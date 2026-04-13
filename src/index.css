@@ -1,0 +1,669 @@
+/* Design system tokens — must come before Tailwind directives */
+@import './design-system/tokens/colors.css';
+@import './design-system/tokens/spacing.css';
+@import './design-system/tokens/typography.css';
+@import './design-system/tokens/radius.css';
+
+/* Theme overrides */
+@import './design-system/theme/light.css';
+@import './design-system/theme/dark.css';
+@import './design-system/theme/brand.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background-color: var(--surface-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Range slider */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.2;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid currentColor;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  margin-top: -5px;
+}
+
+input[type='range']::-moz-range-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.2;
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid currentColor;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* Transaction dark mode CSS variables */
+:root,
+html[data-theme='light'] {
+  --tx-text-primary: #1E293B;
+  --tx-text-secondary: #475569;
+  --tx-text-muted: #64748B;
+  --tx-text-subtle: #94A3B8;
+  --tx-bg-card: #ffffff;
+  --tx-bg-subtle: #F8FAFC;
+  --tx-bg-light: #F1F5F9;
+  --tx-border-light: #F1F5F9;
+  --tx-border: #E2E8F0;
+  --tx-track: #E2E8F0;
+}
+
+html[data-theme='dark'] {
+  --tx-text-primary: #f1f5f9;
+  --tx-text-secondary: #cbd5e1;
+  --tx-text-muted: #94a3b8;
+  --tx-text-subtle: #64748b;
+  --tx-bg-card: #111827;
+  --tx-bg-subtle: #1f2937;
+  --tx-bg-light: #374151;
+  --tx-border-light: rgba(255,255,255,0.08);
+  --tx-border: rgba(255,255,255,0.12);
+  --tx-track: #374151;
+}
+
+/* ============================================================
+   TRANSACTIONS DARK MODE — comprehensive overrides
+   Targets all inline-styled elements in the transactions feature.
+   Scoped to .dark (Tailwind dark mode class on <html>).
+   ============================================================ */
+
+/* ---------- Page backgrounds ---------- */
+.dark .min-h-screen[style*="F8FAFC"],
+.dark .min-h-screen[style*="background"] {
+  background: #030712 !important;
+}
+
+/* ---------- White card containers ---------- */
+.dark [style*='background: "transparent"'],
+.dark [style*="background: transparent"],
+.dark [style*='background: "#fff"'],
+.dark [style*='background: "#ffffff"'],
+.dark [style*="background: \"#fff\""],
+.dark [style*="background: \"#ffffff\""] {
+  background: #111827 !important;
+}
+
+/* ---------- Subtle / light-gray backgrounds ---------- */
+.dark [style*='background: "#F8FAFC"'],
+.dark [style*='background: "#FAFBFC"'],
+.dark [style*="background: \"#F8FAFC\""],
+.dark [style*="background: \"#FAFBFC\""] {
+  background: #1f2937 !important;
+}
+
+.dark [style*='background: "#F1F5F9"'],
+.dark [style*="background: \"#F1F5F9\""] {
+  background: #374151 !important;
+}
+
+/* ---------- Text colors ---------- */
+.dark [style*='color: "inherit"'],
+.dark [style*="color: inherit"] {
+  color: #f1f5f9 !important;
+}
+
+.dark [style*='color: "var(--tx-text-primary, #1E293B)"'],
+.dark [style*='color: "var(--tx-text-secondary, #475569)"'],
+.dark [style*='color: "var(--tx-text-muted, #64748B)"'],
+.dark [style*='color: "var(--tx-text-subtle, #94A3B8)"'] {
+  color: var(--tx-text-primary) !important;
+}
+
+/* ---------- Progress bar tracks ---------- */
+.dark [style*='background: "#E2E8F0"'],
+.dark [style*='background: "var(--tx-track, #E2E8F0)"'],
+.dark [style*="background: \"#E2E8F0\""] {
+  background: #374151 !important;
+}
+
+/* ---------- Borders ---------- */
+.dark [style*='border: "1px solid var(--tx-border-light, #F1F5F9)"'],
+.dark [style*='border: "1px solid var(--tx-border, #E2E8F0)"'],
+.dark [style*='borderBottom: "1px solid var(--tx-border-light, #F1F5F9)"'],
+.dark [style*='borderTop: "1px solid var(--tx-border-light, #F1F5F9)"'] {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ---------- Input fields ---------- */
+.dark input[style],
+.dark select[style] {
+  background: #1f2937 !important;
+  color: #f1f5f9 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* ---------- Loan type selector cards (unselected) ---------- */
+.dark button[style*="border: \"1.5px solid #E2E8F0\""],
+.dark button[style*='border: "1.5px solid #E2E8F0"'] {
+  background: #1f2937 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #f1f5f9 !important;
+}
+
+/* ---------- Loan type selector cards (selected) ---------- */
+.dark button[style*="border: \"2px solid #2563EB\""],
+.dark button[style*='border: "2px solid #2563EB"'] {
+  background: #1e3a5f !important;
+  border-color: #2563eb !important;
+  color: #f1f5f9 !important;
+}
+
+/* ---------- Radio label cards (unselected) ---------- */
+.dark label[style*="border: \"1.5px solid #E2E8F0\""],
+.dark label[style*='border: "1.5px solid #E2E8F0"'] {
+  background: #1f2937 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ---------- Radio label cards (selected) ---------- */
+.dark label[style*="border: \"2px solid #2563EB\""],
+.dark label[style*='border: "2px solid #2563EB"'] {
+  background: #1e3a5f !important;
+}
+
+/* ---------- Amortization preview box ---------- */
+.dark [style*="background: \"#F8FAFC\""][style*="border: \"1px solid #E2E8F0\""],
+.dark [style*='background: "#F8FAFC"'][style*='border: "1px solid #E2E8F0"'] {
+  background: #1f2937 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ---------- Repayment method cards ---------- */
+.dark [style*="background: \"#F0F7FF\""],
+.dark [style*='background: "#F0F7FF"'] {
+  background: #1e3a5f !important;
+}
+
+/* ---------- Periodic payment / date input wrappers ---------- */
+.dark [style*="background: \"#F8FAFC\""][style*="overflow: \"hidden\""],
+.dark [style*='background: "#F8FAFC"'][style*='overflow: "hidden"'] {
+  background: #1f2937 !important;
+}
+
+/* ---------- Collapsible trigger hover ---------- */
+.dark [style*="padding: \"20px 24px\""]:hover {
+  background: #1f2937 !important;
+}
+
+/* ---------- Back / nav buttons ---------- */
+.dark button[style*="background: \"transparent\""],
+.dark button[style*='background: "transparent"'] {
+  background: #1f2937 !important;
+  color: #cbd5e1 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* ---------- File upload items ---------- */
+.dark [style*="background: \"#F8FAFC\""][style*="border-radius: 10"],
+.dark [style*='background: "#F8FAFC"'][style*="borderRadius: 10"] {
+  background: #1f2937 !important;
+}
+
+/* ---------- Repayment schedule rows ---------- */
+.dark [style*="background: \"#F8FAFC\""][style*="borderRadius: 10"],
+.dark [style*='background: "#F8FAFC"'][style*='borderRadius: 10'] {
+  background: #1f2937 !important;
+}
+
+/* ---------- Rebalance / Rollover Card components ---------- */
+.dark .border-gray-100\/80,
+.dark [class*="border-gray-100"] {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ---------- Table rows hover fix ---------- */
+.dark tr:hover td {
+  background: #1f2937 !important;
+}
+
+/* ---------- SelectTrigger dark ---------- */
+.dark [role="combobox"] {
+  background: #1f2937 !important;
+  color: #f1f5f9 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* ---------- SelectContent (dropdown) dark ---------- */
+.dark [role="listbox"],
+.dark [data-radix-popper-content-wrapper] [role="option"] {
+  background: #1f2937 !important;
+  color: #f1f5f9 !important;
+}
+
+/* ---------- Checkbox label text ---------- */
+.dark label[style*="color: \"#1E293B\""],
+.dark label[style*='color: "#1E293B"'] {
+  color: #f1f5f9 !important;
+}
+
+/* ---------- Flow progress bar track ---------- */
+.dark [style*="background: \"#E2E8F0\""][style*="height: 2"] {
+  background: #374151 !important;
+}
+
+/* ---------- Loan fee breakdown dividers ---------- */
+.dark [style*="borderBottom: \"1px solid #F1F5F9\""],
+.dark [style*='borderBottom: "1px solid #F1F5F9"'] {
+  border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ---------- Net loan amount highlight ---------- */
+.dark [style*="background: \"linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)\""][style*="padding: \"16px 28px\""] {
+  background: #1e3a5f !important;
+}
+
+/* ---------- DocuSign / info banners (blue) ---------- */
+.dark [style*="background: \"linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)\""],
+.dark [style*='background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)"'] {
+  background: rgba(37, 99, 235, 0.12) !important;
+  border-color: rgba(37, 99, 235, 0.25) !important;
+}
+
+/* ---------- Loan simulator display boxes ---------- */
+.dark [style*="background: \"linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)\""][style*="borderRadius: 14"],
+.dark [style*='background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)"'][style*="borderRadius: 14"] {
+  background: rgba(37, 99, 235, 0.15) !important;
+}
+
+/* ---------- Tenure display box (sky blue) ---------- */
+.dark [style*="background: \"linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%)\""],
+.dark [style*='background: "linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%)"'] {
+  background: rgba(14, 165, 233, 0.12) !important;
+}
+
+/* ---------- Payment details hero (blue gradient) ---------- */
+.dark [style*="background: \"linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)\""][style*="borderRadius: 12"],
+.dark [style*='background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)"'][style*="borderRadius: 12"] {
+  background: rgba(37, 99, 235, 0.15) !important;
+}
+
+/* ---------- Payoff date row ---------- */
+.dark [style*="background: \"#F8FAFC\""][style*="borderRadius: 10"],
+.dark [style*='background: "#F8FAFC"'][style*="borderRadius: 10"] {
+  background: #1f2937 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ---------- EFT AI tip box (purple) ---------- */
+.dark [style*="background: \"linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%)\""],
+.dark [style*='background: "linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%)"'] {
+  background: rgba(124, 58, 237, 0.12) !important;
+  border-color: rgba(124, 58, 237, 0.25) !important;
+}
+
+/* ---------- Rebalance fund rows ---------- */
+.dark [style*="background: \"#F8FAFC\""][style*="border: \"1px solid #F1F5F9\""] {
+  background: #1f2937 !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ---------- Rollover Card component overrides ---------- */
+.dark .bg-gradient-to-br.from-indigo-50\/30 {
+  background: rgba(99, 102, 241, 0.08) !important;
+}
+
+/* ---------- Processing timeline (indigo gradient card) ---------- */
+.dark [class*="from-indigo-50"] {
+  --tw-gradient-from: rgba(99, 102, 241, 0.08) !important;
+}
+
+/* ---------- Allocation bar rows (gray-50/60) ---------- */
+.dark .bg-gray-50\/60 {
+  background: #1f2937 !important;
+}
+
+/* ---------- Rebalance total indicator card ---------- */
+.dark .bg-gradient-to-br.from-emerald-50\/80 {
+  background: rgba(16, 185, 129, 0.08) !important;
+}
+
+.dark .bg-gradient-to-br.from-amber-50\/80 {
+  background: rgba(245, 158, 11, 0.08) !important;
+}
+
+/* ---------- Trade preview summary cards ---------- */
+.dark .bg-gradient-to-br.from-emerald-50\/50 {
+  background: rgba(16, 185, 129, 0.08) !important;
+}
+
+.dark .bg-gradient-to-br.from-rose-50\/50 {
+  background: rgba(239, 68, 68, 0.08) !important;
+}
+
+.dark .bg-gradient-to-br.from-blue-50\/50 {
+  background: rgba(59, 130, 246, 0.08) !important;
+}
+
+/* ---------- Trade row backgrounds ---------- */
+.dark .bg-emerald-50\/30 {
+  background: rgba(16, 185, 129, 0.06) !important;
+}
+
+.dark .bg-rose-50\/30 {
+  background: rgba(239, 68, 68, 0.06) !important;
+}
+
+/* ---------- Processing info box (gray-50/80) ---------- */
+.dark .bg-gray-50\/80 {
+  background: #1f2937 !important;
+}
+
+/* ---------- Rollover success timeline ---------- */
+.dark .bg-gradient-to-br.from-emerald-400 {
+  background: linear-gradient(135deg, #059669, #10b981) !important;
+}
+
+/* ---------- DocuSign banner (blue gradient) ---------- */
+.dark .bg-gradient-to-br.from-indigo-50\/50 {
+  background: rgba(99, 102, 241, 0.08) !important;
+}
+
+/* ---------- Quick upload dashed border area ---------- */
+.dark .border-indigo-200 {
+  border-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+.dark .bg-indigo-50\/50 {
+  background: rgba(99, 102, 241, 0.06) !important;
+}
+
+/* ---------- Withdrawal eligibility check rows ---------- */
+.dark [style*="background: \"#F8FAFC\""][style*="border: \"1px solid #F1F5F9\""],
+.dark [style*='background: "#F8FAFC"'][style*='border: "1px solid #F1F5F9"'] {
+  background: #1f2937 !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ---------- Rollover plan details / validation cards ---------- */
+.dark .bg-white.rounded-2xl,
+.dark .bg-white.rounded-xl {
+  background: #111827 !important;
+}
+
+/* ---------- Slider track override ---------- */
+.dark .bg-gray-200 {
+  background: #374151 !important;
+}
+
+/* ---------- Separator ---------- */
+.dark [data-orientation="horizontal"].bg-border,
+.dark hr {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ---------- Checkbox ---------- */
+.dark [role="checkbox"] {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  background: #1f2937 !important;
+}
+
+/* ---------- TransactionsPage outer wrapper ---------- */
+.dark .bg-\[\#F8FAFC\] {
+  background: #030712 !important;
+}
+
+/* ---------- Plan overview gradient card ---------- */
+.dark [style*="linear-gradient(135deg, #EFF6FF"] {
+  background: rgba(37, 99, 235, 0.1) !important;
+  border-color: rgba(37, 99, 235, 0.2) !important;
+}
+
+/* ---------- Section header text ---------- */
+.dark [style*='color: "#1E293B"'],
+.dark [style*="color: \"#1E293B\""] {
+  color: #f1f5f9 !important;
+}
+
+.dark [style*='color: "#475569"'],
+.dark [style*="color: \"#475569\""] {
+  color: #cbd5e1 !important;
+}
+
+.dark [style*='color: "#64748B"'],
+.dark [style*="color: \"#64748B\""] {
+  color: #94a3b8 !important;
+}
+
+.dark [style*='color: "#94A3B8"'],
+.dark [style*="color: \"#94A3B8\""] {
+  color: #64748b !important;
+}
+
+.dark [style*='color: "#CBD5E1"'],
+.dark [style*="color: \"#CBD5E1\""] {
+  color: #475569 !important;
+}
+
+/* ---------- Inline background: #fff overrides ---------- */
+.dark [style*='background: "#fff"'],
+.dark [style*="background: \"#fff\""],
+.dark [style*="background: '#fff'"] {
+  background: #111827 !important;
+}
+
+.dark [style*='background: "#ffffff"'],
+.dark [style*="background: \"#ffffff\""] {
+  background: #111827 !important;
+}
+
+/* ---------- Inline background: #F8FAFC overrides ---------- */
+.dark [style*='background: "#F8FAFC"'],
+.dark [style*="background: \"#F8FAFC\""] {
+  background: #1f2937 !important;
+}
+
+/* ---------- Inline background: #F1F5F9 overrides ---------- */
+.dark [style*='background: "#F1F5F9"'],
+.dark [style*="background: \"#F1F5F9\""] {
+  background: #374151 !important;
+}
+
+/* ---------- Inline background: #FAFBFC overrides ---------- */
+.dark [style*='background: "#FAFBFC"'],
+.dark [style*="background: \"#FAFBFC\""] {
+  background: #1f2937 !important;
+}
+
+/* ---------- Inline background: #E2E8F0 (progress tracks) ---------- */
+.dark [style*='background: "#E2E8F0"'],
+.dark [style*="background: \"#E2E8F0\""] {
+  background: #374151 !important;
+}
+
+/* ---------- Inline border colors ---------- */
+.dark [style*='border: "1px solid #F1F5F9"'],
+.dark [style*="border: \"1px solid #F1F5F9\""] {
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+.dark [style*='border: "1px solid #E2E8F0"'],
+.dark [style*="border: \"1px solid #E2E8F0\""],
+.dark [style*='border: "1.5px solid #E2E8F0"'],
+.dark [style*="border: \"1.5px solid #E2E8F0\""] {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.dark [style*='borderBottom: "1px solid #F1F5F9"'],
+.dark [style*="borderBottom: \"1px solid #F1F5F9\""] {
+  border-bottom-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+.dark [style*='borderTop: "1px solid #F1F5F9"'],
+.dark [style*="borderTop: \"1px solid #F1F5F9\""] {
+  border-top-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+/* ---------- Inline border: 1px solid #E8ECF1 ---------- */
+.dark [style*='border: "1px solid #E8ECF1"'],
+.dark [style*="border: \"1px solid #E8ECF1\""] {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ---------- Inline border: 1.5px solid #E2E8F0 (nav buttons) ---------- */
+.dark [style*='border: "1.5px solid #E2E8F0"'],
+.dark [style*="border: \"1.5px solid #E2E8F0\""] {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* ---------- Inline background on selected repayment method ---------- */
+.dark [style*='background: "#F0F7FF"'],
+.dark [style*="background: \"#F0F7FF\""] {
+  background: #1e3a5f !important;
+}
+
+/* ---------- Inline background: #DBEAFE (blue light) ---------- */
+.dark [style*='background: "#DBEAFE"'],
+.dark [style*="background: \"#DBEAFE\""] {
+  background: rgba(37, 99, 235, 0.2) !important;
+}
+
+/* ---------- Inline background: #F1F5F9 on repayment icon ---------- */
+.dark [style*='background: "#F1F5F9"'][style*="width: 36"],
+.dark [style*="background: \"#F1F5F9\""][style*="width: 36"] {
+  background: #374151 !important;
+}
+
+/* ---------- Inline background: #EFF6FF (blue tint) ---------- */
+.dark [style*='background: "#EFF6FF"'],
+.dark [style*="background: \"#EFF6FF\""] {
+  background: rgba(37, 99, 235, 0.12) !important;
+}
+
+/* ---------- Inline background: #F5F3FF (purple tint) ---------- */
+.dark [style*='background: "#F5F3FF"'],
+.dark [style*="background: \"#F5F3FF\""] {
+  background: rgba(139, 92, 246, 0.12) !important;
+}
+
+/* ---------- Inline background: #FFEDD5 (amber tint) ---------- */
+.dark [style*='background: "#FFEDD5"'],
+.dark [style*="background: \"#FFEDD5\""] {
+  background: rgba(245, 158, 11, 0.15) !important;
+}
+
+/* ---------- Inline background: #DCFCE7 (green tint) ---------- */
+.dark [style*='background: "#DCFCE7"'],
+.dark [style*="background: \"#DCFCE7\""] {
+  background: rgba(16, 185, 129, 0.12) !important;
+}
+
+/* ---------- Inline background: #FEE2E2 (red tint) ---------- */
+.dark [style*='background: "#FEE2E2"'],
+.dark [style*="background: \"#FEE2E2\""] {
+  background: rgba(239, 68, 68, 0.12) !important;
+}
+
+/* ---------- Inline background: rgba(37,99,235,0.1) ---------- */
+.dark [style*="background: \"rgba(37,99,235,0.1)\""],
+.dark [style*='background: "rgba(37,99,235,0.1)"'] {
+  background: rgba(37, 99, 235, 0.15) !important;
+}
+
+/* ---------- Inline color: inherit (should be light text in dark) ---------- */
+.dark [style*="color: inherit"] {
+  color: #f1f5f9 !important;
+}
+
+/* ---------- Inline color: var(--tx-*) ---------- */
+.dark [style*="color: \"var(--tx-text-primary"] {
+  color: #f1f5f9 !important;
+}
+.dark [style*="color: \"var(--tx-text-secondary"] {
+  color: #cbd5e1 !important;
+}
+.dark [style*="color: \"var(--tx-text-muted"] {
+  color: #94a3b8 !important;
+}
+.dark [style*="color: \"var(--tx-text-subtle"] {
+  color: #64748b !important;
+}
+
+/* ---------- Inline background: var(--tx-*) ---------- */
+.dark [style*="background: \"var(--tx-bg-card"] {
+  background: #111827 !important;
+}
+.dark [style*="background: \"var(--tx-bg-subtle"] {
+  background: #1f2937 !important;
+}
+.dark [style*="background: \"var(--tx-bg-light"] {
+  background: #374151 !important;
+}
+.dark [style*="background: \"var(--tx-track"] {
+  background: #374151 !important;
+}
+
+/* ---------- Inline border: var(--tx-border*) ---------- */
+.dark [style*="border: \"1px solid var(--tx-border-light"] {
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+.dark [style*="border: \"1px solid var(--tx-border,"] {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+.dark [style*="borderBottom: \"1px solid var(--tx-border-light"] {
+  border-bottom-color: rgba(255, 255, 255, 0.07) !important;
+}
+.dark [style*="borderTop: \"1px solid var(--tx-border-light"] {
+  border-top-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+/* Post-enrollment dashboard tokens */
+@layer components {
+  .premium-card {
+    @apply bg-white dark:bg-gray-900 rounded-2xl p-6 border border-slate-100 dark:border-gray-700 transition-all duration-200 hover:shadow-lg hover:border-slate-200 dark:hover:border-gray-600;
+  }
+
+  .btn-primary {
+    @apply bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold transition-all hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+  }
+}
