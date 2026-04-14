@@ -229,6 +229,7 @@ function RetirementImpactWidget({
           {/* Impact Message */}
           {showImpact && impactLabel && (
             <div
+              className={impactAmount! < 0 ? "dark:bg-amber-950/20 dark:border-amber-800/40" : "dark:bg-green-950/20 dark:border-green-800/40"}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -261,6 +262,7 @@ function RetirementImpactWidget({
           {/* On Track Banner */}
           {onTrack && !showImpact && (
             <div
+              className="dark:bg-green-950/20 dark:border-green-800/40"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -281,6 +283,7 @@ function RetirementImpactWidget({
           {/* Off Track Warning */}
           {!onTrack && !showImpact && (
             <div
+              className="dark:bg-amber-950/20 dark:border-amber-800/40"
               style={{
                 display: "flex",
                 alignItems: "center",

@@ -79,6 +79,7 @@ function AttentionRequiredTimeline({ onResolve }: AttentionRequiredTimelineProps
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.08, duration: 0.3 }}
+            className="dark:bg-amber-950/20 dark:border-amber-800/40"
             style={{
               background: "linear-gradient(135deg, #FFFBEB, #FFF7ED)",
               border: "1px solid #FED7AA",
@@ -90,7 +91,7 @@ function AttentionRequiredTimeline({ onResolve }: AttentionRequiredTimelineProps
               {/* Left: Icon + Info */}
               <div className="flex items-center gap-2.5 lg:flex-1 min-w-0">
                 <div
-                  className="flex items-center justify-center flex-shrink-0"
+                  className="flex items-center justify-center flex-shrink-0 dark:bg-amber-950/40 dark:text-amber-400"
                   style={{ width: 26, height: 26, borderRadius: 7, background: "#FFEDD5", color: "#B45309" }}
                 >
                   <AlertCircle className="w-[13px] h-[13px]" />
