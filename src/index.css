@@ -13,6 +13,34 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Brand theme tokens — overridden by applyBrandTheme() when company branding loads */
+:root {
+  --brand-primary: #2563eb;
+  --brand-primary-hover: #1d4ed8;
+  --brand-primary-light: #eff6ff;
+  --brand-primary-ring: rgba(37, 99, 235, 0.25);
+  --brand-font: inherit;
+}
+
+.btn-brand,
+button[data-brand='primary'] {
+  background-color: var(--brand-primary) !important;
+  color: white;
+}
+.btn-brand:hover,
+button[data-brand='primary']:hover {
+  background-color: var(--brand-primary-hover) !important;
+}
+
+*:focus-visible {
+  outline-color: var(--brand-primary) !important;
+}
+
+[data-brand-active] {
+  color: var(--brand-primary) !important;
+  background-color: var(--brand-primary-light) !important;
+}
+
 /* Base */
 *,
 *::before,
@@ -664,6 +692,10 @@ html[data-theme='dark'] {
   }
 
   .btn-primary {
-    @apply bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold transition-all hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+    @apply text-white px-4 py-2 rounded-lg font-semibold transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+    background-color: var(--brand-primary);
+  }
+  .btn-primary:hover {
+    background-color: var(--brand-primary-hover);
   }
 }

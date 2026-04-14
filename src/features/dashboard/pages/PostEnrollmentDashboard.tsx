@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { supabase } from '@/core/supabase'
 import {
   TrendingUp,
   Wallet,
@@ -90,9 +91,23 @@ const Badge = ({
 
 export default function PostEnrollmentDashboard() {
   const [isLoaded, setIsLoaded] = useState(false)
+  const [userName, setUserName] = useState('')
 
   useEffect(() => {
     setIsLoaded(true)
+  }, [])
+
+  useEffect(() => {
+    if (!supabase) return
+    void supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      const name =
+        (typeof user.user_metadata?.full_name === 'string' && user.user_metadata.full_name) ||
+        (typeof user.user_metadata?.first_name === 'string' && user.user_metadata.first_name) ||
+        user.email?.split('@')[0] ||
+        'there'
+      setUserName(name.split(/\s+/)[0] || 'there')
+    })
   }, [])
 
   void isLoaded
@@ -102,7 +117,9 @@ export default function PostEnrollmentDashboard() {
     <div className="min-h-screen bg-slate-50 font-sans dark:bg-gray-950">
       <main className="mx-auto max-w-[1440px] px-6 py-10">
         <header className="mb-12">
-          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">Welcome back, Alex</h1>
+          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+            Welcome back, {userName || 'there'}
+          </h1>
           <p className="mt-2 text-lg font-medium text-slate-500 dark:text-gray-400">
             Your retirement plan is performing{' '}
             <span className="font-bold text-emerald-600">12% better</span> than last quarter.

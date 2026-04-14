@@ -1,8 +1,9 @@
 /* eslint-disable react-refresh/only-export-components -- route module: lazy page chunks + router factory */
 import { lazy, Suspense, useState, useEffect } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
-import { useEnrollmentDraftStore } from '../core/store/enrollmentDraftStore'
-import PreEnrollmentDashboard from '../features/dashboard/pages/PreEnrollmentDashboard'
+import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
+import PreEnrollmentDashboard from '@/features/dashboard/pages/PreEnrollmentDashboard'
+import PostEnrollmentDashboard from '@/features/dashboard/pages/PostEnrollmentDashboard'
 import { RootLayout, RootErrorBoundary } from './layouts/RootLayout'
 import { AuthLayout } from './layouts/AuthLayout'
 import { AppShell } from './layouts/AppShell'
@@ -71,7 +72,6 @@ const ForgotPassword = lazy(() => import('../features/auth/pages/ForgotPassword'
 const ResetPassword = lazy(() => import('../features/auth/pages/ResetPassword').then((m) => ({ default: m.ResetPassword })))
 
 // Lazy app pages
-const PostEnrollmentDashboard = lazy(() => import('../features/dashboard/pages/PostEnrollmentDashboard'))
 const InvestmentsPage = lazy(() => import('../features/investments/pages/InvestmentsPage').then((m) => ({ default: m.InvestmentsPage })))
 const ProfilePage = lazy(() => import('../features/profile/pages/ProfilePage').then((m) => ({ default: m.ProfilePage })))
 
@@ -102,7 +102,19 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
       return
     }
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => setSession(s))
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, s) => {
+      setSession(s)
+      if (event === 'SIGNED_OUT') {
+        try {
+          localStorage.removeItem('enrollment_draft')
+        } catch {
+          /* ignore */
+        }
+        useEnrollmentDraftStore.getState().resetEnrollment()
+      }
+    })
     return () => subscription.unsubscribe()
   }, [])
 
@@ -121,15 +133,50 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 // ─── Dashboard route (enrollment-aware) ──────────────────────────────────────
 
 function DashboardRoute() {
-  const enrollmentStatus = useEnrollmentDraftStore((s) => s.enrollmentStatus)
-  if (enrollmentStatus === 'complete') {
+  const [showPost, setShowPost] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function checkEnrollment() {
+      if (!supabase) {
+        setShowPost(false)
+        setLoading(false)
+        return
+      }
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user) {
+        setLoading(false)
+        return
+      }
+      const { data } = await supabase
+        .from('enrollments')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('status', 'complete')
+        .maybeSingle()
+      setShowPost(!!data)
+      setLoading(false)
+    }
+    void checkEnrollment()
+  }, [])
+
+  if (loading) {
     return (
-      <Suspense fallback={<PageFallback />}>
-        <PostEnrollmentDashboard />
-      </Suspense>
+      <div className="flex min-h-screen items-center justify-center">
+        <div
+          className="h-8 w-8 animate-spin rounded-full border-2 border-t-transparent"
+          style={{
+            borderColor: 'var(--brand-primary, #2563eb)',
+            borderTopColor: 'transparent',
+          }}
+        />
+      </div>
     )
   }
-  return <PreEnrollmentDashboard />
+
+  return showPost ? <PostEnrollmentDashboard /> : <PreEnrollmentDashboard />
 }
 
 // ─── Router ──────────────────────────────────────────────────────────────────

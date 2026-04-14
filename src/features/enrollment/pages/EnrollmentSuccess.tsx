@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { CheckCircle, Mail, Calendar, BarChart3 } from 'lucide-react'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
+import { supabase } from '@/core/supabase'
 
 
 const nextSteps = [
@@ -13,9 +14,34 @@ const nextSteps = [
 export default function EnrollmentSuccess() {
   const navigate = useNavigate()
 
-  const handleDashboard = () => {
-    const store = useEnrollmentDraftStore.getState()
-    store.setEnrollmentStatus('complete')
+  const handleDashboard = async () => {
+    if (supabase) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (user) {
+        const completedAt = new Date().toISOString()
+        const { data: existing } = await supabase
+          .from('enrollments')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle()
+
+        const row = {
+          user_id: user.id,
+          status: 'complete' as const,
+          completed_at: completedAt,
+          updated_at: completedAt,
+        }
+
+        if (existing?.id) {
+          await supabase.from('enrollments').update(row).eq('id', existing.id)
+        } else {
+          await supabase.from('enrollments').insert(row)
+        }
+      }
+    }
+    useEnrollmentDraftStore.getState().setEnrollmentStatus('complete')
     navigate('/dashboard')
   }
 
@@ -57,8 +83,9 @@ export default function EnrollmentSuccess() {
 
           <button
             type="button"
-            onClick={handleDashboard}
-            className="w-full rounded-xl bg-blue-600 py-3.5 font-medium text-white transition-all hover:bg-blue-700 active:scale-[0.98]"
+            data-brand="primary"
+            onClick={() => void handleDashboard()}
+            className="w-full rounded-xl py-3.5 font-medium transition-all active:scale-[0.98]"
           >
             Go to Dashboard
           </button>

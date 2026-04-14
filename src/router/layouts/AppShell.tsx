@@ -13,11 +13,15 @@ import {
   LogOut,
   Sun,
   Moon,
+  Menu,
+  X,
 } from 'lucide-react'
 import { useAuth } from '@/core/hooks/useAuth'
 import { useUser } from '@/core/hooks/useUser'
 import { useTheme } from '@/core/hooks/useTheme'
 import { useAIStore } from '@/core/store/aiStore'
+import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
+import { applyBrandTheme } from '@/core/theme/brandTheme'
 import { CoreAIPanel } from '@/features/ai/components/CoreAIPanel'
 import { AISearchPalette } from '@/features/ai/components/AISearchPalette'
 import AppFooter from '@/features/dashboard/components/AppFooter'
@@ -45,55 +49,53 @@ export function AppShell() {
   const location = useLocation()
   const openChat = useAIStore((s) => s.openChat)
   const toggleSearch = useAIStore((s) => s.toggleSearch)
-  const [companyLogo, setCompanyLogo] = useState<string | null>(null)
   const [companyName, setCompanyName] = useState('Participant Portal')
+  const [companyLogo, setCompanyLogo] = useState<string | null>(null)
+  const [userDisplayName, setUserDisplayName] = useState('')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
-    async function loadCompanyBranding() {
+    async function loadUserAndCompany() {
       if (!supabase) return
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      const {
+        data: { user: u },
+      } = await supabase.auth.getUser()
+      if (!u) return
 
-      const { data } = await supabase
+      const meta = u.user_metadata as Record<string, string | undefined> | undefined
+      const fullName =
+        meta?.full_name ||
+        `${meta?.first_name || ''} ${meta?.last_name || ''}`.trim() ||
+        u.email?.split('@')[0] ||
+        'User'
+      setUserDisplayName(fullName)
+
+      const { data: ucData } = await supabase
         .from('user_companies')
-        .select('companies(name, logo_url, primary_color, branding_json)')
-        .eq('user_id', user.id)
-        .single()
+        .select('company_id')
+        .eq('user_id', u.id)
+        .maybeSingle()
 
-      if (data?.companies) {
-        const company = data.companies as {
-          name?: string
-          logo_url?: string
-          primary_color?: string
-          branding_json?: unknown
-        }
+      if (!ucData?.company_id) return
 
-        if (company.name) setCompanyName(company.name)
-        if (company.logo_url) setCompanyLogo(company.logo_url)
+      const { data: company } = await supabase
+        .from('companies')
+        .select('name, logo_url, primary_color, branding_json')
+        .eq('id', ucData.company_id)
+        .maybeSingle()
 
-        // Apply primary color as CSS variable for white-label theming
-        if (company.primary_color) {
-          document.documentElement.style.setProperty('--color-brand', company.primary_color)
-          document.documentElement.style.setProperty('--color-brand-hover', company.primary_color + 'dd')
-        }
+      if (!company) return
 
-        // Apply branding_json if present (font-family etc.)
-        if (company.branding_json) {
-          try {
-            const branding =
-              typeof company.branding_json === 'string'
-                ? JSON.parse(company.branding_json)
-                : company.branding_json
-            if (branding && typeof branding === 'object' && 'font_family' in branding) {
-              document.documentElement.style.setProperty('--font-sans', String(branding.font_family))
-            }
-          } catch {
-            // ignore malformed branding_json
-          }
-        }
+      if (company.name) setCompanyName(company.name)
+      if (company.logo_url) {
+        setCompanyLogo(company.logo_url)
+        console.log('Company logo loaded:', company.logo_url)
+      }
+      if (company.primary_color) {
+        applyBrandTheme(company.primary_color, company.branding_json)
       }
     }
-    loadCompanyBranding()
+    void loadUserAndCompany()
   }, [])
 
   const initials =
@@ -107,9 +109,28 @@ export function AppShell() {
     user?.email?.slice(0, 2).toUpperCase() ||
     'U'
 
+  const avatarInitials = userDisplayName
+    ? userDisplayName
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : initials
+
   const handleSignOut = async () => {
+    useEnrollmentDraftStore.getState().resetEnrollment()
+    try {
+      const p = useEnrollmentDraftStore.persist
+      if (p?.clearStorage) {
+        await Promise.resolve(p.clearStorage())
+      }
+    } catch {
+      /* ignore */
+    }
     await signOut()
-    navigate('/v1/login')
+    navigate('/login')
   }
 
   const toggleTheme = () => setMode(resolvedMode === 'dark' ? 'light' : 'dark')
@@ -127,143 +148,188 @@ export function AppShell() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white dark:bg-gray-950">
-      <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-        {/* Main bar — 56px */}
-        <div className="px-4 sm:px-6 h-14 flex items-center gap-4">
-
-          {/* LEFT: Logo — fixed width so center nav stays centered */}
-          <div className="flex items-center gap-2.5 w-44 shrink-0">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shrink-0 overflow-hidden">
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-14 items-center justify-between gap-4">
+            <div className="flex min-w-0 shrink-0 items-center gap-2.5">
               {companyLogo ? (
-                <img src={companyLogo} alt={companyName} className="w-8 h-8 object-contain" />
+                <img
+                  src={companyLogo}
+                  alt={companyName}
+                  className="h-8 max-w-[100px] w-auto object-contain"
+                />
               ) : (
-                <span className="text-white font-bold text-sm">{companyName.charAt(0)}</span>
-              )}
-            </div>
-            <span className="font-bold text-base text-gray-900 dark:text-white truncate hidden sm:block">
-              {companyName}
-            </span>
-          </div>
-
-          {/* CENTER: Nav links — desktop only, takes remaining space, centered */}
-          <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
-            {NAV_ITEMS.map((item) => {
-              const active = isNavActive(item.href, location.pathname)
-              return (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-                    active
-                      ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800'
-                  }`}
+                <div
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white"
+                  style={{ backgroundColor: 'var(--brand-primary)' }}
                 >
-                  <item.icon className="w-4 h-4 shrink-0" />
-                  <span>{item.label}</span>
-                </Link>
-              )
-            })}
-          </nav>
+                  {companyName.charAt(0)}
+                </div>
+              )}
+              <span className="hidden max-w-[120px] truncate text-sm font-bold text-gray-900 dark:text-white sm:block">
+                {companyName}
+              </span>
+            </div>
 
-          {/* RIGHT: Actions — fixed width matching left */}
-          <div className="flex items-center gap-1 w-44 justify-end shrink-0">
-            {/* Dark mode toggle */}
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Toggle theme"
-            >
-              {resolvedMode === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-            {/* Search */}
-            <button
-              type="button"
-              onClick={toggleSearch}
-              className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Open search"
-            >
-              <Search className="w-4 h-4" />
-            </button>
-            {/* AI */}
-            <button
-              type="button"
-              onClick={openChat}
-              className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Open AI assistant"
-            >
-              <Sparkles className="w-4 h-4" />
-            </button>
-            {/* Bell */}
-            <button
-              type="button"
-              className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative"
-              aria-label="Notifications"
-            >
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-gray-900" />
-            </button>
-            {/* Avatar */}
-            <Link
-              to="/profile"
-              className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold ml-1 shrink-0"
-            >
-              {initials}
-            </Link>
-            {/* Logout */}
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-red-600 transition-colors"
-              aria-label="Sign out"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
+            <nav className="hidden flex-1 items-center justify-center gap-0.5 md:flex">
+              {NAV_ITEMS.map((item) => {
+                const active = isNavActive(item.href, location.pathname)
+                return (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    data-brand-active={active ? '' : undefined}
+                    className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-semibold transition-all ${
+                      active
+                        ? 'text-blue-600 dark:text-blue-400'
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white'
+                    }`}
+                    style={
+                      active
+                        ? {
+                            color: 'var(--brand-primary)',
+                            backgroundColor: 'var(--brand-primary-light)',
+                          }
+                        : undefined
+                    }
+                  >
+                    <item.icon className="h-4 w-4 shrink-0" />
+                    <span>{item.label}</span>
+                  </Link>
+                )
+              })}
+            </nav>
 
-        </div>
-
-        {/* MOBILE: bottom nav bar */}
-        <div className="md:hidden flex items-center border-t border-gray-100 dark:border-gray-800 px-2 pb-1 pt-1">
-          {NAV_ITEMS.map((item) => {
-            const active = isNavActive(item.href, location.pathname)
-            return (
-              <Link
-                key={item.href}
-                to={item.href}
-                className={`flex-1 flex flex-col items-center gap-0.5 py-1.5 px-1 rounded-lg transition-colors ${
-                  active
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-gray-400 dark:text-gray-600'
-                }`}
+            <div className="flex shrink-0 items-center gap-0.5">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                aria-label="Toggle theme"
               >
-                <item.icon className="w-5 h-5" />
-                <span className="text-[10px] font-semibold leading-none">{item.label}</span>
+                {resolvedMode === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </button>
+              <button
+                type="button"
+                onClick={toggleSearch}
+                className="hidden h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 sm:flex dark:text-gray-400 dark:hover:bg-gray-800"
+                aria-label="Open search"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={openChat}
+                className="hidden h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 sm:flex dark:text-gray-400 dark:hover:bg-gray-800"
+                aria-label="Open AI assistant"
+              >
+                <Sparkles className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                className="relative flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                aria-label="Notifications"
+              >
+                <Bell className="h-4 w-4" />
+                <span
+                  className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full border-2 border-white dark:border-gray-900"
+                  style={{ backgroundColor: 'var(--brand-primary)' }}
+                />
+              </button>
+              <Link
+                to="/profile"
+                className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                style={{ backgroundColor: 'var(--brand-primary)' }}
+              >
+                {avatarInitials}
               </Link>
-            )
-          })}
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                aria-label="Sign out"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen((o) => !o)}
+                className="ml-1 flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 md:hidden dark:text-gray-400 dark:hover:bg-gray-800"
+                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={mobileMenuOpen}
+              >
+                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </button>
+            </div>
+          </div>
         </div>
+
+        {mobileMenuOpen && (
+          <div className="border-t border-gray-200 bg-white pb-3 dark:border-gray-700 dark:bg-gray-900 md:hidden">
+            <div className="mx-auto max-w-7xl px-4">
+              {NAV_ITEMS.map((item) => {
+                const active = isNavActive(item.href, location.pathname)
+                return (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    data-brand-active={active ? '' : undefined}
+                    className={`flex items-center gap-3 rounded-xl px-3 py-3 transition-all ${
+                      active ? 'font-semibold' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
+                    }`}
+                    style={
+                      active
+                        ? {
+                            color: 'var(--brand-primary)',
+                            backgroundColor: 'var(--brand-primary-light)',
+                          }
+                        : undefined
+                    }
+                  >
+                    <item.icon className="h-5 w-5 shrink-0" />
+                    <span className="text-sm font-medium">{item.label}</span>
+                  </Link>
+                )
+              })}
+              <div className="mt-2 border-t border-gray-100 pt-2 dark:border-gray-800">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false)
+                    void handleSignOut()
+                  }}
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-gray-700 transition-all hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
+                >
+                  <LogOut className="h-5 w-5 shrink-0" />
+                  <span className="text-sm font-medium">Sign out</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="flex min-h-0 flex-1 flex-col overflow-auto bg-slate-50/50 dark:bg-gray-950">
-        <AnimatePresence>
-          <Outlet />
-        </AnimatePresence>
+        <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col px-4 py-6 sm:px-6 lg:px-8">
+          <AnimatePresence>
+            <Outlet />
+          </AnimatePresence>
+        </div>
       </main>
 
       <AppFooter />
       <CoreAIPanel />
       <AISearchPalette />
 
-      {/* Floating AI button */}
       <button
         type="button"
         onClick={openChat}
-        className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center shadow-lg hover:bg-blue-700 transition-all hover:scale-110 active:scale-95"
+        className="fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all hover:scale-110 hover:opacity-90 active:scale-95"
+        style={{ backgroundColor: 'var(--brand-primary)' }}
         aria-label="Open AI assistant"
       >
-        <Sparkles className="w-5 h-5 text-white" />
+        <Sparkles className="h-5 w-5 text-white" />
       </button>
     </div>
   )
