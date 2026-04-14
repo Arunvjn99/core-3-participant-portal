@@ -70,7 +70,7 @@ function WithdrawalEligibility() {
                   <XCircle className="flex-shrink-0" style={{ width: 18, height: 18, color: "var(--c-text-faint)" }} />
                 )}
                 <div>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: check.eligible ? "#1E293B" : "#94A3B8" }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: check.eligible ? "var(--c-text-primary)" : "var(--c-text-faint)" }}>
                     {check.label}
                   </p>
                   <p style={{ fontSize: 11, fontWeight: 500, color: "inherit" }}>{check.note}</p>

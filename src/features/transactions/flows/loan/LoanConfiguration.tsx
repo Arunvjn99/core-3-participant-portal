@@ -195,7 +195,7 @@ function LoanConfiguration() {
                         width: 26,
                         height: 26,
                         borderRadius: "50%",
-                        background: "#2563EB",
+                        background: "var(--brand-primary)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -277,7 +277,7 @@ function LoanConfiguration() {
                 background: "transparent",
                 fontSize: 14,
                 fontWeight: 500,
-                color: reason ? "#1E293B" : "#94A3B8",
+                color: reason ? "var(--c-text-primary)" : "var(--c-text-faint)",
                 height: 48,
                 cursor: "pointer",
                 outline: "none" }}
@@ -711,7 +711,7 @@ function LoanConfiguration() {
                 position: "relative" }}
             >
               {repaymentMethod === "payroll" && (
-                <div style={{ position: "absolute", top: -6, right: -6, width: 20, height: 20, borderRadius: "50%", background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ position: "absolute", top: -6, right: -6, width: 20, height: 20, borderRadius: "50%", background: "var(--brand-primary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <Check style={{ width: 12, height: 12, color: "#fff" }} strokeWidth={3} />
                 </div>
               )}
@@ -760,7 +760,7 @@ function LoanConfiguration() {
                 position: "relative" }}
             >
               {repaymentMethod === "ach" && (
-                <div style={{ position: "absolute", top: -6, right: -6, width: 20, height: 20, borderRadius: "50%", background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ position: "absolute", top: -6, right: -6, width: 20, height: 20, borderRadius: "50%", background: "var(--brand-primary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <Check style={{ width: 12, height: 12, color: "#fff" }} strokeWidth={3} />
                 </div>
               )}
@@ -809,7 +809,7 @@ function LoanConfiguration() {
                 position: "relative" }}
             >
               {repaymentMethod === "manual" && (
-                <div style={{ position: "absolute", top: -6, right: -6, width: 20, height: 20, borderRadius: "50%", background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ position: "absolute", top: -6, right: -6, width: 20, height: 20, borderRadius: "50%", background: "var(--brand-primary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <Check style={{ width: 12, height: 12, color: "#fff" }} strokeWidth={3} />
                 </div>
               )}
@@ -1149,7 +1149,7 @@ function LoanConfiguration() {
           }
           className="flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:bg-blue-700 active:translate-y-0"
           style={{
-            background: "#2563EB",
+            background: "var(--brand-primary)",
             color: "#fff",
             padding: "10px 20px",
             borderRadius: 10,

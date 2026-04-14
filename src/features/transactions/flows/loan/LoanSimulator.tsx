@@ -66,12 +66,12 @@ function LoanSimulator() {
               {/* Loan Amount Slider */}
               <div>
                 <div className="flex items-center gap-2" style={{ marginBottom: 10 }}>
-                  <div className="flex items-center justify-center" style={{ width: 28, height: 28, borderRadius: 8, background: "#2563EB", color: "#fff" }}>
+                  <div className="flex items-center justify-center" style={{ width: 28, height: 28, borderRadius: 8, background: "var(--brand-primary)", color: "#fff" }}>
                     <DollarSign className="w-3.5 h-3.5" />
                   </div>
                   <span style={{ fontSize: 11, fontWeight: 600, color: "inherit" }}>Loan Amount</span>
                 </div>
-                <div style={{ background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)", borderRadius: 14, padding: "10px 16px", marginBottom: 10 }}>
+                <div style={{ background: "var(--c-blue-tint)", borderRadius: 14, padding: "10px 16px", marginBottom: 10 }}>
                   <div className="flex items-baseline gap-1.5">
                     <span style={{ fontSize: 26, fontWeight: 800, color: "inherit", letterSpacing: "-0.8px", lineHeight: 1 }}>
                       ${loanAmount.toLocaleString()}
@@ -98,7 +98,7 @@ function LoanSimulator() {
               {/* Tenure Slider */}
               <div>
                 <div className="flex items-center gap-2" style={{ marginBottom: 10 }}>
-                  <div className="flex items-center justify-center" style={{ width: 28, height: 28, borderRadius: 8, background: "#0EA5E9", color: "#fff" }}>
+                  <div className="flex items-center justify-center" style={{ width: 28, height: 28, borderRadius: 8, background: "var(--c-sky)", color: "#fff" }}>
                     <Calendar className="w-3.5 h-3.5" />
                   </div>
                   <span style={{ fontSize: 11, fontWeight: 600, color: "inherit" }}>Loan Tenure</span>
@@ -146,9 +146,9 @@ function LoanSimulator() {
               </h3>
 
               {/* Hero Stat — Monthly Payment */}
-              <div style={{ background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)", borderRadius: 12, padding: "14px 18px", marginBottom: 12 }}>
+              <div style={{ background: "var(--c-blue-tint)", borderRadius: 12, padding: "14px 18px", marginBottom: 12 }}>
                 <div className="flex items-center gap-2" style={{ marginBottom: 6 }}>
-                  <div className="flex items-center justify-center" style={{ width: 28, height: 28, borderRadius: 8, background: "#2563EB", color: "#fff" }}>
+                  <div className="flex items-center justify-center" style={{ width: 28, height: 28, borderRadius: 8, background: "var(--brand-primary)", color: "#fff" }}>
                     <DollarSign className="w-3.5 h-3.5" />
                   </div>
                   <span style={{ fontSize: 11, fontWeight: 600, color: "var(--brand-primary)" }}>Monthly Payment</span>
@@ -228,8 +228,7 @@ function LoanSimulator() {
         </button>
         <button
           onClick={handleContinue}
-          className="flex items-center gap-2 transition-all duration-200 cursor-pointer"
-          style={{ background: "#2563EB", color: "#fff", padding: "10px 20px", borderRadius: 10, fontSize: 13, fontWeight: 600, border: "none", boxShadow: "0 4px 12px rgba(37,99,235,0.3)" }}
+          className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer"
         >
           Continue to Configuration
           <ArrowRight style={{ width: 16, height: 16 }} />

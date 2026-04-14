@@ -47,7 +47,7 @@ function LoanReview() {
       >
         <div
           className="flex items-center justify-center mb-5"
-          style={{ width: 64, height: 64, borderRadius: 32, background: "linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)", border: "1px solid #BBF7D0" }}
+          style={{ width: 64, height: 64, borderRadius: 32, background: "rgba(16,185,129,0.1)", border: "1px solid #BBF7D0" }}
         >
           <CheckCircle2 style={{ width: 32, height: 32, color: "#10B981" }} />
         </div>
@@ -159,7 +159,7 @@ function LoanReview() {
       >
         <div
           style={{
-            background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)",
+            background: "var(--c-blue-tint)",
             border: "1px solid #BFDBFE",
             borderRadius: 16,
             padding: "20px 24px",
@@ -247,8 +247,7 @@ function LoanReview() {
         <button
           onClick={handleSubmit}
           disabled={!agreed || isSubmitting}
-          className="flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ background: "#2563EB", color: "#fff", padding: "10px 20px", borderRadius: 10, fontSize: 13, fontWeight: 600, border: "none", boxShadow: "0 4px 12px rgba(37,99,235,0.3)" }}
+          className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "Submitting..." : "Submit Loan Request"}
           {!isSubmitting && <ArrowRight style={{ width: 16, height: 16 }} />}

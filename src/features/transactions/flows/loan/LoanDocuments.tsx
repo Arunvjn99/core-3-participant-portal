@@ -75,7 +75,7 @@ function LoanDocuments() {
       >
         <div
           style={{
-            background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)",
+            background: "var(--c-blue-tint)",
             border: "1px solid #BFDBFE",
             borderRadius: 16,
             padding: "24px 28px",
@@ -99,8 +99,7 @@ function LoanDocuments() {
             {!useDocuSign && (
               <button
                 onClick={handleDocuSign}
-                className="flex-shrink-0 cursor-pointer transition-all duration-200"
-                style={{ background: "#2563EB", color: "#fff", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600, border: "none", boxShadow: "0 4px 12px rgba(37,99,235,0.3)" }}
+                className="btn-brand flex-shrink-0 cursor-pointer transition-all duration-200"
               >
                 Sign with DocuSign
               </button>
@@ -138,7 +137,7 @@ function LoanDocuments() {
                     <div className="flex items-center gap-2.5 mb-1">
                       <h3 style={{ fontSize: 14, fontWeight: 700, color: "inherit" }}>{doc.name}</h3>
                       {doc.required && (
-                        <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 6, background: "#FEE2E2", color: "#B91C1C" }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 6, background: "rgba(220,38,38,0.1)", color: "#B91C1C" }}>
                           Required
                         </span>
                       )}
@@ -203,8 +202,7 @@ function LoanDocuments() {
         <button
           onClick={() => navigate("/transactions/loan/review")}
           disabled={!allRequiredUploaded && !useDocuSign}
-          className="flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ background: "#2563EB", color: "#fff", padding: "10px 20px", borderRadius: 10, fontSize: 13, fontWeight: 600, border: "none", boxShadow: "0 4px 12px rgba(37,99,235,0.3)" }}
+          className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Continue to Review
           <ArrowRight style={{ width: 16, height: 16 }} />

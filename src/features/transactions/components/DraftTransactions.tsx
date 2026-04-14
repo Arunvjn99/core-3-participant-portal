@@ -67,7 +67,7 @@ function DraftTransactions() {
         >
           <div
             className="flex items-center justify-center flex-shrink-0"
-            style={{ width: 30, height: 30, borderRadius: 8, background: "#EFF6FF", color: "var(--brand-primary)" }}
+            style={{ width: 30, height: 30, borderRadius: 8, background: "var(--c-blue-tint)", color: "var(--brand-primary)" }}
           >
             {draft.icon}
           </div>

@@ -32,7 +32,7 @@ function QuickActionButton({
             width: 40,
             height: 40,
             borderRadius: 10,
-            background: "linear-gradient(135deg, #EFF6FF, #DBEAFE)",
+            background: "var(--c-blue-tint)",
             color: "var(--brand-primary)",
           }}
         >

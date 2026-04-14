@@ -83,7 +83,7 @@ function LoanFees() {
               style={{
                 padding: "16px 28px",
                 marginTop: 8,
-                background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)",
+                background: "var(--c-blue-tint)",
                 borderRadius: 12,
               }}
             >
@@ -106,7 +106,7 @@ function LoanFees() {
       >
         <div
           className="flex items-start gap-3"
-          style={{ background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)", border: "1px solid #BFDBFE", borderRadius: 14, padding: "16px 20px" }}
+          style={{ background: "var(--c-blue-tint)", border: "1px solid #BFDBFE", borderRadius: 14, padding: "16px 20px" }}
         >
           <Info className="flex-shrink-0 mt-0.5" style={{ width: 16, height: 16, color: "var(--brand-primary)" }} />
           <p className="leading-relaxed" style={{ fontSize: 13, fontWeight: 500, color: "var(--brand-primary)" }}>
@@ -128,8 +128,7 @@ function LoanFees() {
         </button>
         <button
           onClick={() => navigate("/transactions/loan/documents")}
-          className="flex items-center gap-2 transition-all duration-200 cursor-pointer"
-          style={{ background: "#2563EB", color: "#fff", padding: "10px 20px", borderRadius: 10, fontSize: 13, fontWeight: 600, border: "none", boxShadow: "0 4px 12px rgba(37,99,235,0.3)" }}
+          className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer"
         >
           Continue to Documents
           <ArrowRight style={{ width: 16, height: 16 }} />

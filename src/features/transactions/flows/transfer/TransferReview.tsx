@@ -59,7 +59,7 @@ function TransferReview() {
                     <div className="flex-1 overflow-hidden" style={{ height: 6, borderRadius: 3, background: "var(--tx-track, #E2E8F0)" }}>
                       <div className="h-full" style={{ width: `${fund.newAllocation}%`, backgroundColor: COLORS[index], borderRadius: 3 }} />
                     </div>
-                    <span style={{ fontSize: 13, fontWeight: hasChanged ? 700 : 600, color: hasChanged ? "#2563EB" : "#1E293B", minWidth: 40 }}>
+                    <span style={{ fontSize: 13, fontWeight: hasChanged ? 700 : 600, color: hasChanged ? "var(--brand-primary)" : "var(--c-text-primary)", minWidth: 40 }}>
                       {fund.newAllocation}%
                     </span>
                   </div>
@@ -85,7 +85,7 @@ function TransferReview() {
             "This change applies to future contributions and existing balance",
           ].map((text, i) => (
             <li key={i} className="flex items-start gap-2.5">
-              <span className="rounded-full mt-1.5 flex-shrink-0" style={{ width: 6, height: 6, background: "#2563EB" }} />
+              <span className="rounded-full mt-1.5 flex-shrink-0" style={{ width: 6, height: 6, background: "var(--brand-primary)" }} />
               <span style={{ fontSize: 13, fontWeight: 500, color: "var(--brand-primary)" }}>{text}</span>
             </li>
           ))}

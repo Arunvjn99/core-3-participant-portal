@@ -117,7 +117,7 @@ function LoanEligibility() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
       >
-        <div style={{ background: "linear-gradient(135deg, #FFFBEB, #FFF7ED)", border: "1px solid #FED7AA", borderRadius: 16, padding: "20px 24px" }}>
+        <div style={{ background: "rgba(245,158,11,0.1)", border: "1px solid #FED7AA", borderRadius: 16, padding: "20px 24px" }}>
           <h4 style={{ fontSize: 15, fontWeight: 700, color: "inherit", letterSpacing: "-0.3px", marginBottom: 12 }}>
             Plan Restrictions
           </h4>
@@ -146,7 +146,7 @@ function LoanEligibility() {
       >
         <div
           className="flex items-start gap-3"
-          style={{ background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)", border: "1px solid #BFDBFE", borderRadius: 14, padding: "16px 20px" }}
+          style={{ background: "var(--c-blue-tint)", border: "1px solid #BFDBFE", borderRadius: 14, padding: "16px 20px" }}
         >
           <AlertCircle className="flex-shrink-0 mt-0.5" style={{ width: 16, height: 16, color: "var(--brand-primary)" }} />
           <div>
@@ -174,8 +174,7 @@ function LoanEligibility() {
         </button>
         <button
           onClick={() => navigate("/transactions/loan/simulator")}
-          className="flex items-center gap-2 transition-all duration-200 cursor-pointer flex-1 sm:flex-none justify-center"
-          style={{ background: "#2563EB", color: "#fff", padding: "10px 20px", borderRadius: 10, fontSize: 13, fontWeight: 600, border: "none", boxShadow: "0 4px 12px rgba(37,99,235,0.3)" }}
+          className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer flex-1 sm:flex-none justify-center"
         >
           Simulate Loan
           <ArrowRight style={{ width: 16, height: 16 }} />

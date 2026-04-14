@@ -158,6 +158,9 @@ input[type='range']::-moz-range-thumb {
   --c-text-secondary:  #475569;
   --c-text-muted:      #64748b;
   --c-text-faint:      #94a3b8;
+  /* semantic tint backgrounds */
+  --c-blue-tint:       #eff6ff;
+  --c-sky:             #0ea5e9;
 }
 
 .dark {
@@ -171,6 +174,9 @@ input[type='range']::-moz-range-thumb {
   --c-text-secondary:  #cbd5e1;
   --c-text-muted:      #94a3b8;
   --c-text-faint:      #64748b;
+  /* semantic tint backgrounds — darken for dark mode */
+  --c-blue-tint:       rgba(37,99,235,0.15);
+  --c-sky:             #0284c7;
 }
 
 /* Keep these for TSX files that still reference them via fallback syntax */

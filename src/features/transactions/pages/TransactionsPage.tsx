@@ -146,7 +146,7 @@ function TransactionsPage() {
           <div
             className="overflow-hidden"
             style={{
-              background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)",
+              background: "var(--c-blue-tint)",
               border: "1px solid #BFDBFE",
               borderRadius: 16,
               padding: "24px 28px" }}
@@ -215,11 +215,11 @@ function TransactionsPage() {
               {/* Divider */}
               <div
                 className="hidden sm:block mx-10 lg:mx-14"
-                style={{ width: 1, height: 56, background: "#BFDBFE" }}
+                style={{ width: 1, height: 56, background: "color-mix(in srgb, var(--brand-primary) 30%, transparent)" }}
               />
               <div
                 className="sm:hidden"
-                style={{ height: 1, background: "#BFDBFE" }}
+                style={{ height: 1, background: "color-mix(in srgb, var(--brand-primary) 30%, transparent)" }}
               />
 
               {/* Vested Balance */}

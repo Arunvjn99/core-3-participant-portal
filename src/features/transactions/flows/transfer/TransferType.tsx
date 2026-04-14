@@ -111,7 +111,7 @@ function TransferType() {
                         <div key={i} className="flex items-center gap-2">
                           <span
                             className="rounded-full flex-shrink-0"
-                            style={{ width: 6, height: 6, background: isSelected ? "#2563EB" : "#CBD5E1" }}
+                            style={{ width: 6, height: 6, background: isSelected ? "var(--brand-primary)" : "var(--c-text-faint)" }}
                           />
                           <span style={{ fontSize: 12, fontWeight: 500, color: "inherit" }}>{detail}</span>
                         </div>
@@ -132,7 +132,7 @@ function TransferType() {
       >
         <div
           className="flex items-start gap-3"
-          style={{ background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)", border: "1px solid #BFDBFE", borderRadius: 14, padding: "14px 16px" }}
+          style={{ background: "var(--c-blue-tint)", border: "1px solid #BFDBFE", borderRadius: 14, padding: "14px 16px" }}
         >
           <Info className="flex-shrink-0 mt-0.5" style={{ width: 16, height: 16, color: "var(--brand-primary)" }} />
           <p className="leading-relaxed" style={{ fontSize: 12, fontWeight: 500, color: "var(--brand-primary)" }}>
@@ -156,8 +156,7 @@ function TransferType() {
         <button
           onClick={handleContinue}
           disabled={!transferType}
-          className="flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ background: "#2563EB", color: "#fff", padding: "10px 20px", borderRadius: 10, fontSize: 13, fontWeight: 600, border: "none", boxShadow: "0 4px 12px rgba(37,99,235,0.3)" }}
+          className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Continue
           <ArrowRight style={{ width: 16, height: 16 }} />

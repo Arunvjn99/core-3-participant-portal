@@ -183,9 +183,9 @@ function RebalanceCurrentAllocation() {
       >
         <div
           className="flex items-start gap-3.5"
-          style={{ background: "linear-gradient(135deg, #FFFBEB, #FFF7ED)", border: "1px solid #FED7AA", borderRadius: 14, padding: "16px 20px" }}
+          style={{ background: "rgba(245,158,11,0.1)", border: "1px solid #FED7AA", borderRadius: 14, padding: "16px 20px" }}
         >
-          <div className="flex items-center justify-center flex-shrink-0" style={{ width: 30, height: 30, borderRadius: 8, background: "#FFEDD5", color: "#B45309" }}>
+          <div className="flex items-center justify-center flex-shrink-0" style={{ width: 30, height: 30, borderRadius: 8, background: "rgba(245,158,11,0.1)", color: "#F59E0B" }}>
             <Info className="w-[14px] h-[14px]" />
           </div>
           <div>
@@ -212,8 +212,7 @@ function RebalanceCurrentAllocation() {
         </button>
         <button
           onClick={handleContinue}
-          className="flex items-center gap-2 transition-all duration-200 cursor-pointer"
-          style={{ background: "#2563EB", color: "#fff", padding: "10px 20px", borderRadius: 10, fontSize: 13, fontWeight: 600, border: "none", boxShadow: "0 4px 12px rgba(37,99,235,0.3)" }}
+          className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer"
         >
           Adjust Target Allocation
           <ArrowRight style={{ width: 16, height: 16 }} />

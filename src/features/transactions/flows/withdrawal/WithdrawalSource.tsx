@@ -108,7 +108,7 @@ function WithdrawalSource() {
       >
         <div
           className="text-center"
-          style={{ background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)", border: "1px solid #BFDBFE", borderRadius: 16, padding: "20px 24px" }}
+          style={{ background: "var(--c-blue-tint)", border: "1px solid #BFDBFE", borderRadius: 16, padding: "20px 24px" }}
         >
           <p style={{ fontSize: 12, fontWeight: 500, color: "inherit", marginBottom: 4 }}>
               Total Withdrawal Amount
@@ -296,8 +296,7 @@ function WithdrawalSource() {
         <button
           onClick={handleContinue}
           disabled={totalAmount === 0}
-          className="flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ background: "#2563EB", color: "#fff", padding: "10px 20px", borderRadius: 10, fontSize: 13, fontWeight: 600, border: "none", boxShadow: "0 4px 12px rgba(37,99,235,0.3)" }}
+          className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Continue to Fees
         </button>

@@ -23,7 +23,7 @@ function TransferImpact() {
       {/* Risk Level Change */}
       <FlowCard delay={0.05}>
         <div className="flex items-start gap-4">
-          <div className="flex items-center justify-center flex-shrink-0" style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #EFF6FF, #DBEAFE)", color: "var(--brand-primary)" }}>
+          <div className="flex items-center justify-center flex-shrink-0" style={{ width: 44, height: 44, borderRadius: 12, background: "var(--c-blue-tint)", color: "var(--brand-primary)" }}>
             <Shield className="w-5 h-5" />
           </div>
           <div className="flex-1">
@@ -32,7 +32,7 @@ function TransferImpact() {
               <div><FlowLabel>Current Risk Level</FlowLabel><FlowValue>{currentRiskLevel}</FlowValue></div>
               <div>
                 <FlowLabel>New Risk Level</FlowLabel>
-                <p style={{ fontSize: 20, fontWeight: 800, color: newRiskLevel === currentRiskLevel ? "#1E293B" : "#2563EB", letterSpacing: "-0.3px" }}>
+                <p style={{ fontSize: 20, fontWeight: 800, color: newRiskLevel === currentRiskLevel ? "var(--c-text-primary)" : "var(--brand-primary)", letterSpacing: "-0.3px" }}>
                   {newRiskLevel}
                 </p>
               </div>
@@ -63,7 +63,7 @@ function TransferImpact() {
                 <div className="flex items-center gap-4">
                   <span style={{ fontSize: 13, fontWeight: 500, color: "inherit" }}>{fund.currentAllocation}%</span>
                   <span style={{ fontSize: 12, color: "inherit" }}>→</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: fund.newAllocation !== fund.currentAllocation ? "#2563EB" : "#1E293B" }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: fund.newAllocation !== fund.currentAllocation ? "var(--brand-primary)" : "var(--c-text-primary)" }}>
                     {fund.newAllocation}%
                   </span>
                 </div>
@@ -84,7 +84,7 @@ function TransferImpact() {
       {/* Expected Returns */}
       <FlowCard delay={0.15}>
         <div className="flex items-start gap-4">
-          <div className="flex items-center justify-center flex-shrink-0" style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #F0FDF4, #DCFCE7)", color: "#10B981" }}>
+          <div className="flex items-center justify-center flex-shrink-0" style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(16,185,129,0.1)", color: "#10B981" }}>
             <TrendingUp className="w-5 h-5" />
           </div>
           <div className="flex-1">

@@ -77,7 +77,7 @@ function FinancialGuidanceCompact() {
                     width: 36,
                     height: 36,
                     borderRadius: 10,
-                    background: "#F5F3FF",
+                    background: "rgba(139,92,246,0.1)",
                     color: "#8B5CF6",
                     border: "1px solid #E9D5FF",
                   }}

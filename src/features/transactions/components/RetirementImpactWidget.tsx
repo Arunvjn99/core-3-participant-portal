@@ -269,7 +269,7 @@ function RetirementImpactWidget({
                 gap: 8,
                 padding: "8px 12px",
                 borderRadius: 8,
-                background: "linear-gradient(135deg, #F0FDF4, #DCFCE7)",
+                background: "rgba(16,185,129,0.1)",
                 border: "1px solid #BBF7D0",
               }}
             >
@@ -290,7 +290,7 @@ function RetirementImpactWidget({
                 gap: 8,
                 padding: "8px 12px",
                 borderRadius: 8,
-                background: "linear-gradient(135deg, #FFFBEB, #FFF7ED)",
+                background: "rgba(245,158,11,0.1)",
                 border: "1px solid #FED7AA",
               }}
             >

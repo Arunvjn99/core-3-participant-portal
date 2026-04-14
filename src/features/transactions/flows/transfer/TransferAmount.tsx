@@ -200,7 +200,7 @@ function TransferAmount() {
       {parsedAmount > maxBalance && (
         <div
           className="flex items-center gap-2"
-          style={{ background: "linear-gradient(135deg, #FEF2F2, #FEE2E2)", border: "1px solid #FCA5A5", borderRadius: 14, padding: "14px 16px" }}
+          style={{ background: "rgba(220,38,38,0.1)", border: "1px solid #FCA5A5", borderRadius: 14, padding: "14px 16px" }}
         >
           <Info className="flex-shrink-0" style={{ width: 16, height: 16, color: "#EF4444" }} />
           <p style={{ fontSize: 12, fontWeight: 500, color: "#B91C1C" }}>
@@ -222,8 +222,7 @@ function TransferAmount() {
         <button
           onClick={handleContinue}
           disabled={!isValid}
-          className="flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ background: "#2563EB", color: "#fff", padding: "10px 20px", borderRadius: 10, fontSize: 13, fontWeight: 600, border: "none", boxShadow: "0 4px 12px rgba(37,99,235,0.3)" }}
+          className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Preview Impact
           <ArrowRight style={{ width: 16, height: 16 }} />

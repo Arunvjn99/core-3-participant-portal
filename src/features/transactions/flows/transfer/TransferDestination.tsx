@@ -295,7 +295,7 @@ function TransferDestination() {
           disabled={selectedFunds.length === 0}
           className="flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
-            background: "#2563EB",
+            background: "var(--brand-primary)",
             color: "#fff",
             padding: "10px 20px",
             borderRadius: 10,
