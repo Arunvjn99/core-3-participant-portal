@@ -106,7 +106,7 @@ function RebalanceCurrentAllocation() {
                   formatter={(v) => [String(v), ""] as [string, string]}
                   contentStyle={{
                     borderRadius: "12px",
-                    border: "1px solid #e5e7eb",
+                    border: "1px solid var(--c-border-color)",
                     boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                     fontSize: "12px" }}
                 />
@@ -183,7 +183,7 @@ function RebalanceCurrentAllocation() {
       >
         <div
           className="flex items-start gap-3.5"
-          style={{ background: "rgba(245,158,11,0.1)", border: "1px solid #FED7AA", borderRadius: 14, padding: "16px 20px" }}
+          style={{ background: "rgba(245,158,11,0.1)", border: "1px solid var(--c-border-amber)", borderRadius: 14, padding: "16px 20px" }}
         >
           <div className="flex items-center justify-center flex-shrink-0" style={{ width: 30, height: 30, borderRadius: 8, background: "rgba(245,158,11,0.1)", color: "#F59E0B" }}>
             <Info className="w-[14px] h-[14px]" />

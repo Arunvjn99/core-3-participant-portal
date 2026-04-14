@@ -148,35 +148,64 @@ input[type='range']::-moz-range-thumb {
 
 /* ── Transaction/Investment design tokens ── */
 :root {
-  --c-card:            #ffffff;
-  --c-page:            #f8fafc;
-  --c-subtle:          #f1f5f9;
-  --c-muted:           #e2e8f0;
-  --c-border-subtle:   1px solid #f1f5f9;
-  --c-border:          1px solid #e2e8f0;
-  --c-text-primary:    #1e293b;
-  --c-text-secondary:  #475569;
-  --c-text-muted:      #64748b;
-  --c-text-faint:      #94a3b8;
+  /* surfaces */
+  --c-card:              #ffffff;
+  --c-page:              #f8fafc;
+  --c-subtle:            #f1f5f9;
+  --c-muted:             #e2e8f0;
+  /* text */
+  --c-text-primary:      #1e293b;
+  --c-text-secondary:    #475569;
+  --c-text-muted:        #64748b;
+  --c-text-faint:        #94a3b8;
+  /* borders (color only — use with 1px solid) */
+  --c-border-color:      #e2e8f0;
+  --c-border-subtle-color: #f1f5f9;
+  --c-border-blue:       #bfdbfe;
+  --c-border-purple:     #ddd6fe;
+  --c-border-green:      #bbf7d0;
+  --c-border-amber:      #fed7aa;
+  --c-border-red:        #fca5a5;
+  /* also keep shorthand versions for style={{ border: var(--c-border-subtle) }} */
+  --c-border-subtle:     1px solid #f1f5f9;
+  --c-border:            1px solid #e2e8f0;
   /* semantic tint backgrounds */
-  --c-blue-tint:       #eff6ff;
-  --c-sky:             #0ea5e9;
+  --c-blue-tint:         #eff6ff;
+  --c-sky:               #0ea5e9;
+  --c-amber:             #f59e0b;
+  /* brand extensions */
+  --brand-purple:        #7c3aed;
+  --brand-purple-light:  #8b5cf6;
 }
 
 .dark {
-  --c-card:            #111827;
-  --c-page:            #030712;
-  --c-subtle:          #1f2937;
-  --c-muted:           #374151;
-  --c-border-subtle:   1px solid rgba(255,255,255,0.06);
-  --c-border:          1px solid rgba(255,255,255,0.10);
-  --c-text-primary:    #f1f5f9;
-  --c-text-secondary:  #cbd5e1;
-  --c-text-muted:      #94a3b8;
-  --c-text-faint:      #64748b;
-  /* semantic tint backgrounds — darken for dark mode */
-  --c-blue-tint:       rgba(37,99,235,0.15);
-  --c-sky:             #0284c7;
+  /* surfaces */
+  --c-card:              #111827;
+  --c-page:              #030712;
+  --c-subtle:            #1f2937;
+  --c-muted:             #374151;
+  /* text */
+  --c-text-primary:      #f1f5f9;
+  --c-text-secondary:    #cbd5e1;
+  --c-text-muted:        #94a3b8;
+  --c-text-faint:        #64748b;
+  /* borders (darken for dark) */
+  --c-border-color:      rgba(255,255,255,0.10);
+  --c-border-subtle-color: rgba(255,255,255,0.06);
+  --c-border-blue:       rgba(37,99,235,0.3);
+  --c-border-purple:     rgba(139,92,246,0.3);
+  --c-border-green:      rgba(22,163,74,0.3);
+  --c-border-amber:      rgba(180,83,9,0.4);
+  --c-border-red:        rgba(127,29,29,0.5);
+  --c-border-subtle:     1px solid rgba(255,255,255,0.06);
+  --c-border:            1px solid rgba(255,255,255,0.10);
+  /* tint backgrounds — dark variants */
+  --c-blue-tint:         rgba(37,99,235,0.12);
+  --c-sky:               #0284c7;
+  --c-amber:             #d97706;
+  /* brand extensions */
+  --brand-purple:        #a78bfa;
+  --brand-purple-light:  #c4b5fd;
 }
 
 /* Keep these for TSX files that still reference them via fallback syntax */
@@ -198,11 +227,22 @@ input[type='range']::-moz-range-thumb {
   --tx-track:          #374151;
 }
 
-/* ── TSX files using var(..., fallback) still need attribute selectors ── */
-.dark [style*="var(--tx-border-light"] { border-color: rgba(255,255,255,0.06) !important; }
-.dark [style*="var(--tx-border,"]      { border-color: rgba(255,255,255,0.10) !important; }
-.dark [style*="var(--tx-track,"]       { background: #374151 !important; }
-.dark [style*="var(--c-muted)"]        { background: #374151 !important; }
+/* ── TSX files using var(..., fallback) or var(--c-*) in inline styles ── */
+/* These selectors work because the browser writes the var() string literally in the style attr */
+.dark [style*="var(--tx-border-light"]    { border-color: rgba(255,255,255,0.06) !important; }
+.dark [style*="var(--tx-border,"]         { border-color: rgba(255,255,255,0.10) !important; }
+.dark [style*="var(--tx-track,"]          { background: #374151 !important; }
+.dark [style*="var(--c-muted)"]           { background: #374151 !important; }
+.dark [style*="var(--c-blue-tint)"]       { background: rgba(37,99,235,0.12) !important; }
+.dark [style*="var(--c-border-blue)"]     { border-color: rgba(37,99,235,0.3) !important; }
+.dark [style*="var(--c-border-subtle)"]   { border-color: rgba(255,255,255,0.06) !important; }
+.dark [style*="var(--c-border-color)"]    { border-color: rgba(255,255,255,0.10) !important; }
+.dark [style*="var(--c-border-amber)"]    { border-color: rgba(180,83,9,0.4) !important; }
+.dark [style*="var(--c-border-green)"]    { border-color: rgba(22,163,74,0.3) !important; }
+.dark [style*="var(--c-border-purple)"]   { border-color: rgba(139,92,246,0.3) !important; }
+/* These use the full "1px solid ..." shorthand in the border property */
+.dark [style*="var(--c-border-subtle)"]   { border: 1px solid rgba(255,255,255,0.06) !important; }
+.dark [style*="var(--c-border)"]          { border: 1px solid rgba(255,255,255,0.10) !important; }
 
 /* ── Table overrides (cannot use CSS vars on native table BG) ── */
 .dark table                { background-color: #030712 !important; }

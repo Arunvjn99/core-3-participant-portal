@@ -87,7 +87,7 @@ function DraftTransactions() {
                   fontWeight: 700,
                   padding: "3px 10px",
                   borderRadius: 6,
-                  background: "#EFF6FF",
+                  background: "var(--c-blue-tint)",
                   color: "var(--brand-primary)",
                 }}
               >
@@ -114,7 +114,7 @@ function DraftTransactions() {
                 style={{
                   width: `${draft.progress}%`,
                   borderRadius: 3,
-                  background: "linear-gradient(90deg, #2563EB, #1E40AF)",
+                  background: "linear-gradient(90deg, var(--brand-primary), var(--brand-primary-hover))",
                 }}
               />
             </div>

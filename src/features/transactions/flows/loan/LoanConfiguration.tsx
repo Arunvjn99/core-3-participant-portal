@@ -38,7 +38,7 @@ const loanTypes = [
     description: "For personal expenses like education, travel, or medical",
     icon: Wallet,
     iconBg: "#EFF6FF",
-    iconColor: "#2563EB" },
+    iconColor: "var(--brand-primary)" },
   {
     id: "residential",
     label: "Home Purchase",
@@ -52,7 +52,7 @@ const loanTypes = [
     description: "Refinance an existing plan loan at current rates",
     icon: RefreshCw,
     iconBg: "#F5F3FF",
-    iconColor: "#7C3AED" },
+    iconColor: "var(--brand-purple)" },
 ];
 
 function LoanConfiguration() {
@@ -308,9 +308,9 @@ function LoanConfiguration() {
       >
         <div
           style={{
-            background: "linear-gradient(135deg, #EFF6FF 0%, #E8F0FE 100%)",
+            background: "var(--c-blue-tint)",
             borderRadius: 14,
-            border: "1px solid #DBEAFE",
+            border: "1px solid var(--c-border-blue)",
             padding: "18px 22px",
             display: "flex",
             alignItems: "center",
@@ -373,7 +373,7 @@ function LoanConfiguration() {
                 width: 40,
                 height: 40,
                 borderRadius: 10,
-                background: "#EFF6FF",
+                background: "var(--c-blue-tint)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center" }}
@@ -418,7 +418,7 @@ function LoanConfiguration() {
                   borderRadius: 14,
                   border:
                     disbursementMethod === "eft"
-                      ? "2px solid #2563EB"
+                      ? "2px solid var(--brand-primary)"
                       : "1.5px solid #E2E8F0",
                   background:
                     disbursementMethod === "eft" ? "#FAFCFF" : "#fff" }}
@@ -456,7 +456,7 @@ function LoanConfiguration() {
                   borderRadius: 14,
                   border:
                     disbursementMethod === "check"
-                      ? "2px solid #2563EB"
+                      ? "2px solid var(--brand-primary)"
                       : "1.5px solid #E2E8F0",
                   background:
                     disbursementMethod === "check" ? "#FAFCFF" : "#fff" }}
@@ -492,9 +492,9 @@ function LoanConfiguration() {
             <div
               style={{
                 marginTop: 16,
-                background: "linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%)",
+                background: "rgba(139,92,246,0.1)",
                 borderRadius: 12,
-                border: "1px solid #DDD6FE",
+                border: "1px solid var(--c-border-purple)",
                 padding: "14px 18px",
                 position: "relative" }}
             >
@@ -507,7 +507,7 @@ function LoanConfiguration() {
                   right: 14,
                   background: "transparent",
                   border: "none",
-                  color: "#A78BFA",
+                  color: "var(--brand-purple-light)",
                   padding: 2 }}
               >
                 <X style={{ width: 16, height: 16 }} />
@@ -518,14 +518,14 @@ function LoanConfiguration() {
                     width: 28,
                     height: 28,
                     borderRadius: 8,
-                    background: "#7C3AED",
+                    background: "var(--brand-purple)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center" }}
                 >
                   <Sparkles style={{ width: 14, height: 14, color: "#fff" }} />
                 </div>
-                <span style={{ fontSize: 13, fontWeight: 700, color: "#7C3AED", letterSpacing: "0.3px" }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--brand-purple)", letterSpacing: "0.3px" }}>
                   <span style={{ fontSize: 10, fontWeight: 600, opacity: 0.7, marginRight: 6 }}>AI</span>
                   EFT Recommended
                 </span>
@@ -538,7 +538,7 @@ function LoanConfiguration() {
                   lineHeight: "21px",
                   paddingRight: 20 }}
               >
-                EFT is the <strong style={{ color: "#7C3AED" }}>fastest disbursement method</strong> — funds typically arrive in 2-3 business days. It also reduces the risk of lost or delayed checks and has a lower processing fee.
+                EFT is the <strong style={{ color: "var(--brand-purple)" }}>fastest disbursement method</strong> — funds typically arrive in 2-3 business days. It also reduces the risk of lost or delayed checks and has a lower processing fee.
               </p>
             </div>
           )}
@@ -701,7 +701,7 @@ function LoanConfiguration() {
                 borderRadius: 12,
                 border:
                   repaymentMethod === "payroll"
-                    ? "2px solid #2563EB"
+                    ? "2px solid var(--brand-primary)"
                     : "1.5px solid #E2E8F0",
                 background:
                   repaymentMethod === "payroll"
@@ -720,7 +720,7 @@ function LoanConfiguration() {
                   width: 36,
                   height: 36,
                   borderRadius: 8,
-                  background: repaymentMethod === "payroll" ? "#DBEAFE" : "#F1F5F9",
+                  background: repaymentMethod === "payroll" ? "var(--c-blue-tint)" : "var(--c-subtle)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center" }}
@@ -729,7 +729,7 @@ function LoanConfiguration() {
                   style={{
                     width: 18,
                     height: 18,
-                    color: repaymentMethod === "payroll" ? "#2563EB" : "#94A3B8" }}
+                    color: repaymentMethod === "payroll" ? "var(--brand-primary)" : "var(--c-text-faint)" }}
                 />
               </div>
               <span style={{ fontSize: 13, fontWeight: 700, color: "inherit" }}>
@@ -750,7 +750,7 @@ function LoanConfiguration() {
                 borderRadius: 12,
                 border:
                   repaymentMethod === "ach"
-                    ? "2px solid #2563EB"
+                    ? "2px solid var(--brand-primary)"
                     : "1.5px solid #E2E8F0",
                 background:
                   repaymentMethod === "ach"
@@ -769,7 +769,7 @@ function LoanConfiguration() {
                   width: 36,
                   height: 36,
                   borderRadius: 8,
-                  background: repaymentMethod === "ach" ? "#DBEAFE" : "#F1F5F9",
+                  background: repaymentMethod === "ach" ? "var(--c-blue-tint)" : "var(--c-subtle)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center" }}
@@ -778,7 +778,7 @@ function LoanConfiguration() {
                   style={{
                     width: 18,
                     height: 18,
-                    color: repaymentMethod === "ach" ? "#2563EB" : "#94A3B8" }}
+                    color: repaymentMethod === "ach" ? "var(--brand-primary)" : "var(--c-text-faint)" }}
                 />
               </div>
               <span style={{ fontSize: 13, fontWeight: 700, color: "inherit" }}>
@@ -799,7 +799,7 @@ function LoanConfiguration() {
                 borderRadius: 12,
                 border:
                   repaymentMethod === "manual"
-                    ? "2px solid #2563EB"
+                    ? "2px solid var(--brand-primary)"
                     : "1.5px solid #E2E8F0",
                 background:
                   repaymentMethod === "manual"
@@ -818,7 +818,7 @@ function LoanConfiguration() {
                   width: 36,
                   height: 36,
                   borderRadius: 8,
-                  background: repaymentMethod === "manual" ? "#DBEAFE" : "#F1F5F9",
+                  background: repaymentMethod === "manual" ? "var(--c-blue-tint)" : "var(--c-subtle)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center" }}
@@ -827,7 +827,7 @@ function LoanConfiguration() {
                   style={{
                     width: 18,
                     height: 18,
-                    color: repaymentMethod === "manual" ? "#2563EB" : "#94A3B8" }}
+                    color: repaymentMethod === "manual" ? "var(--brand-primary)" : "var(--c-text-faint)" }}
                 />
               </div>
               <span style={{ fontSize: 13, fontWeight: 700, color: "inherit" }}>
@@ -868,7 +868,7 @@ function LoanConfiguration() {
                   style={{
                     width: 42,
                     height: 42,
-                    background: "#EFF6FF",
+                    background: "var(--c-blue-tint)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -925,7 +925,7 @@ function LoanConfiguration() {
                   style={{
                     width: 42,
                     height: 42,
-                    background: "#EFF6FF",
+                    background: "var(--c-blue-tint)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -988,7 +988,7 @@ function LoanConfiguration() {
                         borderRadius: 10,
                         background:
                           "linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)",
-                        border: "1px solid #BBF7D0",
+                        border: "1px solid var(--c-border-green)",
                         color: "#10B981" }}
                     >
                       <Landmark className="w-[18px] h-[18px]" />
@@ -1054,7 +1054,7 @@ function LoanConfiguration() {
                         style={{
                           padding: "9px 12px",
                           borderRadius: 9,
-                          border: "1.5px solid #E8ECF1",
+                          border: "1.5px solid var(--c-border-color)",
                           fontSize: 13,
                           color: "inherit",
                           background: "transparent" }}
@@ -1082,7 +1082,7 @@ function LoanConfiguration() {
                         style={{
                           padding: "9px 12px",
                           borderRadius: 9,
-                          border: "1.5px solid #E8ECF1",
+                          border: "1.5px solid var(--c-border-color)",
                           fontSize: 13,
                           color: "inherit",
                           background: "transparent" }}

@@ -200,7 +200,7 @@ function TransferAmount() {
       {parsedAmount > maxBalance && (
         <div
           className="flex items-center gap-2"
-          style={{ background: "rgba(220,38,38,0.1)", border: "1px solid #FCA5A5", borderRadius: 14, padding: "14px 16px" }}
+          style={{ background: "rgba(220,38,38,0.1)", border: "1px solid var(--c-border-red)", borderRadius: 14, padding: "14px 16px" }}
         >
           <Info className="flex-shrink-0" style={{ width: 16, height: 16, color: "#EF4444" }} />
           <p style={{ fontSize: 12, fontWeight: 500, color: "#B91C1C" }}>

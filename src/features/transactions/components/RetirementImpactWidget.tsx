@@ -59,7 +59,7 @@ function MiniChart({ positive = true, compact = false }: { positive?: boolean; c
             x={i * (w / (years.length - 1))}
             y={h + 14}
             textAnchor={i === 0 ? "start" : i === years.length - 1 ? "end" : "middle"}
-            fill="#94A3B8"
+            fill="var(--c-text-faint)"
             fontSize="9"
             fontWeight="500"
             fontFamily="inherit"
@@ -270,7 +270,7 @@ function RetirementImpactWidget({
                 padding: "8px 12px",
                 borderRadius: 8,
                 background: "rgba(16,185,129,0.1)",
-                border: "1px solid #BBF7D0",
+                border: "1px solid var(--c-border-green)",
               }}
             >
               <CheckCircle2 style={{ width: 14, height: 14, color: "#10B981" }} />
@@ -291,7 +291,7 @@ function RetirementImpactWidget({
                 padding: "8px 12px",
                 borderRadius: 8,
                 background: "rgba(245,158,11,0.1)",
-                border: "1px solid #FED7AA",
+                border: "1px solid var(--c-border-amber)",
               }}
             >
               <Target style={{ width: 14, height: 14, color: "#F59E0B" }} />

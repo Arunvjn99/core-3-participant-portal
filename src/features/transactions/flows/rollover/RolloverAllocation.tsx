@@ -267,7 +267,7 @@ function RolloverAllocation() {
                   formatter={(v) => [String(v), ""] as [string, string]}
                   contentStyle={{
                     borderRadius: "12px",
-                    border: "1px solid #e5e7eb",
+                    border: "1px solid var(--c-border-color)",
                     boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                     fontSize: "12px" }}
                 />

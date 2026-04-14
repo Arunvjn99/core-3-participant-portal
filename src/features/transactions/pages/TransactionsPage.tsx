@@ -34,14 +34,14 @@ function SectionHeader({
       <div
         className={
           variant === "ai"
-            ? "text-[#8B5CF6]"
-            : "text-[#2563EB]"
+            ? "text-purple-600 dark:text-purple-400"
+            : "brand-text"
         }
       >
         {icon}
       </div>
       <div className="flex items-center gap-2.5 flex-wrap">
-        <h2 className="text-[15px] sm:text-[16px] font-bold text-[#1E293B] tracking-[-0.3px]">
+        <h2 className="text-[15px] sm:text-[16px] font-bold text-slate-900 dark:text-white tracking-[-0.3px]">
           {title}
         </h2>
         {badge && (
@@ -53,7 +53,7 @@ function SectionHeader({
         )}
       </div>
       {subtitle && (
-        <span className="text-[12px] text-[#94A3B8] ml-auto hidden sm:block font-medium">
+        <span className="text-[12px] text-slate-400 dark:text-gray-500 ml-auto hidden sm:block font-medium">
           {subtitle}
         </span>
       )}
@@ -128,7 +128,7 @@ function TransactionsPage() {
 
   return (
     <div
-      className="min-h-screen bg-[#F8FAFC] dark:bg-gray-950 transactions-page"
+      className="min-h-screen bg-slate-50 dark:bg-gray-950 dark:bg-gray-950 transactions-page"
       data-page="transactions"
     >
 
@@ -147,7 +147,7 @@ function TransactionsPage() {
             className="overflow-hidden"
             style={{
               background: "var(--c-blue-tint)",
-              border: "1px solid #BFDBFE",
+              border: "1px solid var(--c-border-blue)",
               borderRadius: 16,
               padding: "24px 28px" }}
           >
@@ -161,9 +161,9 @@ function TransactionsPage() {
                     height: 44,
                     borderRadius: 12,
                     background: "var(--c-card)",
-                    border: "1px solid #BFDBFE" }}
+                    border: "1px solid var(--c-border-blue)" }}
                 >
-                  <ShieldIcon className="w-5 h-5 text-[#2563EB]" />
+                  <ShieldIcon className="w-5 h-5 brand-text" />
                 </div>
                 <div>
                   <p
@@ -231,9 +231,9 @@ function TransactionsPage() {
                     height: 44,
                     borderRadius: 12,
                     background: "var(--c-card)",
-                    border: "1px solid #BFDBFE" }}
+                    border: "1px solid var(--c-border-blue)" }}
                 >
-                  <ChartBarIcon className="w-5 h-5 text-[#2563EB]" />
+                  <ChartBarIcon className="w-5 h-5 brand-text" />
                 </div>
                 <div>
                   <p
@@ -355,7 +355,7 @@ function TransactionsPage() {
               title="Draft Transactions"
               badge={{
                 text: "2 drafts",
-                color: "bg-[#EFF6FF] text-[#2563EB]" }}
+                color: "bg-[#EFF6FF] brand-text" }}
               subtitle="Resume where you left off"
             />
             <div
@@ -420,7 +420,7 @@ function TransactionsPage() {
             variant="ai"
             badge={{
               text: "AI Insights",
-              color: "bg-[#F5F3FF] text-[#8B5CF6]" }}
+              color: "bg-[#F5F3FF] text-purple-600 dark:text-purple-400" }}
           />
           <FinancialGuidanceCompact />
         </motion.div>

@@ -40,8 +40,8 @@ function LoanEligibility() {
       icon: <Percent className="w-5 h-5" />,
       label: "Interest Rate",
       value: "8%",
-      bg: "#F5F3FF",
-      color: "#8B5CF6",
+      bg: "var(--c-blue-tint)",
+      color: "var(--brand-purple-light)",
     },
     {
       icon: <Calendar className="w-5 h-5" />,
@@ -117,7 +117,7 @@ function LoanEligibility() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
       >
-        <div style={{ background: "rgba(245,158,11,0.1)", border: "1px solid #FED7AA", borderRadius: 16, padding: "20px 24px" }}>
+        <div style={{ background: "rgba(245,158,11,0.1)", border: "1px solid var(--c-border-amber)", borderRadius: 16, padding: "20px 24px" }}>
           <h4 style={{ fontSize: 15, fontWeight: 700, color: "inherit", letterSpacing: "-0.3px", marginBottom: 12 }}>
             Plan Restrictions
           </h4>
@@ -130,7 +130,7 @@ function LoanEligibility() {
               "Spousal consent may be required depending on plan rules",
             ].map((text, i) => (
               <li key={i} className="flex items-start gap-2.5">
-                <span className="rounded-full mt-1.5 flex-shrink-0" style={{ width: 6, height: 6, background: "#F59E0B" }} />
+                <span className="rounded-full mt-1.5 flex-shrink-0" style={{ width: 6, height: 6, background: "var(--c-amber)" }} />
                 <span style={{ fontSize: 13, fontWeight: 500, color: "inherit", lineHeight: "20px" }}>{text}</span>
               </li>
             ))}
@@ -146,7 +146,7 @@ function LoanEligibility() {
       >
         <div
           className="flex items-start gap-3"
-          style={{ background: "var(--c-blue-tint)", border: "1px solid #BFDBFE", borderRadius: 14, padding: "16px 20px" }}
+          style={{ background: "var(--c-blue-tint)", border: "1px solid var(--c-border-blue)", borderRadius: 14, padding: "16px 20px" }}
         >
           <AlertCircle className="flex-shrink-0 mt-0.5" style={{ width: 16, height: 16, color: "var(--brand-primary)" }} />
           <div>

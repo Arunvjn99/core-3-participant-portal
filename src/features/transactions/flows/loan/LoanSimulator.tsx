@@ -164,7 +164,7 @@ function LoanSimulator() {
               {/* Secondary Stats Grid */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                 {[
-                  { label: "Total Interest", value: `$${Math.round(totalInterest).toLocaleString()}`, bg: "#F5F3FF", color: "#8B5CF6", dotColor: "#8B5CF6" },
+                  { label: "Total Interest", value: `$${Math.round(totalInterest).toLocaleString()}`, bg: "var(--c-blue-tint)", color: "var(--brand-purple-light)", dotColor: "#8B5CF6" },
                   { label: "Total Payback", value: `$${Math.round(totalPayback).toLocaleString()}`, bg: "#F0FDF4", color: "#10B981", dotColor: "#10B981" },
                 ].map((item, i) => (
                   <div key={i} style={{ background: item.bg, borderRadius: 10, padding: "10px 14px" }}>

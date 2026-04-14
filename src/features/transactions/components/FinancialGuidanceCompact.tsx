@@ -35,9 +35,9 @@ const insights = [
 ];
 
 const typeStyles = {
-  opportunity: { tag: "Opportunity", tagBg: "#F5F3FF", tagColor: "#8B5CF6", tagBorder: "#E9D5FF" },
-  warning: { tag: "Heads Up", tagBg: "#F5F3FF", tagColor: "#8B5CF6", tagBorder: "#E9D5FF" },
-  info: { tag: "Upcoming", tagBg: "#F5F3FF", tagColor: "#8B5CF6", tagBorder: "#E9D5FF" },
+  opportunity: { tag: "Opportunity", tagBg: "var(--c-blue-tint)", tagColor: "var(--brand-purple-light)", tagBorder: "var(--c-border-purple)" },
+  warning: { tag: "Heads Up", tagBg: "var(--c-blue-tint)", tagColor: "var(--brand-purple-light)", tagBorder: "var(--c-border-purple)" },
+  info: { tag: "Upcoming", tagBg: "var(--c-blue-tint)", tagColor: "var(--brand-purple-light)", tagBorder: "var(--c-border-purple)" },
 };
 
 function FinancialGuidanceCompact() {
@@ -66,7 +66,7 @@ function FinancialGuidanceCompact() {
 
             {/* Subtle AI sparkle */}
             <div className="absolute top-4 right-4 opacity-30 group-hover:opacity-60 transition-opacity duration-200">
-              <Sparkles className="w-3 h-3" style={{ color: "#8B5CF6" }} />
+              <Sparkles className="w-3 h-3" style={{ color: "var(--brand-purple-light)" }} />
             </div>
 
             <div className="relative">
@@ -78,8 +78,8 @@ function FinancialGuidanceCompact() {
                     height: 36,
                     borderRadius: 10,
                     background: "rgba(139,92,246,0.1)",
-                    color: "#8B5CF6",
-                    border: "1px solid #E9D5FF",
+                    color: "var(--brand-purple-light)",
+                    border: "1px solid var(--c-border-purple)",
                   }}
                 >
                   {insight.icon}
@@ -114,7 +114,7 @@ function FinancialGuidanceCompact() {
 
               <div
                 className="flex items-center transition-colors duration-200 group-hover:opacity-90"
-                style={{ fontSize: 13, fontWeight: 600, color: "#8B5CF6" }}
+                style={{ fontSize: 13, fontWeight: 600, color: "var(--brand-purple-light)" }}
               >
                 <span>{insight.cta}</span>
                 <ArrowUpRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-200" />

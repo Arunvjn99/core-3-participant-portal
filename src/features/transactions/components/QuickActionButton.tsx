@@ -47,7 +47,7 @@ function QuickActionButton({
             >
               {title}
             </h3>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-300 dark:text-gray-600 group-hover:text-[#2563EB] group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+            <ChevronRight className="w-3.5 h-3.5 text-slate-300 dark:text-gray-600 group-hover:brand-text group-hover:translate-x-0.5 transition-all flex-shrink-0" />
           </div>
           <p className="brand-text" style={{ fontSize: 12, fontWeight: 600, marginTop: 2 }}>
             {contextInfo}

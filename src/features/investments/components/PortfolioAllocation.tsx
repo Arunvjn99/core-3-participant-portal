@@ -10,7 +10,7 @@ const allocationData = [
   {
     group: "Income Assets",
     percentage: 30,
-    color: "#8b5cf6",
+    color: "var(--brand-purple-light)",
     items: ["Investment Grade Bonds (18%)", "TIPS (7%)", "High Yield (5%)"],
   },
   {

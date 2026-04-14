@@ -82,7 +82,7 @@ function AttentionRequiredTimeline({ onResolve }: AttentionRequiredTimelineProps
             className="dark:bg-amber-950/20 dark:border-amber-800/40"
             style={{
               background: "rgba(245,158,11,0.1)",
-              border: "1px solid #FED7AA",
+              border: "1px solid var(--c-border-amber)",
               borderRadius: 12,
               padding: "10px 16px",
             }}
@@ -98,7 +98,7 @@ function AttentionRequiredTimeline({ onResolve }: AttentionRequiredTimelineProps
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="rounded-full" style={{ width: 5, height: 5, background: "#F59E0B" }} />
+                    <span className="rounded-full" style={{ width: 5, height: 5, background: "var(--c-amber)" }} />
                     <p
                       className="text-slate-900 dark:text-white"
                       style={{ fontSize: 12.5, fontWeight: 700, letterSpacing: "-0.3px", lineHeight: 1.2 }}

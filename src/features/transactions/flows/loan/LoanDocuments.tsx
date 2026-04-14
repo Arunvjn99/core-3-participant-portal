@@ -76,7 +76,7 @@ function LoanDocuments() {
         <div
           style={{
             background: "var(--c-blue-tint)",
-            border: "1px solid #BFDBFE",
+            border: "1px solid var(--c-border-blue)",
             borderRadius: 16,
             padding: "24px 28px",
           }}

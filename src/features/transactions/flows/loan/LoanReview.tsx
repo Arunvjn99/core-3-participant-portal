@@ -47,7 +47,7 @@ function LoanReview() {
       >
         <div
           className="flex items-center justify-center mb-5"
-          style={{ width: 64, height: 64, borderRadius: 32, background: "rgba(16,185,129,0.1)", border: "1px solid #BBF7D0" }}
+          style={{ width: 64, height: 64, borderRadius: 32, background: "rgba(16,185,129,0.1)", border: "1px solid var(--c-border-green)" }}
         >
           <CheckCircle2 style={{ width: 32, height: 32, color: "#10B981" }} />
         </div>
@@ -160,7 +160,7 @@ function LoanReview() {
         <div
           style={{
             background: "var(--c-blue-tint)",
-            border: "1px solid #BFDBFE",
+            border: "1px solid var(--c-border-blue)",
             borderRadius: 16,
             padding: "20px 24px",
           }}
@@ -181,7 +181,7 @@ function LoanReview() {
                   className="flex items-center justify-center mx-auto mb-1.5"
                   style={{
                     width: 28, height: 28, borderRadius: 14,
-                    background: "transparent", border: "2px solid #BFDBFE",
+                    background: "transparent", border: "2px solid var(--c-border-blue)",
                     fontSize: 10, fontWeight: 700, color: "var(--brand-primary)",
                   }}
                 >

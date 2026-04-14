@@ -108,7 +108,7 @@ function WithdrawalSource() {
       >
         <div
           className="text-center"
-          style={{ background: "var(--c-blue-tint)", border: "1px solid #BFDBFE", borderRadius: 16, padding: "20px 24px" }}
+          style={{ background: "var(--c-blue-tint)", border: "1px solid var(--c-border-blue)", borderRadius: 16, padding: "20px 24px" }}
         >
           <p style={{ fontSize: 12, fontWeight: 500, color: "inherit", marginBottom: 4 }}>
               Total Withdrawal Amount

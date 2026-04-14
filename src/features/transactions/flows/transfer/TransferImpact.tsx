@@ -38,7 +38,7 @@ function TransferImpact() {
               </div>
             </div>
             {newRiskLevel !== currentRiskLevel && (
-              <div className="mt-4" style={{ padding: "12px 16px", background: "#EFF6FF", borderRadius: 10, border: "1px solid #BFDBFE" }}>
+              <div className="mt-4" style={{ padding: "12px 16px", background: "var(--c-blue-tint)", borderRadius: 10, border: "1px solid var(--c-border-blue)" }}>
                 <p style={{ fontSize: 13, fontWeight: 500, color: "var(--brand-primary)" }}>
                   Your portfolio risk level will change from <span style={{ fontWeight: 700 }}>{currentRiskLevel}</span> to{" "}
                   <span style={{ fontWeight: 700 }}>{newRiskLevel}</span> based on your new allocation.

@@ -73,7 +73,7 @@ const scenarios: Record<
   "+2% Contribution": {
     projected: "$1,610,000",
     monthlyIncome: "$5,460",
-    color: "#8b5cf6",
+    color: "var(--brand-purple-light)",
     description: "Increase contribution from 8% to 10%",
     score: 84,
     data: [

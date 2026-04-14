@@ -132,7 +132,7 @@ function TransferType() {
       >
         <div
           className="flex items-start gap-3"
-          style={{ background: "var(--c-blue-tint)", border: "1px solid #BFDBFE", borderRadius: 14, padding: "14px 16px" }}
+          style={{ background: "var(--c-blue-tint)", border: "1px solid var(--c-border-blue)", borderRadius: 14, padding: "14px 16px" }}
         >
           <Info className="flex-shrink-0 mt-0.5" style={{ width: 16, height: 16, color: "var(--brand-primary)" }} />
           <p className="leading-relaxed" style={{ fontSize: 12, fontWeight: 500, color: "var(--brand-primary)" }}>

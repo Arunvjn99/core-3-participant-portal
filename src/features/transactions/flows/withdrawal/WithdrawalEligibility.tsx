@@ -22,7 +22,7 @@ function WithdrawalEligibility() {
   const metrics = [
     { icon: <DollarSign className="w-5 h-5" />, label: "Available to Withdraw", value: "$5,000", bg: "#EFF6FF", color: "var(--brand-primary)" },
     { icon: <Percent className="w-5 h-5" />, label: "Estimated Tax Withholding", value: "20–35%", bg: "#FFEDD5", color: "#F59E0B" },
-    { icon: <Shield className="w-5 h-5" />, label: "Vested Balance", value: "$25,000", bg: "#F5F3FF", color: "#8B5CF6" },
+    { icon: <Shield className="w-5 h-5" />, label: "Vested Balance", value: "$25,000", bg: "var(--c-blue-tint)", color: "var(--brand-purple-light)" },
   ];
 
   return (
@@ -104,7 +104,7 @@ function WithdrawalEligibility() {
                   "Employer match contributions may have vesting restrictions",
                 ].map((text, i) => (
                   <li key={i} className="flex items-start gap-2.5">
-                    <span className="rounded-full mt-1.5 flex-shrink-0" style={{ width: 6, height: 6, background: "#F59E0B" }} />
+                    <span className="rounded-full mt-1.5 flex-shrink-0" style={{ width: 6, height: 6, background: "var(--c-amber)" }} />
                     <span style={{ fontSize: 13, fontWeight: 500, color: "inherit", lineHeight: "20px" }}>{text}</span>
                   </li>
                 ))}

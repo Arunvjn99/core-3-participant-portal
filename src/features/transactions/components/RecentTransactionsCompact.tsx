@@ -134,8 +134,8 @@ function RecentTransactionsCompact({ maxItems }: { maxItems?: number } = {}) {
   const getStatusBadge = (status: Transaction["status"]) => {
     switch (status) {
       case "Completed": return { bg: "#ECFDF5", color: "#059669", dot: "#10B981" };
-      case "Processing": return { bg: "#EFF6FF", color: "var(--brand-primary)", dot: "#3B82F6" };
-      case "Cancelled": return { bg: "#F8FAFC", color: "var(--c-text-muted)", dot: "#94A3B8" };
+      case "Processing": return { bg: "var(--c-blue-tint)", color: "var(--brand-primary)", dot: "var(--brand-primary)" };
+      case "Cancelled": return { bg: "var(--c-subtle)", color: "var(--c-text-muted)", dot: "var(--c-text-faint)" };
     }
   };
 
