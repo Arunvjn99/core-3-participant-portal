@@ -14,6 +14,7 @@ import { EnrollmentShell } from '../features/enrollment/components/EnrollmentShe
 import LoginPage from '../features/auth/pages/LoginPage'
 import SignupPage from '../features/auth/pages/SignupPage'
 import ForgotPasswordPage from '../features/auth/pages/ForgotPasswordPage'
+import WhiteLabelAuth from '../features/auth/components/WhiteLabelAuth'
 
 import PlanSelection from '../features/enrollment/pages/PlanSelection'
 import Contribution from '../features/enrollment/pages/Contribution'
@@ -106,6 +107,7 @@ export const router = createBrowserRouter([
       { path: 'login', element: <LoginPage /> },
       { path: 'signup', element: <SignupPage /> },
       { path: 'forgot-password', element: <ForgotPasswordPage /> },
+      { path: 'auth', element: <WhiteLabelAuth /> },
 
       {
         path: ':version',
