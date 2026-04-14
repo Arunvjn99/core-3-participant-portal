@@ -49,9 +49,9 @@ function AuthCarousel() {
 
   return (
     <div className="flex flex-col h-full justify-end pb-12 px-8">
-      <div className="w-full max-w-[360px] mx-auto mb-6">
+      <div className="w-full max-w-[500px] mx-auto mb-6">
         <div className="bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 shadow-2xl">
-          <div className="relative overflow-hidden" style={{ height: '220px' }}>
+          <div className="relative overflow-hidden w-full max-w-[500px] h-[700px] mx-auto">
             <img
               key={current}
               src={slide.image}
