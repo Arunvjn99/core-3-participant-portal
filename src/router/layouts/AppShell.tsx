@@ -9,6 +9,7 @@ import {
   User,
   Search,
   Sparkles,
+  Bot,
   Bell,
   LogOut,
   Sun,
@@ -49,6 +50,7 @@ export function AppShell() {
   const navigate = useNavigate()
   const location = useLocation()
   const openChat = useAIStore((s) => s.openChat)
+  const isChatOpen = useAIStore((s) => s.isChatOpen)
   const toggleSearch = useAIStore((s) => s.toggleSearch)
   const [userDisplayName, setUserDisplayName] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -271,7 +273,7 @@ export function AppShell() {
       </header>
 
       <main className="flex min-h-0 flex-1 flex-col overflow-auto bg-slate-50/50 dark:bg-gray-950">
-        <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col px-4 pb-6 pt-4 sm:px-6 lg:px-8">
           <AnimatePresence>
             <Outlet />
           </AnimatePresence>
@@ -282,15 +284,18 @@ export function AppShell() {
       <CoreAIPanel />
       <AISearchPalette />
 
-      <button
-        type="button"
-        onClick={openChat}
-        className="fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all hover:scale-110 hover:opacity-90 active:scale-95"
-        style={{ backgroundColor: 'var(--brand-primary)' }}
-        aria-label="Open AI assistant"
-      >
-        <Sparkles className="h-5 w-5 text-white" />
-      </button>
+      {!isChatOpen && (
+        <button
+          type="button"
+          onClick={openChat}
+          className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-full px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-black/10 transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] dark:shadow-black/40"
+          style={{ backgroundColor: 'var(--brand-primary)' }}
+          aria-label="Ask Core AI"
+        >
+          <Bot className="h-5 w-5 shrink-0 opacity-95" aria-hidden />
+          <span>Ask Core AI</span>
+        </button>
+      )}
     </div>
   )
 }

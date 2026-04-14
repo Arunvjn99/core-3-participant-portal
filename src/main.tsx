@@ -8,6 +8,7 @@ import { BrandThemeProvider } from './core/theme/BrandThemeContext'
 import { AuthProvider } from './core/auth/AuthContext'
 import { UserProvider } from './core/user/UserContext'
 import { router } from './router'
+import { GlobalFeedback } from './features/feedback/GlobalFeedback'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -16,6 +17,7 @@ createRoot(document.getElementById('root')!).render(
         <AuthProvider>
           <UserProvider>
             <RouterProvider router={router} />
+            <GlobalFeedback />
           </UserProvider>
         </AuthProvider>
       </BrandThemeProvider>

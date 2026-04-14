@@ -1,19 +1,32 @@
 import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import {
-  CheckCircle2,
-  ChevronRight,
-  TrendingUp,
-  Sparkles,
-  UserCheck,
-} from 'lucide-react'
+import { CheckCircle2, ChevronRight, Sparkles, UserCheck } from 'lucide-react'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { useAIStore } from '@/core/store/aiStore'
 import { useAuth } from '@/core/hooks/useAuth'
 import { useUser } from '@/core/hooks/useUser'
 import { EnrollmentPersonalizationModal } from '../components/EnrollmentPersonalizationModal'
 import AdvisorModal from '@/features/advisors/AdvisorModal'
+
+function getTimeGreeting(): string {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Good morning'
+  if (hour < 17) return 'Good afternoon'
+  return 'Good evening'
+}
+
+function formatGreetingDisplayName(fullName: string | undefined | null, fallbackFirst: string): string {
+  if (fullName?.trim()) {
+    return fullName
+      .trim()
+      .split(/\s+/)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ')
+  }
+  if (fallbackFirst === 'there') return 'there'
+  return fallbackFirst.charAt(0).toUpperCase() + fallbackFirst.slice(1).toLowerCase()
+}
 
 export function PreEnrollmentDashboard() {
   const navigate = useNavigate()
@@ -31,6 +44,8 @@ export function PreEnrollmentDashboard() {
       : user?.email
         ? user.email.split('@')[0]
         : 'there'
+
+  const greetingName = formatGreetingDisplayName(profile?.full_name, firstName)
 
   return (
     <AnimatedPage className="min-h-full">
@@ -52,37 +67,47 @@ export function PreEnrollmentDashboard() {
           className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#f1f5f9_1px,transparent_1px),linear-gradient(to_bottom,#f1f5f9_1px,transparent_1px)] bg-[length:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_20%,transparent_100%)] opacity-20 dark:bg-[linear-gradient(to_right,rgba(148,163,184,0.15)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.15)_1px,transparent_1px)]"
         />
 
-        <main className="mx-auto flex max-w-6xl flex-col gap-32 px-6 pb-20 pt-24">
+        <main className="mx-auto flex max-w-6xl flex-col gap-32 px-6 pb-20 pt-8">
           {/* Hero */}
-          <section className="grid items-center gap-20 lg:grid-cols-[1.1fr_1fr]">
+          <section className="grid items-center gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="flex flex-col gap-8"
+              className="flex flex-col gap-6"
             >
-              <h1 className="text-6xl font-bold leading-[1.05] tracking-[-0.04em] text-slate-900 dark:text-white md:text-7xl">
+              <div className="inline-flex w-fit max-w-full items-center gap-2.5 rounded-full border border-slate-200 bg-white px-4 py-2 shadow-sm dark:border-slate-600 dark:bg-slate-900">
+                <span
+                  className="h-2 w-2 shrink-0 rounded-full bg-[#2b59c3] dark:bg-blue-400"
+                  aria-hidden
+                />
+                <span className="text-sm font-semibold text-[#2b59c3] dark:text-blue-400">
+                  {getTimeGreeting()}, {greetingName}
+                </span>
+              </div>
+
+              <h1 className="max-w-xl text-4xl font-bold leading-[1.15] tracking-[-0.02em] text-slate-900 dark:text-white sm:text-[2.5rem] lg:text-[2.75rem]">
                 Let&apos;s build your <br />
                 <span className="brand-text">future</span>, together.
               </h1>
 
-              <p className="max-w-lg text-xl font-medium leading-relaxed text-slate-500 dark:text-slate-400">
+              <p className="max-w-lg text-base leading-relaxed text-slate-600 dark:text-slate-400 sm:text-[1.0625rem]">
                 You&apos;re one step away from activating your 401(k). We&apos;ve simplified everything so you can
                 focus on what matters.
               </p>
 
-              <div className="flex flex-wrap items-center gap-5 pt-2">
+              <div className="flex flex-wrap items-center gap-4 pt-1">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(true)}
-                  className="btn-brand flex items-center gap-2.5 rounded-2xl px-10 py-4 text-base font-bold shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="btn-brand flex items-center gap-2 rounded-xl px-7 py-3 text-sm font-semibold shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] sm:px-8 sm:py-3.5 sm:text-[0.9375rem]"
                 >
                   Start my enrollment →
                 </button>
                 <button
                   type="button"
                   onClick={() => learningRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                  className="rounded-2xl border border-slate-200 px-10 py-4 font-bold text-slate-600 transition-all hover:scale-[1.02] hover:bg-slate-50 active:scale-[0.98] dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800/50"
+                  className="rounded-xl border border-slate-200 px-7 py-3 text-sm font-semibold text-slate-600 transition-all hover:scale-[1.02] hover:bg-slate-50 active:scale-[0.98] dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800/50 sm:px-8 sm:py-3.5 sm:text-[0.9375rem]"
                 >
                   Learn about the plan
                 </button>
@@ -100,91 +125,72 @@ export function PreEnrollmentDashboard() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="flex flex-col items-center gap-8 lg:items-end"
             >
-              <div className="relative flex aspect-[4/3] w-full max-w-md items-center justify-center overflow-hidden rounded-3xl">
-                <div className="relative flex h-full w-full items-center justify-center">
-                  <motion.div
-                    animate={{ y: [0, -10, 0] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                    className="absolute left-10 top-20 flex h-64 w-48 flex-col gap-3 rounded-2xl border-2 border-slate-900 bg-white p-4 dark:border-slate-600 dark:bg-slate-800"
-                  >
-                    <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-700" />
-                    <div className="h-2 w-full rounded bg-slate-100 dark:bg-slate-700" />
-                    <div className="h-2 w-2/3 rounded bg-slate-100 dark:bg-slate-700" />
-                    <div className="mt-auto flex h-24 w-full items-end gap-1 rounded-xl border border-slate-100 p-2 dark:border-slate-600">
-                      <div className="h-1/2 w-full rounded-sm bg-slate-100 dark:bg-slate-700" />
-                      <div className="h-3/4 w-full rounded-sm bg-slate-100 dark:bg-slate-700" />
-                      <div className="h-full w-full rounded-sm bg-slate-900 dark:bg-slate-200" />
-                    </div>
-                  </motion.div>
-
-                  <motion.div
-                    animate={{ y: [0, 10, 0] }}
-                    transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-                    className="absolute bottom-10 right-10 flex h-72 w-56 flex-col gap-4 rounded-2xl border-2 border-slate-900 bg-white p-6 shadow-2xl shadow-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:shadow-slate-900/50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="brand-bg h-10 w-10 rounded-full" />
-                      <div className="flex flex-col gap-1">
-                        <div className="h-2 w-20 rounded bg-slate-900 dark:bg-slate-200" />
-                        <div className="h-1.5 w-12 rounded bg-slate-200 dark:bg-slate-500" />
-                      </div>
-                    </div>
-                    <div className="mt-4 flex flex-col gap-2">
-                      <div className="h-2 w-full rounded bg-slate-100 dark:bg-slate-700" />
-                      <div className="h-2 w-full rounded bg-slate-100 dark:bg-slate-700" />
-                      <div className="h-2 w-3/4 rounded bg-slate-100 dark:bg-slate-700" />
-                    </div>
-                    <div className="mt-auto flex items-end justify-between">
-                      <div className="flex flex-col gap-1">
-                        <div className="text-[10px] font-bold uppercase text-slate-400">Growth</div>
-                        <div className="text-xl font-black text-slate-900 dark:text-white">+24%</div>
-                      </div>
-                      <TrendingUp className="brand-text h-8 w-8" />
-                    </div>
-                  </motion.div>
-                </div>
+              <div className="relative w-full max-w-[500px]">
+                <img
+                  src="/hero-enrollment-illustration.png"
+                  alt="Illustration of retirement plan onboarding with character and floating UI cards"
+                  width={500}
+                  height={700}
+                  className="mx-auto block h-auto w-full max-h-[min(700px,85vh)] object-contain"
+                  loading="eager"
+                  decoding="async"
+                />
               </div>
             </motion.div>
           </section>
 
           {/* Learning */}
           <section ref={learningRef} className="relative z-10">
-            <div className="relative overflow-hidden rounded-[40px] bg-gradient-to-r from-[#2F6BFF] to-[#6FA8FF] p-8 text-white shadow-2xl shadow-blue-200/50 md:p-12">
+            <div className="relative overflow-hidden rounded-[40px] bg-gradient-to-r from-[#2F6BFF] to-[#6FA8FF] text-white shadow-2xl shadow-blue-200/50 dark:shadow-blue-900/30">
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.2),transparent_50%)]" />
 
-              <div className="relative z-10 flex max-w-3xl flex-col items-start gap-8">
-                <div className="inline-flex w-fit items-center rounded-full border border-white/20 bg-white/20 px-4 py-1.5 backdrop-blur-md">
-                  <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-white">Step 1</span>
-                </div>
+              <div className="relative z-10 grid items-center gap-8 p-8 md:gap-10 md:p-12 lg:grid-cols-[minmax(0,1fr)_minmax(220px,380px)] lg:gap-12">
+                <div className="flex max-w-3xl flex-col items-start gap-6 md:gap-8">
+                  <div className="inline-flex w-fit items-center rounded-full border border-white/20 bg-white/20 px-4 py-1.5 backdrop-blur-md">
+                    <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-white">Step 1</span>
+                  </div>
 
-                <div className="flex flex-col gap-3">
-                  <h2 className="text-3xl font-bold leading-[1.1] tracking-tight md:text-4xl">
-                    Learn how your <br />
-                    retirement plan works
-                  </h2>
-                  <p className="max-w-md text-base font-medium leading-relaxed text-blue-50/80">
-                    Understand contributions, employer match, and how your savings grow over time.
-                  </p>
-                </div>
+                  <div className="flex flex-col gap-3">
+                    <h2 className="text-2xl font-bold leading-[1.15] tracking-tight sm:text-3xl md:text-[2rem]">
+                      Learn how your <br />
+                      retirement plan works
+                    </h2>
+                    <p className="max-w-md text-sm leading-relaxed text-blue-50/90 sm:text-base">
+                      Understand contributions, employer match, and how your savings grow over time.
+                    </p>
+                  </div>
 
-                <div className="flex flex-col gap-6 pt-4 sm:flex-row">
-                  {[
-                    'What is a 401(k) and how it works',
-                    'How much you should contribute',
-                    'How employer matching impacts your savings',
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/20">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-white" />
+                  <div className="flex flex-col gap-4 pt-1 sm:flex-row sm:flex-wrap sm:gap-x-8 sm:gap-y-4">
+                    {[
+                      'What is a 401(k) and how it works',
+                      'How much you should contribute',
+                      'How employer matching impacts your savings',
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/20">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-white" />
+                        </div>
+                        <span className="text-sm font-semibold text-white/90">{item}</span>
                       </div>
-                      <span className="text-sm font-semibold text-white/90">{item}</span>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex justify-center lg:justify-end lg:self-end">
+                  <img
+                    src="/learning-card-illustration.png"
+                    alt="Student with school supplies learning about your plan"
+                    width={380}
+                    height={420}
+                    className="h-auto w-full max-w-[min(100%,380px)] object-contain object-bottom"
+                    loading="lazy"
+                    decoding="async"
+                  />
                 </div>
               </div>
 
-              <div className="absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-white/10 blur-[80px]" />
-              <div className="absolute -left-20 -top-20 h-48 w-48 rounded-full bg-blue-400/20 blur-[60px]" />
+              <div className="pointer-events-none absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-white/10 blur-[80px]" />
+              <div className="pointer-events-none absolute -left-20 -top-20 h-48 w-48 rounded-full bg-blue-400/20 blur-[60px]" />
             </div>
           </section>
 
