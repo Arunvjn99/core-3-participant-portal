@@ -159,12 +159,12 @@ function RebalanceTradePreview() {
         transition={{ duration: 0.4, delay: 0.2 }}
       >
         <Card
-          className="p-6 rounded-2xl border-gray-100/80"
+          className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
             boxShadow:
               "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
         >
-          <h3 className="font-semibold text-gray-900 text-sm mb-5">
+          <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-5">
             Trade Details
           </h3>
 
@@ -206,15 +206,15 @@ function RebalanceTradePreview() {
                       >
                         {trade.action}
                       </span>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
                         {trade.name}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[10px] text-gray-400 font-mono">
+                      <span className="text-[10px] text-gray-400 dark:text-gray-500 font-mono">
                         {trade.ticker}
                       </span>
-                      <span className="text-[10px] text-gray-400">
+                      <span className="text-[10px] text-gray-400 dark:text-gray-500">
                         {trade.currentAllocation}% → {trade.targetAllocation}%
                       </span>
                     </div>
@@ -253,14 +253,14 @@ function RebalanceTradePreview() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.3 }}
       >
-        <div className="p-4 rounded-2xl bg-gray-50/80 border border-gray-100/60">
+        <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/80 border border-gray-100 dark:border-gray-700/60">
           <div className="flex items-start gap-2.5">
-            <Clock className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+            <Clock className="w-4 h-4 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-xs text-gray-600 font-medium mb-1">
+              <p className="text-xs text-gray-600 dark:text-gray-300 font-medium mb-1">
                 Trade Execution
               </p>
-              <p className="text-[11px] text-gray-500 leading-relaxed">
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
                 Trades will be executed at the next market close. No fees apply
                 to portfolio rebalancing within your 401(k) plan. Your updated
                 allocation will be reflected within 1-2 business days.

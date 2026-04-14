@@ -143,18 +143,18 @@ function WithdrawalSource() {
               >
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <p className="font-medium text-gray-900 text-sm">
+                    <p className="font-medium text-gray-900 dark:text-white text-sm">
                       {source.label}
                     </p>
-                    <p className="text-[10px] text-gray-400">
+                    <p className="text-[10px] text-gray-400 dark:text-gray-500">
                       {source.sublabel}
                     </p>
                   </div>
                   <div className="text-right">
-                    <span className="text-lg font-semibold text-gray-900">
+                    <span className="text-lg font-semibold text-gray-900 dark:text-white">
                       ${source.value.toLocaleString()}
                     </span>
-                    <p className="text-[10px] text-gray-400">
+                    <p className="text-[10px] text-gray-400 dark:text-gray-500">
                       of ${source.max.toLocaleString()} available
                     </p>
                   </div>
@@ -176,7 +176,7 @@ function WithdrawalSource() {
                       width: `${(source.value / source.max) * 100}%` }}
                   />
                 </div>
-                <p className="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1 flex items-center gap-1">
                   <Info className="w-2.5 h-2.5" />
                   {source.taxNote}
                 </p>
@@ -193,18 +193,18 @@ function WithdrawalSource() {
         transition={{ duration: 0.4, delay: 0.2 }}
       >
         <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
-          <Card className="rounded-2xl border-gray-100/80 overflow-hidden">
+          <Card className="rounded-2xl border-gray-100 dark:border-gray-700/80 overflow-hidden">
             <CollapsibleTrigger asChild>
-              <button className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50/50 transition-colors cursor-pointer">
+              <button className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 dark:bg-gray-800/50 transition-colors cursor-pointer">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600">
                     <Settings2 className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 text-sm">
+                    <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
                       Advanced Settings
                     </h3>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                       Gross vs Net election and other options
                     </p>
                   </div>
@@ -217,9 +217,9 @@ function WithdrawalSource() {
               </button>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <div className="px-5 pb-5 border-t border-gray-100">
+              <div className="px-5 pb-5 border-t border-gray-100 dark:border-gray-700">
                 <div className="pt-4">
-                  <Label className="text-sm text-gray-700 mb-3 block">
+                  <Label className="text-sm text-gray-700 dark:text-gray-200 mb-3 block">
                     Gross vs Net Election
                   </Label>
                   <RadioGroup
@@ -227,7 +227,7 @@ function WithdrawalSource() {
                     onValueChange={setGrossNetElection}
                   >
                     <div className="space-y-2">
-                      <div className="flex items-start space-x-3 p-3.5 border border-gray-200 rounded-xl hover:border-blue-200 transition-colors">
+                      <div className="flex items-start space-x-3 p-3.5 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-blue-200 transition-colors">
                         <RadioGroupItem value="gross" id="gross" />
                         <div className="flex-1">
                           <Label
@@ -236,14 +236,14 @@ function WithdrawalSource() {
                           >
                             Gross Amount
                           </Label>
-                          <p className="text-[11px] text-gray-500 mt-0.5">
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
                             The total amount withdrawn before taxes and fees
                             are deducted. You'll receive less than this
                             amount.
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-start space-x-3 p-3.5 border border-gray-200 rounded-xl hover:border-blue-200 transition-colors">
+                      <div className="flex items-start space-x-3 p-3.5 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-blue-200 transition-colors">
                         <RadioGroupItem value="net" id="net" />
                         <div className="flex-1">
                           <Label
@@ -252,7 +252,7 @@ function WithdrawalSource() {
                           >
                             Net Amount
                           </Label>
-                          <p className="text-[11px] text-gray-500 mt-0.5">
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
                             The amount you want to receive after taxes and
                             fees. A larger gross amount will be withdrawn to
                             cover deductions.

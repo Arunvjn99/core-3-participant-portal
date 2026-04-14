@@ -63,12 +63,12 @@ function RolloverReview() {
         <h2 style={{ fontSize: 26, fontWeight: 800, color: "inherit", letterSpacing: "-0.5px", lineHeight: "34px", marginBottom: 8 }}>
           Rollover Submitted
         </h2>
-        <p className="text-gray-600 text-center max-w-md mb-3">
+        <p className="text-gray-600 dark:text-gray-300 text-center max-w-md mb-3">
           Your rollover of ${estimatedAmount.toLocaleString()} from{" "}
           {rolloverData.previousEmployer || "your previous plan"} has been
           submitted successfully.
         </p>
-        <div className="flex items-center gap-2 text-sm text-gray-400 mb-8">
+        <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500 mb-8">
           <Clock className="w-4 h-4" />
           <span>Typical processing time: 5-10 business days</span>
         </div>
@@ -116,18 +116,18 @@ function RolloverReview() {
                 </div>
                 <div>
                   <p
-                    className={`text-sm font-medium ${step.active ? "text-gray-900" : "text-gray-400"}`}
+                    className={`text-sm font-medium ${step.active ? "text-gray-900 dark:text-white" : "text-gray-400"}`}
                   >
                     {step.label}
                   </p>
-                  <p className="text-[10px] text-gray-400">{step.desc}</p>
+                  <p className="text-[10px] text-gray-400 dark:text-gray-500">{step.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <p className="text-xs text-gray-400 mt-8">
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-8">
           Redirecting to dashboard...
         </p>
       </motion.div>
@@ -157,48 +157,48 @@ function RolloverReview() {
         transition={{ duration: 0.4, delay: 0.05 }}
       >
         <Card
-          className="p-6 rounded-2xl border-gray-100/80"
+          className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
             boxShadow:
               "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
         >
           <div className="flex items-center gap-2 mb-5">
-            <Building2 className="w-4 h-4 text-gray-400" />
-            <h3 className="font-semibold text-gray-900">
+            <Building2 className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <h3 className="font-semibold text-gray-900 dark:text-white">
               Previous Plan Details
             </h3>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
             <div className="space-y-1">
-              <p className="text-[11px] text-gray-400 uppercase tracking-wider">
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                 Employer
               </p>
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
                 {rolloverData.previousEmployer || "Acme Corporation"}
               </p>
             </div>
             <div className="space-y-1">
-              <p className="text-[11px] text-gray-400 uppercase tracking-wider">
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                 Administrator
               </p>
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
                 {rolloverData.planAdministrator || "Fidelity Investments"}
               </p>
             </div>
             <div className="space-y-1">
-              <p className="text-[11px] text-gray-400 uppercase tracking-wider">
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                 Account Number
               </p>
-              <p className="text-sm font-medium text-gray-900 font-mono">
+              <p className="text-sm font-medium text-gray-900 dark:text-white font-mono">
                 {rolloverData.accountNumber || "1234-5678-90"}
               </p>
             </div>
             <div className="space-y-1">
-              <p className="text-[11px] text-gray-400 uppercase tracking-wider">
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                 Rollover Type
               </p>
-              <p className="text-sm font-medium text-gray-900 capitalize">
+              <p className="text-sm font-medium text-gray-900 dark:text-white capitalize">
                 {rolloverData.rolloverType || "Traditional"} 401(k)
               </p>
             </div>
@@ -208,12 +208,12 @@ function RolloverReview() {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-600">
+              <DollarSign className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+              <span className="text-sm text-gray-600 dark:text-gray-300">
                 Estimated Rollover Amount
               </span>
             </div>
-            <p className="text-xl font-semibold text-gray-900">
+            <p className="text-xl font-semibold text-gray-900 dark:text-white">
               ${estimatedAmount.toLocaleString()}
             </p>
           </div>
@@ -227,14 +227,14 @@ function RolloverReview() {
         transition={{ duration: 0.4, delay: 0.1 }}
       >
         <Card
-          className="p-6 rounded-2xl border-gray-100/80"
+          className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
             boxShadow:
               "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
         >
           <div className="flex items-center gap-2 mb-5">
-            <PieChart className="w-4 h-4 text-gray-400" />
-            <h3 className="font-semibold text-gray-900">
+            <PieChart className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <h3 className="font-semibold text-gray-900 dark:text-white">
               Investment Allocation
             </h3>
           </div>
@@ -243,7 +243,7 @@ function RolloverReview() {
             {allocation.map((fund, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between p-3 rounded-xl bg-gray-50/60"
+                className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60"
               >
                 <div className="flex items-center gap-3">
                   <div
@@ -251,18 +251,18 @@ function RolloverReview() {
                     style={{
                       backgroundColor: COLORS[idx % COLORS.length] }}
                   />
-                  <span className="text-sm text-gray-900">
+                  <span className="text-sm text-gray-900 dark:text-white">
                     {fund.fundName}
                   </span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
                     $
                     {Math.round(
                       (fund.percentage / 100) * estimatedAmount
                     ).toLocaleString()}
                   </span>
-                  <span className="text-sm font-semibold text-gray-900 w-12 text-right">
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white w-12 text-right">
                     {fund.percentage}%
                   </span>
                 </div>
@@ -291,14 +291,14 @@ function RolloverReview() {
         transition={{ duration: 0.4, delay: 0.15 }}
       >
         <Card
-          className="p-6 rounded-2xl border-gray-100/80"
+          className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
             boxShadow:
               "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
         >
           <div className="flex items-center gap-2 mb-5">
-            <FileText className="w-4 h-4 text-gray-400" />
-            <h3 className="font-semibold text-gray-900">Documents</h3>
+            <FileText className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <h3 className="font-semibold text-gray-900 dark:text-white">Documents</h3>
           </div>
 
           <div className="space-y-2">
@@ -309,11 +309,11 @@ function RolloverReview() {
             ].map((doc, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between p-3 rounded-xl bg-gray-50/60"
+                className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60"
               >
                 <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-900">{doc.name}</span>
+                  <FileText className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                  <span className="text-sm text-gray-900 dark:text-white">{doc.name}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   {doc.status === "Uploaded" ? (
@@ -324,7 +324,7 @@ function RolloverReview() {
                       </span>
                     </>
                   ) : (
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-gray-400 dark:text-gray-500">
                       {doc.status}
                     </span>
                   )}
@@ -342,14 +342,14 @@ function RolloverReview() {
         transition={{ duration: 0.4, delay: 0.2 }}
       >
         <Card
-          className="p-6 rounded-2xl border-gray-100/80 bg-gradient-to-br from-indigo-50/30 to-blue-50/20"
+          className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80 bg-gradient-to-br from-indigo-50/30 to-blue-50/20"
           style={{
             boxShadow:
               "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
         >
           <div className="flex items-center gap-2 mb-5">
-            <Clock className="w-4 h-4 text-gray-400" />
-            <h3 className="font-semibold text-gray-900">
+            <Clock className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <h3 className="font-semibold text-gray-900 dark:text-white">
               Estimated Processing Timeline
             </h3>
           </div>
@@ -371,16 +371,16 @@ function RolloverReview() {
                 desc: "Funds invested" },
             ].map((item, idx) => (
               <div key={idx} className="text-center">
-                <div className="w-8 h-8 rounded-full bg-white border-2 border-indigo-200 flex items-center justify-center mx-auto mb-2 text-xs font-semibold text-indigo-600">
+                <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-900 border-2 border-indigo-200 flex items-center justify-center mx-auto mb-2 text-xs font-semibold text-indigo-600">
                   {idx + 1}
                 </div>
-                <p className="text-xs font-semibold text-gray-900 mb-0.5">
+                <p className="text-xs font-semibold text-gray-900 dark:text-white mb-0.5">
                   {item.step}
                 </p>
                 <p className="text-[10px] text-indigo-600 font-medium">
                   {item.time}
                 </p>
-                <p className="text-[10px] text-gray-400">{item.desc}</p>
+                <p className="text-[10px] text-gray-400 dark:text-gray-500">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -404,7 +404,7 @@ function RolloverReview() {
         transition={{ duration: 0.4, delay: 0.25 }}
       >
         <Card
-          className="p-6 rounded-2xl border-gray-100/80"
+          className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
             boxShadow:
               "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
@@ -417,7 +417,7 @@ function RolloverReview() {
             />
             <label
               htmlFor="terms"
-              className="text-sm text-gray-700 cursor-pointer leading-relaxed"
+              className="text-sm text-gray-700 dark:text-gray-200 cursor-pointer leading-relaxed"
             >
               I confirm that the information provided is accurate. I understand
               that this rollover will be processed according to plan rules and

@@ -21,7 +21,7 @@ function WithdrawalEligibility() {
 
   const metrics = [
     { icon: <DollarSign className="w-5 h-5" />, label: "Available to Withdraw", value: "$5,000", bg: "#EFF6FF", color: "var(--brand-primary)" },
-    { icon: <Percent className="w-5 h-5" />, label: "Estimated Tax Withholding", value: "20–35%", bg: "#FFEDD5", color: "#F59E0B" },
+    { icon: <Percent className="w-5 h-5" />, label: "Estimated Tax Withholding", value: "20–35%", bg: "rgba(245,158,11,0.1)", color: "#F59E0B" },
     { icon: <Shield className="w-5 h-5" />, label: "Vested Balance", value: "$25,000", bg: "var(--c-blue-tint)", color: "var(--brand-purple-light)" },
   ];
 
@@ -61,7 +61,7 @@ function WithdrawalEligibility() {
               style={{
                 padding: "14px 16px", borderRadius: 12,
                 border: check.eligible ? "1px solid #BBF7D0" : "1px solid #F1F5F9",
-                background: check.eligible ? "#F0FDF4" : "#F8FAFC" }}
+                background: check.eligible ? "rgba(16,185,129,0.1)" : "var(--c-page)" }}
             >
               <div className="flex items-center gap-3">
                 {check.eligible ? (
@@ -78,7 +78,7 @@ function WithdrawalEligibility() {
               </div>
               <span style={{
                 fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 6,
-                background: check.eligible ? "#DCFCE7" : "#F1F5F9",
+                background: check.eligible ? "rgba(16,185,129,0.1)" : "var(--c-subtle)",
                 color: check.eligible ? "#059669" : "#94A3B8" }}>
                 {check.eligible ? "Eligible" : "Not Eligible"}
               </span>

@@ -26,7 +26,7 @@ function LoanEligibility() {
       icon: <Wallet className="w-5 h-5" />,
       label: "Outstanding Loan Balance",
       value: "$0",
-      bg: "#F0FDF4",
+      bg: "rgba(16,185,129,0.1)",
       color: "#10B981",
     },
     {
@@ -47,14 +47,14 @@ function LoanEligibility() {
       icon: <Calendar className="w-5 h-5" />,
       label: "Maximum Term",
       value: "5 years",
-      bg: "#F0F9FF",
+      bg: "var(--c-blue-tint)",
       color: "#0EA5E9",
     },
     {
       icon: <TrendingDown className="w-5 h-5" />,
       label: "Estimated Monthly Payment Range",
       value: "$96 - $203",
-      bg: "#FFEDD5",
+      bg: "rgba(245,158,11,0.1)",
       color: "#F59E0B",
     },
   ];

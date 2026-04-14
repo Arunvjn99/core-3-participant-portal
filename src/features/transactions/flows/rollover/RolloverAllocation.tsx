@@ -129,17 +129,17 @@ function RolloverAllocation() {
           className="lg:col-span-2"
         >
           <Card
-            className="p-6 rounded-2xl border-gray-100/80"
+            className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
             style={{
               boxShadow:
                 "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
           >
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="font-semibold text-gray-900">
+                <h3 className="font-semibold text-gray-900 dark:text-white">
                   Investment Funds
                 </h3>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                   Adjust percentages to total 100%
                 </p>
               </div>
@@ -161,7 +161,7 @@ function RolloverAllocation() {
                   initial={{ opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.06, duration: 0.3 }}
-                  className="p-4 rounded-xl border border-gray-100 bg-gray-50/30 hover:bg-gray-50/60 transition-all"
+                  className="p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30 hover:bg-gray-50/60 transition-all"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
@@ -174,11 +174,11 @@ function RolloverAllocation() {
                         {fund.icon}
                       </div>
                       <div>
-                        <h4 className="font-medium text-gray-900 text-sm">
+                        <h4 className="font-medium text-gray-900 dark:text-white text-sm">
                           {fund.name}
                         </h4>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[10px] text-gray-400">
+                          <span className="text-[10px] text-gray-400 dark:text-gray-500">
                             {fund.category}
                           </span>
                           <span
@@ -194,10 +194,10 @@ function RolloverAllocation() {
                     </div>
 
                     <div className="text-right">
-                      <p className="text-lg font-semibold text-gray-900">
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
                         {fund.percentage}%
                       </p>
-                      <p className="text-[10px] text-gray-400">
+                      <p className="text-[10px] text-gray-400 dark:text-gray-500">
                         $
                         {Math.round(
                           (fund.percentage / 100) * estimatedAmount
@@ -234,14 +234,14 @@ function RolloverAllocation() {
           transition={{ duration: 0.4, delay: 0.1 }}
         >
           <Card
-            className="p-6 rounded-2xl border-gray-100/80 sticky top-24"
+            className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80 sticky top-24"
             style={{
               boxShadow:
                 "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
           >
             <div className="flex items-center gap-2 mb-4">
-              <ChartBar className="w-4 h-4 text-gray-400" />
-              <h3 className="font-semibold text-gray-900 text-sm">Preview</h3>
+              <ChartBar className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+              <h3 className="font-semibold text-gray-900 dark:text-white text-sm">Preview</h3>
             </div>
 
             <ResponsiveContainer width="100%" height={200}>
@@ -288,11 +288,11 @@ function RolloverAllocation() {
                         className="w-2.5 h-2.5 rounded-full"
                         style={{ backgroundColor: fund.color }}
                       />
-                      <span className="text-[11px] text-gray-600 truncate max-w-[140px]">
+                      <span className="text-[11px] text-gray-600 dark:text-gray-300 truncate max-w-[140px]">
                         {fund.name}
                       </span>
                     </div>
-                    <span className="text-[11px] font-semibold text-gray-900">
+                    <span className="text-[11px] font-semibold text-gray-900 dark:text-white">
                       {fund.percentage}%
                     </span>
                   </div>
@@ -300,10 +300,10 @@ function RolloverAllocation() {
             </div>
 
             {/* Total */}
-            <div className="mt-4 pt-4 border-t border-gray-100">
+            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">Total Amount</span>
-                <span className="text-sm font-semibold text-gray-900">
+                <span className="text-xs text-gray-500 dark:text-gray-400">Total Amount</span>
+                <span className="text-sm font-semibold text-gray-900 dark:text-white">
                   ${estimatedAmount.toLocaleString()}
                 </span>
               </div>

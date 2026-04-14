@@ -130,36 +130,36 @@ function RolloverValidation() {
         transition={{ duration: 0.4, delay: 0.05 }}
       >
         <Card
-          className="p-5 rounded-2xl border-gray-100/80"
+          className="p-5 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
             boxShadow:
               "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
         >
-          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
             Plan Summary
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <p className="text-[11px] text-gray-400 mb-0.5">Employer</p>
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-0.5">Employer</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
                 {rolloverData.previousEmployer || "Acme Corp"}
               </p>
             </div>
             <div>
-              <p className="text-[11px] text-gray-400 mb-0.5">Administrator</p>
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-0.5">Administrator</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
                 {rolloverData.planAdministrator || "Fidelity"}
               </p>
             </div>
             <div>
-              <p className="text-[11px] text-gray-400 mb-0.5">Account</p>
-              <p className="text-sm font-medium text-gray-900 font-mono">
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-0.5">Account</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white font-mono">
                 {rolloverData.accountNumber || "****-5678"}
               </p>
             </div>
             <div>
-              <p className="text-[11px] text-gray-400 mb-0.5">Est. Amount</p>
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 mb-0.5">Est. Amount</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
                 $
                 {(rolloverData.estimatedAmount || 15000).toLocaleString()}
               </p>
@@ -175,15 +175,15 @@ function RolloverValidation() {
         transition={{ duration: 0.4, delay: 0.1 }}
       >
         <Card
-          className="p-6 rounded-2xl border-gray-100/80"
+          className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
             boxShadow:
               "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
         >
-          <h3 className="font-semibold text-gray-900 mb-1">
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
             Compatibility Checks
           </h3>
-          <p className="text-sm text-gray-500 mb-6">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
             Each check must pass before you can proceed
           </p>
 
@@ -221,10 +221,10 @@ function RolloverValidation() {
 
                 {/* Check Info */}
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-medium text-gray-900 text-sm">
+                  <h4 className="font-medium text-gray-900 dark:text-white text-sm">
                     {check.label}
                   </h4>
-                  <p className="text-[11px] text-gray-500">
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400">
                     {check.description}
                   </p>
                 </div>
@@ -250,7 +250,7 @@ function RolloverValidation() {
                     <XCircle className="w-5 h-5 text-red-600" />
                   )}
                   {check.status === "pending" && (
-                    <div className="w-5 h-5 rounded-full border-2 border-gray-200" />
+                    <div className="w-5 h-5 rounded-full border-2 border-gray-200 dark:border-gray-700" />
                   )}
                 </div>
               </motion.div>
@@ -276,10 +276,10 @@ function RolloverValidation() {
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900 text-sm mb-1">
+                <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">
                   All Checks Passed
                 </h4>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-gray-600 dark:text-gray-300">
                   Your previous plan is fully compatible. You can proceed to
                   choose how you'd like to allocate the rollover funds.
                 </p>

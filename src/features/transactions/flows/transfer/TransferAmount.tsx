@@ -108,11 +108,11 @@ function TransferAmount() {
         <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--tx-border-light, #F1F5F9)", padding: "24px 28px" }}>
           {method === "dollar" ? (
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-3 block">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-3 block">
                 Transfer Amount
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl text-gray-400 font-medium">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl text-gray-400 dark:text-gray-500 font-medium">
                   $
                 </span>
                 <input
@@ -122,11 +122,11 @@ function TransferAmount() {
                     setAmount(e.target.value.replace(/[^0-9.,]/g, ""))
                   }
                   placeholder="0.00"
-                  className="w-full pl-10 pr-4 py-4 text-3xl font-semibold rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                  className="w-full pl-10 pr-4 py-4 text-3xl font-semibold rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
                 />
               </div>
               <div className="flex items-center justify-between mt-3">
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-400 dark:text-gray-500">
                   {effectivePercent.toFixed(1)}% of source balance
                 </span>
                 <button
@@ -139,7 +139,7 @@ function TransferAmount() {
             </div>
           ) : (
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-3 block">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-3 block">
                 Transfer Percentage
               </label>
               <div className="relative">
@@ -150,14 +150,14 @@ function TransferAmount() {
                     setPercentage(e.target.value.replace(/[^0-9.]/g, ""))
                   }
                   placeholder="0"
-                  className="w-full pr-10 pl-4 py-4 text-3xl font-semibold rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                  className="w-full pr-10 pl-4 py-4 text-3xl font-semibold rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-2xl text-gray-400 font-medium">
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-2xl text-gray-400 dark:text-gray-500 font-medium">
                   %
                 </span>
               </div>
               <div className="flex items-center justify-between mt-3">
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-400 dark:text-gray-500">
                   ≈ ${parsedAmount.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </span>
                 <div className="flex gap-2">
@@ -165,7 +165,7 @@ function TransferAmount() {
                     <button
                       key={pct}
                       onClick={() => setPercentage(pct.toString())}
-                      className="text-[10px] px-2.5 py-1 rounded-lg bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors font-medium"
+                      className="text-[10px] px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-blue-50 hover:text-blue-600 transition-colors font-medium"
                     >
                       {pct}%
                     </button>

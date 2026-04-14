@@ -108,10 +108,10 @@ function RolloverPlanDetails() {
                 >
                   {type.icon}
                 </div>
-                <h4 className="font-semibold text-gray-900 text-sm mb-1">
+                <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">
                   {type.label}
                 </h4>
-                <p className="text-[11px] text-gray-500 leading-relaxed">
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
                   {type.description}
                 </p>
               </button>
@@ -127,23 +127,23 @@ function RolloverPlanDetails() {
         transition={{ duration: 0.4, delay: 0.1 }}
       >
         <Card
-          className="p-6 rounded-2xl border-gray-100/80"
+          className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
             boxShadow:
               "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
         >
-          <h3 className="font-semibold text-gray-900 mb-1">
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
             Plan Information
           </h3>
-          <p className="text-sm text-gray-500 mb-5">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">
             Provide details about your previous employer's retirement plan
           </p>
 
           <div className="space-y-5">
             {/* Previous Employer */}
             <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                <Building2 className="w-4 h-4 text-gray-400" />
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                <Building2 className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                 Previous Employer Name
               </label>
               <input
@@ -151,14 +151,14 @@ function RolloverPlanDetails() {
                 value={previousEmployer}
                 onChange={(e) => setPreviousEmployer(e.target.value)}
                 placeholder="e.g., Acme Corporation"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
               />
             </div>
 
             {/* Plan Administrator */}
             <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                <ShieldCheck className="w-4 h-4 text-gray-400" />
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                <ShieldCheck className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                 Plan Administrator
               </label>
               <input
@@ -166,14 +166,14 @@ function RolloverPlanDetails() {
                 value={planAdministrator}
                 onChange={(e) => setPlanAdministrator(e.target.value)}
                 placeholder="e.g., Fidelity Investments"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
               />
             </div>
 
             {/* Account Number */}
             <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                <Hash className="w-4 h-4 text-gray-400" />
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                <Hash className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                 Account Number
               </label>
               <input
@@ -181,18 +181,18 @@ function RolloverPlanDetails() {
                 value={accountNumber}
                 onChange={(e) => setAccountNumber(e.target.value)}
                 placeholder="e.g., 1234-5678-90"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all font-mono"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all font-mono"
               />
             </div>
 
             {/* Estimated Amount */}
             <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                <DollarSign className="w-4 h-4 text-gray-400" />
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                <DollarSign className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                 Estimated Rollover Amount
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 font-medium">
                   $
                 </span>
                 <input
@@ -203,7 +203,7 @@ function RolloverPlanDetails() {
                     setEstimatedAmount(val);
                   }}
                   placeholder="0.00"
-                  className="w-full pl-8 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+                  className="w-full pl-8 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
                 />
               </div>
             </div>
@@ -227,10 +227,10 @@ function RolloverPlanDetails() {
               <Info className="w-4 h-4" />
             </div>
             <div>
-              <h4 className="font-semibold text-gray-900 text-sm mb-1">
+              <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">
                 What you'll need
               </h4>
-              <ul className="space-y-1.5 text-xs text-gray-600">
+              <ul className="space-y-1.5 text-xs text-gray-600 dark:text-gray-300">
                 <li className="flex items-start gap-2">
                   <span className="text-blue-500 mt-0.5">•</span>
                   <span>

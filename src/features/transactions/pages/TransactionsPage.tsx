@@ -338,7 +338,7 @@ function TransactionsPage() {
               title="Attention Required"
               badge={{
                 text: "4 items",
-                color: "bg-[#FFFBEB] text-[#B45309]" }}
+                color: "bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300" }}
             />
             <AttentionRequiredTimeline onResolve={handleResolveIssue} />
           </motion.div>

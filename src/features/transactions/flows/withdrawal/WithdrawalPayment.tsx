@@ -64,7 +64,7 @@ function WithdrawalPayment() {
         transition={{ duration: 0.4, delay: 0.05 }}
       >
         <Card className="p-6">
-          <h3 className="font-semibold text-gray-900 mb-4">
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
             Disbursement Method
           </h3>
 
@@ -73,19 +73,19 @@ function WithdrawalPayment() {
             onValueChange={setPaymentMethod}
           >
             <div className="space-y-3">
-              <div className="flex items-start space-x-3 p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
+              <div className="flex items-start space-x-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 transition-colors">
                 <RadioGroupItem value="eft" id="eft" />
                 <div className="flex-1">
                   <Label htmlFor="eft" className="font-medium cursor-pointer">
                     Electronic Funds Transfer (EFT)
                   </Label>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                     Funds typically arrive in 2-3 business days
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start space-x-3 p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
+              <div className="flex items-start space-x-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 transition-colors">
                 <RadioGroupItem value="check" id="check" />
                 <div className="flex-1">
                   <Label
@@ -94,7 +94,7 @@ function WithdrawalPayment() {
                   >
                     Mail Check
                   </Label>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                     Check will be mailed to your address (7-10 business days)
                   </p>
                 </div>
@@ -112,7 +112,7 @@ function WithdrawalPayment() {
           transition={{ duration: 0.3 }}
         >
           <Card className="p-6">
-            <h3 className="font-semibold text-gray-900 mb-4">Bank Account</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Bank Account</h3>
             <Select value={bankAccount} onValueChange={setBankAccount}>
               <SelectTrigger>
                 <SelectValue placeholder="Select bank account" />
@@ -145,18 +145,18 @@ function WithdrawalPayment() {
             onOpenChange={setBankDetailsOpen}
             defaultOpen={true}
           >
-            <Card className="rounded-2xl border-gray-100/80 overflow-hidden">
+            <Card className="rounded-2xl border-gray-100 dark:border-gray-700/80 overflow-hidden">
               <CollapsibleTrigger asChild>
-                <button className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50/50 transition-colors cursor-pointer">
+                <button className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 dark:bg-gray-800/50 transition-colors cursor-pointer">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
                       <Landmark className="w-4 h-4" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 text-sm">
+                      <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
                         New Bank Account Details
                       </h3>
-                      <p className="text-xs text-gray-500 mt-0.5">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                         Account number, routing number, and type
                       </p>
                     </div>
@@ -169,9 +169,9 @@ function WithdrawalPayment() {
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="px-5 pb-5 border-t border-gray-100 space-y-4">
+                <div className="px-5 pb-5 border-t border-gray-100 dark:border-gray-700 space-y-4">
                   <div className="pt-4">
-                    <Label className="text-sm text-gray-700 mb-2 block">
+                    <Label className="text-sm text-gray-700 dark:text-gray-200 mb-2 block">
                       Bank Account Number
                     </Label>
                     <Input
@@ -182,7 +182,7 @@ function WithdrawalPayment() {
                     />
                   </div>
                   <div>
-                    <Label className="text-sm text-gray-700 mb-2 block">
+                    <Label className="text-sm text-gray-700 dark:text-gray-200 mb-2 block">
                       Routing Number
                     </Label>
                     <Input
@@ -194,7 +194,7 @@ function WithdrawalPayment() {
                     />
                   </div>
                   <div>
-                    <Label className="text-sm text-gray-700 mb-2 block">
+                    <Label className="text-sm text-gray-700 dark:text-gray-200 mb-2 block">
                       Account Type
                     </Label>
                     <Select
@@ -236,7 +236,7 @@ function WithdrawalPayment() {
           transition={{ duration: 0.3 }}
         >
           <Card className="p-6">
-            <h3 className="font-semibold text-gray-900 mb-4">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
               Mailing Address
             </h3>
 
@@ -245,7 +245,7 @@ function WithdrawalPayment() {
               onValueChange={setAddressType}
             >
               <div className="space-y-3 mb-4">
-                <div className="flex items-start space-x-3 p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
+                <div className="flex items-start space-x-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 transition-colors">
                   <RadioGroupItem value="employee" id="employee" />
                   <div className="flex-1">
                     <Label
@@ -254,7 +254,7 @@ function WithdrawalPayment() {
                     >
                       Use Employee Address on File
                     </Label>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                       123 Main Street, Apt 4B
                       <br />
                       New York, NY 10001
@@ -262,7 +262,7 @@ function WithdrawalPayment() {
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-3 p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
+                <div className="flex items-start space-x-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 transition-colors">
                   <RadioGroupItem value="custom" id="custom" />
                   <Label
                     htmlFor="custom"

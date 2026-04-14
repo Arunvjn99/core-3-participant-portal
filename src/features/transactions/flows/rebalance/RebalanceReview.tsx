@@ -52,10 +52,10 @@ function RebalanceReview() {
         <h2 style={{ fontSize: 26, fontWeight: 800, color: "inherit", letterSpacing: "-0.5px", lineHeight: "34px", marginBottom: 8 }}>
           Rebalance Submitted
         </h2>
-        <p className="text-gray-600 text-center max-w-md mb-3">
+        <p className="text-gray-600 dark:text-gray-300 text-center max-w-md mb-3">
           Your portfolio rebalancing will be processed at the next market close.
         </p>
-        <div className="flex items-center gap-2 text-sm text-gray-400 mb-8">
+        <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500 mb-8">
           <Clock className="w-4 h-4" />
           <span>Expected completion: Next trading day</span>
         </div>
@@ -83,7 +83,7 @@ function RebalanceReview() {
                   )}
                 </div>
                 <span
-                  className={`text-sm ${idx === 0 ? "text-gray-900 font-medium" : "text-gray-400"}`}
+                  className={`text-sm ${idx === 0 ? "text-gray-900 dark:text-white font-medium" : "text-gray-400"}`}
                 >
                   {step}
                 </span>
@@ -92,7 +92,7 @@ function RebalanceReview() {
           )}
         </div>
 
-        <p className="text-xs text-gray-400 mt-8">
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-8">
           Redirecting to dashboard...
         </p>
       </motion.div>
@@ -121,14 +121,14 @@ function RebalanceReview() {
         transition={{ duration: 0.4, delay: 0.05 }}
       >
         <Card
-          className="p-6 rounded-2xl border-gray-100/80"
+          className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
             boxShadow:
               "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
         >
           <div className="flex items-center gap-2 mb-5">
-            <PieChart className="w-4 h-4 text-gray-400" />
-            <h3 className="font-semibold text-gray-900">Allocation Changes</h3>
+            <PieChart className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <h3 className="font-semibold text-gray-900 dark:text-white">Allocation Changes</h3>
           </div>
 
           <div className="space-y-4">
@@ -140,7 +140,7 @@ function RebalanceReview() {
               return (
                 <div
                   key={fund.ticker}
-                  className="flex items-center justify-between p-3 rounded-xl bg-gray-50/60"
+                  className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60"
                 >
                   <div className="flex items-center gap-3">
                     <div
@@ -148,14 +148,14 @@ function RebalanceReview() {
                       style={{ backgroundColor: COLORS[idx] }}
                     />
                     <div>
-                      <span className="text-sm text-gray-900">{fund.name}</span>
+                      <span className="text-sm text-gray-900 dark:text-white">{fund.name}</span>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10px] text-gray-400">
+                        <span className="text-[10px] text-gray-400 dark:text-gray-500">
                           {fund.currentAllocation}%
                         </span>
-                        <ArrowRight className="w-3 h-3 text-gray-300" />
+                        <ArrowRight className="w-3 h-3 text-gray-300 dark:text-gray-600" />
                         <span
-                          className={`text-[10px] font-semibold ${change !== 0 ? "text-blue-600" : "text-gray-500"}`}
+                          className={`text-[10px] font-semibold ${change !== 0 ? "text-blue-600" : "text-gray-500 dark:text-gray-400"}`}
                         >
                           {fund.targetAllocation}%
                         </span>
@@ -170,7 +170,7 @@ function RebalanceReview() {
                         {change > 0 ? "+" : "-"}${tradeAmount.toLocaleString()}
                       </span>
                     ) : (
-                      <span className="text-xs text-gray-400">No change</span>
+                      <span className="text-xs text-gray-400 dark:text-gray-500">No change</span>
                     )}
                   </div>
                 </div>
@@ -205,7 +205,7 @@ function RebalanceReview() {
         transition={{ duration: 0.4, delay: 0.15 }}
       >
         <Card
-          className="p-6 rounded-2xl border-gray-100/80"
+          className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
             boxShadow:
               "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
@@ -218,7 +218,7 @@ function RebalanceReview() {
             />
             <label
               htmlFor="terms"
-              className="text-sm text-gray-700 cursor-pointer leading-relaxed"
+              className="text-sm text-gray-700 dark:text-gray-200 cursor-pointer leading-relaxed"
             >
               I understand that this rebalancing will change my investment
               allocation and that past performance does not guarantee future

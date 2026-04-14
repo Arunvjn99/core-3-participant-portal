@@ -12,7 +12,7 @@ export function RadioGroupItem({ value, id, className = '' }: RadioGroupItemProp
       className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${className}`}
       style={{ borderColor: ctx.value === value ? 'var(--brand-primary)' : 'var(--c-text-faint)', background: ctx.value === value ? 'var(--brand-primary)' : 'var(--c-card)' }}
     >
-      {ctx.value === value && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+      {ctx.value === value && <span className="w-1.5 h-1.5 rounded-full bg-white dark:bg-gray-900" />}
     </button>
   )
 }

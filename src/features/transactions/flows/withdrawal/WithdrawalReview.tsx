@@ -41,10 +41,10 @@ function WithdrawalReview() {
         <h2 style={{ fontSize: 26, fontWeight: 800, color: "inherit", letterSpacing: "-0.5px", lineHeight: "34px", marginBottom: 8 }}>
           Withdrawal Submitted
         </h2>
-        <p className="text-gray-600 text-center max-w-md mb-6">
+        <p className="text-gray-600 dark:text-gray-300 text-center max-w-md mb-6">
           Your withdrawal request has been submitted successfully. You'll receive confirmation shortly.
         </p>
-        <p className="text-sm text-gray-500">Redirecting to dashboard...</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Redirecting to dashboard...</p>
       </div>
     );
   }
@@ -61,12 +61,12 @@ function WithdrawalReview() {
       </div>
 
       <Card className="p-6">
-        <h3 className="font-semibold text-gray-900 mb-6">Withdrawal Summary</h3>
+        <h3 className="font-semibold text-gray-900 dark:text-white mb-6">Withdrawal Summary</h3>
 
         <div className="space-y-4">
           <div>
-            <p className="text-sm text-gray-600 mb-1">Withdrawal Type</p>
-            <p className="font-medium text-gray-900 capitalize">
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Withdrawal Type</p>
+            <p className="font-medium text-gray-900 dark:text-white capitalize">
               {withdrawalData.type?.replace("-", " ") || "Hardship Withdrawal"}
             </p>
           </div>
@@ -74,11 +74,11 @@ function WithdrawalReview() {
           <Separator />
 
           <div>
-            <p className="text-sm text-gray-600 mb-2">Source Allocation</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">Source Allocation</p>
             {withdrawalData.sources?.map((source, index) => (
               <div key={index} className="flex items-center justify-between py-1">
-                <p className="text-gray-900">{source.name}</p>
-                <p className="font-medium text-gray-900">${source.amount.toLocaleString()}</p>
+                <p className="text-gray-900 dark:text-white">{source.name}</p>
+                <p className="font-medium text-gray-900 dark:text-white">${source.amount.toLocaleString()}</p>
               </div>
             ))}
           </div>
@@ -87,31 +87,31 @@ function WithdrawalReview() {
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-gray-900">Withdrawal Amount</p>
-              <p className="font-semibold text-gray-900">${amount.toLocaleString()}</p>
+              <p className="text-gray-900 dark:text-white">Withdrawal Amount</p>
+              <p className="font-semibold text-gray-900 dark:text-white">${amount.toLocaleString()}</p>
             </div>
             <div className="flex items-center justify-between">
-              <p className="text-gray-900">Federal Tax Withholding (20%)</p>
+              <p className="text-gray-900 dark:text-white">Federal Tax Withholding (20%)</p>
               <p className="font-semibold text-red-600">-${federalTax.toLocaleString()}</p>
             </div>
             <div className="flex items-center justify-between">
-              <p className="text-gray-900">State Tax Withholding (5%)</p>
+              <p className="text-gray-900 dark:text-white">State Tax Withholding (5%)</p>
               <p className="font-semibold text-red-600">-${stateTax.toLocaleString()}</p>
             </div>
             <div className="flex items-center justify-between">
-              <p className="text-gray-900">Early Withdrawal Penalty (10%)</p>
+              <p className="text-gray-900 dark:text-white">Early Withdrawal Penalty (10%)</p>
               <p className="font-semibold text-red-600">-${earlyPenalty.toLocaleString()}</p>
             </div>
             <div className="flex items-center justify-between">
-              <p className="text-gray-900">Fees</p>
+              <p className="text-gray-900 dark:text-white">Fees</p>
               <p className="font-semibold text-red-600">-${fees}</p>
             </div>
           </div>
 
-          <Separator className="border-gray-300" />
+          <Separator className="border-gray-300 dark:border-gray-600" />
 
           <div className="flex items-center justify-between py-2">
-            <p className="font-semibold text-gray-900 text-lg">Final Payout</p>
+            <p className="font-semibold text-gray-900 dark:text-white text-lg">Final Payout</p>
             <p className="text-2xl font-bold text-green-600">
               ${finalPayout.toLocaleString()}
             </p>
@@ -120,14 +120,14 @@ function WithdrawalReview() {
           <Separator />
 
           <div>
-            <p className="text-sm text-gray-600 mb-1">Payment Method</p>
-            <p className="font-medium text-gray-900">
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Payment Method</p>
+            <p className="font-medium text-gray-900 dark:text-white">
               {withdrawalData.paymentMethod === "eft" 
                 ? "Electronic Funds Transfer" 
                 : "Mail Check"}
             </p>
             {withdrawalData.paymentMethod === "check" && (
-              <p className="text-sm text-gray-600 mt-1">{withdrawalData.address}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{withdrawalData.address}</p>
             )}
           </div>
         </div>
@@ -152,7 +152,7 @@ function WithdrawalReview() {
           <div className="flex-1">
             <label
               htmlFor="terms"
-              className="text-sm text-gray-900 cursor-pointer leading-relaxed"
+              className="text-sm text-gray-900 dark:text-white cursor-pointer leading-relaxed"
             >
               I understand that this withdrawal will permanently reduce my retirement savings, 
               may be subject to taxes and penalties, and cannot be reversed once processed. 

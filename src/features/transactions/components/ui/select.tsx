@@ -24,7 +24,7 @@ export function SelectTrigger({ children, className = '', style }: { children?: 
       className={`flex w-full items-center justify-between rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition hover:border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-gray-700 dark:bg-gray-800 dark:text-white ${className}`}
     >
       {children}
-      <ChevronDown className={`ml-2 h-4 w-4 shrink-0 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+      <ChevronDown className={`ml-2 h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500 transition-transform ${open ? 'rotate-180' : ''}`} />
     </button>
   )
 }
@@ -51,7 +51,7 @@ export function SelectItem({ value, children, className = '' }: { value: string;
       role="option"
       aria-selected={selected === value}
       onClick={() => { onValueChange?.(value); setOpen(false) }}
-      className={`cursor-pointer px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 ${selected === value ? 'font-medium text-blue-600' : 'text-gray-900 dark:text-white'} ${className}`}
+      className={`cursor-pointer px-3 py-2 text-sm hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 ${selected === value ? 'font-medium text-blue-600' : 'text-gray-900 dark:text-white'} ${className}`}
     >
       {children}
     </div>

@@ -44,7 +44,7 @@ const loanTypes = [
     label: "Home Purchase",
     description: "Primary residence loan from your retirement plan",
     icon: Building2,
-    iconBg: "#F0FDF4",
+    iconBg: "rgba(16,185,129,0.1)",
     iconColor: "#10B981" },
   {
     id: "refinance",
@@ -976,7 +976,7 @@ function LoanConfiguration() {
             >
               <CollapsibleTrigger asChild>
                 <button
-                  className="w-full flex items-center justify-between text-left cursor-pointer transition-all duration-200 hover:bg-slate-50 dark:hover:bg-gray-800"
+                  className="w-full flex items-center justify-between text-left cursor-pointer transition-all duration-200 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-gray-800"
                   style={{ padding: "20px 24px" }}
                 >
                   <div className="flex items-center gap-3.5">
@@ -987,7 +987,7 @@ function LoanConfiguration() {
                         height: 36,
                         borderRadius: 10,
                         background:
-                          "linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)",
+                          "rgba(16,185,129,0.1)",
                         border: "1px solid var(--c-border-green)",
                         color: "#10B981" }}
                     >

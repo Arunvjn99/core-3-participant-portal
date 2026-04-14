@@ -70,12 +70,12 @@ function WithdrawalFees() {
           <div className="space-y-4">
             <div className="flex items-center justify-between py-3">
               <div>
-                <p className="font-medium text-gray-900">Withdrawal Amount</p>
-                <p className="text-sm text-gray-600">
+                <p className="font-medium text-gray-900 dark:text-white">Withdrawal Amount</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
                   Total from selected sources
                 </p>
               </div>
-              <p className="text-xl font-semibold text-gray-900">
+              <p className="text-xl font-semibold text-gray-900 dark:text-white">
                 ${withdrawalAmount.toLocaleString()}
               </p>
             </div>
@@ -85,10 +85,10 @@ function WithdrawalFees() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-900">
+                  <p className="text-gray-900 dark:text-white">
                     Federal Tax Withholding ({federalWithholding}%)
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     Mandatory minimum withholding
                   </p>
                 </div>
@@ -99,10 +99,10 @@ function WithdrawalFees() {
 
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-900">
+                  <p className="text-gray-900 dark:text-white">
                     State Tax Withholding ({stateWithholding}%)
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     Based on your state of residence
                   </p>
                 </div>
@@ -115,10 +115,10 @@ function WithdrawalFees() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div>
-                      <p className="text-gray-900">
+                      <p className="text-gray-900 dark:text-white">
                         Early Withdrawal Penalty (10%)
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         Under age 59½ penalty
                       </p>
                     </div>
@@ -131,8 +131,8 @@ function WithdrawalFees() {
 
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-900">Redemption Fee</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-gray-900 dark:text-white">Redemption Fee</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     Investment liquidation fee
                   </p>
                 </div>
@@ -140,14 +140,14 @@ function WithdrawalFees() {
               </div>
             </div>
 
-            <Separator className="border-gray-300" />
+            <Separator className="border-gray-300 dark:border-gray-600" />
 
             <div className="flex items-center justify-between py-3 bg-green-50 -mx-6 px-6 rounded-lg">
               <div>
-                <p className="font-semibold text-gray-900 text-lg">
+                <p className="font-semibold text-gray-900 dark:text-white text-lg">
                   Final Payout
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
                   Amount you will receive
                 </p>
               </div>
@@ -169,14 +169,14 @@ function WithdrawalFees() {
           <div className="flex items-start gap-3">
             <TrendingDown className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h4 className="font-semibold text-gray-900 mb-2">
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
                 Remaining Retirement Balance
               </h4>
               <div className="flex items-baseline gap-2 mb-3">
-                <span className="text-2xl font-semibold text-gray-900">
+                <span className="text-2xl font-semibold text-gray-900 dark:text-white">
                   ${remainingBalance.toLocaleString()}
                 </span>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-gray-500 dark:text-gray-400">
                   after withdrawal
                 </span>
               </div>
@@ -187,7 +187,7 @@ function WithdrawalFees() {
                     width: `${(remainingBalance / currentBalance) * 100}%` }}
                 />
               </div>
-              <div className="flex justify-between text-[10px] text-gray-500 mt-1">
+              <div className="flex justify-between text-[10px] text-gray-500 dark:text-gray-400 mt-1">
                 <span>$0</span>
                 <span>
                   ${currentBalance.toLocaleString()} (current balance)
@@ -205,18 +205,18 @@ function WithdrawalFees() {
         transition={{ duration: 0.4, delay: 0.15 }}
       >
         <Collapsible open={taxSettingsOpen} onOpenChange={setTaxSettingsOpen}>
-          <Card className="rounded-2xl border-gray-100/80 overflow-hidden">
+          <Card className="rounded-2xl border-gray-100 dark:border-gray-700/80 overflow-hidden">
             <CollapsibleTrigger asChild>
-              <button className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50/50 transition-colors cursor-pointer">
+              <button className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 dark:bg-gray-800/50 transition-colors cursor-pointer">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-violet-50 text-violet-600">
                     <Settings2 className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 text-sm">
+                    <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
                       Tax Withholding Settings
                     </h3>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                       Adjust federal and state withholding percentages
                     </p>
                   </div>
@@ -229,20 +229,20 @@ function WithdrawalFees() {
               </button>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <div className="px-5 pb-5 border-t border-gray-100 space-y-6">
+              <div className="px-5 pb-5 border-t border-gray-100 dark:border-gray-700 space-y-6">
                 <div className="pt-4">
                   {/* Federal Withholding */}
                   <div className="mb-6">
                     <div className="flex items-center justify-between mb-3">
                       <div>
-                        <p className="font-medium text-gray-900 text-sm">
+                        <p className="font-medium text-gray-900 dark:text-white text-sm">
                           Federal Withholding
                         </p>
-                        <p className="text-[10px] text-gray-500">
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400">
                           Minimum 10% required
                         </p>
                       </div>
-                      <span className="text-xl font-semibold text-gray-900">
+                      <span className="text-xl font-semibold text-gray-900 dark:text-white">
                         {federalWithholding}%
                       </span>
                     </div>
@@ -253,7 +253,7 @@ function WithdrawalFees() {
                       max={37}
                       step={1}
                     />
-                    <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+                    <div className="flex justify-between text-[10px] text-gray-400 dark:text-gray-500 mt-1">
                       <span>10% min</span>
                       <span>37% max</span>
                     </div>
@@ -263,14 +263,14 @@ function WithdrawalFees() {
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <div>
-                        <p className="font-medium text-gray-900 text-sm">
+                        <p className="font-medium text-gray-900 dark:text-white text-sm">
                           State Withholding
                         </p>
-                        <p className="text-[10px] text-gray-500">
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400">
                           Varies by state (NY shown)
                         </p>
                       </div>
-                      <span className="text-xl font-semibold text-gray-900">
+                      <span className="text-xl font-semibold text-gray-900 dark:text-white">
                         {stateWithholding}%
                       </span>
                     </div>
@@ -281,7 +281,7 @@ function WithdrawalFees() {
                       max={13}
                       step={1}
                     />
-                    <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+                    <div className="flex justify-between text-[10px] text-gray-400 dark:text-gray-500 mt-1">
                       <span>0%</span>
                       <span>13% max</span>
                     </div>
@@ -303,7 +303,7 @@ function WithdrawalFees() {
           <div className="flex items-start gap-2.5">
             <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-gray-700 dark:text-gray-200">
                 <span className="font-semibold">Tax Notice:</span> This
                 withholding may not cover all tax liabilities. You may owe
                 additional taxes when you file your return. The early withdrawal

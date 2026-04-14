@@ -237,8 +237,8 @@ function RetirementImpactWidget({
                 padding: "8px 12px",
                 borderRadius: 10,
                 background: impactAmount! < 0
-                  ? "linear-gradient(135deg, #FFF7ED, #FFEDD5)"
-                  : "linear-gradient(135deg, #F0FDF4, #DCFCE7)",
+                  ? "rgba(245,158,11,0.1)"
+                  : "rgba(16,185,129,0.1)",
                 border: impactAmount! < 0 ? "1px solid #FED7AA" : "1px solid #BBF7D0",
                 marginBottom: 10,
               }}

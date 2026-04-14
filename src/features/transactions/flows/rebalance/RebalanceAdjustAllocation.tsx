@@ -97,7 +97,7 @@ function RebalanceAdjustAllocation() {
               : "0 1px 3px rgba(245,158,11,0.06)",
           }}
         >
-          <p className="text-xs text-gray-500 mb-1">Total Allocation</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Allocation</p>
           <p
             className={`text-3xl font-bold ${isValid ? "text-emerald-600" : "text-amber-600"}`}
           >
@@ -120,13 +120,13 @@ function RebalanceAdjustAllocation() {
         transition={{ duration: 0.4, delay: 0.1 }}
       >
         <Card
-          className="p-6 rounded-2xl border-gray-100/80"
+          className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
             boxShadow:
               "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)",
           }}
         >
-          <h3 className="font-semibold text-gray-900 text-sm mb-6">
+          <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-6">
             Investment Funds
           </h3>
 
@@ -148,21 +148,21 @@ function RebalanceAdjustAllocation() {
                         style={{ backgroundColor: COLORS[index] }}
                       />
                       <div>
-                        <p className="font-medium text-gray-900 text-sm">
+                        <p className="font-medium text-gray-900 dark:text-white text-sm">
                           {fund.name}
                         </p>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[10px] text-gray-400 font-mono">
+                          <span className="text-[10px] text-gray-400 dark:text-gray-500 font-mono">
                             {fund.ticker}
                           </span>
-                          <span className="text-[10px] text-gray-400">
+                          <span className="text-[10px] text-gray-400 dark:text-gray-500">
                             Current: {fund.currentAllocation}%
                           </span>
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="text-xl font-semibold text-gray-900">
+                      <span className="text-xl font-semibold text-gray-900 dark:text-white">
                         {fund.targetAllocation}%
                       </span>
                       {change !== 0 && (
@@ -187,7 +187,7 @@ function RebalanceAdjustAllocation() {
                     className="mb-2"
                   />
 
-                  <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-300"
                       style={{

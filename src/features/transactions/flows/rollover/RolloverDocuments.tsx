@@ -110,10 +110,10 @@ function RolloverDocuments() {
             <div className="p-3 rounded-xl bg-indigo-100/70 text-indigo-600 mb-3 group-hover:bg-indigo-100 transition-colors">
               <Camera className="w-6 h-6" />
             </div>
-            <h3 className="font-semibold text-gray-900 text-sm mb-1">
+            <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">
               Quick Upload
             </h3>
-            <p className="text-xs text-gray-500 max-w-sm">
+            <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm">
               Drag and drop all documents here, or click to browse. Supports
               JPG, PNG, and PDF files up to 10MB each.
             </p>
@@ -162,7 +162,7 @@ function RolloverDocuments() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-gray-900 text-sm">
+                        <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
                           {doc.name}
                         </h3>
                         {doc.required ? (
@@ -170,15 +170,15 @@ function RolloverDocuments() {
                             Required
                           </span>
                         ) : (
-                          <span className="text-[9px] font-semibold bg-gray-50 text-gray-500 px-2 py-0.5 rounded-full border border-gray-100">
+                          <span className="text-[9px] font-semibold bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full border border-gray-100 dark:border-gray-700">
                             Optional
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-gray-500 leading-relaxed">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                         {doc.description}
                       </p>
-                      <p className="text-[10px] text-gray-400 mt-1">
+                      <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
                         Accepted: {doc.formats}
                       </p>
                     </div>
@@ -205,26 +205,26 @@ function RolloverDocuments() {
                     key={file.id}
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
-                    className="flex items-center justify-between p-3 mt-3 bg-white rounded-xl border border-gray-100"
+                    className="flex items-center justify-between p-3 mt-3 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-700"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-1.5 rounded-lg bg-gray-50">
-                        <FileText className="w-4 h-4 text-gray-500" />
+                      <div className="p-1.5 rounded-lg bg-gray-50 dark:bg-gray-800">
+                        <FileText className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                       </div>
                       <div>
-                        <p className="text-xs font-medium text-gray-900">
+                        <p className="text-xs font-medium text-gray-900 dark:text-white">
                           {file.name}
                         </p>
-                        <p className="text-[10px] text-gray-400">
+                        <p className="text-[10px] text-gray-400 dark:text-gray-500">
                           {file.size}
                         </p>
                       </div>
                     </div>
                     <button
                       onClick={() => handleRemoveFile(file.id)}
-                      className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                      className="p-1.5 hover:bg-gray-100 dark:bg-gray-800 rounded-lg transition-colors"
                     >
-                      <X className="w-3.5 h-3.5 text-gray-400" />
+                      <X className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
                     </button>
                   </motion.div>
                 ))}
@@ -240,10 +240,10 @@ function RolloverDocuments() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.3 }}
       >
-        <div className="p-4 rounded-2xl bg-gray-50/80 border border-gray-100/60">
+        <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/80 border border-gray-100 dark:border-gray-700/60">
           <div className="flex items-start gap-2.5">
-            <Info className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-            <p className="text-[11px] text-gray-500 leading-relaxed">
+            <Info className="w-4 h-4 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
+            <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
               All documents are encrypted during upload and stored securely.
               Your documents will only be used for processing this rollover
               request and will be retained per plan compliance requirements.

@@ -109,7 +109,7 @@ const typeColors: Record<Transaction["type"], { bg: string; color: string }> = {
   Loan: { bg: "#EFF6FF", color: "var(--brand-primary)" },
   Withdrawal: { bg: "#FEF2F2", color: "#DC2626" },
   Transfer: { bg: "#EFF6FF", color: "var(--brand-primary)" },
-  Rebalance: { bg: "#F0FDF4", color: "#10B981" },
+  Rebalance: { bg: "rgba(16,185,129,0.1)", color: "#10B981" },
   Rollover: { bg: "#EFF6FF", color: "var(--brand-primary)" },
 };
 
@@ -341,7 +341,7 @@ function RecentTransactionsCompact({ maxItems }: { maxItems?: number } = {}) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: idx * 0.04 }}
-                  className="group transition-colors duration-200 border-b border-slate-100 dark:border-gray-800 hover:bg-slate-50 dark:hover:bg-gray-800/50"
+                  className="group transition-colors duration-200 border-b border-slate-100 dark:border-gray-800 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-gray-800/50"
                 >
                   <td style={{ padding: "14px 16px" }}>
                     <div className="flex items-center gap-2">

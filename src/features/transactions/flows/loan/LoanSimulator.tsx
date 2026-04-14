@@ -93,7 +93,7 @@ function LoanSimulator() {
               </div>
 
               {/* Divider */}
-              <div style={{ height: 1, background: "linear-gradient(90deg, transparent, #E2E8F0, transparent)" }} />
+              <div style={{ height: 1, background: "linear-gradient(90deg, transparent, var(--c-muted), transparent)" }} />
 
               {/* Tenure Slider */}
               <div>
@@ -103,7 +103,7 @@ function LoanSimulator() {
                   </div>
                   <span style={{ fontSize: 11, fontWeight: 600, color: "inherit" }}>Loan Tenure</span>
                 </div>
-                <div style={{ background: "linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%)", borderRadius: 14, padding: "10px 16px", marginBottom: 10 }}>
+                <div style={{ background: "var(--c-blue-tint)", borderRadius: 14, padding: "10px 16px", marginBottom: 10 }}>
                   <div className="flex items-baseline gap-1.5">
                     <span style={{ fontSize: 26, fontWeight: 800, color: "inherit", letterSpacing: "-0.8px", lineHeight: 1 }}>
                       {tenure}
@@ -164,8 +164,8 @@ function LoanSimulator() {
               {/* Secondary Stats Grid */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                 {[
-                  { label: "Total Interest", value: `$${Math.round(totalInterest).toLocaleString()}`, bg: "var(--c-blue-tint)", color: "var(--brand-purple-light)", dotColor: "#8B5CF6" },
-                  { label: "Total Payback", value: `$${Math.round(totalPayback).toLocaleString()}`, bg: "#F0FDF4", color: "#10B981", dotColor: "#10B981" },
+                  { label: "Total Interest", value: `$${Math.round(totalInterest).toLocaleString()}`, bg: "var(--c-blue-tint)", color: "var(--brand-purple-light)", dotColor: "var(--brand-purple-light)" },
+                  { label: "Total Payback", value: `$${Math.round(totalPayback).toLocaleString()}`, bg: "rgba(16,185,129,0.1)", color: "#10B981", dotColor: "#10B981" },
                 ].map((item, i) => (
                   <div key={i} style={{ background: item.bg, borderRadius: 10, padding: "10px 14px" }}>
                     <div className="flex items-center gap-1.5" style={{ marginBottom: 4 }}>

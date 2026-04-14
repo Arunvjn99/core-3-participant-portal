@@ -103,7 +103,7 @@ function TransferDestination() {
     {
       Low: { bg: "#ECFDF5", color: "#059669", border: "#BBF7D0" },
       Moderate: { bg: "#EFF6FF", color: "var(--brand-primary)", border: "#BFDBFE" },
-      High: { bg: "#FFFBEB", color: "#B45309", border: "#FED7AA" } };
+      High: { bg: "rgba(245,158,11,0.1)", color: "#B45309", border: "#FED7AA" } };
 
   const handleContinue = () => {
     navigate("/transactions/transfer/amount");
