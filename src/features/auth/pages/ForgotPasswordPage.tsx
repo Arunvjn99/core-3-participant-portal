@@ -1,108 +1,109 @@
-import { useState, type FormEvent } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle2 } from 'lucide-react'
-import AuthTwoPanel from '../components/AuthTwoPanel'
+import { ArrowLeft, CheckCircle2 } from 'lucide-react'
 import { supabase } from '@/core/supabase'
+import AuthLayout from '../components/AuthLayout'
+
+const CORE_LOGO = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/CORE%20logo.png'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState('')
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError('')
+    setLoading(true)
+
     if (!supabase) {
       setSent(true)
+      setLoading(false)
       return
     }
-    setLoading(true)
-    setError(null)
+
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/reset-password`,
     })
-    setLoading(false)
+
     if (resetError) {
       setError(resetError.message)
     } else {
       setSent(true)
     }
-  }
-
-  if (sent) {
-    return (
-      <AuthTwoPanel>
-        <div className="text-center py-4">
-          <div className="flex justify-center mb-4">
-            <div className="w-14 h-14 rounded-full bg-green-100 dark:bg-green-950/40 flex items-center justify-center">
-              <CheckCircle2 className="w-7 h-7 text-green-600" />
-            </div>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Check your email</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-            We sent a password reset link to <span className="font-medium text-gray-700 dark:text-gray-300">{email}</span>
-          </p>
-          <Link
-            to="/login"
-            className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-          >
-            ← Back to login
-          </Link>
-        </div>
-      </AuthTwoPanel>
-    )
+    setLoading(false)
   }
 
   return (
-    <AuthTwoPanel>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Forgot password?</h1>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+    <AuthLayout>
+      <img
+        src={CORE_LOGO}
+        alt="CORE"
+        className="h-8 w-auto object-contain mb-8"
+        onError={(e) => { e.currentTarget.style.display = 'none' }}
+      />
+
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1.5">Reset password</h1>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">
         Enter your email and we&apos;ll send you a reset link.
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Email address
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@company.com"
-            required
-            autoComplete="email"
-            className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
-          />
-        </div>
-
-        {error && (
-          <p className="rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/40 px-3 py-2 text-sm text-red-600 dark:text-red-400">
-            {error}
+      {sent ? (
+        <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800/40 rounded-2xl p-6 text-center">
+          <CheckCircle2 className="w-10 h-10 text-green-600 mx-auto mb-3" />
+          <p className="text-green-800 dark:text-green-400 font-semibold mb-1">Check your email</p>
+          <p className="text-green-600 dark:text-green-500 text-sm">
+            We&apos;ve sent a reset link to{' '}
+            <span className="font-medium">{email}</span>
           </p>
-        )}
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+              autoComplete="email"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            />
+          </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-60"
-        >
-          {loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Sending...
-            </span>
-          ) : (
-            'Send Reset Link'
+          {error && (
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           )}
-        </button>
 
-        <p className="text-center text-sm">
-          <Link to="/login" className="text-blue-600 dark:text-blue-400 hover:underline">
-            ← Back to login
-          </Link>
-        </p>
-      </form>
-    </AuthTwoPanel>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3.5 bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-white dark:text-gray-900 text-white font-semibold rounded-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Sending...
+              </span>
+            ) : (
+              'Send Reset Link'
+            )}
+          </button>
+        </form>
+      )}
+
+      <Link
+        to="/login"
+        className="flex items-center gap-2 mt-6 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 w-fit"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back to login
+      </Link>
+    </AuthLayout>
   )
 }

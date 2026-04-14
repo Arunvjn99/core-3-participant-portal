@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components -- route module: lazy page chunks + router factory */
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useState, useEffect } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { useEnrollmentDraftStore } from '../core/store/enrollmentDraftStore'
 import PreEnrollmentDashboard from '../features/dashboard/pages/PreEnrollmentDashboard'
@@ -8,14 +8,16 @@ import { AuthLayout } from './layouts/AuthLayout'
 import { AppShell } from './layouts/AppShell'
 import { ValidatedVersionRoute } from './guards/ValidatedVersionRoute'
 import { ProtectedRoute } from '../core/auth/ProtectedRoute'
-import { DEFAULT_VERSION as _DEFAULT_VERSION } from '../lib/constants'
-void _DEFAULT_VERSION
 import { EnrollmentShell } from '../features/enrollment/components/EnrollmentShell'
+import { supabase } from '../core/supabase'
+
+// Auth pages — new two-panel design
 import LoginPage from '../features/auth/pages/LoginPage'
 import SignupPage from '../features/auth/pages/SignupPage'
 import ForgotPasswordPage from '../features/auth/pages/ForgotPasswordPage'
 import WhiteLabelAuth from '../features/auth/components/WhiteLabelAuth'
 
+// Enrollment pages
 import PlanSelection from '../features/enrollment/pages/PlanSelection'
 import Contribution from '../features/enrollment/pages/Contribution'
 import ContributionSource from '../features/enrollment/pages/ContributionSource'
@@ -26,7 +28,7 @@ import RetirementReadiness from '../features/enrollment/pages/RetirementReadines
 import ReviewEnrollment from '../features/enrollment/pages/ReviewEnrollment'
 import EnrollmentSuccess from '../features/enrollment/pages/EnrollmentSuccess'
 
-// Transactions
+// Transaction pages
 import TransactionsPage from '../features/transactions/pages/TransactionsPage'
 import LoanFlowLayout from '../features/transactions/flows/loan/LoanFlowLayout'
 import LoanEligibility from '../features/transactions/flows/loan/LoanEligibility'
@@ -61,17 +63,62 @@ import RolloverAllocation from '../features/transactions/flows/rollover/Rollover
 import RolloverDocuments from '../features/transactions/flows/rollover/RolloverDocuments'
 import RolloverReview from '../features/transactions/flows/rollover/RolloverReview'
 
-// Lazy-loaded auth pages
+// Legacy versioned auth pages
 const Login = lazy(() => import('../features/auth/pages/Login').then((m) => ({ default: m.Login })))
 const Signup = lazy(() => import('../features/auth/pages/Signup').then((m) => ({ default: m.Signup })))
 const VerifyOTP = lazy(() => import('../features/auth/pages/VerifyOTP').then((m) => ({ default: m.VerifyOTP })))
 const ForgotPassword = lazy(() => import('../features/auth/pages/ForgotPassword').then((m) => ({ default: m.ForgotPassword })))
 const ResetPassword = lazy(() => import('../features/auth/pages/ResetPassword').then((m) => ({ default: m.ResetPassword })))
 
-// Lazy-loaded app pages
+// Lazy app pages
 const PostEnrollmentDashboard = lazy(() => import('../features/dashboard/pages/PostEnrollmentDashboard'))
 const InvestmentsPage = lazy(() => import('../features/investments/pages/InvestmentsPage').then((m) => ({ default: m.InvestmentsPage })))
 const ProfilePage = lazy(() => import('../features/profile/pages/ProfilePage').then((m) => ({ default: m.ProfilePage })))
+
+// ─── Spinner fallback ────────────────────────────────────────────────────────
+
+const PageFallback = () => (
+  <div className="flex min-h-[40vh] items-center justify-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+  </div>
+)
+
+const withSuspense = (Component: React.ComponentType) => (
+  <Suspense fallback={<PageFallback />}>
+    <Component />
+  </Suspense>
+)
+
+// ─── Auth Guard ──────────────────────────────────────────────────────────────
+
+function AuthGuard({ children }: { children: React.ReactNode }) {
+  // null = not yet loaded, undefined = loaded but no session
+  const [session, setSession] = useState<object | null | undefined>(undefined)
+
+  useEffect(() => {
+    if (!supabase) {
+      // Demo mode — always allow access
+      setSession({})
+      return
+    }
+    supabase.auth.getSession().then(({ data }) => setSession(data.session))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => setSession(s))
+    return () => subscription.unsubscribe()
+  }, [])
+
+  if (session === undefined) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950">
+        <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (!session) return <Navigate to="/login" replace />
+  return <>{children}</>
+}
+
+// ─── Dashboard route (enrollment-aware) ──────────────────────────────────────
 
 function DashboardRoute() {
   const enrollmentStatus = useEnrollmentDraftStore((s) => s.enrollmentStatus)
@@ -85,17 +132,7 @@ function DashboardRoute() {
   return <PreEnrollmentDashboard />
 }
 
-const PageFallback = () => (
-  <div className="flex min-h-[40vh] items-center justify-center">
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-  </div>
-)
-
-const withSuspense = (Component: React.ComponentType) => (
-  <Suspense fallback={<PageFallback />}>
-    <Component />
-  </Suspense>
-)
+// ─── Router ──────────────────────────────────────────────────────────────────
 
 export const router = createBrowserRouter([
   {
@@ -103,12 +140,17 @@ export const router = createBrowserRouter([
     element: <RootLayout />,
     errorElement: <RootErrorBoundary />,
     children: [
+      // Public auth routes — redirect root to /login
       { index: true, element: <Navigate to="/login" replace /> },
       { path: 'login', element: <LoginPage /> },
+      { path: 'v1/login', element: <LoginPage /> },
       { path: 'signup', element: <SignupPage /> },
+      { path: 'v1/signup', element: <SignupPage /> },
       { path: 'forgot-password', element: <ForgotPasswordPage /> },
+      { path: 'v1/forgot-password', element: <ForgotPasswordPage /> },
       { path: 'auth', element: <WhiteLabelAuth /> },
 
+      // Legacy versioned auth (keeps old URLs working)
       {
         path: ':version',
         element: <ValidatedVersionRoute />,
@@ -126,6 +168,7 @@ export const router = createBrowserRouter([
         ],
       },
 
+      // Enrollment (no auth guard — users may enroll before full auth)
       {
         path: 'enrollment',
         element: <EnrollmentShell />,
@@ -144,11 +187,14 @@ export const router = createBrowserRouter([
         ],
       },
 
+      // Protected app routes — require auth session
       {
         element: (
-          <ProtectedRoute>
-            <AppShell />
-          </ProtectedRoute>
+          <AuthGuard>
+            <ProtectedRoute>
+              <AppShell />
+            </ProtectedRoute>
+          </AuthGuard>
         ),
         children: [
           { path: 'dashboard', element: <DashboardRoute /> },

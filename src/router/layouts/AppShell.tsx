@@ -49,22 +49,51 @@ export function AppShell() {
   const [companyName, setCompanyName] = useState('Participant Portal')
 
   useEffect(() => {
-    async function fetchCompany() {
+    async function loadCompanyBranding() {
       if (!supabase) return
-      const { data: { user: authUser } } = await supabase.auth.getUser()
-      if (!authUser) return
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
       const { data } = await supabase
         .from('user_companies')
-        .select('companies(name, logo_url, primary_color)')
-        .eq('user_id', authUser.id)
+        .select('companies(name, logo_url, primary_color, branding_json)')
+        .eq('user_id', user.id)
         .single()
+
       if (data?.companies) {
-        const company = data.companies as { name?: string; logo_url?: string; primary_color?: string }
-        if (company.logo_url) setCompanyLogo(company.logo_url)
+        const company = data.companies as {
+          name?: string
+          logo_url?: string
+          primary_color?: string
+          branding_json?: unknown
+        }
+
         if (company.name) setCompanyName(company.name)
+        if (company.logo_url) setCompanyLogo(company.logo_url)
+
+        // Apply primary color as CSS variable for white-label theming
+        if (company.primary_color) {
+          document.documentElement.style.setProperty('--color-brand', company.primary_color)
+          document.documentElement.style.setProperty('--color-brand-hover', company.primary_color + 'dd')
+        }
+
+        // Apply branding_json if present (font-family etc.)
+        if (company.branding_json) {
+          try {
+            const branding =
+              typeof company.branding_json === 'string'
+                ? JSON.parse(company.branding_json)
+                : company.branding_json
+            if (branding && typeof branding === 'object' && 'font_family' in branding) {
+              document.documentElement.style.setProperty('--font-sans', String(branding.font_family))
+            }
+          } catch {
+            // ignore malformed branding_json
+          }
+        }
       }
     }
-    fetchCompany()
+    loadCompanyBranding()
   }, [])
 
   const initials =
