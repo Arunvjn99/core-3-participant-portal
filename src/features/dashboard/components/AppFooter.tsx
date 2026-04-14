@@ -1,30 +1,47 @@
-import { ShieldCheck } from 'lucide-react'
+import { useBrandTheme } from '@/core/theme/BrandThemeContext'
+
+const CORE_LOGO = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/CORE%20logo.png'
 
 export default function AppFooter() {
+  // useBrandTheme is available for any future brand-specific footer customisation
+  void useBrandTheme()
+
   return (
     <footer className="mt-auto border-t border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-        <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-          <div className="flex cursor-pointer items-center gap-2 opacity-60 transition-opacity hover:opacity-100">
-            <ShieldCheck className="h-5 w-5 text-blue-600" />
-            <span className="text-base font-bold text-gray-900 dark:text-white">
-              Participant Portal
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+          {/* CORE logo + copyright */}
+          <div className="flex items-center gap-3">
+            <img
+              src={CORE_LOGO}
+              alt="CORE"
+              className="h-6 opacity-70 transition-opacity hover:opacity-100"
+              onError={(e) => { e.currentTarget.style.display = 'none' }}
+            />
+            <span className="text-xs text-gray-400 dark:text-gray-600">
+              © {new Date().getFullYear()} Congruent Solutions Inc. All rights reserved.
             </span>
           </div>
 
-          <p className="text-center text-sm font-medium text-gray-500 dark:text-gray-400">
-            © {new Date().getFullYear()} RetireSmart Financial Services. All rights reserved.
-          </p>
-
-          <div className="flex items-center gap-6 text-sm font-semibold text-gray-500 dark:text-gray-400">
-            <a href="#" className="transition-colors hover:text-blue-600 dark:hover:text-blue-400">
+          {/* Links */}
+          <div className="flex items-center gap-6 text-xs font-medium text-gray-400 dark:text-gray-600">
+            <a
+              href="#"
+              className="uppercase tracking-wide transition-colors hover:text-gray-700 dark:hover:text-gray-300"
+            >
               Privacy Policy
             </a>
-            <a href="#" className="transition-colors hover:text-blue-600 dark:hover:text-blue-400">
+            <a
+              href="#"
+              className="uppercase tracking-wide transition-colors hover:text-gray-700 dark:hover:text-gray-300"
+            >
               Terms of Service
             </a>
-            <a href="#" className="transition-colors hover:text-blue-600 dark:hover:text-blue-400">
-              Security
+            <a
+              href="#"
+              className="uppercase tracking-wide transition-colors hover:text-gray-700 dark:hover:text-gray-300"
+            >
+              Help Center
             </a>
           </div>
         </div>

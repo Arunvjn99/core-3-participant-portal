@@ -17,8 +17,6 @@ import DraftTransactions from "../components/DraftTransactions";
 import RetirementImpactWidget from "../components/RetirementImpactWidget";
 import svgPaths from "../svgPaths";
 import { motion } from "framer-motion";
-import AppFooter from "@/features/dashboard/components/AppFooter";
-
 function SectionHeader({
   icon,
   title,
@@ -424,7 +422,6 @@ function TransactionsPage() {
           <FinancialGuidanceCompact />
         </motion.div>
       </div>
-      <AppFooter />
     </div>
   );
 }

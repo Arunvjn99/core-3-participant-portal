@@ -72,7 +72,7 @@ const ForgotPassword = lazy(() => import('../features/auth/pages/ForgotPassword'
 const ResetPassword = lazy(() => import('../features/auth/pages/ResetPassword').then((m) => ({ default: m.ResetPassword })))
 
 // Lazy app pages
-const InvestmentsPage = lazy(() => import('../features/investments/pages/InvestmentsPage').then((m) => ({ default: m.InvestmentsPage })))
+const InvestmentsPage = lazy(() => import('../features/investments/pages/InvestmentsPage'))
 const ProfilePage = lazy(() => import('../features/profile/pages/ProfilePage').then((m) => ({ default: m.ProfilePage })))
 
 // ─── Spinner fallback ────────────────────────────────────────────────────────

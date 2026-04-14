@@ -731,3 +731,40 @@ html[data-theme='dark'] {
     background-color: var(--brand-primary-hover) !important;
   }
 }
+
+/* ── Transaction flow: override hardcoded inline color styles in dark mode ── */
+.dark [style*="#1E293B"] { color: #f1f5f9 !important; }
+.dark [style*="#475569"] { color: #94a3b8 !important; }
+.dark [style*="#64748B"] { color: #94a3b8 !important; }
+.dark [style*="#94A3B8"] { color: #6b7280 !important; }
+.dark [style*="#CBD5E1"] { color: #4b5563 !important; }
+
+.dark [style*='background: "#fff"'],
+.dark [style*='background: "#ffffff"'] { background-color: #1e293b !important; }
+.dark [style*='background: "#F8FAFC"'] { background-color: #0f172a !important; }
+.dark [style*='background: "#F1F5F9"'] { background-color: #1e293b !important; }
+.dark [style*='background: "#FAFBFC"'] { background-color: #1a2535 !important; }
+.dark [style*='background: "#E2E8F0"'] { background-color: #334155 !important; }
+
+.dark [style*='border: "1px solid #F1F5F9"'] { border-color: #334155 !important; }
+.dark [style*='border: "1px solid #E2E8F0"'] { border-color: #475569 !important; }
+.dark [style*='border: "1px solid #E8ECF1"'] { border-color: #334155 !important; }
+.dark [style*='borderBottom: "1px solid #F1F5F9"'] { border-bottom-color: #334155 !important; }
+
+.dark [style*='background: "#FFFBEB"'],
+.dark [style*='background: "#FFF7ED"'] {
+  background-color: rgba(120,53,15,0.2) !important;
+  border-color: rgba(217,119,6,0.3) !important;
+}
+.dark [style*='"#92400E"'] { color: #fbbf24 !important; }
+.dark [style*='"#B45309"'] { color: #fbbf24 !important; }
+
+.dark table tbody tr { background-color: #0f172a; }
+.dark table tbody tr:hover { background-color: #1e293b !important; }
+.dark table thead tr { background: #1e293b !important; }
+
+.dark input[style], .dark select[style], .dark textarea[style] {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #475569 !important;
+}
