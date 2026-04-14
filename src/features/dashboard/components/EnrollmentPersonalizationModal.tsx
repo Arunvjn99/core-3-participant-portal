@@ -388,7 +388,7 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                     className={cn(
                       'rounded-full transition-all duration-300',
                       currentStep === step.id
-                        ? 'h-2 w-6 bg-blue-600'
+                        ? 'h-2 w-6 brand-bg'
                         : currentStep > step.id
                           ? 'h-2 w-2 bg-emerald-500'
                           : 'h-2 w-2 bg-gray-200 dark:bg-gray-700'
@@ -420,7 +420,7 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
 
                       {!isEditingBirthDate ? (
                         <div className="flex items-center gap-3">
-                          <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-blue-600">
+                          <div className="brand-bg flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full">
                             <span className="text-sm font-bold text-white">{displayInitials}</span>
                           </div>
                           <div className="flex-1">
@@ -498,7 +498,7 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                             <button
                               type="button"
                               onClick={handleSaveBirthDate}
-                              className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+                              className="btn-brand flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold"
                             >
                               <Check className="h-3.5 w-3.5" /> Save
                             </button>
@@ -604,7 +604,7 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                         </p>
                         <div className="flex items-center gap-3 pt-1">
                           <div className="flex flex-col items-center gap-1">
-                            <div className="h-2.5 w-2.5 rounded-full bg-blue-600" />
+                            <div className="brand-bg h-2.5 w-2.5 rounded-full" />
                             <span className="text-[10px] font-medium text-gray-500">Now</span>
                             <span className="text-[10px] text-gray-400">{currentYear}</span>
                           </div>
@@ -614,7 +614,7 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                             </div>
                           </div>
                           <div className="flex flex-col items-center gap-1">
-                            <div className="h-2.5 w-2.5 rounded-full bg-indigo-600" />
+                            <div className="brand-bg h-2.5 w-2.5 rounded-full opacity-80" />
                             <span className="text-[10px] font-medium text-gray-500">Retire</span>
                             <span className="text-[10px] text-gray-400">{retirementYear}</span>
                           </div>
@@ -949,7 +949,7 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
               <button
                 type="button"
                 onClick={currentStep === 4 ? handleComplete : () => setCurrentStep((s) => s + 1)}
-                className="flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition-all hover:scale-[1.02] hover:bg-blue-700 active:scale-[0.98] dark:shadow-blue-900/30"
+                className="btn-brand flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] dark:shadow-blue-900/30"
               >
                 {currentStep === 4 ? 'View My Plan' : 'Continue'}
                 <ChevronRight className="h-4 w-4" />

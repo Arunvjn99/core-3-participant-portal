@@ -73,7 +73,7 @@ function PersonalInfoSection() {
       </div>
       <button
         type="button"
-        className="mt-6 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+        className="btn-brand mt-6 rounded-xl px-6 py-2.5 text-sm font-semibold"
       >
         Save Changes
       </button>
@@ -88,7 +88,7 @@ function BeneficiariesSection() {
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Beneficiaries</h2>
         <button
           type="button"
-          className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+          className="btn-brand rounded-xl px-4 py-2 text-sm font-semibold"
         >
           Add Beneficiary
         </button>
@@ -152,7 +152,7 @@ function SecuritySection() {
         </div>
         <button
           type="button"
-          className="rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+          className="btn-brand rounded-xl px-6 py-2.5 text-sm font-semibold"
         >
           Update Password
         </button>

@@ -248,7 +248,7 @@ function ConfirmationModal({
           <button
             type="button"
             onClick={onApply}
-            className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-blue-700 active:scale-[0.98]"
+            className="btn-brand flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium active:scale-[0.98]"
           >
             <Zap className="h-3.5 w-3.5" /> Apply Change
           </button>
@@ -705,7 +705,7 @@ function RetirementReadiness() {
             <button
               type="button"
               onClick={handleNext}
-              className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-blue-700 transition-all shadow-md font-semibold"
+              className="btn-brand flex flex-1 items-center justify-center gap-2 rounded-xl py-3 px-4 font-semibold shadow-md transition-all"
               style={{ fontSize: '0.85rem' }}
             >
               Apply Selected <ArrowRight className="w-4 h-4" />
@@ -726,7 +726,7 @@ function RetirementReadiness() {
         <button
           type="button"
           onClick={handleNext}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 py-3.5 font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.98]"
+          className="btn-brand flex w-full items-center justify-center gap-2 rounded-xl px-8 py-3.5 font-semibold active:scale-[0.98]"
         >
           Continue to Review <ArrowRight className="h-4 w-4" />
         </button>

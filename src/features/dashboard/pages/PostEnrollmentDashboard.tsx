@@ -132,7 +132,7 @@ export default function PostEnrollmentDashboard() {
 
             {/* 1. Total Balance Card (Hero) */}
             <Card className="relative overflow-hidden border-slate-200 bg-white p-0 dark:border-gray-700 dark:bg-gray-900">
-              <div className="absolute left-0 top-0 h-1 w-full bg-blue-600" />
+              <div className="brand-bg absolute left-0 top-0 h-1 w-full" />
               <div className="relative z-10 p-8">
                 <div className="mb-8 flex items-start justify-between">
                   <div>
@@ -231,7 +231,7 @@ export default function PostEnrollmentDashboard() {
                       initial={{ width: 0 }}
                       whileInView={{ width: '60%' }}
                       transition={{ duration: 1.2, ease: 'easeOut' }}
-                      className="h-full rounded-full bg-blue-600 shadow-sm"
+                      className="brand-progress h-full rounded-full shadow-sm"
                     />
                   </div>
                 </div>
@@ -248,7 +248,8 @@ export default function PostEnrollmentDashboard() {
                       initial={{ width: 0 }}
                       whileInView={{ width: '40%' }}
                       transition={{ duration: 1.2, delay: 0.2, ease: 'easeOut' }}
-                      className="h-full rounded-full bg-blue-600/40 shadow-sm"
+                      className="h-full rounded-full shadow-sm"
+                      style={{ backgroundColor: 'color-mix(in srgb, var(--brand-primary) 40%, transparent)' }}
                     />
                   </div>
                 </div>
@@ -295,7 +296,7 @@ export default function PostEnrollmentDashboard() {
                 </div>
                 <div className="w-full rounded-2xl border border-slate-100 bg-slate-50 p-6 dark:border-gray-700 dark:bg-gray-800 md:w-1/2">
                   <h4 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
-                    <TrendingUp className="h-4 w-4 text-blue-600" />
+                    <TrendingUp className="brand-text h-4 w-4" />
                     Allocation Insight
                   </h4>
                   <p className="text-sm font-medium leading-relaxed text-slate-500 dark:text-gray-400">
@@ -350,7 +351,10 @@ export default function PostEnrollmentDashboard() {
                   <p className="mb-8 max-w-xl text-base font-medium leading-relaxed text-slate-300">
                     Understand why long-term planning beats short-term reactions in today's changing economy.
                   </p>
-                  <button className="flex w-fit items-center gap-2 rounded-xl bg-white px-8 py-3 text-sm font-bold text-slate-950 shadow-lg transition-all hover:bg-blue-600 hover:text-white active:scale-95">
+                  <button
+                    type="button"
+                    className="flex w-fit items-center gap-2 rounded-xl bg-white px-8 py-3 text-sm font-bold text-slate-950 shadow-lg transition-all hover:bg-[var(--brand-primary)] hover:text-white active:scale-95"
+                  >
                     Read Article <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>
@@ -432,7 +436,7 @@ export default function PostEnrollmentDashboard() {
                         {action.type === 'warning' ? (
                           <Zap className="mt-0.5 h-4 w-4 text-amber-600" />
                         ) : (
-                          <Calendar className="mt-0.5 h-4 w-4 text-blue-600" />
+                          <Calendar className="brand-text mt-0.5 h-4 w-4" />
                         )}
                         <h4 className="text-sm font-bold text-slate-900 dark:text-white">{action.title}</h4>
                       </div>
@@ -479,7 +483,7 @@ export default function PostEnrollmentDashboard() {
 
               {/* 9. Advisor Card */}
               <Card className="overflow-hidden border-slate-200 bg-white p-0 dark:border-gray-700 dark:bg-gray-900">
-                <div className="h-2 bg-blue-600" />
+                <div className="brand-bg h-2" />
                 <div className="p-6">
                   <div className="mb-6 flex items-center gap-4">
                     <div className="relative">

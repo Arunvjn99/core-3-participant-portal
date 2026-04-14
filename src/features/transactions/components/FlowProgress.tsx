@@ -29,8 +29,8 @@ function FlowProgress({ steps, currentStep }: FlowProgressProps) {
           {/* Progress bar */}
           <div className="overflow-hidden bg-slate-200 dark:bg-gray-700" style={{ height: 6, borderRadius: 3 }}>
             <motion.div
-              className="h-full"
-              style={{ borderRadius: 3, background: "#2563EB" }}
+              className="brand-progress h-full"
+              style={{ borderRadius: 3 }}
               initial={{ width: 0 }}
               animate={{ width: `${((currentStep) / steps.length) * 100}%` }}
               transition={{ duration: 0.5, ease: "easeOut" }}
@@ -45,12 +45,12 @@ function FlowProgress({ steps, currentStep }: FlowProgressProps) {
                 <div
                   key={step.number}
                   className={`rounded-full transition-all duration-200 ${
-                    isComplete || isCurrent ? "bg-blue-600" : "bg-slate-200 dark:bg-gray-600"
+                    isComplete || isCurrent ? "brand-bg" : "bg-slate-200 dark:bg-gray-600"
                   }`}
                   style={{
                     width: 8,
                     height: 8,
-                    boxShadow: isCurrent ? "0 0 0 3px rgba(37,99,235,0.15)" : undefined,
+                    boxShadow: isCurrent ? "0 0 0 3px var(--brand-primary-ring)" : undefined,
                   }}
                 />
               );
@@ -63,8 +63,7 @@ function FlowProgress({ steps, currentStep }: FlowProgressProps) {
           {/* Progress Line */}
           <div className="absolute top-5 left-0 right-0 bg-slate-200 dark:bg-gray-700" style={{ height: 2 }}>
             <motion.div
-              className="h-full"
-              style={{ background: "#2563EB" }}
+              className="brand-progress h-full"
               initial={{ width: 0 }}
               animate={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
               transition={{ duration: 0.5, ease: "easeOut" }}
@@ -91,11 +90,11 @@ function FlowProgress({ steps, currentStep }: FlowProgressProps) {
                       width: 40,
                       height: 40,
                       borderRadius: 20,
-                      background: isComplete || isCurrent ? "#2563EB" : undefined,
+                      background: isComplete || isCurrent ? 'var(--brand-primary)' : undefined,
                       boxShadow: isCurrent
-                        ? "0 0 0 4px rgba(37,99,235,0.12), 0 4px 12px rgba(37,99,235,0.3)"
+                        ? '0 0 0 4px var(--brand-primary-ring), 0 4px 12px color-mix(in srgb, var(--brand-primary) 30%, transparent)'
                         : isComplete
-                          ? "0 4px 12px rgba(37,99,235,0.3)"
+                          ? '0 4px 12px color-mix(in srgb, var(--brand-primary) 30%, transparent)'
                           : undefined,
                     }}
                   >

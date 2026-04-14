@@ -117,7 +117,7 @@ Current user context: enrolled participant with $30,000 plan balance.`,
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shrink-0">
+                  <div className="brand-bg flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
                     <Sparkles className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -146,7 +146,7 @@ Current user context: enrolled participant with $30,000 plan balance.`,
                       <div
                         className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                           msg.role === 'user'
-                            ? 'bg-blue-600 text-white rounded-br-md'
+                            ? 'brand-bg text-white rounded-br-md'
                             : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-bl-md'
                         }`}
                       >

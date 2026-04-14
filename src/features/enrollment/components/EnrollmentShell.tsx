@@ -1,10 +1,13 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import { AnimatedPage } from '../../../design-system/motion/AnimatedPage'
 import { ENROLLMENT_STEPS, getStepByPath } from '../enrollmentSteps'
 import AppFooter from '@/features/dashboard/components/AppFooter'
 
 /** Steps shown in the progress UI (excludes success / confirmation-only step). */
 const STEPPER_STEPS = ENROLLMENT_STEPS.filter((s) => s.step <= 7)
+
+const brandRing = { boxShadow: '0 0 0 4px var(--brand-primary-ring)' }
 
 export function EnrollmentShell() {
   const navigate = useNavigate()
@@ -23,7 +26,17 @@ export function EnrollmentShell() {
   return (
     <div className="flex min-h-screen flex-col bg-[#f5f7fa] dark:bg-gray-950">
       <div className="flex h-12 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 dark:border-gray-700 dark:bg-gray-900 sm:px-6">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {activeStep > 1 && (
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Back</span>
+            </button>
+          )}
           <span className="text-sm text-gray-400 dark:text-gray-500">Enrollment</span>
           {activeStep <= STEPPER_STEPS.length && (
             <>
@@ -37,7 +50,7 @@ export function EnrollmentShell() {
         <button
           type="button"
           onClick={() => navigate('/dashboard')}
-          className="text-sm font-medium text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+          className="brand-text text-sm font-medium transition-colors hover:opacity-80"
         >
           Save &amp; Exit
         </button>
@@ -45,7 +58,7 @@ export function EnrollmentShell() {
 
       {showStepper && (
         <div className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
-          <div className="hidden px-4 py-3 md:block sm:px-6">
+          <div className="hidden px-4 py-3 sm:px-6 md:block">
             <div className="mx-auto max-w-5xl">
               <p className="mb-2.5 text-xs text-gray-400 dark:text-gray-500">
                 Step {activeStep} of {STEPPER_STEPS.length}
@@ -60,12 +73,17 @@ export function EnrollmentShell() {
                       <div className="flex w-full items-center gap-0.5">
                         <div
                           className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-all ${
-                            isCompleted
-                              ? 'bg-blue-600 text-white'
-                              : isCurrent
-                                ? 'bg-blue-600 text-white ring-4 ring-blue-100 dark:ring-blue-900/40'
-                                : 'bg-gray-200 text-gray-400 dark:bg-gray-700 dark:text-gray-500'
+                            isCompleted || isCurrent
+                              ? 'text-white'
+                              : 'bg-gray-200 text-gray-400 dark:bg-gray-700 dark:text-gray-500'
                           }`}
+                          style={
+                            isCompleted
+                              ? { backgroundColor: 'var(--brand-primary)' }
+                              : isCurrent
+                                ? { backgroundColor: 'var(--brand-primary)', ...brandRing }
+                                : undefined
+                          }
                         >
                           {isCompleted ? (
                             <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none">
@@ -84,15 +102,18 @@ export function EnrollmentShell() {
                         {i < STEPPER_STEPS.length - 1 && (
                           <div
                             className={`mx-1 h-0.5 flex-1 rounded-full transition-colors ${
-                              isCompleted ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
+                              isCompleted ? '' : 'bg-gray-200 dark:bg-gray-700'
                             }`}
+                            style={
+                              isCompleted ? { backgroundColor: 'var(--brand-primary)' } : undefined
+                            }
                           />
                         )}
                       </div>
                       <span
                         className={`text-center text-xs leading-tight transition-colors ${
                           isCurrent
-                            ? 'font-semibold text-blue-600 dark:text-blue-400'
+                            ? 'font-semibold brand-text'
                             : isCompleted
                               ? 'text-gray-600 dark:text-gray-400'
                               : 'text-gray-400 dark:text-gray-600'
@@ -111,7 +132,10 @@ export function EnrollmentShell() {
           <div className="px-4 py-3 md:hidden">
             <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+                <div
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                  style={{ backgroundColor: 'var(--brand-primary)' }}
+                >
                   {activeStep}
                 </div>
                 <div>
@@ -131,7 +155,7 @@ export function EnrollmentShell() {
             </div>
             <div className="h-1.5 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
               <div
-                className="h-full rounded-full bg-blue-600 transition-all duration-500"
+                className="brand-progress h-full rounded-full transition-all duration-500"
                 style={{ width: `${(activeStep / STEPPER_STEPS.length) * 100}%` }}
               />
             </div>
@@ -142,12 +166,13 @@ export function EnrollmentShell() {
                   <div
                     key={i}
                     className={`h-1 rounded-full transition-all duration-300 ${
-                      sn < activeStep
-                        ? 'flex-1 bg-blue-600'
-                        : sn === activeStep
-                          ? 'flex-[2] bg-blue-600'
-                          : 'flex-1 bg-gray-200 dark:bg-gray-700'
-                    }`}
+                      sn < activeStep || sn === activeStep ? '' : 'bg-gray-200 dark:bg-gray-700'
+                    } ${sn === activeStep ? 'flex-[2]' : 'flex-1'}`}
+                    style={
+                      sn < activeStep || sn === activeStep
+                        ? { backgroundColor: 'var(--brand-primary)' }
+                        : undefined
+                    }
                   />
                 )
               })}

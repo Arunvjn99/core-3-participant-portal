@@ -149,7 +149,7 @@ function RebalanceTab() {
       </div>
       <button
         type="button"
-        className="mt-6 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+        className="btn-brand mt-6 rounded-xl px-6 py-2.5 text-sm font-semibold"
       >
         Submit Rebalance Request
       </button>

@@ -21,7 +21,7 @@ import { useUser } from '@/core/hooks/useUser'
 import { useTheme } from '@/core/hooks/useTheme'
 import { useAIStore } from '@/core/store/aiStore'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
-import { applyBrandTheme } from '@/core/theme/brandTheme'
+import { useBrandTheme } from '@/core/theme/BrandThemeContext'
 import { CoreAIPanel } from '@/features/ai/components/CoreAIPanel'
 import { AISearchPalette } from '@/features/ai/components/AISearchPalette'
 import AppFooter from '@/features/dashboard/components/AppFooter'
@@ -42,6 +42,7 @@ function isNavActive(href: string, pathname: string): boolean {
 }
 
 export function AppShell() {
+  const { theme } = useBrandTheme()
   const { signOut, user } = useAuth()
   const { profile } = useUser()
   const { resolvedMode, setMode } = useTheme()
@@ -49,19 +50,19 @@ export function AppShell() {
   const location = useLocation()
   const openChat = useAIStore((s) => s.openChat)
   const toggleSearch = useAIStore((s) => s.toggleSearch)
-  const [companyName, setCompanyName] = useState('Participant Portal')
-  const [companyLogo, setCompanyLogo] = useState<string | null>(null)
   const [userDisplayName, setUserDisplayName] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
-    async function loadUserAndCompany() {
-      if (!supabase) return
+    async function loadDisplayName() {
+      if (!supabase) {
+        setUserDisplayName(user?.email?.split('@')[0] || '')
+        return
+      }
       const {
         data: { user: u },
       } = await supabase.auth.getUser()
       if (!u) return
-
       const meta = u.user_metadata as Record<string, string | undefined> | undefined
       const fullName =
         meta?.full_name ||
@@ -69,34 +70,9 @@ export function AppShell() {
         u.email?.split('@')[0] ||
         'User'
       setUserDisplayName(fullName)
-
-      const { data: ucData } = await supabase
-        .from('user_companies')
-        .select('company_id')
-        .eq('user_id', u.id)
-        .maybeSingle()
-
-      if (!ucData?.company_id) return
-
-      const { data: company } = await supabase
-        .from('companies')
-        .select('name, logo_url, primary_color, branding_json')
-        .eq('id', ucData.company_id)
-        .maybeSingle()
-
-      if (!company) return
-
-      if (company.name) setCompanyName(company.name)
-      if (company.logo_url) {
-        setCompanyLogo(company.logo_url)
-        console.log('Company logo loaded:', company.logo_url)
-      }
-      if (company.primary_color) {
-        applyBrandTheme(company.primary_color, company.branding_json)
-      }
     }
-    void loadUserAndCompany()
-  }, [])
+    void loadDisplayName()
+  }, [user?.email])
 
   const initials =
     profile?.full_name
@@ -152,10 +128,10 @@ export function AppShell() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-14 items-center justify-between gap-4">
             <div className="flex min-w-0 shrink-0 items-center gap-2.5">
-              {companyLogo ? (
+              {theme.companyLogo ? (
                 <img
-                  src={companyLogo}
-                  alt={companyName}
+                  src={theme.companyLogo}
+                  alt={theme.companyName}
                   className="h-8 max-w-[100px] w-auto object-contain"
                 />
               ) : (
@@ -163,11 +139,11 @@ export function AppShell() {
                   className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white"
                   style={{ backgroundColor: 'var(--brand-primary)' }}
                 >
-                  {companyName.charAt(0)}
+                  {theme.companyName.charAt(0)}
                 </div>
               )}
               <span className="hidden max-w-[120px] truncate text-sm font-bold text-gray-900 dark:text-white sm:block">
-                {companyName}
+                {theme.companyName}
               </span>
             </div>
 
@@ -178,20 +154,12 @@ export function AppShell() {
                   <Link
                     key={item.href}
                     to={item.href}
-                    data-brand-active={active ? '' : undefined}
+                    data-brand-nav-active={active ? '' : undefined}
                     className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-semibold transition-all ${
                       active
-                        ? 'text-blue-600 dark:text-blue-400'
+                        ? ''
                         : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white'
                     }`}
-                    style={
-                      active
-                        ? {
-                            color: 'var(--brand-primary)',
-                            backgroundColor: 'var(--brand-primary-light)',
-                          }
-                        : undefined
-                    }
                   >
                     <item.icon className="h-4 w-4 shrink-0" />
                     <span>{item.label}</span>
@@ -274,18 +242,10 @@ export function AppShell() {
                     key={item.href}
                     to={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    data-brand-active={active ? '' : undefined}
+                    data-brand-nav-active={active ? '' : undefined}
                     className={`flex items-center gap-3 rounded-xl px-3 py-3 transition-all ${
                       active ? 'font-semibold' : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
                     }`}
-                    style={
-                      active
-                        ? {
-                            color: 'var(--brand-primary)',
-                            backgroundColor: 'var(--brand-primary-light)',
-                          }
-                        : undefined
-                    }
                   >
                     <item.icon className="h-5 w-5 shrink-0" />
                     <span className="text-sm font-medium">{item.label}</span>

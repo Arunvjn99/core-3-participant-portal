@@ -119,18 +119,28 @@ export default function SignupPage() {
     }
 
     if (authData.user && selectedCompany) {
-      // Link user to company
-      await supabase.from('user_companies').insert({
+      const { error: userCompanyError } = await supabase.from('user_companies').insert({
         user_id: authData.user.id,
         company_id: selectedCompany.id,
         role: 'participant',
       })
-      // Upsert profile
-      await supabase.from('profiles').upsert({
+      if (userCompanyError) {
+        console.error('[SignupPage] user_companies insert failed:', userCompanyError.message, userCompanyError)
+        setError(
+          `Account created, but we could not link your company (${selectedCompany.name}). You can contact support or try again from profile settings.`,
+        )
+        setLoading(false)
+        return
+      }
+
+      const { error: profileError } = await supabase.from('profiles').upsert({
         id: authData.user.id,
         full_name: `${form.firstName} ${form.lastName}`,
         email: form.email,
       })
+      if (profileError) {
+        console.error('[SignupPage] profiles upsert failed:', profileError.message, profileError)
+      }
     }
 
     navigate('/dashboard')
@@ -183,7 +193,7 @@ export default function SignupPage() {
 
         <p className="text-center text-sm text-gray-500 dark:text-gray-400">
           Already have an account?{' '}
-          <Link to="/login" className="font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+          <Link to="/login" className="brand-text font-semibold hover:underline">
             Sign in
           </Link>
         </p>
@@ -449,7 +459,7 @@ export default function SignupPage() {
 
       <p className="mt-5 text-center text-sm text-gray-500 dark:text-gray-400">
         Already have an account?{' '}
-        <Link to="/login" className="font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+        <Link to="/login" className="brand-text font-semibold hover:underline">
           Sign in
         </Link>
       </p>

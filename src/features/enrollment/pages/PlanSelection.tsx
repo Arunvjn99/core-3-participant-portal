@@ -54,7 +54,7 @@ export default function PlanSelection() {
             <button
               type="button"
               onClick={() => confirmPlan(onlyPlan)}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 font-semibold text-white transition-all hover:bg-blue-700 active:scale-[0.98]"
+              className="btn-brand flex w-full items-center justify-center gap-2 rounded-xl py-3.5 font-semibold active:scale-[0.98]"
             >
               Continue to Contributions <ArrowRight className="h-4 w-4" />
             </button>
@@ -138,7 +138,7 @@ export default function PlanSelection() {
                 e.stopPropagation()
                 confirmPlan('traditional')
               }}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 active:scale-[0.98] sm:text-base"
+              className="btn-brand mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold shadow-sm active:scale-[0.98] sm:text-base"
             >
               Continue with Traditional 401(k) <ArrowRight className="h-4 w-4" />
             </button>
@@ -186,8 +186,8 @@ export default function PlanSelection() {
               className={cn(
                 'mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold shadow-sm transition-all active:scale-[0.98] sm:text-base',
                 selectedPlan === 'roth'
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'border border-blue-600 bg-white text-blue-600 hover:bg-blue-50 dark:border-blue-500 dark:bg-gray-800 dark:text-blue-400 dark:hover:bg-blue-950/30'
+                  ? 'btn-brand text-white'
+                  : 'border-2 border-[color:var(--brand-primary)] bg-white text-[color:var(--brand-primary)] hover:bg-[color:var(--brand-primary-light)] dark:border-[color:var(--brand-primary)] dark:bg-gray-800 dark:hover:bg-[color:var(--brand-primary-light)]'
               )}
             >
               Choose Roth 401(k) <ArrowRight className="h-4 w-4" />

@@ -208,7 +208,7 @@ export default function Contribution() {
                     onClick={() => handleQuick(opt.value)}
                     className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all ${
                       percent === opt.value
-                        ? 'bg-blue-600 text-white shadow-md'
+                        ? 'brand-bg text-white shadow-md'
                         : 'bg-gray-100 text-gray-600 hover:scale-105 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
                     }`}
                   >
@@ -344,7 +344,7 @@ export default function Contribution() {
 
             <div className="flex flex-wrap items-center justify-center gap-4">
               {[
-                { color: 'bg-blue-600', label: 'Total Savings' },
+                { color: 'brand-bg', label: 'Total Savings' },
                 { color: 'bg-green-600', label: 'Market Gains' },
               ].map(({ color, label }) => (
                 <div key={label} className="flex items-center gap-1.5">
@@ -373,7 +373,7 @@ export default function Contribution() {
                   onClick={() => setCompareMode(!compareMode)}
                   className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
                     compareMode
-                      ? 'bg-blue-600 text-white shadow-md'
+                      ? 'brand-bg text-white shadow-md'
                       : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                   }`}
                 >
@@ -390,7 +390,7 @@ export default function Contribution() {
                         onClick={() => setComparePercent(val)}
                         className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-all ${
                           comparePercent === val
-                            ? 'bg-blue-600 text-white shadow-md'
+                            ? 'brand-bg text-white shadow-md'
                             : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                         }`}
                       >
@@ -426,7 +426,7 @@ export default function Contribution() {
           <button
             type="button"
             onClick={handleNext}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 py-4 text-base font-semibold text-white shadow-lg transition-all hover:bg-blue-700 active:scale-[0.98] md:shadow-md"
+            className="btn-brand flex w-full items-center justify-center gap-2 rounded-xl px-8 py-4 text-base font-semibold shadow-lg active:scale-[0.98] md:shadow-md"
           >
             Save &amp; Continue <ArrowRight className="h-5 w-5" />
           </button>

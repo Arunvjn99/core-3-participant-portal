@@ -13,11 +13,7 @@ import {
   RotateCcw,
   Plus,
   Trash2,
-  ToggleLeft,
-  ToggleRight,
-  Layers,
   Minus,
-  Copy,
   Gauge,
   Phone,
   Sparkles,
@@ -33,7 +29,9 @@ interface SourceFundAllocation { name: string; ticker: string; expense: string; 
 type SourceKey = 'roth' | 'preTax' | 'afterTax'
 interface PerSourceAllocations { sameForAll: boolean; unified: SourceFundAllocation[]; sources: Record<SourceKey, SourceFundAllocation[]> }
 
-const sourceLabels: Record<SourceKey, string> = { roth: 'Roth', preTax: 'Pre-Tax', afterTax: 'After-Tax' }
+// sourceLabels kept for potential future use
+const _sourceLabels: Record<SourceKey, string> = { roth: 'Roth', preTax: 'Pre-Tax', afterTax: 'After-Tax' }
+void _sourceLabels
 const sourceFullLabels: Record<SourceKey, string> = { roth: 'Roth Contributions', preTax: 'Pre-Tax Contributions', afterTax: 'After-Tax Contributions' }
 const sourceTaxLabels: Record<SourceKey, string> = { roth: 'Tax Free', preTax: 'Tax Deferred', afterTax: 'Taxable' }
 const sourceColors: Record<SourceKey, string> = { roth: '#8b5cf6', preTax: '#3b82f6', afterTax: '#10b981' }
@@ -228,50 +226,13 @@ function SourceFundList({ funds, onUpdate, onRemove, onAdd }: { funds: SourceFun
   )
 }
 
-function CopyPortfolioMenu({ currentSource, activeSources, contributionSources, onCopy }: { currentSource: SourceKey; activeSources: SourceKey[]; contributionSources: { preTax: number; roth: number; afterTax: number }; onCopy: (s: SourceKey) => void }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    function h(e: MouseEvent) { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
-    if (open) document.addEventListener('mousedown', h)
-    return () => document.removeEventListener('mousedown', h)
-  }, [open])
-  const others = activeSources.filter((s) => s !== currentSource)
-  if (others.length === 0) return null
-  return (
-    <div className="relative" ref={ref}>
-      <button type="button" onClick={() => setOpen(!open)} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-700 transition-colors py-1 px-2 rounded-lg hover:bg-gray-100" style={{ fontSize: '0.75rem', fontWeight: 500 }}><Copy className="w-3 h-3" /> Copy from</button>
-      {open && (
-        <div className="absolute right-0 top-full mt-1 z-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg w-52 py-1">
-          {others.map((src) => (
-            <button type="button" key={src} onClick={() => { onCopy(src); setOpen(false) }} className="w-full px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 text-left flex items-center justify-between transition-colors">
-              <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: sourceColors[src] }} /><span className="text-gray-700 dark:text-gray-300" style={{ fontSize: '0.78rem' }}>{sourceLabels[src]} ({contributionSources[src]}%)</span></div>
-              <ArrowRight className="w-3 h-3 text-gray-400" />
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
 
-function PortfolioEditorContent({ allocs, setAllocs, activeSources, contributionSources, activeTab, setActiveTab }: { allocs: PerSourceAllocations; setAllocs: React.Dispatch<React.SetStateAction<PerSourceAllocations | null>>; activeSources: SourceKey[]; contributionSources: { preTax: number; roth: number; afterTax: number }; activeTab: SourceKey; setActiveTab: (t: SourceKey) => void }) {
+function PortfolioEditorContent({ allocs, setAllocs }: { allocs: PerSourceAllocations; setAllocs: React.Dispatch<React.SetStateAction<PerSourceAllocations | null>> }) {
   const updateUnifiedFund = useCallback((ticker: string, value: number) => { setAllocs((p) => p ? ({ ...p, unified: p.unified.map((f) => f.ticker === ticker ? { ...f, allocation: value } : f) }) : p) }, [setAllocs])
   const removeUnifiedFund = useCallback((ticker: string) => { setAllocs((p) => p ? ({ ...p, unified: p.unified.filter((f) => f.ticker !== ticker) }) : p) }, [setAllocs])
   const addUnifiedFund = useCallback((fund: SourceFundAllocation) => { setAllocs((p) => p ? ({ ...p, unified: [...p.unified, fund] }) : p) }, [setAllocs])
-  const updateSourceFund = useCallback((source: SourceKey, ticker: string, value: number) => { setAllocs((p) => p ? ({ ...p, sources: { ...p.sources, [source]: p.sources[source].map((f) => f.ticker === ticker ? { ...f, allocation: value } : f) } }) : p) }, [setAllocs])
-  const removeSourceFund = useCallback((source: SourceKey, ticker: string) => { setAllocs((p) => p ? ({ ...p, sources: { ...p.sources, [source]: p.sources[source].filter((f) => f.ticker !== ticker) } }) : p) }, [setAllocs])
-  const addSourceFund = useCallback((source: SourceKey, fund: SourceFundAllocation) => { setAllocs((p) => p ? ({ ...p, sources: { ...p.sources, [source]: [...p.sources[source], fund] } }) : p) }, [setAllocs])
-  const toggleSameForAll = () => {
-    setAllocs((p) => {
-      if (!p) return p
-      if (p.sameForAll) { const ns = { ...p.sources }; activeSources.forEach((s) => { if (ns[s].length === 0) ns[s] = p.unified.map((f) => ({ ...f })) }); return { ...p, sameForAll: false, sources: ns } }
-      return { ...p, sameForAll: true }
-    })
-  }
   const unifiedTotal = getSourceTotal(allocs.unified)
-  const sourceTotals = activeSources.map((s) => ({ key: s, total: getSourceTotal(allocs.sources[s]) }))
-  const currentFunds = allocs.sameForAll ? allocs.unified : allocs.sources[activeTab]
+  const currentFunds = allocs.unified
   const chartData = Object.entries(
     (currentFunds || []).filter((f) => f.allocation > 0).reduce<Record<string, { value: number; color: string }>>((acc, f) => {
       if (!acc[f.assetClass]) acc[f.assetClass] = { value: 0, color: f.color }
@@ -282,16 +243,6 @@ function PortfolioEditorContent({ allocs, setAllocs, activeSources, contribution
 
   return (
     <div className="space-y-4 h-full overflow-y-auto">
-      {activeSources.length > 1 && (
-        <button type="button" onClick={toggleSameForAll} className={`w-full flex items-center gap-3 rounded-xl px-4 py-3 border transition-all ${allocs.sameForAll ? 'border-blue-200 bg-blue-50' : 'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800'}`}>
-          {allocs.sameForAll ? <ToggleRight className="w-5 h-5 text-blue-600 shrink-0" /> : <ToggleLeft className="w-5 h-5 text-gray-400 shrink-0" />}
-          <div className="text-left flex-1">
-            <p className={allocs.sameForAll ? 'text-blue-800' : 'text-gray-700 dark:text-gray-300'} style={{ fontSize: '0.82rem', fontWeight: 500 }}>Same portfolio for all sources</p>
-            <p className="text-gray-400" style={{ fontSize: '0.7rem' }}>{allocs.sameForAll ? 'One allocation applies to all contribution sources.' : 'Customize each source independently.'}</p>
-          </div>
-          {!allocs.sameForAll && <div className="flex items-center gap-1 shrink-0"><Layers className="w-3.5 h-3.5 text-gray-400" /><span className="text-gray-500" style={{ fontSize: '0.72rem' }}>{activeSources.length} sources</span></div>}
-        </button>
-      )}
       {chartData.length > 0 && (
         <div className="flex items-center gap-4 bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3">
           <div className="w-14 h-14 shrink-0">
@@ -305,84 +256,42 @@ function PortfolioEditorContent({ allocs, setAllocs, activeSources, contribution
           </div>
         </div>
       )}
-      {allocs.sameForAll ? (
-        <div>
-          {allocs.unified.length === 0
-            ? <div className="text-center py-8"><p className="text-gray-400" style={{ fontSize: '0.85rem' }}>No funds selected.</p><div className="mt-3 flex justify-center"><FundPicker existingTickers={[]} onAdd={addUnifiedFund} /></div></div>
-            : <SourceFundList funds={allocs.unified} onUpdate={updateUnifiedFund} onRemove={removeUnifiedFund} onAdd={addUnifiedFund} />}
-          <div className="mt-4 space-y-2"><AllocationIndicator total={unifiedTotal} label="Total Allocation" /></div>
-        </div>
-      ) : (
-        <div>
-          <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 mb-4">
-            {activeSources.map((src) => {
-              const t = getSourceTotal(allocs.sources[src])
-              const v = t === 100
-              return (
-                <button type="button" key={src} onClick={() => setActiveTab(src)} className={`flex-1 rounded-lg py-2 px-3 transition-all flex items-center justify-center gap-2 ${activeTab === src ? 'bg-white dark:bg-gray-700 shadow-sm' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
-                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: sourceColors[src] }} />
-                  <span className={activeTab === src ? 'text-gray-900 dark:text-white' : 'text-gray-500'} style={{ fontSize: '0.8rem', fontWeight: activeTab === src ? 600 : 400 }}>{sourceLabels[src]}</span>
-                  {t > 0 && <span className={`shrink-0 ${v ? 'text-green-600' : 'text-amber-600'}`}>{v ? <CheckCircle2 className="w-3 h-3" /> : <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>{t}%</span>}</span>}
-                </button>
-              )
-            })}
-          </div>
-          <div className="mb-2">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: sourceColors[activeTab] }} /><p className="text-gray-800 dark:text-white" style={{ fontSize: '0.88rem', fontWeight: 600 }}>{sourceLabels[activeTab]} Portfolio</p></div>
-              {activeSources.length > 1 && <CopyPortfolioMenu currentSource={activeTab} activeSources={activeSources} contributionSources={contributionSources} onCopy={(from) => setAllocs((p) => p ? ({ ...p, sources: { ...p.sources, [activeTab]: p.sources[from].map((f) => ({ ...f })) } }) : p)} />}
-            </div>
-            {allocs.sources[activeTab].length === 0
-              ? <div className="text-center py-6 bg-gray-50 dark:bg-gray-800 rounded-xl"><p className="text-gray-400 mb-2" style={{ fontSize: '0.82rem' }}>No funds for {sourceLabels[activeTab]}.</p><div className="flex justify-center"><FundPicker existingTickers={[]} onAdd={(f) => addSourceFund(activeTab, f)} /></div></div>
-              : <SourceFundList funds={allocs.sources[activeTab]} onUpdate={(t, v) => updateSourceFund(activeTab, t, v)} onRemove={(t) => removeSourceFund(activeTab, t)} onAdd={(f) => addSourceFund(activeTab, f)} />}
-            <div className="mt-3 space-y-2"><AllocationIndicator total={getSourceTotal(allocs.sources[activeTab])} label={`${sourceLabels[activeTab]} Allocation`} /></div>
-          </div>
-          <div className="border-t border-gray-100 dark:border-gray-800 pt-3 mt-4 space-y-1.5">
-            <p className="text-gray-400 mb-1" style={{ fontSize: '0.68rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>All Sources</p>
-            {sourceTotals.map((s) => (
-              <div key={s.key} className={`flex items-center justify-between px-3 py-1.5 rounded-lg ${s.total === 100 ? 'bg-green-50' : 'bg-amber-50'}`}>
-                <div className="flex items-center gap-2">
-                  {s.total === 100 ? <CheckCircle2 className="w-3 h-3 text-green-600" /> : <AlertTriangle className="w-3 h-3 text-amber-600" />}
-                  <span className={s.total === 100 ? 'text-green-700' : 'text-amber-700'} style={{ fontSize: '0.75rem', fontWeight: 500 }}>{sourceLabels[s.key]}</span>
-                </div>
-                <span className={`tabular-nums ${s.total === 100 ? 'text-green-800' : 'text-amber-800'}`} style={{ fontSize: '0.8rem', fontWeight: 600 }}>{s.total}%</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      <div>
+        {allocs.unified.length === 0
+          ? <div className="text-center py-8"><p className="text-gray-400" style={{ fontSize: '0.85rem' }}>No funds selected.</p><div className="mt-3 flex justify-center"><FundPicker existingTickers={[]} onAdd={addUnifiedFund} /></div></div>
+          : <SourceFundList funds={allocs.unified} onUpdate={updateUnifiedFund} onRemove={removeUnifiedFund} onAdd={addUnifiedFund} />}
+        <div className="mt-4 space-y-2"><AllocationIndicator total={unifiedTotal} label="Total Allocation" /></div>
+      </div>
     </div>
   )
 }
 
-function CustomizeModal({ isOpen, onClose, initialAllocations, activeSources, contributionSources, onSave, initialTab }: { isOpen: boolean; onClose: () => void; initialAllocations: PerSourceAllocations; activeSources: SourceKey[]; contributionSources: { preTax: number; roth: number; afterTax: number }; onSave: (a: PerSourceAllocations) => void; initialTab?: SourceKey }) {
+function CustomizeModal({ isOpen, onClose, initialAllocations, onSave }: { isOpen: boolean; onClose: () => void; initialAllocations: PerSourceAllocations; activeSources?: SourceKey[]; contributionSources?: { preTax: number; roth: number; afterTax: number }; onSave: (a: PerSourceAllocations) => void; initialTab?: SourceKey }) {
   const [allocs, setAllocs] = useState<PerSourceAllocations>(initialAllocations)
-  const [activeTab, setActiveTab] = useState<SourceKey>(initialTab || activeSources[0] || 'preTax')
   const backdropRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    if (isOpen) { setAllocs(initialAllocations); setActiveTab(initialTab || activeSources[0] || 'preTax'); document.body.style.overflow = 'hidden' }
+    if (isOpen) { setAllocs(initialAllocations); document.body.style.overflow = 'hidden' }
     return () => { document.body.style.overflow = '' }
-  }, [isOpen, initialAllocations, activeSources, initialTab])
+  }, [isOpen, initialAllocations])
   if (!isOpen) return null
   const unifiedTotal = getSourceTotal(allocs.unified)
-  const sourceTotals = activeSources.map((s) => ({ key: s, total: getSourceTotal(allocs.sources[s]) }))
-  const allValid = allocs.sameForAll ? unifiedTotal === 100 : sourceTotals.every((s) => s.total === 100)
+  const allValid = unifiedTotal === 100
   return (
     <div ref={backdropRef} onClick={(e) => { if (e.target === backdropRef.current) onClose() }} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-          <div><h2 className="text-gray-900 dark:text-white" style={{ fontSize: '1.1rem' }}>Edit Portfolio</h2><p className="text-gray-400 mt-0.5" style={{ fontSize: '0.78rem' }}>{allocs.sameForAll ? 'Set fund allocations for all contribution sources.' : `Editing ${sourceLabels[activeTab]} contribution portfolio.`}</p></div>
+          <div><h2 className="text-gray-900 dark:text-white" style={{ fontSize: '1.1rem' }}>Edit Portfolio</h2><p className="text-gray-400 mt-0.5" style={{ fontSize: '0.78rem' }}>Set fund allocations for all contribution sources.</p></div>
           <button type="button" onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"><X className="w-4 h-4" /></button>
         </div>
         <div className="flex-1 overflow-y-auto px-6 py-4">
-          <PortfolioEditorContent allocs={allocs} setAllocs={setAllocs as React.Dispatch<React.SetStateAction<PerSourceAllocations | null>>} activeSources={activeSources} contributionSources={contributionSources} activeTab={activeTab} setActiveTab={setActiveTab} />
+          <PortfolioEditorContent allocs={allocs} setAllocs={setAllocs as React.Dispatch<React.SetStateAction<PerSourceAllocations | null>>} />
         </div>
         <div className="border-t border-gray-100 dark:border-gray-800 px-6 py-4">
           <div className="flex items-center gap-3">
             <button type="button" onClick={() => setAllocs(initialAllocations)} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-700 transition-colors px-3 py-2" style={{ fontSize: '0.82rem', fontWeight: 500 }}><RotateCcw className="w-3.5 h-3.5" /> Reset</button>
             <div className="flex-1" />
             <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" style={{ fontSize: '0.85rem', fontWeight: 500 }}>Cancel</button>
-            <button type="button" onClick={() => { if (allValid) onSave(allocs) }} disabled={!allValid} className={`px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all ${allValid ? 'bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.98]' : 'bg-gray-200 dark:bg-gray-800 text-gray-400 cursor-not-allowed'}`} style={{ fontSize: '0.85rem', fontWeight: 500 }}><Check className="w-4 h-4" /> Save Portfolio</button>
+            <button type="button" onClick={() => { if (allValid) onSave(allocs) }} disabled={!allValid} className={`px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all ${allValid ? 'btn-brand text-white active:scale-[0.98]' : 'bg-gray-200 dark:bg-gray-800 text-gray-400 cursor-not-allowed'}`} style={{ fontSize: '0.85rem', fontWeight: 500 }}><Check className="w-4 h-4" /> Save Portfolio</button>
           </div>
         </div>
       </div>
@@ -451,7 +360,6 @@ function InvestmentStrategy() {
   const [modalInitialTab, setModalInitialTab] = useState<SourceKey>('preTax')
   const [customAllocations, setCustomAllocations] = useState<PerSourceAllocations | null>(null)
   const [inlineAllocs, setInlineAllocs] = useState<PerSourceAllocations | null>(null)
-  const [inlineActiveTab, setInlineActiveTab] = useState<SourceKey>('preTax')
 
   const currentAllocation = allocations[data.riskLevel] ?? allocations['balanced']
   const defaultFunds = buildFundsFromRecommended(currentAllocation)
@@ -482,7 +390,7 @@ function InvestmentStrategy() {
       unified: defaultFunds.map((f) => ({ ...f })),
       sources: { roth: defaultFunds.map((f) => ({ ...f })), preTax: defaultFunds.map((f) => ({ ...f })), afterTax: defaultFunds.map((f) => ({ ...f })) },
     }
-    if (showBuildPortfolioModal) { setInlineAllocs(initial); setInlineActiveTab(sourceKey); setEditingSource(sourceKey) }
+    if (showBuildPortfolioModal) { setInlineAllocs(initial); setEditingSource(sourceKey) }
     else { setCustomAllocations(initial); setModalInitialTab(sourceKey); setShowCustomizeModal(true) }
   }
 
@@ -568,7 +476,7 @@ function InvestmentStrategy() {
                 <p className="text-blue-900 dark:text-blue-300 mb-1" style={{ fontSize: '0.78rem', fontWeight: 600 }}>Why this works for you:</p>
                 <p className="text-blue-800 dark:text-blue-400" style={{ fontSize: '0.75rem', lineHeight: 1.5 }}>Balanced for growth with your retirement timeline</p>
               </div>
-              <button type="button" onClick={handleNext} className="w-full bg-blue-600 text-white py-3 px-6 rounded-xl hover:bg-blue-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+              <button type="button" onClick={handleNext} className="btn-brand flex w-full items-center justify-center gap-2 rounded-xl py-3 px-6 transition-all active:scale-[0.98]" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
                 Continue with recommended plan <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -662,19 +570,19 @@ function InvestmentStrategy() {
                       </div>
                     </div>
                     <div className="flex-1 overflow-y-auto px-6 py-4">
-                      <PortfolioEditorContent allocs={inlineAllocs} setAllocs={setInlineAllocs} activeSources={activeSources} contributionSources={data.contributionSources} activeTab={inlineActiveTab} setActiveTab={setInlineActiveTab} />
+                      <PortfolioEditorContent allocs={inlineAllocs} setAllocs={setInlineAllocs} />
                     </div>
                     <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
                       <div className="flex items-center gap-3">
                         <button type="button" onClick={handleCloseInline} className="flex-1 px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" style={{ fontSize: '0.85rem', fontWeight: 500 }}>Cancel</button>
-                        <button type="button" onClick={handleSaveInline} className="flex-1 px-5 py-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-all flex items-center justify-center gap-2" style={{ fontSize: '0.85rem', fontWeight: 500 }}><Check className="w-4 h-4" /> Save Changes</button>
+                        <button type="button" onClick={handleSaveInline} className="btn-brand flex flex-1 items-center justify-center gap-2 rounded-xl px-5 py-2.5 transition-all" style={{ fontSize: '0.85rem', fontWeight: 500 }}><Check className="w-4 h-4" /> Save Changes</button>
                       </div>
                     </div>
                   </div>
                 )}
               </div>
               <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-                <button type="button" onClick={() => { setShowBuildPortfolioModal(false); setEditingSource(null); setInlineAllocs(null) }} className="w-full bg-blue-600 text-white py-3 px-6 rounded-xl hover:bg-blue-700 transition-all flex items-center justify-center gap-2" style={{ fontSize: '0.9rem', fontWeight: 600 }}>Done <ArrowRight className="w-4 h-4" /></button>
+                <button type="button" onClick={() => { setShowBuildPortfolioModal(false); setEditingSource(null); setInlineAllocs(null) }} className="btn-brand flex w-full items-center justify-center gap-2 rounded-xl py-3 px-6 transition-all" style={{ fontSize: '0.9rem', fontWeight: 600 }}>Done <ArrowRight className="w-4 h-4" /></button>
               </div>
             </div>
           </div>

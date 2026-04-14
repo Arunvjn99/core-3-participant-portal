@@ -144,7 +144,23 @@ export default function AutoIncrease() {
             </p>
 
             <div className="mb-4 grid gap-3 sm:grid-cols-2">
-              {/* With Auto Increase */}
+              {/* Without Auto Increase — shown first so the "With" option on the right looks better */}
+              <div className="flex flex-col rounded-xl border border-gray-200 bg-gray-50 p-4 opacity-75 dark:border-gray-700 dark:bg-gray-800/50">
+                <div className="mb-2 flex items-center gap-1.5">
+                  <Minus className="h-4 w-4 text-gray-400" />
+                  <span className="text-gray-500 dark:text-gray-400" style={{ fontSize: '0.82rem', fontWeight: 600 }}>
+                    Without Auto Increase
+                  </span>
+                </div>
+                <p className="text-gray-400 dark:text-gray-500" style={{ fontSize: '0.65rem', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.04em' }}>
+                  Est. savings in 10 years
+                </p>
+                <p className="mt-0.5 text-gray-500 dark:text-gray-400" style={{ fontSize: '1.5rem', fontWeight: 700 }}>
+                  ${fixedProjection.toLocaleString()}
+                </p>
+              </div>
+
+              {/* With Auto Increase — recommended, on the right */}
               <div className="relative flex flex-col rounded-xl border-2 border-green-500 bg-white p-4 dark:bg-gray-800">
                 <span
                   className="absolute -top-2.5 left-3 rounded-full bg-green-600 px-2.5 py-0.5 text-white"
@@ -163,22 +179,6 @@ export default function AutoIncrease() {
                 </p>
                 <p className="mt-0.5 text-green-700 dark:text-green-400" style={{ fontSize: '1.5rem', fontWeight: 700 }}>
                   ${autoProjection.toLocaleString()}
-                </p>
-              </div>
-
-              {/* Without Auto Increase */}
-              <div className="flex flex-col rounded-xl border border-gray-200 bg-gray-50 p-4 opacity-75 dark:border-gray-700 dark:bg-gray-800/50">
-                <div className="mb-2 flex items-center gap-1.5">
-                  <Minus className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-500 dark:text-gray-400" style={{ fontSize: '0.82rem', fontWeight: 600 }}>
-                    Without Auto Increase
-                  </span>
-                </div>
-                <p className="text-gray-400 dark:text-gray-500" style={{ fontSize: '0.65rem', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.04em' }}>
-                  Est. savings in 10 years
-                </p>
-                <p className="mt-0.5 text-gray-500 dark:text-gray-400" style={{ fontSize: '1.5rem', fontWeight: 700 }}>
-                  ${fixedProjection.toLocaleString()}
                 </p>
               </div>
             </div>

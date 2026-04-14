@@ -130,14 +130,14 @@ export default function ContributionSource() {
             </div>
 
             <div className="flex h-2.5 overflow-hidden rounded-full">
-              {planDefault.preTax > 0 && <div className="bg-blue-600" style={{ width: `${planDefault.preTax}%` }} />}
+              {planDefault.preTax > 0 && <div className="brand-bg" style={{ width: `${planDefault.preTax}%` }} />}
               {planDefault.roth > 0 && <div className="bg-purple-600" style={{ width: `${planDefault.roth}%` }} />}
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-blue-600" />
+                  <div className="brand-bg h-2 w-2 rounded-full" />
                   <p className="text-sm text-gray-700 dark:text-gray-300">Pre-Tax ({planDefault.preTax}%)</p>
                 </div>
                 <p className="text-sm font-semibold text-gray-900 dark:text-white">${planDefaultPreTax.toLocaleString()}</p>
@@ -173,7 +173,7 @@ export default function ContributionSource() {
                 )
                 navigate('/enrollment/auto-increase')
               }}
-              className="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-md transition-all hover:bg-blue-700"
+              className="btn-brand w-full rounded-xl px-4 py-3 text-sm font-semibold shadow-md"
             >
               Continue with Plan Default
             </button>
@@ -195,7 +195,7 @@ export default function ContributionSource() {
               <div className="space-y-2">
                 <div className="flex h-4 overflow-hidden rounded-full border border-gray-200 shadow-sm dark:border-gray-700">
                   {sources.preTax > 0 && (
-                    <div className="bg-blue-600 transition-all duration-300" style={{ width: `${sources.preTax}%` }} />
+                    <div className="brand-bg transition-all duration-300" style={{ width: `${sources.preTax}%` }} />
                   )}
                   {sources.roth > 0 && (
                     <div className="bg-purple-600 transition-all duration-300" style={{ width: `${sources.roth}%` }} />
@@ -206,7 +206,7 @@ export default function ContributionSource() {
                 </div>
                 <div className="flex flex-wrap items-center gap-4 text-xs">
                   <div className="flex items-center gap-1.5">
-                    <div className="h-2 w-2 rounded-full bg-blue-600" />
+                    <div className="brand-bg h-2 w-2 rounded-full" />
                     <span className="text-gray-500 dark:text-gray-400">{sources.preTax}% Pre-Tax</span>
                   </div>
                   <div className="flex items-center gap-1.5">
@@ -227,7 +227,7 @@ export default function ContributionSource() {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-2">
-                        <div className="h-3 w-3 rounded-full bg-blue-600" />
+                        <div className="brand-bg h-3 w-3 rounded-full" />
                         <p className="text-sm font-semibold text-gray-900 dark:text-white">Pre-Tax</p>
                       </div>
                       <p className="ml-5 text-xs text-gray-500 dark:text-gray-400">Lower taxes today</p>
@@ -372,14 +372,6 @@ export default function ContributionSource() {
                       Roth may be better — tax-free income later
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleNext}
-                    disabled={total !== 100}
-                    className="mt-3 w-full rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-700 transition-all hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-                  >
-                    Continue with Custom Allocation
-                  </button>
                 </div>
               </div>
             </div>
@@ -392,7 +384,7 @@ export default function ContributionSource() {
                   <p className="mb-3 text-xl font-extrabold text-gray-900 dark:text-white">${monthlyTotal.toLocaleString()}</p>
                   <div className="space-y-1.5 border-l-2 border-gray-200 pl-3 dark:border-gray-700">
                     {[
-                      { color: 'bg-blue-600', label: 'Pre-Tax', amount: monthlyPreTax },
+                      { color: 'brand-bg', label: 'Pre-Tax', amount: monthlyPreTax },
                       { color: 'bg-purple-600', label: 'Roth', amount: monthlyRoth },
                     ].map(({ color, label, amount }) => (
                       <div key={label} className="flex items-center justify-between">
@@ -448,7 +440,7 @@ export default function ContributionSource() {
                 bg: 'from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/10',
                 border: 'border-blue-200 dark:border-blue-800/40',
                 icon: <TrendingUp className="h-4 w-4 text-white" />,
-                iconBg: 'bg-blue-600',
+                iconBg: 'brand-bg',
                 checkColor: 'text-blue-600',
                 title: 'Pre-Tax',
                 points: ['Lower taxes today', 'Reduces current taxable income', 'Pay taxes when you withdraw'],

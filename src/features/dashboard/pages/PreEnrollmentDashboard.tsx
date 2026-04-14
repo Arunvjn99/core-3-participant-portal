@@ -6,19 +6,19 @@ import {
   ChevronRight,
   TrendingUp,
   Sparkles,
-  BookOpen,
-  Calculator,
-  ShieldCheck,
+  UserCheck,
 } from 'lucide-react'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { useAIStore } from '@/core/store/aiStore'
 import { useAuth } from '@/core/hooks/useAuth'
 import { useUser } from '@/core/hooks/useUser'
 import { EnrollmentPersonalizationModal } from '../components/EnrollmentPersonalizationModal'
+import AdvisorModal from '@/features/advisors/AdvisorModal'
 
 export function PreEnrollmentDashboard() {
   const navigate = useNavigate()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [advisorModalOpen, setAdvisorModalOpen] = useState(false)
   const { openChat } = useAIStore()
   const { user } = useAuth()
   const { profile } = useUser()
@@ -63,7 +63,7 @@ export function PreEnrollmentDashboard() {
             >
               <h1 className="text-6xl font-bold leading-[1.05] tracking-[-0.04em] text-slate-900 dark:text-white md:text-7xl">
                 Let&apos;s build your <br />
-                <span className="text-blue-600 dark:text-blue-400">future</span>, together.
+                <span className="brand-text">future</span>, together.
               </h1>
 
               <p className="max-w-lg text-xl font-medium leading-relaxed text-slate-500 dark:text-slate-400">
@@ -75,7 +75,7 @@ export function PreEnrollmentDashboard() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(true)}
-                  className="flex items-center gap-2.5 rounded-2xl bg-slate-900 px-10 py-4 text-base font-bold text-white shadow-xl shadow-slate-200 transition-all hover:scale-[1.02] hover:bg-slate-800 active:scale-[0.98] dark:bg-white dark:text-slate-900 dark:shadow-none dark:hover:bg-gray-100"
+                  className="btn-brand flex items-center gap-2.5 rounded-2xl px-10 py-4 text-base font-bold shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Start my enrollment →
                 </button>
@@ -123,7 +123,7 @@ export function PreEnrollmentDashboard() {
                     className="absolute bottom-10 right-10 flex h-72 w-56 flex-col gap-4 rounded-2xl border-2 border-slate-900 bg-white p-6 shadow-2xl shadow-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:shadow-slate-900/50"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-blue-600" />
+                      <div className="brand-bg h-10 w-10 rounded-full" />
                       <div className="flex flex-col gap-1">
                         <div className="h-2 w-20 rounded bg-slate-900 dark:bg-slate-200" />
                         <div className="h-1.5 w-12 rounded bg-slate-200 dark:bg-slate-500" />
@@ -139,7 +139,7 @@ export function PreEnrollmentDashboard() {
                         <div className="text-[10px] font-bold uppercase text-slate-400">Growth</div>
                         <div className="text-xl font-black text-slate-900 dark:text-white">+24%</div>
                       </div>
-                      <TrendingUp className="h-8 w-8 text-blue-600" />
+                      <TrendingUp className="brand-text h-8 w-8" />
                     </div>
                   </motion.div>
                 </div>
@@ -190,63 +190,31 @@ export function PreEnrollmentDashboard() {
 
           {/* Bento */}
           <section className="relative z-10 grid gap-8 md:grid-cols-2">
+            {/* Contact Advisor Card */}
             <motion.div
               whileHover={{ y: -8 }}
-              className="flex flex-col overflow-hidden rounded-[32px] border border-white/5 bg-[#0a0a0a] shadow-2xl transition-all"
+              className="relative cursor-pointer overflow-hidden rounded-[32px] shadow-2xl transition-all"
+              style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)' }}
+              onClick={() => setAdvisorModalOpen(true)}
             >
-              <div className="relative flex aspect-[16/9] items-center justify-center overflow-hidden border-b border-white/5 bg-[#0d0d0d]">
-                <div
-                  className="absolute inset-0 bg-[radial-gradient(#ffffff08_1px,transparent_1px)] bg-[length:24px_24px]"
-                />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.1),transparent_70%)]" />
-
-                <div className="relative z-10 flex items-center justify-center">
-                  <div className="absolute h-32 w-32 rounded-full bg-blue-600/20 blur-3xl" />
-                  <motion.div
-                    animate={{ scale: [1, 1.05, 1] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                    className="relative flex h-20 w-20 items-center justify-center rounded-full border border-white/20 bg-blue-500/30 shadow-[0_0_50px_rgba(59,130,246,0.4)] backdrop-blur-sm"
-                  >
-                    <Sparkles className="h-10 w-10 text-white" />
-                  </motion.div>
-
-                  {[BookOpen, Calculator, TrendingUp, ShieldCheck].map((Icon, i) => (
-                    <motion.div
-                      key={i}
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-                      className="absolute flex h-full w-full items-center justify-center"
-                      style={{ rotate: `${i * 90}deg` }}
-                    >
-                      <div
-                        className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/5 shadow-xl backdrop-blur-md"
-                        style={{ transform: `rotate(-${i * 90}deg) translateY(-80px)` }}
-                      >
-                        <Icon className="h-6 w-6 text-slate-400" />
-                      </div>
-                    </motion.div>
-                  ))}
-
-                  <svg className="absolute h-64 w-64 opacity-20" viewBox="0 0 100 100" aria-hidden>
-                    <circle cx="50" cy="50" r="40" fill="none" stroke="white" strokeWidth="0.5" strokeDasharray="1 4" />
-                    <circle cx="50" cy="50" r="30" fill="none" stroke="white" strokeWidth="0.5" strokeDasharray="1 4" />
-                  </svg>
+              <div
+                className="absolute inset-0 opacity-10"
+                style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}
+              />
+              <div className="relative flex min-h-[280px] flex-col justify-between p-8">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 mb-6">
+                  <UserCheck className="h-6 w-6 text-white" />
                 </div>
-              </div>
-
-              <div className="flex flex-col gap-4 p-8">
-                <div className="flex flex-col gap-2">
-                  <h3 className="text-2xl font-bold tracking-tight text-white">How much is enough for retirement?</h3>
-                  <p className="text-base font-medium leading-relaxed text-slate-400">
-                    Finding the right contribution rate for your goals.
+                <div>
+                  <h3 className="mb-2 text-2xl font-bold text-white">Talk to an Advisor</h3>
+                  <p className="mb-6 text-sm leading-relaxed text-white/60">
+                    Get personalized guidance from a certified retirement planner. Book a free 30-minute session.
                   </p>
+                  <div className="group flex items-center gap-2 text-sm font-medium text-white/80 transition-colors hover:text-white">
+                    <span>Browse Advisors</span>
+                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  className="flex w-fit items-center gap-2 text-sm font-bold text-white/60 transition-colors hover:text-white"
-                >
-                  Know more <ChevronRight className="h-4 w-4" />
-                </button>
               </div>
             </motion.div>
 
@@ -332,6 +300,10 @@ export function PreEnrollmentDashboard() {
           </div>
         </footer>
       </div>
+
+      {advisorModalOpen && (
+        <AdvisorModal onClose={() => setAdvisorModalOpen(false)} />
+      )}
     </AnimatedPage>
   )
 }

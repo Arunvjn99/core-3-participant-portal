@@ -13,32 +13,64 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Brand theme tokens — overridden by applyBrandTheme() when company branding loads */
+/* ── Brand tokens — set by JS via BrandThemeProvider ── */
 :root {
   --brand-primary: #2563eb;
   --brand-primary-hover: #1d4ed8;
   --brand-primary-light: #eff6ff;
   --brand-primary-ring: rgba(37, 99, 235, 0.25);
-  --brand-font: inherit;
+  --brand-font: Inter, sans-serif;
+  --brand-radius: 0.75rem;
+  --color-brand: #2563eb;
+  --color-brand-hover: #1d4ed8;
 }
 
-.btn-brand,
-button[data-brand='primary'] {
+.btn-brand {
   background-color: var(--brand-primary) !important;
-  color: white;
+  color: #fff !important;
+  transition:
+    background-color 0.15s ease,
+    opacity 0.15s ease;
 }
-.btn-brand:hover,
-button[data-brand='primary']:hover {
+.btn-brand:hover {
   background-color: var(--brand-primary-hover) !important;
+}
+.btn-brand:focus-visible {
+  outline: 2px solid var(--brand-primary) !important;
+}
+
+[data-brand='primary'] {
+  background-color: var(--brand-primary) !important;
+  color: #fff !important;
+}
+[data-brand='primary']:hover {
+  background-color: var(--brand-primary-hover) !important;
+}
+
+[data-brand-nav-active] {
+  color: var(--brand-primary) !important;
+  background-color: var(--brand-primary-light) !important;
 }
 
 *:focus-visible {
   outline-color: var(--brand-primary) !important;
 }
 
-[data-brand-active] {
+.brand-progress {
+  background-color: var(--brand-primary) !important;
+}
+
+.brand-text {
   color: var(--brand-primary) !important;
+}
+.brand-bg {
+  background-color: var(--brand-primary) !important;
+}
+.brand-bg-light {
   background-color: var(--brand-primary-light) !important;
+}
+.brand-border {
+  border-color: var(--brand-primary) !important;
 }
 
 /* Base */
@@ -693,9 +725,9 @@ html[data-theme='dark'] {
 
   .btn-primary {
     @apply text-white px-4 py-2 rounded-lg font-semibold transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
-    background-color: var(--brand-primary);
+    background-color: var(--brand-primary) !important;
   }
   .btn-primary:hover {
-    background-color: var(--brand-primary-hover);
+    background-color: var(--brand-primary-hover) !important;
   }
 }

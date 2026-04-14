@@ -40,7 +40,7 @@ function WithdrawalSource() {
       value: pretax,
       setValue: setPretax,
       max: maxPretax,
-      color: "bg-blue-600",
+      color: "brand-bg",
       bgColor: "bg-blue-200",
       taxNote: "Subject to ordinary income tax" },
     {

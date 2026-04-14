@@ -115,7 +115,7 @@ function AuthCarousel() {
           if (fallback) fallback.style.display = 'flex';
         }} />
         <div className="hidden items-center gap-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+          <div className="brand-bg flex h-8 w-8 items-center justify-center rounded-lg">
             <span className="text-white font-black text-sm">C</span>
           </div>
           <span className="text-white font-bold text-xl tracking-tight">CORE</span>

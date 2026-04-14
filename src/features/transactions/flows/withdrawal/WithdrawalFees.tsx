@@ -182,7 +182,7 @@ function WithdrawalFees() {
               </div>
               <div className="h-2 bg-blue-200 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-blue-600 transition-all"
+                  className="brand-progress h-full transition-all"
                   style={{
                     width: `${(remainingBalance / currentBalance) * 100}%` }}
                 />

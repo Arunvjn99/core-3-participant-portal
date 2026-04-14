@@ -97,7 +97,7 @@ export default function LoginPage() {
         <div className="flex justify-end">
           <Link
             to="/forgot-password"
-            className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+            className="brand-text text-sm font-medium hover:opacity-80"
           >
             Forgot password?
           </Link>
@@ -114,7 +114,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3.5 bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-white dark:text-gray-900 text-white font-semibold rounded-xl transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+          className="btn-brand w-full rounded-xl py-3.5 font-semibold transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? (
             <span className="flex items-center justify-center gap-2">
@@ -132,7 +132,7 @@ export default function LoginPage() {
         Still need help? Contact{' '}
         <a
           href="mailto:support@congruentsolutions.com"
-          className="font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+          className="brand-text font-semibold hover:underline"
         >
           Help Center
         </a>
@@ -143,7 +143,7 @@ export default function LoginPage() {
         Don&apos;t have an account?{' '}
         <Link
           to="/signup"
-          className="font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+          className="brand-text font-semibold hover:underline"
         >
           Sign up
         </Link>

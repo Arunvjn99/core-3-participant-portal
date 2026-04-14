@@ -198,7 +198,7 @@ export default function ReviewEnrollment() {
             disabled={!data.agreedToTerms}
             className={`flex w-full items-center justify-center gap-2 rounded-xl px-8 py-3.5 shadow-lg transition-all md:shadow-none ${
               data.agreedToTerms
-                ? 'bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.98]'
+                ? 'btn-brand text-white active:scale-[0.98]'
                 : 'cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-gray-800'
             }`}
           >
