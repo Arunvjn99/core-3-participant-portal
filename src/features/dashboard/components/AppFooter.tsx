@@ -1,10 +1,14 @@
+import { useTranslation } from 'react-i18next'
 import { useBrandTheme } from '@/core/theme/BrandThemeContext'
 
 const CORE_LOGO = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/CORE%20logo.png'
 
 export default function AppFooter() {
+  const { t } = useTranslation()
   // useBrandTheme is available for any future brand-specific footer customisation
   void useBrandTheme()
+
+  const year = new Date().getFullYear()
 
   return (
     <footer className="mt-auto border-t border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
@@ -19,7 +23,7 @@ export default function AppFooter() {
               onError={(e) => { e.currentTarget.style.display = 'none' }}
             />
             <span className="text-xs text-gray-400 dark:text-gray-600">
-              © {new Date().getFullYear()} Congruent Solutions Inc. All rights reserved.
+              {t('footer.copyright', { year })}
             </span>
           </div>
 
@@ -29,19 +33,19 @@ export default function AppFooter() {
               href="#"
               className="uppercase tracking-wide transition-colors hover:text-gray-700 dark:hover:text-gray-300"
             >
-              Privacy Policy
+              {t('footer.privacy')}
             </a>
             <a
               href="#"
               className="uppercase tracking-wide transition-colors hover:text-gray-700 dark:hover:text-gray-300"
             >
-              Terms of Service
+              {t('footer.terms')}
             </a>
             <a
               href="#"
               className="uppercase tracking-wide transition-colors hover:text-gray-700 dark:hover:text-gray-300"
             >
-              Help Center
+              {t('footer.help')}
             </a>
           </div>
         </div>

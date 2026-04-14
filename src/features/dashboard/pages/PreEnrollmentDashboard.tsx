@@ -281,32 +281,6 @@ export function PreEnrollmentDashboard() {
             </motion.div>
           </section>
         </main>
-
-        <footer className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-10 border-t border-slate-200 px-6 py-20 dark:border-slate-800 md:flex-row md:items-center">
-          <div className="flex flex-col items-center gap-4 md:items-start">
-            <div className="flex items-center gap-2.5 opacity-40 grayscale">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900 dark:bg-slate-100">
-                <div className="h-3.5 w-3.5 rotate-45 rounded-sm bg-white dark:bg-slate-900" />
-              </div>
-              <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Participant Portal</span>
-            </div>
-            <p className="text-[13px] font-medium text-slate-400 dark:text-slate-600">
-              {t('footer.copyright', { year: new Date().getFullYear() })}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-10 text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-600">
-            <a href="#" className="transition-colors hover:text-slate-900 dark:hover:text-slate-300">
-              {t('footer.privacy')}
-            </a>
-            <a href="#" className="transition-colors hover:text-slate-600 dark:hover:text-slate-400">
-              {t('footer.terms')}
-            </a>
-            <a href="#" className="transition-colors hover:text-slate-600 dark:hover:text-slate-400">
-              {t('footer.help')}
-            </a>
-          </div>
-        </footer>
       </div>
 
       {advisorModalOpen && (
