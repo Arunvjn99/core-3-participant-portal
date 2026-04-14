@@ -1,0 +1,210 @@
+{
+  "app_name": "Portal del Participante",
+  "language": "Idioma",
+  "lang": {
+    "en": "English",
+    "es": "Español",
+    "fr": "Français"
+  },
+
+  "nav": {
+    "dashboard": "Panel",
+    "enrollment": "Inscripción",
+    "transactions": "Transacciones",
+    "investments": "Inversiones",
+    "profile": "Perfil",
+    "sign_out": "Cerrar sesión",
+    "toggle_theme": "Cambiar tema",
+    "open_search": "Abrir búsqueda",
+    "notifications": "Notificaciones",
+    "menu": "Menú"
+  },
+
+  "greeting": {
+    "morning": "Buenos días",
+    "afternoon": "Buenas tardes",
+    "evening": "Buenas noches"
+  },
+
+  "auth": {
+    "login": "Iniciar sesión",
+    "signup": "Registrarse",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "confirm_password": "Confirmar contraseña",
+    "full_name": "Nombre completo",
+    "enter_email": "Ingrese su correo o nombre de usuario",
+    "enter_password": "Ingrese su contraseña",
+    "enter_confirm_password": "Confirme su contraseña",
+    "enter_full_name": "Ingrese su nombre completo",
+    "forgot_password": "¿Olvidó su contraseña?",
+    "no_account": "¿No tiene una cuenta?",
+    "have_account": "¿Ya tiene una cuenta?",
+    "help_text": "¿Necesita más ayuda? Contacte",
+    "help_center": "Centro de ayuda",
+    "signing_in": "Iniciando sesión...",
+    "creating_account": "Creando cuenta...",
+    "show_password": "Mostrar contraseña",
+    "hide_password": "Ocultar contraseña",
+    "forgot_title": "Olvidé mi contraseña",
+    "forgot_subtitle": "Ingrese su correo y le enviaremos un enlace de restablecimiento.",
+    "send_reset": "Enviar enlace",
+    "sending": "Enviando...",
+    "back_to_login": "Volver a iniciar sesión",
+    "reset_sent_title": "Revise su correo",
+    "reset_sent_text": "Si existe una cuenta para {{email}}, recibirá un enlace de restablecimiento en breve.",
+    "verify_title": "Código de verificación",
+    "verify_subtitle": "Hemos enviado un código de 6 dígitos a su correo electrónico.",
+    "verify_button": "Verificar y continuar",
+    "verifying": "Verificando...",
+    "resend_code": "Reenviar código",
+    "resend_sending": "Enviando…",
+    "resend_demo": "Modo demo — no se envió correo.",
+    "resend_success": "Enviamos un nuevo código a su correo.",
+    "resend_no_email": "No pudimos determinar su correo. Inicie sesión de nuevo para solicitar un código.",
+    "platform_name": "Plataforma de Inteligencia para la Jubilación",
+    "platform_by": "por Congruent Solutions",
+    "copyright": "© Congruent Solutions, Inc. Todos los derechos reservados",
+    "privacy_policy": "Política de privacidad"
+  },
+
+  "carousel": {
+    "slide1_title": "Monitoree el rendimiento del plan",
+    "slide1_subtitle": "Vea la participación, tendencias de contribución y salud del plan de un vistazo para tomar decisiones informadas.",
+    "slide2_title": "Nuevas funciones disponibles",
+    "slide2_subtitle": "Inicie sesión para explorar herramientas más inteligentes para planificar su futuro financiero.",
+    "slide3_title": "Potencie su supervisión",
+    "slide3_subtitle": "Inicie sesión para obtener visibilidad clara del rendimiento de cada plan.",
+    "projected_balance": "Saldo proyectado",
+    "prev_slide": "Diapositiva anterior",
+    "next_slide": "Siguiente diapositiva",
+    "go_to_slide": "Ir a diapositiva {{n}}"
+  },
+
+  "hero": {
+    "title_line1": "Construyamos su",
+    "title_line2": "futuro",
+    "title_line3": ", juntos.",
+    "subtitle": "Está a un paso de activar su 401(k). Hemos simplificado todo para que pueda enfocarse en lo que importa.",
+    "start_enrollment": "Iniciar mi inscripción →",
+    "learn_plan": "Conocer el plan",
+    "time_note": "Solo toma 5 minutos"
+  },
+
+  "learning": {
+    "step1": "Paso 1",
+    "title_line1": "Aprenda cómo funciona",
+    "title_line2": "su plan de jubilación",
+    "subtitle": "Entienda las contribuciones, la igualación del empleador y cómo crecen sus ahorros con el tiempo.",
+    "item1": "Qué es un 401(k) y cómo funciona",
+    "item2": "Cuánto debería contribuir",
+    "item3": "Cómo la igualación del empleador impacta sus ahorros"
+  },
+
+  "advisor": {
+    "title": "Hablar con un asesor",
+    "subtitle": "Obtenga orientación personalizada de un planificador de jubilación certificado. Reserve una sesión gratuita de 30 minutos.",
+    "browse": "Ver asesores"
+  },
+
+  "core_ai": {
+    "title": "Preguntar a Core AI",
+    "description": "Obtenga respuestas instantáneas y orientación personalizada sobre jubilación.",
+    "start_chatting": "Iniciar chat",
+    "online": "En línea",
+    "typing": "Core AI está escribiendo...",
+    "placeholder": "Pregunte sobre su plan...",
+    "initial_message": "Hola, soy Core AI — su asistente de jubilación. ¿Qué le gustaría hacer?",
+    "chip_enroll": "Quiero inscribirme",
+    "chip_loan": "Quiero solicitar un préstamo",
+    "chip_withdraw": "¿Cuánto puedo retirar?",
+    "chip_balance": "Consultar mi saldo adquirido"
+  },
+
+  "feedback": {
+    "title": "Enviar comentarios",
+    "subtitle": "¿Cómo calificaría esta página? Los detalles opcionales nos ayudan a mejorar.",
+    "rating": "Calificación",
+    "comments": "Comentarios",
+    "optional": "(opcional)",
+    "placeholder": "Cuéntenos qué funcionó o qué deberíamos mejorar…",
+    "cancel": "Cancelar",
+    "submit": "Enviar",
+    "star": "{{n}} estrella",
+    "stars": "{{n}} estrellas",
+    "error_rating": "Por favor elija una calificación con estrellas.",
+    "success": "¡Gracias por sus comentarios!",
+    "success_demo": "¡Gracias! Comentarios guardados localmente (modo demo).",
+    "open_feedback": "Abrir formulario de comentarios"
+  },
+
+  "footer": {
+    "copyright": "© {{year}} Congruent Solutions Inc. Todos los derechos reservados.",
+    "privacy": "Política de privacidad",
+    "terms": "Términos de servicio",
+    "help": "Centro de ayuda"
+  },
+
+  "enrollment": {
+    "plan_selection": "Selección de plan",
+    "contribution": "Contribución",
+    "contribution_source": "Fuente de contribución",
+    "auto_increase": "Aumento automático",
+    "investment_strategy": "Estrategia de inversión",
+    "retirement_readiness": "Preparación para la jubilación",
+    "review": "Revisar y confirmar",
+    "success": "Inscripción completada",
+    "next": "Siguiente",
+    "back": "Atrás",
+    "skip": "Omitir",
+    "confirm": "Confirmar"
+  },
+
+  "transactions": {
+    "title": "Transacciones",
+    "loan": "Préstamo",
+    "withdrawal": "Retiro",
+    "transfer": "Transferencia",
+    "rebalance": "Rebalanceo",
+    "rollover": "Traspaso",
+    "continue": "Continuar",
+    "back": "Atrás",
+    "submit": "Enviar",
+    "review": "Revisar",
+    "cancel": "Cancelar"
+  },
+
+  "investments": {
+    "title": "Inversiones",
+    "portfolio": "Portafolio",
+    "performance": "Rendimiento",
+    "allocation": "Asignación",
+    "actions": "Acciones recomendadas"
+  },
+
+  "profile": {
+    "title": "Perfil",
+    "personal_info": "Información personal",
+    "security": "Seguridad",
+    "preferences": "Preferencias",
+    "beneficiaries": "Beneficiarios",
+    "save": "Guardar cambios",
+    "cancel": "Cancelar"
+  },
+
+  "common": {
+    "loading": "Cargando...",
+    "error": "Ocurrió un error",
+    "retry": "Reintentar",
+    "close": "Cerrar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "view": "Ver",
+    "search": "Buscar",
+    "no_results": "No se encontraron resultados",
+    "confirm": "Confirmar",
+    "yes": "Sí",
+    "no": "No"
+  }
+}

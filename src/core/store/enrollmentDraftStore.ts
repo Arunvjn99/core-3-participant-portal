@@ -162,11 +162,11 @@ export const useEnrollmentDraftStore = create<EnrollmentDraftStore>()(
     {
       name: 'enrollment_draft',
       storage: createJSONStorage(() => localStorage),
-      /** Do not persist completion — source of truth is Supabase `enrollments.status`. */
       partialize: (state) => ({
         currentStep: state.currentStep,
         highestCompletedStep: state.highestCompletedStep,
         draftData: state.draftData,
+        enrollmentStatus: state.enrollmentStatus,
       }),
     }
   )

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import {
@@ -8,7 +8,6 @@ import {
   TrendingUp,
   User,
   Search,
-  Sparkles,
   Bot,
   Bell,
   LogOut,
@@ -16,7 +15,10 @@ import {
   Moon,
   Menu,
   X,
+  Globe,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { SUPPORTED_LANGS, type SupportedLang } from '@/core/i18n'
 import { useAuth } from '@/core/hooks/useAuth'
 import { useUser } from '@/core/hooks/useUser'
 import { useTheme } from '@/core/hooks/useTheme'
@@ -28,17 +30,24 @@ import { AISearchPalette } from '@/features/ai/components/AISearchPalette'
 import AppFooter from '@/features/dashboard/components/AppFooter'
 import { supabase } from '@/core/supabase'
 
-const NAV_ITEMS = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'Enrollment', href: '/enrollment/plan', icon: ClipboardList },
-  { label: 'Transactions', href: '/transactions', icon: ArrowLeftRight },
-  { label: 'Investments', href: '/investments', icon: TrendingUp },
-  { label: 'Profile', href: '/profile', icon: User },
-]
+function getNavItems(isEnrolled: boolean) {
+  return [
+    { labelKey: 'nav.dashboard', href: '/dashboard', icon: LayoutDashboard },
+    {
+      labelKey: 'nav.enrollment',
+      href: isEnrolled ? '/enrollment/manage' : '/enrollment/plan',
+      icon: ClipboardList,
+    },
+    { labelKey: 'nav.transactions', href: '/transactions', icon: ArrowLeftRight },
+    { labelKey: 'nav.investments', href: '/investments', icon: TrendingUp },
+    { labelKey: 'nav.profile', href: '/profile', icon: User },
+  ]
+}
 
 function isNavActive(href: string, pathname: string): boolean {
   if (href === '/dashboard') return pathname === '/dashboard'
-  if (href === '/enrollment/plan') return pathname.startsWith('/enrollment')
+  if (href === '/enrollment/plan' || href === '/enrollment/manage')
+    return pathname.startsWith('/enrollment')
   return pathname.startsWith(href)
 }
 
@@ -47,13 +56,18 @@ export function AppShell() {
   const { signOut, user } = useAuth()
   const { profile } = useUser()
   const { resolvedMode, setMode } = useTheme()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const openChat = useAIStore((s) => s.openChat)
   const isChatOpen = useAIStore((s) => s.isChatOpen)
   const toggleSearch = useAIStore((s) => s.toggleSearch)
+  const enrollmentStatus = useEnrollmentDraftStore((s) => s.enrollmentStatus)
+  const navItems = getNavItems(enrollmentStatus === 'complete')
   const [userDisplayName, setUserDisplayName] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [langMenuOpen, setLangMenuOpen] = useState(false)
+  const langMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     async function loadDisplayName() {
@@ -113,6 +127,22 @@ export function AppShell() {
 
   const toggleTheme = () => setMode(resolvedMode === 'dark' ? 'light' : 'dark')
 
+  const changeLang = (lng: SupportedLang) => {
+    void i18n.changeLanguage(lng)
+    setLangMenuOpen(false)
+  }
+
+  useEffect(() => {
+    if (!langMenuOpen) return
+    const onClick = (e: MouseEvent) => {
+      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
+        setLangMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onClick)
+    return () => document.removeEventListener('mousedown', onClick)
+  }, [langMenuOpen])
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -150,7 +180,7 @@ export function AppShell() {
             </div>
 
             <nav className="hidden flex-1 items-center justify-center gap-0.5 md:flex">
-              {NAV_ITEMS.map((item) => {
+              {navItems.map((item) => {
                 const active = isNavActive(item.href, location.pathname)
                 return (
                   <Link
@@ -164,7 +194,7 @@ export function AppShell() {
                     }`}
                   >
                     <item.icon className="h-4 w-4 shrink-0" />
-                    <span>{item.label}</span>
+                    <span>{t(item.labelKey)}</span>
                   </Link>
                 )
               })}
@@ -175,7 +205,7 @@ export function AppShell() {
                 type="button"
                 onClick={toggleTheme}
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-                aria-label="Toggle theme"
+                aria-label={t('nav.toggle_theme')}
               >
                 {resolvedMode === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </button>
@@ -183,22 +213,50 @@ export function AppShell() {
                 type="button"
                 onClick={toggleSearch}
                 className="hidden h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 sm:flex dark:text-gray-400 dark:hover:bg-gray-800"
-                aria-label="Open search"
+                aria-label={t('nav.open_search')}
               >
                 <Search className="h-4 w-4" />
               </button>
-              <button
-                type="button"
-                onClick={openChat}
-                className="hidden h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 sm:flex dark:text-gray-400 dark:hover:bg-gray-800"
-                aria-label="Open AI assistant"
-              >
-                <Sparkles className="h-4 w-4" />
-              </button>
+              <div className="relative" ref={langMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setLangMenuOpen((o) => !o)}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                  aria-label={t('language')}
+                  aria-expanded={langMenuOpen}
+                  aria-haspopup="listbox"
+                >
+                  <Globe className="h-4 w-4" />
+                </button>
+                {langMenuOpen && (
+                  <div
+                    role="listbox"
+                    aria-label={t('language')}
+                    className="absolute right-0 top-full mt-1 w-36 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900"
+                  >
+                    {SUPPORTED_LANGS.map((lng) => (
+                      <button
+                        key={lng}
+                        type="button"
+                        role="option"
+                        aria-selected={i18n.language === lng}
+                        onClick={() => changeLang(lng)}
+                        className={`flex w-full items-center gap-2.5 px-3.5 py-2.5 text-sm transition-colors ${
+                          i18n.language === lng
+                            ? 'bg-blue-50 font-semibold text-blue-700 dark:bg-blue-950/40 dark:text-blue-400'
+                            : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800'
+                        }`}
+                      >
+                        {t(`lang.${lng}`)}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <button
                 type="button"
                 className="relative flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-                aria-label="Notifications"
+                aria-label={t('nav.notifications')}
               >
                 <Bell className="h-4 w-4" />
                 <span
@@ -217,7 +275,7 @@ export function AppShell() {
                 type="button"
                 onClick={handleSignOut}
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-                aria-label="Sign out"
+                aria-label={t('nav.sign_out')}
               >
                 <LogOut className="h-4 w-4" />
               </button>
@@ -237,7 +295,7 @@ export function AppShell() {
         {mobileMenuOpen && (
           <div className="border-t border-gray-200 bg-white pb-3 dark:border-gray-700 dark:bg-gray-900 md:hidden">
             <div className="mx-auto max-w-7xl px-4">
-              {NAV_ITEMS.map((item) => {
+              {navItems.map((item) => {
                 const active = isNavActive(item.href, location.pathname)
                 return (
                   <Link
@@ -250,7 +308,7 @@ export function AppShell() {
                     }`}
                   >
                     <item.icon className="h-5 w-5 shrink-0" />
-                    <span className="text-sm font-medium">{item.label}</span>
+                    <span className="text-sm font-medium">{t(item.labelKey)}</span>
                   </Link>
                 )
               })}
@@ -264,7 +322,7 @@ export function AppShell() {
                   className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-gray-700 transition-all hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
                 >
                   <LogOut className="h-5 w-5 shrink-0" />
-                  <span className="text-sm font-medium">Sign out</span>
+                  <span className="text-sm font-medium">{t('nav.sign_out')}</span>
                 </button>
               </div>
             </div>

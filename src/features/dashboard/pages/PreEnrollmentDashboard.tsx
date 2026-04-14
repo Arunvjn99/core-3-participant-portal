@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { CheckCircle2, ChevronRight, Sparkles, UserCheck } from 'lucide-react'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { useAIStore } from '@/core/store/aiStore'
@@ -8,12 +9,13 @@ import { useAuth } from '@/core/hooks/useAuth'
 import { useUser } from '@/core/hooks/useUser'
 import { EnrollmentPersonalizationModal } from '../components/EnrollmentPersonalizationModal'
 import AdvisorModal from '@/features/advisors/AdvisorModal'
+import type { TFunction } from 'i18next'
 
-function getTimeGreeting(): string {
+function getTimeGreeting(t: TFunction): string {
   const hour = new Date().getHours()
-  if (hour < 12) return 'Good morning'
-  if (hour < 17) return 'Good afternoon'
-  return 'Good evening'
+  if (hour < 12) return t('greeting.morning')
+  if (hour < 17) return t('greeting.afternoon')
+  return t('greeting.evening')
 }
 
 function formatGreetingDisplayName(fullName: string | undefined | null, fallbackFirst: string): string {
@@ -29,6 +31,7 @@ function formatGreetingDisplayName(fullName: string | undefined | null, fallback
 }
 
 export function PreEnrollmentDashboard() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [advisorModalOpen, setAdvisorModalOpen] = useState(false)
@@ -82,18 +85,17 @@ export function PreEnrollmentDashboard() {
                   aria-hidden
                 />
                 <span className="text-sm font-semibold text-[#2b59c3] dark:text-blue-400">
-                  {getTimeGreeting()}, {greetingName}
+                  {getTimeGreeting(t)}, {greetingName}
                 </span>
               </div>
 
               <h1 className="max-w-xl text-4xl font-bold leading-[1.15] tracking-[-0.02em] text-slate-900 dark:text-white sm:text-[2.5rem] lg:text-[2.75rem]">
-                Let&apos;s build your <br />
-                <span className="brand-text">future</span>, together.
+                {t('hero.title_line1')} <br />
+                <span className="brand-text">{t('hero.title_line2')}</span>{t('hero.title_line3')}
               </h1>
 
               <p className="max-w-lg text-base leading-relaxed text-slate-600 dark:text-slate-400 sm:text-[1.0625rem]">
-                You&apos;re one step away from activating your 401(k). We&apos;ve simplified everything so you can
-                focus on what matters.
+                {t('hero.subtitle')}
               </p>
 
               <div className="flex flex-wrap items-center gap-4 pt-1">
@@ -102,20 +104,20 @@ export function PreEnrollmentDashboard() {
                   onClick={() => setIsModalOpen(true)}
                   className="btn-brand flex items-center gap-2 rounded-xl px-7 py-3 text-sm font-semibold shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] sm:px-8 sm:py-3.5 sm:text-[0.9375rem]"
                 >
-                  Start my enrollment →
+                  {t('hero.start_enrollment')}
                 </button>
                 <button
                   type="button"
                   onClick={() => learningRef.current?.scrollIntoView({ behavior: 'smooth' })}
                   className="rounded-xl border border-slate-200 px-7 py-3 text-sm font-semibold text-slate-600 transition-all hover:scale-[1.02] hover:bg-slate-50 active:scale-[0.98] dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800/50 sm:px-8 sm:py-3.5 sm:text-[0.9375rem]"
                 >
-                  Learn about the plan
+                  {t('hero.learn_plan')}
                 </button>
               </div>
 
               <div className="flex items-center gap-3 text-sm font-semibold text-slate-400 dark:text-slate-500">
                 <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                It only takes 5 minutes
+                {t('hero.time_note')}
               </div>
             </motion.div>
 
@@ -147,24 +149,24 @@ export function PreEnrollmentDashboard() {
               <div className="relative z-10 grid items-center gap-8 p-8 md:gap-10 md:p-12 lg:grid-cols-[minmax(0,1fr)_minmax(220px,380px)] lg:gap-12">
                 <div className="flex max-w-3xl flex-col items-start gap-6 md:gap-8">
                   <div className="inline-flex w-fit items-center rounded-full border border-white/20 bg-white/20 px-4 py-1.5 backdrop-blur-md">
-                    <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-white">Step 1</span>
+                    <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-white">{t('learning.step1')}</span>
                   </div>
 
                   <div className="flex flex-col gap-3">
                     <h2 className="text-2xl font-bold leading-[1.15] tracking-tight sm:text-3xl md:text-[2rem]">
-                      Learn how your <br />
-                      retirement plan works
+                      {t('learning.title_line1')} <br />
+                      {t('learning.title_line2')}
                     </h2>
                     <p className="max-w-md text-sm leading-relaxed text-blue-50/90 sm:text-base">
-                      Understand contributions, employer match, and how your savings grow over time.
+                      {t('learning.subtitle')}
                     </p>
                   </div>
 
                   <div className="flex flex-col gap-4 pt-1 sm:flex-row sm:flex-wrap sm:gap-x-8 sm:gap-y-4">
                     {[
-                      'What is a 401(k) and how it works',
-                      'How much you should contribute',
-                      'How employer matching impacts your savings',
+                      t('learning.item1'),
+                      t('learning.item2'),
+                      t('learning.item3'),
                     ].map((item, i) => (
                       <div key={i} className="flex items-center gap-3">
                         <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/20">
@@ -212,12 +214,12 @@ export function PreEnrollmentDashboard() {
                   <UserCheck className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="mb-2 text-2xl font-bold text-white">Talk to an Advisor</h3>
+                  <h3 className="mb-2 text-2xl font-bold text-white">{t('advisor.title')}</h3>
                   <p className="mb-6 text-sm leading-relaxed text-white/60">
-                    Get personalized guidance from a certified retirement planner. Book a free 30-minute session.
+                    {t('advisor.subtitle')}
                   </p>
                   <div className="group flex items-center gap-2 text-sm font-medium text-white/80 transition-colors hover:text-white">
-                    <span>Browse Advisors</span>
+                    <span>{t('advisor.browse')}</span>
                     <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </div>
                 </div>
@@ -263,9 +265,9 @@ export function PreEnrollmentDashboard() {
 
               <div className="flex flex-col gap-4 p-8">
                 <div className="flex flex-col gap-2">
-                  <h3 className="text-2xl font-bold tracking-tight text-white">Ask Core AI</h3>
+                  <h3 className="text-2xl font-bold tracking-tight text-white">{t('core_ai.title')}</h3>
                   <p className="text-base font-medium leading-relaxed text-slate-400">
-                    Get instant answers and personalized retirement guidance.
+                    {t('core_ai.description')}
                   </p>
                 </div>
                 <button
@@ -273,7 +275,7 @@ export function PreEnrollmentDashboard() {
                   onClick={openChat}
                   className="flex w-fit items-center gap-2 text-sm font-bold text-white/60 transition-colors hover:text-white"
                 >
-                  Start chatting <ChevronRight className="h-4 w-4" />
+                  {t('core_ai.start_chatting')} <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
             </motion.div>
@@ -289,19 +291,19 @@ export function PreEnrollmentDashboard() {
               <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Participant Portal</span>
             </div>
             <p className="text-[13px] font-medium text-slate-400 dark:text-slate-600">
-              © 2026 Congruent Solutions Inc. All rights reserved.
+              {t('footer.copyright', { year: new Date().getFullYear() })}
             </p>
           </div>
 
           <div className="flex flex-wrap justify-center gap-10 text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-600">
             <a href="#" className="transition-colors hover:text-slate-900 dark:hover:text-slate-300">
-              Privacy Policy
+              {t('footer.privacy')}
             </a>
             <a href="#" className="transition-colors hover:text-slate-600 dark:hover:text-slate-400">
-              Terms of Service
+              {t('footer.terms')}
             </a>
             <a href="#" className="transition-colors hover:text-slate-600 dark:hover:text-slate-400">
-              Help Center
+              {t('footer.help')}
             </a>
           </div>
         </footer>

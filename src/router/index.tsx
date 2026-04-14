@@ -10,6 +10,8 @@ import { AppShell } from './layouts/AppShell'
 import { ValidatedVersionRoute } from './guards/ValidatedVersionRoute'
 import { ProtectedRoute } from '../core/auth/ProtectedRoute'
 import { EnrollmentShell } from '../features/enrollment/components/EnrollmentShell'
+import EnrollmentManagement from '../features/enrollment/pages/EnrollmentManagement'
+import PlanDetail from '../features/enrollment/pages/PlanDetail'
 import { supabase } from '../core/supabase'
 
 // Auth pages — new two-panel design
@@ -133,50 +135,11 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 // ─── Dashboard route (enrollment-aware) ──────────────────────────────────────
 
 function DashboardRoute() {
-  const [showPost, setShowPost] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const enrollmentStatus = useEnrollmentDraftStore((s) => s.enrollmentStatus)
 
-  useEffect(() => {
-    async function checkEnrollment() {
-      if (!supabase) {
-        setShowPost(false)
-        setLoading(false)
-        return
-      }
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      if (!user) {
-        setLoading(false)
-        return
-      }
-      const { data } = await supabase
-        .from('enrollments')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('status', 'complete')
-        .maybeSingle()
-      setShowPost(!!data)
-      setLoading(false)
-    }
-    void checkEnrollment()
-  }, [])
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div
-          className="h-8 w-8 animate-spin rounded-full border-2 border-t-transparent"
-          style={{
-            borderColor: 'var(--brand-primary, #2563eb)',
-            borderTopColor: 'transparent',
-          }}
-        />
-      </div>
-    )
-  }
-
-  return showPost ? <PostEnrollmentDashboard /> : <PreEnrollmentDashboard />
+  return enrollmentStatus === 'complete'
+    ? <PostEnrollmentDashboard />
+    : <PreEnrollmentDashboard />
 }
 
 // ─── Router ──────────────────────────────────────────────────────────────────
@@ -246,6 +209,8 @@ export const router = createBrowserRouter([
         ),
         children: [
           { path: 'dashboard', element: <DashboardRoute /> },
+          { path: 'enrollment/manage', element: <EnrollmentManagement /> },
+          { path: 'enrollment/manage/:planId', element: <PlanDetail /> },
           { path: 'investments', element: withSuspense(InvestmentsPage) },
           { path: 'profile', element: withSuspense(ProfilePage) },
           { path: 'transactions', element: <TransactionsPage /> },

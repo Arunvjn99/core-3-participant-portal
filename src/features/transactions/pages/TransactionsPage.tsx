@@ -290,35 +290,35 @@ function TransactionsPage() {
               icon={<HandCoins className="w-4 h-4" />}
               title="Take a Loan"
               contextInfo="Borrow up to $10,000"
-              additionalInfo="Typical approval: 1-3 days"
+              additionalInfo="Repay from payroll over 1–5 years"
               onClick={() => navigate("/transactions/loan")}
             />
             <QuickActionButton
               icon={<DollarSign className="w-4 h-4" />}
               title="Withdraw Money"
               contextInfo="Available: $5,000"
-              additionalInfo="Tax impact: 10-20%"
+              additionalInfo="Early withdrawal may incur penalties"
               onClick={() => navigate("/transactions/withdrawal")}
             />
             <QuickActionButton
               icon={<ArrowLeftRight className="w-4 h-4" />}
               title="Transfer Funds"
               contextInfo="Reallocate balance"
-              additionalInfo="No fees or penalties"
+              additionalInfo="Move money between funds fee-free"
               onClick={() => navigate("/transactions/transfer")}
             />
             <QuickActionButton
               icon={<PieChart className="w-4 h-4" />}
               title="Rebalance"
               contextInfo="Current: Moderate risk"
-              additionalInfo="Last: 6 months ago"
+              additionalInfo="Keeps your portfolio aligned with risk"
               onClick={() => navigate("/transactions/rebalance")}
             />
             <QuickActionButton
               icon={<RefreshCcw className="w-4 h-4" />}
               title="Roll Over"
               contextInfo="Consolidate savings"
-              additionalInfo="No tax penalty"
+              additionalInfo="Combine old plans with no tax penalty"
               onClick={() => navigate("/transactions/rollover")}
             />
           </div>

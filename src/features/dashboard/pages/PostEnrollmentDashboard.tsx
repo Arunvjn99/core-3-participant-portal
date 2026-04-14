@@ -3,17 +3,18 @@ import { supabase } from '@/core/supabase'
 import {
   TrendingUp,
   Wallet,
-  PieChart,
   ChevronRight,
-  Plus,
   ArrowRight,
+  ArrowLeftRight,
   BookOpen,
   ShieldCheck,
   Zap,
   HelpCircle,
   Calendar,
   Briefcase,
-  Target,
+  HandCoins,
+  DollarSign,
+  RefreshCcw,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -192,25 +193,47 @@ export default function PostEnrollmentDashboard() {
             {/* 2. Quick Actions */}
             <section>
               <h3 className="mb-5 text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-gray-400">Quick Actions</h3>
-              <div className="grid grid-cols-2 gap-5 sm:grid-cols-4">
-                {[
-                  { icon: Plus, label: 'Add Funds', color: 'bg-blue-50 text-blue-700', desc: 'One-time deposit' },
-                  { icon: Target, label: 'Adjust Goal', color: 'bg-purple-50 text-purple-700', desc: 'Update target' },
-                  { icon: PieChart, label: 'Rebalance', color: 'bg-emerald-50 text-emerald-700', desc: 'Optimize assets' },
-                  { icon: HelpCircle, label: 'Support', color: 'bg-amber-50 text-amber-700', desc: 'Get assistance' },
-                ].map((action, i) => (
-                  <motion.button
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                {([
+                  { icon: HandCoins, title: 'Take a Loan', info: 'Borrow up to $10,000', hint: 'Typical approval: 1-3 days', href: '/transactions/loan' },
+                  { icon: DollarSign, title: 'Withdraw Money', info: 'Available: $5,000', hint: 'Tax impact: 10-20%', href: '/transactions/withdrawal' },
+                  { icon: ArrowLeftRight, title: 'Transfer Funds', info: 'Reallocate balance', hint: 'No fees or penalties', href: '/transactions/transfer' },
+                  { icon: RefreshCcw, title: 'Roll Over', info: 'Consolidate savings', hint: 'No tax penalty', href: '/transactions/rollover' },
+                ] as const).map((action, i) => (
+                  <motion.a
                     key={i}
-                    whileHover={{ y: -6, scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="group flex flex-col items-start rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition-all hover:border-blue-600/20 hover:shadow-xl dark:border-gray-700 dark:bg-gray-900 dark:hover:border-blue-500/30"
+                    href={action.href}
+                    onClick={(e: React.MouseEvent) => { e.preventDefault(); window.location.href = action.href }}
+                    whileHover={{ y: -2, boxShadow: '0 8px 24px rgba(37,99,235,0.18)' }}
+                    whileTap={{ scale: 0.985 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                    className="group relative flex items-start gap-3.5 overflow-hidden rounded-[14px] border border-slate-100 bg-white p-4 pr-5 transition-colors hover:border-blue-200 dark:border-gray-700 dark:bg-gray-900 dark:hover:border-blue-700"
                   >
-                    <div className={`mb-4 rounded-xl p-3 shadow-sm transition-transform group-hover:scale-110 ${action.color}`}>
-                      <action.icon className="h-5 w-5" />
+                    <div
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] transition-all"
+                      style={{ background: 'var(--c-blue-tint, #eff6ff)', color: 'var(--brand-primary)' }}
+                    >
+                      <action.icon className="h-4 w-4" />
                     </div>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white">{action.label}</p>
-                    <p className="mt-1 text-xs font-medium text-slate-500 dark:text-gray-400">{action.desc}</p>
-                  </motion.button>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-bold leading-5 tracking-[-0.3px] text-slate-900 dark:text-white">
+                          {action.title}
+                        </h4>
+                        <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-300 transition-all group-hover:translate-x-0.5 dark:text-gray-600" />
+                      </div>
+                      <p className="mt-0.5 text-xs font-semibold" style={{ color: 'var(--brand-primary)' }}>
+                        {action.info}
+                      </p>
+                      <p className="mt-0.5 text-[11px] font-medium text-slate-400 dark:text-gray-500">
+                        {action.hint}
+                      </p>
+                    </div>
+                    <div
+                      className="absolute bottom-0 left-0 right-0 origin-left scale-x-0 transition-transform duration-200 group-hover:scale-x-100"
+                      style={{ height: 2, background: 'var(--brand-primary)', borderRadius: 1 }}
+                    />
+                  </motion.a>
                 ))}
               </div>
             </section>

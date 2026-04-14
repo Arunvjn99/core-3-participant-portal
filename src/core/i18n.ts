@@ -1,32 +1,31 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
+import LanguageDetector from 'i18next-browser-languagedetector'
 
-void i18n.use(initReactI18next).init({
-  lng: 'en',
-  fallbackLng: 'en',
-  interpolation: { escapeValue: false },
-  resources: {
-    en: {
-      translation: {
-        app_name: 'Participant Portal',
-      },
+import en from '../locales/en.json'
+import es from '../locales/es.json'
+import fr from '../locales/fr.json'
+
+export const SUPPORTED_LANGS = ['en', 'es', 'fr'] as const
+export type SupportedLang = (typeof SUPPORTED_LANGS)[number]
+
+void i18n
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    fallbackLng: 'en',
+    supportedLngs: SUPPORTED_LANGS as unknown as string[],
+    interpolation: { escapeValue: false },
+    detection: {
+      order: ['localStorage', 'navigator'],
+      lookupLocalStorage: 'i18nextLng',
+      caches: ['localStorage'],
     },
-    es: {
-      translation: {
-        app_name: 'Portal del participante',
-      },
+    resources: {
+      en: { translation: en },
+      es: { translation: es },
+      fr: { translation: fr },
     },
-    fr: {
-      translation: {
-        app_name: 'Portail des participants',
-      },
-    },
-    zh: {
-      translation: {
-        app_name: '参与者门户',
-      },
-    },
-  },
-})
+  })
 
 export default i18n

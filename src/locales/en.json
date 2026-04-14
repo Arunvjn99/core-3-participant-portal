@@ -1,0 +1,210 @@
+{
+  "app_name": "Participant Portal",
+  "language": "Language",
+  "lang": {
+    "en": "English",
+    "es": "Español",
+    "fr": "Français"
+  },
+
+  "nav": {
+    "dashboard": "Dashboard",
+    "enrollment": "Enrollment",
+    "transactions": "Transactions",
+    "investments": "Investments",
+    "profile": "Profile",
+    "sign_out": "Sign out",
+    "toggle_theme": "Toggle theme",
+    "open_search": "Open search",
+    "notifications": "Notifications",
+    "menu": "Menu"
+  },
+
+  "greeting": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening"
+  },
+
+  "auth": {
+    "login": "Login",
+    "signup": "Sign up",
+    "email": "Email",
+    "password": "Password",
+    "confirm_password": "Confirm Password",
+    "full_name": "Full Name",
+    "enter_email": "Enter your Email or Username",
+    "enter_password": "Enter your password",
+    "enter_confirm_password": "Confirm your password",
+    "enter_full_name": "Enter your full name",
+    "forgot_password": "Forgot password?",
+    "no_account": "Don't have an account?",
+    "have_account": "Already have an account?",
+    "help_text": "Still need help? Contact",
+    "help_center": "Help Center",
+    "signing_in": "Signing in...",
+    "creating_account": "Creating account...",
+    "show_password": "Show password",
+    "hide_password": "Hide password",
+    "forgot_title": "Forgot Password",
+    "forgot_subtitle": "Enter your email and we'll send you a reset link.",
+    "send_reset": "Send reset link",
+    "sending": "Sending...",
+    "back_to_login": "Back to sign in",
+    "reset_sent_title": "Check your email",
+    "reset_sent_text": "If an account exists for {{email}}, you'll receive a password reset link shortly.",
+    "verify_title": "Verification code",
+    "verify_subtitle": "We've sent a 6-digit code to your email address.",
+    "verify_button": "Verify & continue",
+    "verifying": "Verifying...",
+    "resend_code": "Resend code",
+    "resend_sending": "Sending…",
+    "resend_demo": "Demo mode — no email sent.",
+    "resend_success": "We sent a new code to your email.",
+    "resend_no_email": "We could not determine your email. Please sign in again to request a code.",
+    "platform_name": "Retirement Intelligence Platform",
+    "platform_by": "by Congruent Solutions",
+    "copyright": "© Congruent Solutions, Inc. All Rights Reserved",
+    "privacy_policy": "Privacy Policy"
+  },
+
+  "carousel": {
+    "slide1_title": "Monitor Plan Performance",
+    "slide1_subtitle": "View participant engagement, contribution trends, and plan health at a glance to make informed decisions.",
+    "slide2_title": "Introducing new features",
+    "slide2_subtitle": "Sign in to explore smarter tools for planning your financial future.",
+    "slide3_title": "Empower your oversight",
+    "slide3_subtitle": "Sign in to gain clear visibility into every plan's performance.",
+    "projected_balance": "Projected Balance",
+    "prev_slide": "Previous slide",
+    "next_slide": "Next slide",
+    "go_to_slide": "Go to slide {{n}}"
+  },
+
+  "hero": {
+    "title_line1": "Let's build your",
+    "title_line2": "future",
+    "title_line3": ", together.",
+    "subtitle": "You're one step away from activating your 401(k). We've simplified everything so you can focus on what matters.",
+    "start_enrollment": "Start my enrollment →",
+    "learn_plan": "Learn about the plan",
+    "time_note": "It only takes 5 minutes"
+  },
+
+  "learning": {
+    "step1": "Step 1",
+    "title_line1": "Learn how your",
+    "title_line2": "retirement plan works",
+    "subtitle": "Understand contributions, employer match, and how your savings grow over time.",
+    "item1": "What is a 401(k) and how it works",
+    "item2": "How much you should contribute",
+    "item3": "How employer matching impacts your savings"
+  },
+
+  "advisor": {
+    "title": "Talk to an Advisor",
+    "subtitle": "Get personalized guidance from a certified retirement planner. Book a free 30-minute session.",
+    "browse": "Browse Advisors"
+  },
+
+  "core_ai": {
+    "title": "Ask Core AI",
+    "description": "Get instant answers and personalized retirement guidance.",
+    "start_chatting": "Start chatting",
+    "online": "Online",
+    "typing": "Core AI is typing...",
+    "placeholder": "Ask about your plan...",
+    "initial_message": "Hi, I'm Core AI — your retirement assistant. What would you like to do?",
+    "chip_enroll": "I want to enroll",
+    "chip_loan": "I want to apply for a loan",
+    "chip_withdraw": "How much can I withdraw?",
+    "chip_balance": "Check my vested balance"
+  },
+
+  "feedback": {
+    "title": "Send feedback",
+    "subtitle": "How would you rate this page? Optional details help us improve.",
+    "rating": "Rating",
+    "comments": "Comments",
+    "optional": "(optional)",
+    "placeholder": "Tell us what worked or what we should improve…",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "star": "{{n}} star",
+    "stars": "{{n}} stars",
+    "error_rating": "Please choose a star rating.",
+    "success": "Thanks for your feedback!",
+    "success_demo": "Thanks! Feedback saved locally (demo mode).",
+    "open_feedback": "Open feedback form"
+  },
+
+  "footer": {
+    "copyright": "© {{year}} Congruent Solutions Inc. All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "help": "Help Center"
+  },
+
+  "enrollment": {
+    "plan_selection": "Plan Selection",
+    "contribution": "Contribution",
+    "contribution_source": "Contribution Source",
+    "auto_increase": "Auto Increase",
+    "investment_strategy": "Investment Strategy",
+    "retirement_readiness": "Retirement Readiness",
+    "review": "Review & Confirm",
+    "success": "Enrollment Complete",
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip",
+    "confirm": "Confirm"
+  },
+
+  "transactions": {
+    "title": "Transactions",
+    "loan": "Loan",
+    "withdrawal": "Withdrawal",
+    "transfer": "Transfer",
+    "rebalance": "Rebalance",
+    "rollover": "Rollover",
+    "continue": "Continue",
+    "back": "Back",
+    "submit": "Submit",
+    "review": "Review",
+    "cancel": "Cancel"
+  },
+
+  "investments": {
+    "title": "Investments",
+    "portfolio": "Portfolio",
+    "performance": "Performance",
+    "allocation": "Allocation",
+    "actions": "Recommended Actions"
+  },
+
+  "profile": {
+    "title": "Profile",
+    "personal_info": "Personal Information",
+    "security": "Security",
+    "preferences": "Preferences",
+    "beneficiaries": "Beneficiaries",
+    "save": "Save Changes",
+    "cancel": "Cancel"
+  },
+
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "close": "Close",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "no_results": "No results found",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No"
+  }
+}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, Check, X, ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '@/core/supabase'
 import AuthLayout from '../components/AuthLayout'
 
@@ -48,6 +49,7 @@ const FALLBACK_COMPANIES: Company[] = [
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function SignupPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [step, setStep] = useState<'company' | 'form'>('company')
   const [companies, setCompanies] = useState<Company[]>([])
@@ -192,9 +194,9 @@ export default function SignupPage() {
         </div>
 
         <p className="text-center text-sm text-gray-500 dark:text-gray-400">
-          Already have an account?{' '}
+          {t('auth.have_account')}{' '}
           <Link to="/login" className="brand-text font-semibold hover:underline">
-            Sign in
+            {t('auth.login')}
           </Link>
         </p>
       </AuthLayout>
@@ -228,17 +230,17 @@ export default function SignupPage() {
         </button>
       </div>
 
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Create account</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('auth.signup')}</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Name row */}
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              First Name
+              {t('auth.full_name')}
             </label>
             <input id="firstName" type="text" value={form.firstName} onChange={update('firstName')}
-              placeholder="John" required className={inputCls} />
+              placeholder={t('auth.enter_full_name')} required className={inputCls} />
           </div>
           <div>
             <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -252,10 +254,10 @@ export default function SignupPage() {
         {/* Email */}
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Email address
+            {t('auth.email')}
           </label>
           <input id="email" type="email" value={form.email} onChange={update('email')}
-            placeholder="you@company.com" required autoComplete="email" className={inputCls} />
+            placeholder={t('auth.enter_email')} required autoComplete="email" className={inputCls} />
         </div>
 
         {/* State + Country */}
@@ -341,7 +343,7 @@ export default function SignupPage() {
         {/* Password */}
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Password
+            {t('auth.password')}
           </label>
           <div className="relative">
             <input
@@ -349,14 +351,14 @@ export default function SignupPage() {
               type={showPassword ? 'text' : 'password'}
               value={form.password}
               onChange={update('password')}
-              placeholder="At least 8 characters"
+              placeholder={t('auth.enter_password')}
               required
               autoComplete="new-password"
               className={`${inputCls} pr-12`}
             />
             <button type="button" onClick={() => setShowPassword((v) => !v)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}>
+              aria-label={showPassword ? t('auth.hide_password') : t('auth.show_password')}>
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
@@ -408,7 +410,7 @@ export default function SignupPage() {
         {/* Confirm password */}
         <div>
           <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Confirm Password
+            {t('auth.confirm_password')}
           </label>
           <div className="relative">
             <input
@@ -416,14 +418,14 @@ export default function SignupPage() {
               type={showConfirm ? 'text' : 'password'}
               value={form.confirmPassword}
               onChange={update('confirmPassword')}
-              placeholder="Repeat your password"
+              placeholder={t('auth.enter_confirm_password')}
               required
               autoComplete="new-password"
               className={`${inputCls} pr-12`}
             />
             <button type="button" onClick={() => setShowConfirm((v) => !v)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              aria-label={showConfirm ? 'Hide password' : 'Show password'}>
+              aria-label={showConfirm ? t('auth.hide_password') : t('auth.show_password')}>
               {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
@@ -449,18 +451,18 @@ export default function SignupPage() {
           {loading ? (
             <span className="flex items-center justify-center gap-2">
               <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Creating account...
+              {t('auth.creating_account')}
             </span>
           ) : (
-            'Create account'
+            t('auth.signup')
           )}
         </button>
       </form>
 
       <p className="mt-5 text-center text-sm text-gray-500 dark:text-gray-400">
-        Already have an account?{' '}
+        {t('auth.have_account')}{' '}
         <Link to="/login" className="brand-text font-semibold hover:underline">
-          Sign in
+          {t('auth.login')}
         </Link>
       </p>
     </AuthLayout>

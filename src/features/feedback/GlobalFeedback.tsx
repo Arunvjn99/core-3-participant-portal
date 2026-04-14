@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslation } from 'react-i18next'
 import { MessageSquarePlus, Star, X } from 'lucide-react'
 import { useAuth } from '@/core/hooks/useAuth'
 import { useFeedbackUiStore } from '@/core/store/feedbackUiStore'
@@ -10,6 +11,7 @@ import { cn } from '@/lib/cn'
 const TOAST_MS = 4200
 
 export function GlobalFeedback() {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const modalOpen = useFeedbackUiStore((s) => s.modalOpen)
   const setModalOpen = useFeedbackUiStore((s) => s.setModalOpen)
@@ -68,7 +70,7 @@ export function GlobalFeedback() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (rating < 1 || rating > 5) {
-      setError('Please choose a star rating.')
+      setError(t('feedback.error_rating'))
       return
     }
     setError(null)
@@ -86,7 +88,7 @@ export function GlobalFeedback() {
       return
     }
     closeModal()
-    showToast(result.demo ? 'Thanks! Feedback saved locally (demo mode).' : 'Thanks for your feedback!')
+    showToast(result.demo ? t('feedback.success_demo') : t('feedback.success'))
   }
 
   const modal =
@@ -113,10 +115,10 @@ export function GlobalFeedback() {
           <div className="mb-4 flex items-start justify-between gap-4">
             <div>
               <h2 id={titleId} className="text-lg font-semibold text-[var(--text-primary)]">
-                Send feedback
+                {t('feedback.title')}
               </h2>
               <p id={descId} className="mt-1 text-sm text-[var(--text-secondary)]">
-                How would you rate this page? Optional details help us improve.
+                {t('feedback.subtitle')}
               </p>
             </div>
             <button
@@ -131,7 +133,7 @@ export function GlobalFeedback() {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div>
-              <p className="mb-2 text-sm font-medium text-[var(--text-primary)]">Rating</p>
+              <p className="mb-2 text-sm font-medium text-[var(--text-primary)]">{t('feedback.rating')}</p>
               <div className="flex gap-1" role="group" aria-label="Star rating 1 to 5">
                 {[1, 2, 3, 4, 5].map((n) => (
                   <button
@@ -145,7 +147,7 @@ export function GlobalFeedback() {
                         ? 'text-amber-400'
                         : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
                     )}
-                    aria-label={`${n} star${n > 1 ? 's' : ''}`}
+                    aria-label={n > 1 ? t('feedback.stars', { n }) : t('feedback.star', { n })}
                     aria-pressed={n <= rating}
                   >
                     <Star
@@ -159,7 +161,7 @@ export function GlobalFeedback() {
 
             <div>
               <label htmlFor="feedback-comment" className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]">
-                Comments <span className="font-normal text-[var(--text-muted)]">(optional)</span>
+                {t('feedback.comments')} <span className="font-normal text-[var(--text-muted)]">{t('feedback.optional')}</span>
               </label>
               <textarea
                 id="feedback-comment"
@@ -167,7 +169,7 @@ export function GlobalFeedback() {
                 onChange={(e) => setComment(e.target.value)}
                 rows={4}
                 maxLength={2000}
-                placeholder="Tell us what worked or what we should improve…"
+                placeholder={t('feedback.placeholder')}
                 className={cn(
                   'w-full resize-y rounded-xl border border-[var(--border-default)] bg-[var(--surface-page)] px-3 py-2.5 text-sm text-[var(--text-primary)]',
                   'placeholder:text-[var(--text-muted)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-light)]'
@@ -183,10 +185,10 @@ export function GlobalFeedback() {
 
             <div className="flex justify-end gap-2 pt-1">
               <Button type="button" variant="secondary" size="md" onClick={closeModal}>
-                Cancel
+                {t('feedback.cancel')}
               </Button>
               <Button type="submit" variant="primary" size="md" loading={submitting} disabled={submitting}>
-                Submit
+                {t('feedback.submit')}
               </Button>
             </div>
           </form>
@@ -222,8 +224,8 @@ export function GlobalFeedback() {
           'transition-transform hover:scale-105 hover:shadow-[var(--shadow-dropdown)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)]',
           'dark:border-[var(--border-strong)]'
         )}
-        aria-label="Open feedback form"
-        title="Feedback"
+        aria-label={t('feedback.open_feedback')}
+        title={t('feedback.title')}
       >
         <MessageSquarePlus className="h-5 w-5" aria-hidden />
       </button>

@@ -1,0 +1,210 @@
+{
+  "app_name": "Portail des Participants",
+  "language": "Langue",
+  "lang": {
+    "en": "English",
+    "es": "Español",
+    "fr": "Français"
+  },
+
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "enrollment": "Inscription",
+    "transactions": "Transactions",
+    "investments": "Investissements",
+    "profile": "Profil",
+    "sign_out": "Déconnexion",
+    "toggle_theme": "Changer de thème",
+    "open_search": "Ouvrir la recherche",
+    "notifications": "Notifications",
+    "menu": "Menu"
+  },
+
+  "greeting": {
+    "morning": "Bonjour",
+    "afternoon": "Bon après-midi",
+    "evening": "Bonsoir"
+  },
+
+  "auth": {
+    "login": "Connexion",
+    "signup": "S'inscrire",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "confirm_password": "Confirmer le mot de passe",
+    "full_name": "Nom complet",
+    "enter_email": "Entrez votre e-mail ou nom d'utilisateur",
+    "enter_password": "Entrez votre mot de passe",
+    "enter_confirm_password": "Confirmez votre mot de passe",
+    "enter_full_name": "Entrez votre nom complet",
+    "forgot_password": "Mot de passe oublié ?",
+    "no_account": "Vous n'avez pas de compte ?",
+    "have_account": "Vous avez déjà un compte ?",
+    "help_text": "Besoin d'aide ? Contactez",
+    "help_center": "Centre d'aide",
+    "signing_in": "Connexion en cours...",
+    "creating_account": "Création du compte...",
+    "show_password": "Afficher le mot de passe",
+    "hide_password": "Masquer le mot de passe",
+    "forgot_title": "Mot de passe oublié",
+    "forgot_subtitle": "Entrez votre e-mail et nous vous enverrons un lien de réinitialisation.",
+    "send_reset": "Envoyer le lien",
+    "sending": "Envoi en cours...",
+    "back_to_login": "Retour à la connexion",
+    "reset_sent_title": "Vérifiez votre e-mail",
+    "reset_sent_text": "Si un compte existe pour {{email}}, vous recevrez un lien de réinitialisation sous peu.",
+    "verify_title": "Code de vérification",
+    "verify_subtitle": "Nous avons envoyé un code à 6 chiffres à votre adresse e-mail.",
+    "verify_button": "Vérifier et continuer",
+    "verifying": "Vérification en cours...",
+    "resend_code": "Renvoyer le code",
+    "resend_sending": "Envoi…",
+    "resend_demo": "Mode démo — aucun e-mail envoyé.",
+    "resend_success": "Nous avons envoyé un nouveau code à votre e-mail.",
+    "resend_no_email": "Impossible de déterminer votre e-mail. Veuillez vous reconnecter pour demander un code.",
+    "platform_name": "Plateforme d'Intelligence Retraite",
+    "platform_by": "par Congruent Solutions",
+    "copyright": "© Congruent Solutions, Inc. Tous droits réservés",
+    "privacy_policy": "Politique de confidentialité"
+  },
+
+  "carousel": {
+    "slide1_title": "Surveillez la performance du plan",
+    "slide1_subtitle": "Consultez l'engagement des participants, les tendances de contribution et la santé du plan en un coup d'œil.",
+    "slide2_title": "Nouvelles fonctionnalités",
+    "slide2_subtitle": "Connectez-vous pour découvrir des outils plus intelligents pour planifier votre avenir financier.",
+    "slide3_title": "Renforcez votre supervision",
+    "slide3_subtitle": "Connectez-vous pour obtenir une visibilité claire sur la performance de chaque plan.",
+    "projected_balance": "Solde projeté",
+    "prev_slide": "Diapositive précédente",
+    "next_slide": "Diapositive suivante",
+    "go_to_slide": "Aller à la diapositive {{n}}"
+  },
+
+  "hero": {
+    "title_line1": "Construisons votre",
+    "title_line2": "avenir",
+    "title_line3": ", ensemble.",
+    "subtitle": "Vous êtes à un pas d'activer votre 401(k). Nous avons tout simplifié pour que vous puissiez vous concentrer sur l'essentiel.",
+    "start_enrollment": "Commencer mon inscription →",
+    "learn_plan": "En savoir plus sur le plan",
+    "time_note": "Cela ne prend que 5 minutes"
+  },
+
+  "learning": {
+    "step1": "Étape 1",
+    "title_line1": "Apprenez comment fonctionne",
+    "title_line2": "votre plan de retraite",
+    "subtitle": "Comprenez les cotisations, l'abondement de l'employeur et comment votre épargne croît au fil du temps.",
+    "item1": "Qu'est-ce qu'un 401(k) et comment ça marche",
+    "item2": "Combien devriez-vous cotiser",
+    "item3": "Comment l'abondement de l'employeur impacte votre épargne"
+  },
+
+  "advisor": {
+    "title": "Parler à un conseiller",
+    "subtitle": "Obtenez des conseils personnalisés d'un planificateur de retraite certifié. Réservez une session gratuite de 30 minutes.",
+    "browse": "Voir les conseillers"
+  },
+
+  "core_ai": {
+    "title": "Demander à Core AI",
+    "description": "Obtenez des réponses instantanées et des conseils personnalisés sur la retraite.",
+    "start_chatting": "Commencer à discuter",
+    "online": "En ligne",
+    "typing": "Core AI est en train d'écrire...",
+    "placeholder": "Posez une question sur votre plan...",
+    "initial_message": "Bonjour, je suis Core AI — votre assistant retraite. Que souhaitez-vous faire ?",
+    "chip_enroll": "Je veux m'inscrire",
+    "chip_loan": "Je veux demander un prêt",
+    "chip_withdraw": "Combien puis-je retirer ?",
+    "chip_balance": "Vérifier mon solde acquis"
+  },
+
+  "feedback": {
+    "title": "Envoyer un commentaire",
+    "subtitle": "Comment évaluez-vous cette page ? Les détails optionnels nous aident à nous améliorer.",
+    "rating": "Évaluation",
+    "comments": "Commentaires",
+    "optional": "(facultatif)",
+    "placeholder": "Dites-nous ce qui a fonctionné ou ce que nous devrions améliorer…",
+    "cancel": "Annuler",
+    "submit": "Envoyer",
+    "star": "{{n}} étoile",
+    "stars": "{{n}} étoiles",
+    "error_rating": "Veuillez choisir une évaluation par étoiles.",
+    "success": "Merci pour votre commentaire !",
+    "success_demo": "Merci ! Commentaire enregistré localement (mode démo).",
+    "open_feedback": "Ouvrir le formulaire de commentaires"
+  },
+
+  "footer": {
+    "copyright": "© {{year}} Congruent Solutions Inc. Tous droits réservés.",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions d'utilisation",
+    "help": "Centre d'aide"
+  },
+
+  "enrollment": {
+    "plan_selection": "Sélection du plan",
+    "contribution": "Cotisation",
+    "contribution_source": "Source de cotisation",
+    "auto_increase": "Augmentation automatique",
+    "investment_strategy": "Stratégie d'investissement",
+    "retirement_readiness": "Préparation à la retraite",
+    "review": "Vérifier et confirmer",
+    "success": "Inscription terminée",
+    "next": "Suivant",
+    "back": "Retour",
+    "skip": "Passer",
+    "confirm": "Confirmer"
+  },
+
+  "transactions": {
+    "title": "Transactions",
+    "loan": "Prêt",
+    "withdrawal": "Retrait",
+    "transfer": "Transfert",
+    "rebalance": "Rééquilibrage",
+    "rollover": "Transfert de plan",
+    "continue": "Continuer",
+    "back": "Retour",
+    "submit": "Soumettre",
+    "review": "Vérifier",
+    "cancel": "Annuler"
+  },
+
+  "investments": {
+    "title": "Investissements",
+    "portfolio": "Portefeuille",
+    "performance": "Performance",
+    "allocation": "Répartition",
+    "actions": "Actions recommandées"
+  },
+
+  "profile": {
+    "title": "Profil",
+    "personal_info": "Informations personnelles",
+    "security": "Sécurité",
+    "preferences": "Préférences",
+    "beneficiaries": "Bénéficiaires",
+    "save": "Enregistrer les modifications",
+    "cancel": "Annuler"
+  },
+
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "retry": "Réessayer",
+    "close": "Fermer",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "view": "Voir",
+    "search": "Rechercher",
+    "no_results": "Aucun résultat trouvé",
+    "confirm": "Confirmer",
+    "yes": "Oui",
+    "no": "Non"
+  }
+}

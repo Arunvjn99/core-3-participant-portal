@@ -8,6 +8,7 @@ import {
 } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Moon, Sun } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/core/hooks/useTheme'
 import { supabase } from '@/core/supabase'
 import { useAuth } from '@/core/hooks/useAuth'
@@ -28,6 +29,7 @@ interface VerifyLocationState {
 const OTP_LEN = 6
 
 export function VerifyOTP() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const setOtpVerified = useOtpStore((s) => s.setOtpVerified)
@@ -85,17 +87,17 @@ export function VerifyOTP() {
     setResendHint(null)
     setError(null)
     if (ENV.DEMO_MODE) {
-      setResendHint('Demo mode — no email sent.')
+      setResendHint(t('auth.resend_demo'))
       return
     }
     if (!email) {
-      setError('We could not determine your email. Please sign in again to request a code.')
+      setError(t('auth.resend_no_email'))
       return
     }
     setResendBusy(true)
     try {
       if (!supabase) {
-        setResendHint('Demo mode — no email sent.')
+        setResendHint(t('auth.resend_demo'))
         return
       }
       const resendType: 'signup' | 'email_change' =
@@ -108,7 +110,7 @@ export function VerifyOTP() {
         setError(resendError.message)
         return
       }
-      setResendHint('We sent a new code to your email.')
+      setResendHint(t('auth.resend_success'))
     } finally {
       setResendBusy(false)
     }
@@ -151,15 +153,15 @@ export function VerifyOTP() {
             }}
           />
           <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
-            Retirement Intelligence Platform
+            {t('auth.platform_name')}
           </p>
-          <p className="text-gray-400 dark:text-gray-500 text-xs mt-0.5">by Congruent Solutions</p>
+          <p className="text-gray-400 dark:text-gray-500 text-xs mt-0.5">{t('auth.platform_by')}</p>
         </div>
 
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Verification code</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{t('auth.verify_title')}</h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-            We&apos;ve sent a 6-digit code to your email address.
+            {t('auth.verify_subtitle')}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -209,10 +211,10 @@ export function VerifyOTP() {
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
                   <span className="w-4 h-4 border-2 border-white/30 dark:border-gray-900/30 border-t-white dark:border-t-gray-900 rounded-full animate-spin" />
-                  Verifying...
+                  {t('auth.verifying')}
                 </span>
               ) : (
-                'Verify & continue'
+                t('auth.verify_button')
               )}
             </button>
 
@@ -223,10 +225,10 @@ export function VerifyOTP() {
                 disabled={resendBusy}
                 className="brand-text font-semibold hover:opacity-80 disabled:opacity-50"
               >
-                {resendBusy ? 'Sending…' : 'Resend code'}
+                {resendBusy ? t('auth.resend_sending') : t('auth.resend_code')}
               </button>
               <Link to={ROUTES.LOGIN} className="brand-text font-semibold hover:opacity-80">
-                Back to sign in
+                {t('auth.back_to_login')}
               </Link>
             </div>
           </form>
@@ -234,14 +236,14 @@ export function VerifyOTP() {
 
         <div className="mt-10 pt-6 border-t border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-gray-400 dark:text-gray-600">
-            © Congruent Solutions, Inc. All Rights Reserved
+            {t('auth.copyright')}
           </p>
           <div className="flex items-center gap-4">
             <a
               href="#"
               className="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-600 dark:hover:text-gray-400"
             >
-              Privacy Policy
+              {t('auth.privacy_policy')}
             </a>
             <img
               src={CORE_LOGO}
