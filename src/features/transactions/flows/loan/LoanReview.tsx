@@ -166,7 +166,7 @@ function LoanReview() {
           }}
         >
           <div className="flex items-center gap-2 mb-4">
-            <Clock style={{ width: 16, height: 16, color: "#2563EB" }} />
+            <Clock style={{ width: 16, height: 16, color: "var(--brand-primary)" }} />
             <h4 style={{ fontSize: 14, fontWeight: 700, color: "inherit", letterSpacing: "-0.3px" }}>Processing Timeline</h4>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -182,13 +182,13 @@ function LoanReview() {
                   style={{
                     width: 28, height: 28, borderRadius: 14,
                     background: "transparent", border: "2px solid #BFDBFE",
-                    fontSize: 10, fontWeight: 700, color: "#2563EB",
+                    fontSize: 10, fontWeight: 700, color: "var(--brand-primary)",
                   }}
                 >
                   {idx + 1}
                 </div>
                 <p style={{ fontSize: 12, fontWeight: 700, color: "inherit" }}>{item.step}</p>
-                <p style={{ fontSize: 10, fontWeight: 600, color: "#2563EB" }}>{item.time}</p>
+                <p style={{ fontSize: 10, fontWeight: 600, color: "var(--brand-primary)" }}>{item.time}</p>
                 <p style={{ fontSize: 10, fontWeight: 500, color: "inherit" }}>{item.desc}</p>
               </div>
             ))}
@@ -239,7 +239,7 @@ function LoanReview() {
         <button
           onClick={() => navigate("/transactions/loan/documents")}
           className="flex items-center gap-2 transition-all duration-200 cursor-pointer"
-          style={{ background: "transparent", border: "1px solid #E2E8F0", color: "inherit", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
+          style={{ background: "transparent", border: "var(--c-border)", color: "inherit", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
         >
           <ArrowLeft style={{ width: 16, height: 16 }} />
           Back

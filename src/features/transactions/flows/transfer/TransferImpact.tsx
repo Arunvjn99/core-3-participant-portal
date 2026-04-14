@@ -23,7 +23,7 @@ function TransferImpact() {
       {/* Risk Level Change */}
       <FlowCard delay={0.05}>
         <div className="flex items-start gap-4">
-          <div className="flex items-center justify-center flex-shrink-0" style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #EFF6FF, #DBEAFE)", color: "#2563EB" }}>
+          <div className="flex items-center justify-center flex-shrink-0" style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg, #EFF6FF, #DBEAFE)", color: "var(--brand-primary)" }}>
             <Shield className="w-5 h-5" />
           </div>
           <div className="flex-1">
@@ -39,7 +39,7 @@ function TransferImpact() {
             </div>
             {newRiskLevel !== currentRiskLevel && (
               <div className="mt-4" style={{ padding: "12px 16px", background: "#EFF6FF", borderRadius: 10, border: "1px solid #BFDBFE" }}>
-                <p style={{ fontSize: 13, fontWeight: 500, color: "#1E40AF" }}>
+                <p style={{ fontSize: 13, fontWeight: 500, color: "var(--brand-primary)" }}>
                   Your portfolio risk level will change from <span style={{ fontWeight: 700 }}>{currentRiskLevel}</span> to{" "}
                   <span style={{ fontWeight: 700 }}>{newRiskLevel}</span> based on your new allocation.
                 </p>

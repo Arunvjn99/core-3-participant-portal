@@ -67,7 +67,7 @@ function DraftTransactions() {
         >
           <div
             className="flex items-center justify-center flex-shrink-0"
-            style={{ width: 30, height: 30, borderRadius: 8, background: "#EFF6FF", color: "#2563EB" }}
+            style={{ width: 30, height: 30, borderRadius: 8, background: "#EFF6FF", color: "var(--brand-primary)" }}
           >
             {draft.icon}
           </div>
@@ -88,7 +88,7 @@ function DraftTransactions() {
                   padding: "3px 10px",
                   borderRadius: 6,
                   background: "#EFF6FF",
-                  color: "#2563EB",
+                  color: "var(--brand-primary)",
                 }}
               >
                 Draft
@@ -125,14 +125,14 @@ function DraftTransactions() {
               onClick={() => navigate(draft.resumePath)}
               className="flex items-center justify-center transition-all duration-200 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600"
               title="Resume"
-              style={{ width: 32, height: 32, borderRadius: 8, color: "#2563EB" }}
+              style={{ width: 32, height: 32, borderRadius: 8, color: "var(--brand-primary)" }}
             >
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
             <button
               className="flex items-center justify-center transition-all duration-200 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 hover:border-red-200 dark:hover:border-red-700"
               title="Delete"
-              style={{ width: 32, height: 32, borderRadius: 8, color: "#64748B" }}
+              style={{ width: 32, height: 32, borderRadius: 8, color: "var(--c-text-muted)" }}
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>

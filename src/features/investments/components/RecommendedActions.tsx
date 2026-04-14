@@ -49,7 +49,7 @@ function RecommendedActions() {
         <Sparkles className="w-4 h-4 text-amber-500" />
         <h3 className="text-gray-900 dark:text-white">Recommended Actions</h3>
       </div>
-      <p className="text-xs text-gray-500 mb-4">Personalized steps to improve your retirement outlook</p>
+      <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Personalized steps to improve your retirement outlook</p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
         {actions.map((action) => {
@@ -67,7 +67,7 @@ function RecommendedActions() {
                   <Icon className={`w-5 h-5 ${action.iconColor}`} />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-900" style={{ fontWeight: 600 }}>{action.title}</p>
+                  <p className="text-sm text-gray-900 dark:text-white" style={{ fontWeight: 600 }}>{action.title}</p>
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded-full ${action.priorityBg}`}
                     style={{ fontWeight: 500 }}
@@ -77,7 +77,7 @@ function RecommendedActions() {
                 </div>
               </div>
 
-              <p className="text-xs text-gray-500 leading-relaxed mb-3 flex-1">{action.description}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3 flex-1">{action.description}</p>
 
               <div className="flex items-center gap-1 mb-4">
                 <TrendingUp className="w-3 h-3 text-emerald-500 shrink-0" />

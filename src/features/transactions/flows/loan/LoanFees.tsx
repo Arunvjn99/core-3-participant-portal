@@ -72,7 +72,7 @@ function LoanFees() {
             ))}
 
             {/* Total Fees */}
-            <div className="flex items-center justify-between" style={{ padding: "14px 0", borderBottom: "1px solid #E2E8F0" }}>
+            <div className="flex items-center justify-between" style={{ padding: "14px 0", borderBottom: "var(--c-border)" }}>
               <p style={{ fontSize: 14, fontWeight: 600, color: "inherit" }}>Total Fees</p>
               <p style={{ fontSize: 14, fontWeight: 700, color: "#EF4444" }}>-${totalFees}</p>
             </div>
@@ -91,7 +91,7 @@ function LoanFees() {
                 <p style={{ fontSize: 16, fontWeight: 700, color: "inherit", letterSpacing: "-0.3px" }}>Net Loan Amount</p>
                 <p style={{ fontSize: 12, fontWeight: 500, color: "inherit" }}>Amount you will receive</p>
               </div>
-              <p style={{ fontSize: 28, fontWeight: 800, color: "#2563EB", letterSpacing: "-0.5px" }}>
+              <p style={{ fontSize: 28, fontWeight: 800, color: "var(--brand-primary)", letterSpacing: "-0.5px" }}>
                 ${netLoanAmount.toLocaleString()}
               </p>
             </div>
@@ -108,8 +108,8 @@ function LoanFees() {
           className="flex items-start gap-3"
           style={{ background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)", border: "1px solid #BFDBFE", borderRadius: 14, padding: "16px 20px" }}
         >
-          <Info className="flex-shrink-0 mt-0.5" style={{ width: 16, height: 16, color: "#2563EB" }} />
-          <p className="leading-relaxed" style={{ fontSize: 13, fontWeight: 500, color: "#1E40AF" }}>
+          <Info className="flex-shrink-0 mt-0.5" style={{ width: 16, height: 16, color: "var(--brand-primary)" }} />
+          <p className="leading-relaxed" style={{ fontSize: 13, fontWeight: 500, color: "var(--brand-primary)" }}>
             <span style={{ fontWeight: 700 }}>Note:</span> All fees will be deducted from your loan amount.
             Your monthly payments will be based on the gross loan amount of ${loanAmount.toLocaleString()},
             but you will receive ${netLoanAmount.toLocaleString()}. Interest rate of 8% applies to the gross amount.
@@ -121,7 +121,7 @@ function LoanFees() {
         <button
           onClick={() => navigate("/transactions/loan/configuration")}
           className="flex items-center gap-2 transition-all duration-200 cursor-pointer"
-          style={{ background: "transparent", border: "1px solid #E2E8F0", color: "inherit", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
+          style={{ background: "transparent", border: "var(--c-border)", color: "inherit", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
         >
           <ArrowLeft style={{ width: 16, height: 16 }} />
           Back

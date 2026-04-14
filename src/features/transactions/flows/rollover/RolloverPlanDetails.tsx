@@ -97,7 +97,7 @@ function RolloverPlanDetails() {
                   background: rolloverType === type.id ? "#EFF6FF" : "#fff" }}
               >
                 {rolloverType === type.id && (
-                  <CheckCircle2 className="absolute top-3 right-3" style={{ width: 16, height: 16, color: "#2563EB" }} />
+                  <CheckCircle2 className="absolute top-3 right-3" style={{ width: 16, height: 16, color: "var(--brand-primary)" }} />
                 )}
                 <div
                   className={`p-2 rounded-lg inline-flex mb-3 ${
@@ -260,7 +260,7 @@ function RolloverPlanDetails() {
         <button
           onClick={() => navigate("/transactions")}
           className="flex items-center gap-2 transition-all duration-200 cursor-pointer"
-          style={{ background: "transparent", border: "1px solid #E2E8F0", color: "inherit", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
+          style={{ background: "transparent", border: "var(--c-border)", color: "inherit", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
         >
           Cancel
         </button>

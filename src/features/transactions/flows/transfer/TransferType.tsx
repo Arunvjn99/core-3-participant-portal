@@ -84,7 +84,7 @@ function TransferType() {
                   background: isSelected ? "#EFF6FF" : "#fff" }}
               >
                 {isSelected && (
-                  <CheckCircle2 className="absolute top-5 right-5" style={{ width: 20, height: 20, color: "#2563EB" }} />
+                  <CheckCircle2 className="absolute top-5 right-5" style={{ width: 20, height: 20, color: "var(--brand-primary)" }} />
                 )}
 
                 <div className="flex items-start gap-4">
@@ -134,8 +134,8 @@ function TransferType() {
           className="flex items-start gap-3"
           style={{ background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)", border: "1px solid #BFDBFE", borderRadius: 14, padding: "14px 16px" }}
         >
-          <Info className="flex-shrink-0 mt-0.5" style={{ width: 16, height: 16, color: "#2563EB" }} />
-          <p className="leading-relaxed" style={{ fontSize: 12, fontWeight: 500, color: "#1E40AF" }}>
+          <Info className="flex-shrink-0 mt-0.5" style={{ width: 16, height: 16, color: "var(--brand-primary)" }} />
+          <p className="leading-relaxed" style={{ fontSize: 12, fontWeight: 500, color: "var(--brand-primary)" }}>
             Transfers within your 401(k) plan are tax-free and have no
             impact on your contribution limits. If you want to change both
             existing balance and future contributions, you'll need to
@@ -148,7 +148,7 @@ function TransferType() {
         <button
           onClick={() => navigate("/transactions")}
           className="flex items-center gap-2 transition-all duration-200 cursor-pointer"
-          style={{ background: "transparent", border: "1px solid #E2E8F0", color: "inherit", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
+          style={{ background: "transparent", border: "var(--c-border)", color: "inherit", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
         >
           <ArrowLeft style={{ width: 16, height: 16 }} />
           Cancel

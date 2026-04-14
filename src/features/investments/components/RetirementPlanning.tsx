@@ -140,15 +140,15 @@ function RetirementPlanning() {
           <Target className="w-4 h-4 text-blue-500" />
           <h3 className="text-gray-900 dark:text-white">Retirement Planning</h3>
         </div>
-        <p className="text-xs text-gray-500 mb-5">What your portfolio means for retirement at age 65</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-5">What your portfolio means for retirement at age 65</p>
 
         {/* Top Stats Row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           {/* Readiness Score */}
-          <div className="flex items-center gap-4 bg-gray-50/80 rounded-xl p-4">
+          <div className="flex items-center gap-4 bg-gray-50/80 dark:bg-gray-800 rounded-xl p-4">
             <ReadinessRing score={scenario.score} color={scenario.color} />
             <div>
-              <p className="text-[11px] text-gray-500 uppercase tracking-wide mb-0.5" style={{ fontWeight: 500 }}>Readiness Score</p>
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-0.5" style={{ fontWeight: 500 }}>Readiness Score</p>
               <span className={`inline-flex items-center gap-1 ${scoreLabel.bg} ${scoreLabel.color} px-2 py-0.5 rounded-full text-[11px]`} style={{ fontWeight: 500 }}>
                 <TrendingUp className="w-3 h-3" />
                 {scoreLabel.text}
@@ -157,9 +157,9 @@ function RetirementPlanning() {
           </div>
 
           {/* Projected Savings */}
-          <div className="bg-gray-50/80 rounded-xl p-4">
-            <p className="text-[11px] text-gray-500 uppercase tracking-wide mb-1" style={{ fontWeight: 500 }}>Projected at 65</p>
-            <p className="text-2xl text-gray-900 tracking-tight" style={{ fontWeight: 600 }}>{scenario.projected}</p>
+          <div className="bg-gray-50/80 dark:bg-gray-800 rounded-xl p-4">
+            <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1" style={{ fontWeight: 500 }}>Projected at 65</p>
+            <p className="text-2xl text-gray-900 dark:text-white tracking-tight" style={{ fontWeight: 600 }}>{scenario.projected}</p>
             <span
               className={`inline-flex text-[11px] mt-1 px-2 py-0.5 rounded-full ${
                 meetsGoal ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"
@@ -171,13 +171,13 @@ function RetirementPlanning() {
           </div>
 
           {/* Monthly Income */}
-          <div className="bg-gray-50/80 rounded-xl p-4">
-            <p className="text-[11px] text-gray-500 uppercase tracking-wide mb-1" style={{ fontWeight: 500 }}>Est. Monthly Income</p>
+          <div className="bg-gray-50/80 dark:bg-gray-800 rounded-xl p-4">
+            <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1" style={{ fontWeight: 500 }}>Est. Monthly Income</p>
             <div className="flex items-baseline gap-1">
-              <p className="text-2xl text-gray-900 tracking-tight" style={{ fontWeight: 600 }}>{scenario.monthlyIncome}</p>
-              <span className="text-xs text-gray-400">/mo</span>
+              <p className="text-2xl text-gray-900 dark:text-white tracking-tight" style={{ fontWeight: 600 }}>{scenario.monthlyIncome}</p>
+              <span className="text-xs text-gray-400 dark:text-gray-500">/mo</span>
             </div>
-            <p className="text-[11px] text-gray-400 mt-1">Based on 4% withdrawal rate</p>
+            <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">Based on 4% withdrawal rate</p>
           </div>
         </div>
 
@@ -189,8 +189,8 @@ function RetirementPlanning() {
               onClick={() => setActive(tab)}
               className={`px-3 py-1.5 rounded-lg text-xs transition-all ${
                 active === tab
-                  ? "bg-gray-900 text-white shadow-sm"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 shadow-sm"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
               }`}
             >
               {tab}
@@ -247,16 +247,16 @@ function RetirementPlanning() {
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-5 mt-3 pt-3 border-t border-gray-100">
+        <div className="flex items-center gap-5 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
           <div className="flex items-center gap-2">
             <div className="w-4 h-0.5 rounded-full" style={{ backgroundColor: scenario.color }} />
-            <span className="text-[11px] text-gray-500">Projected Savings</span>
+            <span className="text-[11px] text-gray-500 dark:text-gray-400">Projected Savings</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 border-t border-dashed border-gray-300" />
-            <span className="text-[11px] text-gray-500">Retirement Goal</span>
+            <div className="w-4 border-t border-dashed border-gray-300 dark:border-gray-600" />
+            <span className="text-[11px] text-gray-500 dark:text-gray-400">Retirement Goal</span>
           </div>
-          <p className="text-[11px] text-gray-400 ml-auto hidden sm:block">{scenario.description}</p>
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 ml-auto hidden sm:block">{scenario.description}</p>
         </div>
       </div>
     </div>

@@ -86,7 +86,7 @@ function TransferReview() {
           ].map((text, i) => (
             <li key={i} className="flex items-start gap-2.5">
               <span className="rounded-full mt-1.5 flex-shrink-0" style={{ width: 6, height: 6, background: "#2563EB" }} />
-              <span style={{ fontSize: 13, fontWeight: 500, color: "#1E40AF" }}>{text}</span>
+              <span style={{ fontSize: 13, fontWeight: 500, color: "var(--brand-primary)" }}>{text}</span>
             </li>
           ))}
         </ul>

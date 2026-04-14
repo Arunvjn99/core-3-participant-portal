@@ -273,7 +273,7 @@ function LoanConfiguration() {
               style={{
                 padding: "12px 36px 12px 16px",
                 borderRadius: 12,
-                border: "1px solid #E2E8F0",
+                border: "var(--c-border)",
                 background: "transparent",
                 fontSize: 14,
                 fontWeight: 500,
@@ -328,7 +328,7 @@ function LoanConfiguration() {
               flexShrink: 0 }}
           >
             <Clock
-              style={{ width: 20, height: 20, color: "#2563EB" }}
+              style={{ width: 20, height: 20, color: "var(--brand-primary)" }}
             />
           </div>
           <div>
@@ -345,7 +345,7 @@ function LoanConfiguration() {
               style={{
                 fontSize: 13,
                 fontWeight: 500,
-                color: "#2563EB" }}
+                color: "var(--brand-primary)" }}
             >
               You'll receive email updates at each stage of review
             </p>
@@ -378,7 +378,7 @@ function LoanConfiguration() {
                 alignItems: "center",
                 justifyContent: "center" }}
             >
-              <CreditCard style={{ width: 20, height: 20, color: "#2563EB" }} />
+              <CreditCard style={{ width: 20, height: 20, color: "var(--brand-primary)" }} />
             </div>
             <h3
               style={{
@@ -554,7 +554,7 @@ function LoanConfiguration() {
                     style={{
                       padding: "12px 36px 12px 16px",
                       borderRadius: 12,
-                      border: "1px solid #E2E8F0",
+                      border: "var(--c-border)",
                       background: "transparent",
                       fontSize: 14,
                       fontWeight: 600,
@@ -656,7 +656,7 @@ function LoanConfiguration() {
                 marginBottom: 16 }}
             >
               <div className="flex items-center gap-2" style={{ marginBottom: 8 }}>
-                <BarChart3 style={{ width: 14, height: 14, color: "#2563EB" }} />
+                <BarChart3 style={{ width: 14, height: 14, color: "var(--brand-primary)" }} />
                 <span style={{ fontSize: 12, fontWeight: 700, color: "inherit" }}>
                   Amortization Preview
                 </span>
@@ -668,7 +668,7 @@ function LoanConfiguration() {
                 </div>
                 <div style={{ background: "transparent", borderRadius: 8, padding: "8px 10px", border: "1px solid var(--tx-border-light, #F1F5F9)" }}>
                   <p style={{ fontSize: 10, fontWeight: 500, color: "inherit", marginBottom: 2 }}>Total Interest</p>
-                  <p style={{ fontSize: 14, fontWeight: 700, color: "#2563EB" }}>$200.00</p>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: "var(--brand-primary)" }}>$200.00</p>
                 </div>
                 <div style={{ background: "transparent", borderRadius: 8, padding: "8px 10px", border: "1px solid var(--tx-border-light, #F1F5F9)" }}>
                   <p style={{ fontSize: 10, fontWeight: 500, color: "inherit", marginBottom: 2 }}>Number of Payments</p>
@@ -859,7 +859,7 @@ function LoanConfiguration() {
                   display: "flex",
                   alignItems: "center",
                   borderRadius: 10,
-                  border: "1px solid #E2E8F0",
+                  border: "var(--c-border)",
                   background: "transparent",
                   overflow: "hidden",
                   marginBottom: 6 }}
@@ -875,7 +875,7 @@ function LoanConfiguration() {
                     flexShrink: 0 }}
                 >
                   <DollarSign
-                    style={{ width: 16, height: 16, color: "#2563EB" }}
+                    style={{ width: 16, height: 16, color: "var(--brand-primary)" }}
                   />
                 </div>
                 <input
@@ -917,7 +917,7 @@ function LoanConfiguration() {
                   display: "flex",
                   alignItems: "center",
                   borderRadius: 10,
-                  border: "1px solid #E2E8F0",
+                  border: "var(--c-border)",
                   background: "transparent",
                   overflow: "hidden" }}
               >
@@ -932,7 +932,7 @@ function LoanConfiguration() {
                     flexShrink: 0 }}
                 >
                   <Calendar
-                    style={{ width: 16, height: 16, color: "#2563EB" }}
+                    style={{ width: 16, height: 16, color: "var(--brand-primary)" }}
                   />
                 </div>
                 <input
@@ -1108,7 +1108,7 @@ function LoanConfiguration() {
                           style={{
                             padding: "9px 36px 9px 14px",
                             borderRadius: 10,
-                            border: "1px solid #E2E8F0",
+                            border: "var(--c-border)",
                             background: "transparent",
                             fontSize: 13,
                             fontWeight: 600 }}

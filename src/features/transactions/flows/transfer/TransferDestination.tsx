@@ -102,7 +102,7 @@ function TransferDestination() {
   const riskColors: Record<string, { bg: string; color: string; border: string }> =
     {
       Low: { bg: "#ECFDF5", color: "#059669", border: "#BBF7D0" },
-      Moderate: { bg: "#EFF6FF", color: "#2563EB", border: "#BFDBFE" },
+      Moderate: { bg: "#EFF6FF", color: "var(--brand-primary)", border: "#BFDBFE" },
       High: { bg: "#FFFBEB", color: "#B45309", border: "#FED7AA" } };
 
   const handleContinue = () => {
@@ -188,7 +188,7 @@ function TransferDestination() {
                 {fund.selected && (
                   <CheckCircle2
                     className="absolute top-3 right-3"
-                    style={{ width: 16, height: 16, color: "#2563EB" }}
+                    style={{ width: 16, height: 16, color: "var(--brand-primary)" }}
                   />
                 )}
 
@@ -280,7 +280,7 @@ function TransferDestination() {
           className="flex items-center gap-2 transition-all duration-200 cursor-pointer"
           style={{
             background: "transparent",
-            border: "1px solid #E2E8F0",
+            border: "var(--c-border)",
             color: "inherit",
             padding: "10px 16px",
             borderRadius: 10,

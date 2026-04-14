@@ -106,11 +106,11 @@ const typeIcons: Record<Transaction["type"], React.ReactNode> = {
 };
 
 const typeColors: Record<Transaction["type"], { bg: string; color: string }> = {
-  Loan: { bg: "#EFF6FF", color: "#2563EB" },
+  Loan: { bg: "#EFF6FF", color: "var(--brand-primary)" },
   Withdrawal: { bg: "#FEF2F2", color: "#DC2626" },
-  Transfer: { bg: "#EFF6FF", color: "#2563EB" },
+  Transfer: { bg: "#EFF6FF", color: "var(--brand-primary)" },
   Rebalance: { bg: "#F0FDF4", color: "#10B981" },
-  Rollover: { bg: "#EFF6FF", color: "#2563EB" },
+  Rollover: { bg: "#EFF6FF", color: "var(--brand-primary)" },
 };
 
 function RecentTransactionsCompact({ maxItems }: { maxItems?: number } = {}) {
@@ -134,8 +134,8 @@ function RecentTransactionsCompact({ maxItems }: { maxItems?: number } = {}) {
   const getStatusBadge = (status: Transaction["status"]) => {
     switch (status) {
       case "Completed": return { bg: "#ECFDF5", color: "#059669", dot: "#10B981" };
-      case "Processing": return { bg: "#EFF6FF", color: "#2563EB", dot: "#3B82F6" };
-      case "Cancelled": return { bg: "#F8FAFC", color: "#64748B", dot: "#94A3B8" };
+      case "Processing": return { bg: "#EFF6FF", color: "var(--brand-primary)", dot: "#3B82F6" };
+      case "Cancelled": return { bg: "#F8FAFC", color: "var(--c-text-muted)", dot: "#94A3B8" };
     }
   };
 

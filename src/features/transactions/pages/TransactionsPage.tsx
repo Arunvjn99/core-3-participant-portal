@@ -160,7 +160,7 @@ function TransactionsPage() {
                     width: 44,
                     height: 44,
                     borderRadius: 12,
-                    background: "#fff",
+                    background: "var(--c-card)",
                     border: "1px solid #BFDBFE" }}
                 >
                   <ShieldIcon className="w-5 h-5 text-[#2563EB]" />
@@ -170,7 +170,7 @@ function TransactionsPage() {
                     className="uppercase"
                     style={{
                       fontSize: 10.5,
-                      color: "#64748B",
+                      color: "var(--c-text-muted)",
                       letterSpacing: "0.5px",
                       fontWeight: 700,
                       lineHeight: "14px" }}
@@ -181,7 +181,7 @@ function TransactionsPage() {
                     style={{
                       fontSize: 15,
                       fontWeight: 800,
-                      color: "#1E293B",
+                      color: "var(--c-text-primary)",
                       letterSpacing: "-0.3px",
                       lineHeight: "22px",
                       marginTop: 2 }}
@@ -193,7 +193,7 @@ function TransactionsPage() {
                       className="uppercase"
                       style={{
                         fontSize: 10,
-                        color: "#94A3B8",
+                        color: "var(--c-text-faint)",
                         letterSpacing: "0.5px",
                         fontWeight: 600 }}
                     >
@@ -203,7 +203,7 @@ function TransactionsPage() {
                       style={{
                         fontSize: 14,
                         fontWeight: 800,
-                        color: "#2563EB",
+                        color: "var(--brand-primary)",
                         letterSpacing: "-0.3px" }}
                     >
                       $30,000
@@ -230,7 +230,7 @@ function TransactionsPage() {
                     width: 44,
                     height: 44,
                     borderRadius: 12,
-                    background: "#fff",
+                    background: "var(--c-card)",
                     border: "1px solid #BFDBFE" }}
                 >
                   <ChartBarIcon className="w-5 h-5 text-[#2563EB]" />
@@ -240,7 +240,7 @@ function TransactionsPage() {
                     className="uppercase"
                     style={{
                       fontSize: 10.5,
-                      color: "#64748B",
+                      color: "var(--c-text-muted)",
                       letterSpacing: "0.5px",
                       fontWeight: 700,
                       lineHeight: "14px" }}
@@ -252,7 +252,7 @@ function TransactionsPage() {
                       style={{
                         fontSize: 28,
                         fontWeight: 800,
-                        color: "#1E293B",
+                        color: "var(--c-text-primary)",
                         letterSpacing: "-0.5px",
                         lineHeight: "36px" }}
                     >
@@ -261,7 +261,7 @@ function TransactionsPage() {
                     <span
                       style={{
                         fontSize: 12,
-                        color: "#64748B",
+                        color: "var(--c-text-muted)",
                         fontWeight: 600 }}
                     >
                       83.3% vested
@@ -360,9 +360,9 @@ function TransactionsPage() {
             />
             <div
               style={{
-                background: "#fff",
+                background: "var(--c-card)",
                 borderRadius: 16,
-                border: "1px solid #F1F5F9",
+                border: "var(--c-border-subtle)",
                 padding: "20px 24px" }}
             >
               <DraftTransactions />
@@ -386,9 +386,9 @@ function TransactionsPage() {
             />
             <div
               style={{
-                background: "#fff",
+                background: "var(--c-card)",
                 borderRadius: 16,
-                border: "1px solid #F1F5F9",
+                border: "var(--c-border-subtle)",
                 padding: "24px 28px" }}
             >
               <RecentTransactionsCompact maxItems={4} />

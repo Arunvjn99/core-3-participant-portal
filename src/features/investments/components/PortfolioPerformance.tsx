@@ -67,17 +67,17 @@ function PortfolioPerformance() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
         <div>
           <h3 className="text-gray-900 dark:text-white">Portfolio Performance</h3>
-          <p className="text-xs text-gray-500 mt-0.5">Growth over time vs S&P 500 benchmark</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Growth over time vs S&P 500 benchmark</p>
         </div>
-        <div className="flex gap-1 bg-gray-100 p-1 rounded-lg self-start">
+        <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg self-start">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveRange(tab)}
               className={`px-3 py-1.5 rounded-md text-xs transition-all ${
                 activeRange === tab
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
               }`}
               style={{ fontWeight: activeRange === tab ? 500 : 400 }}
             >
@@ -90,7 +90,7 @@ function PortfolioPerformance() {
       <div style={{ width: "100%", height: 260, minHeight: 260, minWidth: 0 }}>
         <ResponsiveContainer width="100%" height={260}>
           <LineChart data={currentData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--c-muted, #f3f4f6)" vertical={false} />
             <XAxis
               dataKey="date"
               tick={{ fontSize: 11, fill: "#9ca3af" }}
@@ -130,14 +130,14 @@ function PortfolioPerformance() {
       </div>
 
       {/* Custom Legend */}
-      <div className="flex items-center gap-5 mt-3 pt-3 border-t border-gray-100">
+      <div className="flex items-center gap-5 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
         <div className="flex items-center gap-2">
           <div className="w-4 h-0.5 bg-blue-500 rounded-full" />
-          <span className="text-[11px] text-gray-600">Your Portfolio</span>
+          <span className="text-[11px] text-gray-600 dark:text-gray-400">Your Portfolio</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-0.5 bg-gray-300 rounded-full" style={{ backgroundImage: "repeating-linear-gradient(90deg, #d1d5db 0 4px, transparent 4px 8px)" }} />
-          <span className="text-[11px] text-gray-500">S&P 500</span>
+          <div className="w-4 h-0.5 bg-gray-300 dark:bg-gray-600 rounded-full" />
+          <span className="text-[11px] text-gray-500 dark:text-gray-400">S&amp;P 500</span>
         </div>
       </div>
     </div>

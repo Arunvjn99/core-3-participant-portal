@@ -145,44 +145,140 @@ input[type='range']::-moz-range-thumb {
 }
 
 
-/* ── Transaction CSS variables (used as fallback in some TSX files) ── */
+
+/* ── Transaction/Investment design tokens ── */
 :root {
-  --tx-text-primary: #1E293B;
-  --tx-text-secondary: #475569;
-  --tx-text-muted: #64748B;
-  --tx-text-subtle: #94A3B8;
-  --tx-bg-card: #ffffff;
-  --tx-bg-subtle: #F8FAFC;
-  --tx-bg-light: #F1F5F9;
-  --tx-border-light: #F1F5F9;
-  --tx-border: #E2E8F0;
-  --tx-track: #E2E8F0;
+  --c-card:            #ffffff;
+  --c-page:            #f8fafc;
+  --c-subtle:          #f1f5f9;
+  --c-muted:           #e2e8f0;
+  --c-border-subtle:   1px solid #f1f5f9;
+  --c-border:          1px solid #e2e8f0;
+  --c-text-primary:    #1e293b;
+  --c-text-secondary:  #475569;
+  --c-text-muted:      #64748b;
+  --c-text-faint:      #94a3b8;
 }
 
 .dark {
-  --tx-text-primary: #f1f5f9;
-  --tx-text-secondary: #cbd5e1;
-  --tx-text-muted: #94a3b8;
-  --tx-text-subtle: #64748b;
-  --tx-bg-card: #1e293b;
-  --tx-bg-subtle: #1f2937;
-  --tx-bg-light: #374151;
-  --tx-border-light: rgba(255,255,255,0.08);
-  --tx-border: rgba(255,255,255,0.12);
-  --tx-track: #374151;
+  --c-card:            #111827;
+  --c-page:            #030712;
+  --c-subtle:          #1f2937;
+  --c-muted:           #374151;
+  --c-border-subtle:   1px solid rgba(255,255,255,0.06);
+  --c-border:          1px solid rgba(255,255,255,0.10);
+  --c-text-primary:    #f1f5f9;
+  --c-text-secondary:  #cbd5e1;
+  --c-text-muted:      #94a3b8;
+  --c-text-faint:      #64748b;
 }
 
-/* ── TSX files that use var(--tx-*) with fallback values ── */
-.dark [style*="var(--tx-border-light"] { border-color: rgba(255,255,255,0.08) !important; }
-.dark [style*="var(--tx-border,"]      { border-color: rgba(255,255,255,0.12) !important; }
-.dark [style*="var(--tx-track,"]       { background: #374151 !important; background-color: #374151 !important; }
+/* Keep these for TSX files that still reference them via fallback syntax */
+:root {
+  --tx-bg-card:        #ffffff;
+  --tx-bg-subtle:      #f8fafc;
+  --tx-bg-light:       #f1f5f9;
+  --tx-border-light:   #f1f5f9;
+  --tx-border:         #e2e8f0;
+  --tx-track:          #e2e8f0;
+}
+
+.dark {
+  --tx-bg-card:        #111827;
+  --tx-bg-subtle:      #1f2937;
+  --tx-bg-light:       #374151;
+  --tx-border-light:   rgba(255,255,255,0.06);
+  --tx-border:         rgba(255,255,255,0.10);
+  --tx-track:          #374151;
+}
+
+/* ── TSX files using var(..., fallback) still need attribute selectors ── */
+.dark [style*="var(--tx-border-light"] { border-color: rgba(255,255,255,0.06) !important; }
+.dark [style*="var(--tx-border,"]      { border-color: rgba(255,255,255,0.10) !important; }
+.dark [style*="var(--tx-track,"]       { background: #374151 !important; }
+.dark [style*="var(--c-muted)"]        { background: #374151 !important; }
+
+/* ── Table overrides (cannot use CSS vars on native table BG) ── */
+.dark table                { background-color: #030712 !important; }
+.dark table thead tr,
+.dark table thead          { background: #111827 !important; }
+.dark table thead th       { color: #94a3b8 !important; border-bottom-color: rgba(255,255,255,0.06) !important; }
+.dark table tbody tr       { background-color: #030712 !important; }
+.dark table tbody tr:hover { background-color: #111827 !important; }
+.dark table tbody td       { color: #f1f5f9 !important; border-bottom-color: rgba(255,255,255,0.06) !important; }
+
+/* ── Form inputs (style prop on native inputs) ── */
+.dark input, .dark select, .dark textarea {
+  background-color: #1f2937 !important;
+  color: #f1f5f9 !important;
+  border-color: rgba(255,255,255,0.10) !important;
+}
+
+/* ── Any remaining hardcoded inline hex that wasn't caught by Python ── */
+.dark [style*="#F8FAFC"]  { background: #030712 !important; background-color: #030712 !important; }
+.dark [style*="#F1F5F9"]  { background: #1f2937 !important; background-color: #1f2937 !important; }
+.dark [style*="#fff"]     { background: #111827 !important; background-color: #111827 !important; }
+.dark [style*="#ffffff"]  { background: #111827 !important; background-color: #111827 !important; }
+.dark [style*="#E2E8F0"][style*="height"] { background: #374151 !important; }
+
+/* Semantic colour tints — darken for dark mode */
+.dark [style*="background"][style*="#FFFBEB"],
+.dark [style*="background"][style*="#FFF7ED"] {
+  background: rgba(120,53,15,0.25) !important;
+}
+.dark [style*="background"][style*="#FFEDD5"] {
+  background: rgba(120,53,15,0.25) !important;
+}
+.dark [style*="background"][style*="#FEE2E2"],
+.dark [style*="background"][style*="#FEF2F2"] {
+  background: rgba(127,29,29,0.25) !important;
+}
+.dark [style*="background"][style*="#EFF6FF"],
+.dark [style*="background"][style*="#DBEAFE"],
+.dark [style*="background"][style*="#BFDBFE"] {
+  background: #0f2744 !important;
+}
+.dark [style*="background"][style*="#F5F3FF"],
+.dark [style*="background"][style*="#EDE9FE"] {
+  background: rgba(91,33,182,0.2) !important;
+}
+.dark [style*="background"][style*="#F0FDF4"],
+.dark [style*="background"][style*="#DCFCE7"] {
+  background: rgba(6,78,59,0.25) !important;
+}
+/* Plan overview gradient */
+.dark [style*="linear-gradient"][style*="#EFF6FF"],
+.dark [style*="linear-gradient"][style*="#DBEAFE"] {
+  background: linear-gradient(135deg, #0f2744 0%, #0d1f3c 100%) !important;
+  border-color: #1d4ed8 !important;
+}
+
+/* Semantic text colours in dark */
+.dark [style*="color"][style*="#1E293B"] { color: #f1f5f9 !important; }
+.dark [style*="color"][style*="#475569"] { color: #94a3b8 !important; }
+.dark [style*="color"][style*="#64748B"] { color: #94a3b8 !important; }
+.dark [style*="color"][style*="#94A3B8"] { color: #64748b !important; }
+.dark [style*="color"][style*="#CBD5E1"] { color: #475569 !important; }
+.dark [style*="color"][style*="#92400E"] { color: #fcd34d !important; }
+.dark [style*="color"][style*="#B45309"] { color: #fcd34d !important; }
+.dark [style*="color"][style*="#B91C1C"] { color: #fca5a5 !important; }
+.dark [style*="color"][style*="#166534"] { color: #4ade80 !important; }
+.dark [style*="color"][style*="#059669"] { color: #34d399 !important; }
+
+/* Border colour overrides */
+.dark [style*="1px solid #F1F5F9"]   { border-color: rgba(255,255,255,0.06) !important; }
+.dark [style*="1px solid #E2E8F0"]   { border-color: rgba(255,255,255,0.10) !important; }
+.dark [style*="1px solid #E8ECF1"]   { border-color: rgba(255,255,255,0.06) !important; }
+.dark [style*="1.5px solid #E2E8F0"] { border-color: rgba(255,255,255,0.10) !important; }
+.dark [style*="1px solid #BFDBFE"]   { border-color: #1d4ed8 !important; }
+.dark [style*="1px solid #FED7AA"]   { border-color: rgba(180,83,9,0.5) !important; }
+.dark [style*="1px solid #BBF7D0"]   { border-color: rgba(22,163,74,0.4) !important; }
 
 /* Post-enrollment dashboard tokens */
 @layer components {
   .premium-card {
     @apply bg-white dark:bg-gray-900 rounded-2xl p-6 border border-slate-100 dark:border-gray-700 transition-all duration-200 hover:shadow-lg hover:border-slate-200 dark:hover:border-gray-600;
   }
-
   .btn-primary {
     @apply text-white px-4 py-2 rounded-lg font-semibold transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
     background-color: var(--brand-primary) !important;
@@ -191,154 +287,3 @@ input[type='range']::-moz-range-thumb {
     background-color: var(--brand-primary-hover) !important;
   }
 }
-
-/* ============================================================
-   TRANSACTION DARK MODE — CSS attribute selector overrides
-   [style*="X"] matches the style attribute string in the DOM.
-   We must set BOTH background AND background-color because React
-   sets the background shorthand, which background-color alone
-   cannot override even with !important.
-   ============================================================ */
-
-/* --- Backgrounds --- */
-.dark [style*="#fff"],
-.dark [style*="#ffffff"],
-.dark [style*="#FFF"] {
-  background-color: #1e293b !important;
-  background: #1e293b !important;
-}
-
-.dark [style*="#F8FAFC"] {
-  background-color: #0f172a !important;
-  background: #0f172a !important;
-}
-
-.dark [style*="#F1F5F9"] {
-  background-color: #1e293b !important;
-  background: #1e293b !important;
-}
-
-.dark [style*="#FAFBFC"],
-.dark [style*="#FAFCFF"] {
-  background-color: #1a2535 !important;
-  background: #1a2535 !important;
-}
-
-.dark [style*="#E2E8F0"] {
-  background-color: #334155 !important;
-  background: #334155 !important;
-}
-
-/* Amber/orange tints */
-.dark [style*="background"][style*="#FFFBEB"],
-.dark [style*="background"][style*="#FFF7ED"] {
-  background-color: rgba(120,53,15,0.25) !important;
-  background: rgba(120,53,15,0.25) !important;
-}
-
-.dark [style*="background"][style*="#FEE2E2"] {
-  background-color: rgba(127,29,29,0.25) !important;
-  background: rgba(127,29,29,0.25) !important;
-}
-
-.dark [style*="background"][style*="#FFEDD5"] {
-  background-color: rgba(120,53,15,0.25) !important;
-  background: rgba(120,53,15,0.25) !important;
-}
-
-/* Blue tints */
-.dark [style*="background"][style*="#EFF6FF"],
-.dark [style*="background"][style*="#BFDBFE"],
-.dark [style*="background"][style*="#DBEAFE"] {
-  background-color: #1e3a5f !important;
-  background: #1e3a5f !important;
-}
-
-/* Green tints */
-.dark [style*="background"][style*="#F0FDF4"],
-.dark [style*="background"][style*="#DCFCE7"] {
-  background-color: rgba(6,78,59,0.25) !important;
-  background: rgba(6,78,59,0.25) !important;
-}
-
-/* Plan overview gradient card */
-.dark [style*="linear-gradient"][style*="#EFF6FF"],
-.dark [style*="linear-gradient"][style*="#DBEAFE"] {
-  background: linear-gradient(135deg, #0f2744 0%, #0d1f3c 100%) !important;
-  border-color: #1d4ed8 !important;
-}
-
-/* --- Text colors --- */
-.dark [style*="color"][style*="#1E293B"] { color: #f1f5f9 !important; }
-.dark [style*="color"][style*="#475569"] { color: #94a3b8 !important; }
-.dark [style*="color"][style*="#64748B"] { color: #94a3b8 !important; }
-.dark [style*="color"][style*="#94A3B8"] { color: #6b7280 !important; }
-.dark [style*="color"][style*="#CBD5E1"] { color: #475569 !important; }
-.dark [style*="color"][style*="#374151"] { color: #d1d5db !important; }
-
-/* Amber text */
-.dark [style*="color"][style*="#92400E"] { color: #fcd34d !important; }
-.dark [style*="color"][style*="#B45309"] { color: #fcd34d !important; }
-.dark [style*="color"][style*="#78350F"] { color: #fde68a !important; }
-
-/* Red text */
-.dark [style*="color"][style*="#B91C1C"] { color: #fca5a5 !important; }
-.dark [style*="color"][style*="#991B1B"] { color: #fca5a5 !important; }
-
-/* Green text */
-.dark [style*="color"][style*="#166534"] { color: #4ade80 !important; }
-.dark [style*="color"][style*="#059669"] { color: #34d399 !important; }
-.dark [style*="color"][style*="#065F46"] { color: #34d399 !important; }
-
-/* Blue text */
-.dark [style*="color"][style*="#1E40AF"] { color: #93c5fd !important; }
-.dark [style*="color"][style*="#1D4ED8"] { color: #93c5fd !important; }
-
-/* Purple text */
-.dark [style*="color"][style*="#7C3AED"] { color: #c4b5fd !important; }
-.dark [style*="color"][style*="#6D28D9"] { color: #c4b5fd !important; }
-
-/* --- Border colors --- */
-.dark [style*="1px solid #F1F5F9"]   { border-color: #1e293b !important; }
-.dark [style*="1px solid #E2E8F0"]   { border-color: #334155 !important; }
-.dark [style*="1px solid #E8ECF1"]   { border-color: #334155 !important; }
-.dark [style*="1.5px solid #E2E8F0"] { border-color: #334155 !important; }
-.dark [style*="2px solid #E2E8F0"]   { border-color: #334155 !important; }
-.dark [style*="1px solid #BFDBFE"]   { border-color: #1d4ed8 !important; }
-.dark [style*="2px solid #BFDBFE"]   { border-color: #2563eb !important; }
-.dark [style*="1.5px solid #2563EB"] { border-color: #2563eb !important; }
-.dark [style*="2px solid #2563EB"]   { border-color: #2563eb; background: #1e3a5f !important; }
-.dark [style*="1px solid #FCA5A5"]   { border-color: rgba(127,29,29,0.6) !important; }
-.dark [style*="1px solid #FED7AA"]   { border-color: rgba(180,83,9,0.5) !important; }
-.dark [style*="1px solid #BBF7D0"]   { border-color: rgba(22,163,74,0.4) !important; }
-
-/* --- Progress bar tracks --- */
-.dark [style*="#E2E8F0"][style*="height"] {
-  background-color: #334155 !important;
-  background: #334155 !important;
-}
-
-/* --- Tables --- */
-.dark table                { background-color: #0f172a !important; }
-.dark table thead tr,
-.dark table thead          { background: #1e293b !important; }
-.dark table thead th       { color: #94a3b8 !important; border-bottom-color: #334155 !important; }
-.dark table tbody tr       { background-color: #0f172a !important; }
-.dark table tbody tr:hover { background-color: #1e293b !important; }
-.dark table tbody td       { color: #f1f5f9 !important; border-bottom-color: #1e293b !important; }
-
-/* --- Form inputs --- */
-.dark input   { background-color: #1e293b !important; color: #f1f5f9 !important; border-color: #334155 !important; }
-.dark select  { background-color: #1e293b !important; color: #f1f5f9 !important; border-color: #334155 !important; }
-.dark textarea{ background-color: #1e293b !important; color: #f1f5f9 !important; border-color: #334155 !important; }
-
-/* --- Cancel/secondary buttons --- */
-.dark button[style*="#475569"]  { color: #94a3b8 !important; background-color: #1e293b !important; border-color: #334155 !important; }
-.dark button[style*="#fff"],
-.dark button[style*="#ffffff"]  { background-color: #1e293b !important; background: #1e293b !important; border-color: #334155 !important; }
-
-/* --- Loan/radio selector cards --- */
-.dark button[style*="1.5px solid #E2E8F0"],
-.dark label[style*="1.5px solid #E2E8F0"]  { background: #1f2937 !important; border-color: rgba(255,255,255,0.1) !important; }
-.dark button[style*="2px solid #2563EB"],
-.dark label[style*="2px solid #2563EB"]    { background: #1e3a5f !important; border-color: #2563eb !important; }

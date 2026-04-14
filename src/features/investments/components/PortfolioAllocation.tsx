@@ -26,8 +26,8 @@ const pieData = allocationData.map((d) => ({ name: d.group, value: d.percentage,
 function PortfolioAllocation() {
   return (
     <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-100 dark:border-gray-800">
-      <h3 className="text-gray-900 mb-1">Portfolio Allocation</h3>
-      <p className="text-xs text-gray-500 mb-5">Asset class breakdown by category</p>
+      <h3 className="text-gray-900 dark:text-white mb-1">Portfolio Allocation</h3>
+      <p className="text-xs text-gray-500 dark:text-gray-400 mb-5">Asset class breakdown by category</p>
 
       <div className="flex flex-col sm:flex-row items-center gap-6">
         {/* Donut Chart */}
@@ -52,8 +52,8 @@ function PortfolioAllocation() {
           </ResponsiveContainer>
           {/* Center label */}
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-lg text-gray-900" style={{ fontWeight: 600 }}>3</span>
-            <span className="text-[10px] text-gray-400">classes</span>
+            <span className="text-lg text-gray-900 dark:text-white" style={{ fontWeight: 600 }}>3</span>
+            <span className="text-[10px] text-gray-400 dark:text-gray-500">classes</span>
           </div>
         </div>
 
@@ -64,12 +64,12 @@ function PortfolioAllocation() {
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: group.color }} />
-                  <span className="text-sm text-gray-900" style={{ fontWeight: 500 }}>{group.group}</span>
+                  <span className="text-sm text-gray-900 dark:text-white" style={{ fontWeight: 500 }}>{group.group}</span>
                 </div>
-                <span className="text-sm text-gray-900" style={{ fontWeight: 600 }}>{group.percentage}%</span>
+                <span className="text-sm text-gray-900 dark:text-white" style={{ fontWeight: 600 }}>{group.percentage}%</span>
               </div>
               {/* Progress bar */}
-              <div className="w-full h-1.5 bg-gray-100 rounded-full mb-1.5">
+              <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full mb-1.5">
                 <div
                   className="h-full rounded-full transition-all duration-500"
                   style={{ width: `${group.percentage}%`, backgroundColor: group.color }}

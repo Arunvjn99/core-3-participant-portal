@@ -33,7 +33,7 @@ function QuickActionButton({
             height: 40,
             borderRadius: 10,
             background: "linear-gradient(135deg, #EFF6FF, #DBEAFE)",
-            color: "#2563EB",
+            color: "var(--brand-primary)",
           }}
         >
           {icon}
@@ -49,7 +49,7 @@ function QuickActionButton({
             </h3>
             <ChevronRight className="w-3.5 h-3.5 text-slate-300 dark:text-gray-600 group-hover:text-[#2563EB] group-hover:translate-x-0.5 transition-all flex-shrink-0" />
           </div>
-          <p style={{ fontSize: 12, fontWeight: 600, color: "#2563EB", marginTop: 2 }}>
+          <p className="brand-text" style={{ fontSize: 12, fontWeight: 600, marginTop: 2 }}>
             {contextInfo}
           </p>
           {additionalInfo && (
@@ -66,7 +66,7 @@ function QuickActionButton({
       {/* Bottom accent line on hover */}
       <div
         className="absolute bottom-0 left-0 right-0 scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"
-        style={{ height: 2, background: "#2563EB", borderRadius: 1 }}
+        style={{ height: 2, background: "var(--brand-primary)", borderRadius: 1 }}
       />
     </motion.div>
   );

@@ -17,18 +17,18 @@ function PortfolioSnapshot() {
             <BarChart3 className="w-4.5 h-4.5 text-blue-600" />
           </div>
           <div>
-            <p className="text-sm text-gray-900" style={{ fontWeight: 500 }}>Portfolio Snapshot</p>
+            <p className="text-sm text-gray-900 dark:text-white" style={{ fontWeight: 500 }}>Portfolio Snapshot</p>
             <p className="text-[11px] text-gray-400">As of March 16, 2026</p>
           </div>
         </div>
 
         {/* Total Balance — Primary Focus */}
         <div className="mb-5">
-          <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide" style={{ fontWeight: 500 }}>Total Portfolio Balance</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide" style={{ fontWeight: 500 }}>Total Portfolio Balance</p>
           <div className="flex items-baseline gap-3 flex-wrap">
-            <p className="text-4xl sm:text-5xl text-gray-900 tracking-tight" style={{ fontWeight: 700, letterSpacing: "-0.02em" }}>
+            <p className="text-4xl sm:text-5xl text-gray-900 dark:text-white tracking-tight" style={{ fontWeight: 700, letterSpacing: "-0.02em" }}>
               ${Math.floor(totalBalance).toLocaleString()}
-              <span className="text-xl text-gray-300" style={{ fontWeight: 400 }}>
+              <span className="text-xl text-gray-300 dark:text-gray-600" style={{ fontWeight: 400 }}>
                 .{(totalBalance % 1).toFixed(2).slice(2)}
               </span>
             </p>
@@ -88,8 +88,8 @@ function MetricCard({
   positive?: boolean;
 }) {
   return (
-    <div className="bg-gray-50/80 rounded-xl p-3.5">
-      <p className="text-[11px] text-gray-500 mb-1.5">{label}</p>
+      <div className="bg-gray-50/80 dark:bg-gray-800 rounded-xl p-3.5">
+      <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-1.5">{label}</p>
       <div className="flex items-center gap-1">
         {positive && (
           <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
@@ -98,7 +98,7 @@ function MetricCard({
           {value}
         </p>
       </div>
-      <p className="text-[10px] text-gray-400 mt-0.5">{detail}</p>
+      <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">{detail}</p>
     </div>
   );
 }

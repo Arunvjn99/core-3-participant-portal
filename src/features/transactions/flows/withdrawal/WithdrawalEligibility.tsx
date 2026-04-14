@@ -20,7 +20,7 @@ function WithdrawalEligibility() {
   ];
 
   const metrics = [
-    { icon: <DollarSign className="w-5 h-5" />, label: "Available to Withdraw", value: "$5,000", bg: "#EFF6FF", color: "#2563EB" },
+    { icon: <DollarSign className="w-5 h-5" />, label: "Available to Withdraw", value: "$5,000", bg: "#EFF6FF", color: "var(--brand-primary)" },
     { icon: <Percent className="w-5 h-5" />, label: "Estimated Tax Withholding", value: "20–35%", bg: "#FFEDD5", color: "#F59E0B" },
     { icon: <Shield className="w-5 h-5" />, label: "Vested Balance", value: "$25,000", bg: "#F5F3FF", color: "#8B5CF6" },
   ];
@@ -67,7 +67,7 @@ function WithdrawalEligibility() {
                 {check.eligible ? (
                   <CheckCircle2 className="flex-shrink-0" style={{ width: 18, height: 18, color: "#10B981" }} />
                 ) : (
-                  <XCircle className="flex-shrink-0" style={{ width: 18, height: 18, color: "#94A3B8" }} />
+                  <XCircle className="flex-shrink-0" style={{ width: 18, height: 18, color: "var(--c-text-faint)" }} />
                 )}
                 <div>
                   <p style={{ fontSize: 13, fontWeight: 600, color: check.eligible ? "#1E293B" : "#94A3B8" }}>

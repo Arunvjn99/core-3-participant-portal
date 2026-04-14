@@ -56,15 +56,14 @@ function FlowValue({ children, size = 20 }: { children: React.ReactNode; size?: 
 }
 
 function FlowInfoBanner({ children, variant = "info" }: { children: React.ReactNode; variant?: "info" | "warning" | "error" | "success" }) {
-  const styles = {
-    info: { background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)", border: "1px solid #BFDBFE", color: "#1E40AF" },
-    warning: { background: "linear-gradient(135deg, #FFFBEB, #FFF7ED)", border: "1px solid #FED7AA", color: "#92400E" },
-    error: { background: "linear-gradient(135deg, #FEF2F2, #FEE2E2)", border: "1px solid #FCA5A5", color: "#B91C1C" },
-    success: { background: "linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)", border: "1px solid #BBF7D0", color: "#166534" },
-  };
-  const s = styles[variant];
+  const cls = {
+    info:    "bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/40 text-blue-900 dark:text-blue-200",
+    warning: "bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-amber-900 dark:text-amber-200",
+    error:   "bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/40 text-red-900 dark:text-red-200",
+    success: "bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800/40 text-green-900 dark:text-green-200",
+  }[variant];
   return (
-    <div style={{ ...s, borderRadius: 14, padding: "14px 16px" }}>
+    <div className={`rounded-xl p-4 ${cls}`}>
       {children}
     </div>
   );
@@ -98,8 +97,8 @@ function FlowNavButtons({
       <button
         onClick={onNext}
         disabled={disabled || isSubmitting}
-        className="flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-        style={{ background: "#2563EB", color: "#fff", padding: "10px 20px", borderRadius: 10, fontSize: 13, fontWeight: 600, border: "none", boxShadow: "0 4px 12px rgba(37,99,235,0.3)" }}
+        className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{ padding: "10px 20px", borderRadius: 10, fontSize: 13, fontWeight: 600, border: "none", boxShadow: "0 4px 12px var(--brand-primary-ring)" }}
       >
         {isSubmitting ? "Submitting..." : nextLabel}
         {!isSubmitting && <ArrowRight style={{ width: 16, height: 16 }} />}
@@ -116,10 +115,8 @@ function FlowSuccessState({ title, description }: { title: string; description: 
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="flex flex-col items-center justify-center py-16"
     >
-      <div
-        className="flex items-center justify-center mb-5"
-        style={{ width: 64, height: 64, borderRadius: 32, background: "linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)", border: "1px solid #BBF7D0" }}
-      >
+      <div className="flex items-center justify-center mb-5 bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800/40 rounded-full"
+           style={{ width: 64, height: 64 }}>
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
           <polyline points="22 4 12 14.01 9 11.01" />

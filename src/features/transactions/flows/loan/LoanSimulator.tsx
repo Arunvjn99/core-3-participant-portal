@@ -151,7 +151,7 @@ function LoanSimulator() {
                   <div className="flex items-center justify-center" style={{ width: 28, height: 28, borderRadius: 8, background: "#2563EB", color: "#fff" }}>
                     <DollarSign className="w-3.5 h-3.5" />
                   </div>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: "#3B82F6" }}>Monthly Payment</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: "var(--brand-primary)" }}>Monthly Payment</span>
                 </div>
                 <div className="flex items-baseline gap-1.5">
                   <span style={{ fontSize: 28, fontWeight: 800, color: "inherit", letterSpacing: "-1px", lineHeight: 1 }}>
@@ -182,7 +182,7 @@ function LoanSimulator() {
               {/* Payoff Date — Full Width */}
               <div className="flex items-center justify-between" style={{ marginTop: 8, background: "transparent", borderRadius: 10, padding: "10px 14px", border: "1px solid var(--tx-border-light, #F1F5F9)" }}>
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-3 h-3" style={{ color: "#2563EB" }} />
+                  <Calendar className="w-3 h-3" style={{ color: "var(--brand-primary)" }} />
                   <span style={{ fontSize: 11, fontWeight: 600, color: "inherit" }}>Loan Payoff Date</span>
                 </div>
                 <span style={{ fontSize: 13, fontWeight: 700, color: "inherit", letterSpacing: "-0.2px" }}>
@@ -221,7 +221,7 @@ function LoanSimulator() {
         <button
           onClick={() => navigate("/transactions/loan")}
           className="flex items-center gap-2 transition-all duration-200 cursor-pointer"
-          style={{ background: "transparent", border: "1px solid #E2E8F0", color: "inherit", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
+          style={{ background: "transparent", border: "var(--c-border)", color: "inherit", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
         >
           <ArrowLeft style={{ width: 16, height: 16 }} />
           Back

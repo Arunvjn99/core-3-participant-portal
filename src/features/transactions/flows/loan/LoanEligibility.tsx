@@ -20,7 +20,7 @@ function LoanEligibility() {
       label: "Maximum Loan Available",
       value: "$10,000",
       bg: "#EFF6FF",
-      color: "#2563EB",
+      color: "var(--brand-primary)",
     },
     {
       icon: <Wallet className="w-5 h-5" />,
@@ -34,7 +34,7 @@ function LoanEligibility() {
       label: "Available Loan Balance",
       value: "$10,000",
       bg: "#DBEAFE",
-      color: "#2563EB",
+      color: "var(--brand-primary)",
     },
     {
       icon: <Percent className="w-5 h-5" />,
@@ -148,12 +148,12 @@ function LoanEligibility() {
           className="flex items-start gap-3"
           style={{ background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)", border: "1px solid #BFDBFE", borderRadius: 14, padding: "16px 20px" }}
         >
-          <AlertCircle className="flex-shrink-0 mt-0.5" style={{ width: 16, height: 16, color: "#2563EB" }} />
+          <AlertCircle className="flex-shrink-0 mt-0.5" style={{ width: 16, height: 16, color: "var(--brand-primary)" }} />
           <div>
-            <p style={{ fontSize: 13, fontWeight: 700, color: "#1E40AF", marginBottom: 4 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: "var(--brand-primary)", marginBottom: 4 }}>
               Documentation Requirements
             </p>
-            <p className="leading-relaxed" style={{ fontSize: 12, fontWeight: 500, color: "#1E40AF" }}>
+            <p className="leading-relaxed" style={{ fontSize: 12, fontWeight: 500, color: "var(--brand-primary)" }}>
               You will need to provide a voided check or bank statement for
               EFT disbursement, sign a promissory note, and may need spousal
               consent or employment verification depending on your plan and
@@ -167,7 +167,7 @@ function LoanEligibility() {
         <button
           onClick={() => navigate("/transactions")}
           className="flex items-center gap-2 transition-all duration-200 cursor-pointer flex-1 sm:flex-none justify-center"
-          style={{ background: "transparent", border: "1px solid #E2E8F0", color: "inherit", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
+          style={{ background: "transparent", border: "var(--c-border)", color: "inherit", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
         >
           <ArrowLeft style={{ width: 16, height: 16 }} />
           Cancel
