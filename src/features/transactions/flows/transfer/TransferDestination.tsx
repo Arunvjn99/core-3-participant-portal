@@ -280,7 +280,7 @@ function TransferDestination() {
           className="flex items-center gap-2 transition-all duration-200 cursor-pointer"
           style={{
             background: "transparent",
-            border: "1.5px solid #E2E8F0",
+            border: "1px solid #E2E8F0",
             color: "inherit",
             padding: "10px 16px",
             borderRadius: 10,

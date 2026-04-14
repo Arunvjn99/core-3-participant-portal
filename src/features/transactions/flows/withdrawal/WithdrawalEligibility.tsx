@@ -67,7 +67,7 @@ function WithdrawalEligibility() {
                 {check.eligible ? (
                   <CheckCircle2 className="flex-shrink-0" style={{ width: 18, height: 18, color: "#10B981" }} />
                 ) : (
-                  <XCircle className="flex-shrink-0" style={{ width: 18, height: 18, color: "#CBD5E1" }} />
+                  <XCircle className="flex-shrink-0" style={{ width: 18, height: 18, color: "#94A3B8" }} />
                 )}
                 <div>
                   <p style={{ fontSize: 13, fontWeight: 600, color: check.eligible ? "#1E293B" : "#94A3B8" }}>

@@ -152,7 +152,7 @@ function LoanDocuments() {
                     <button
                       onClick={() => handleFileUpload(doc.name)}
                       className="flex items-center gap-2 cursor-pointer transition-all duration-200 flex-shrink-0"
-                      style={{ background: "transparent", border: "1.5px solid #E2E8F0", color: "inherit", padding: "8px 14px", borderRadius: 10, fontSize: 12, fontWeight: 600 }}
+                      style={{ background: "transparent", border: "1px solid #E2E8F0", color: "inherit", padding: "8px 14px", borderRadius: 10, fontSize: 12, fontWeight: 600 }}
                     >
                       <Upload style={{ width: 14, height: 14 }} />
                       Upload
@@ -195,7 +195,7 @@ function LoanDocuments() {
         <button
           onClick={() => navigate("/transactions/loan/fees")}
           className="flex items-center gap-2 transition-all duration-200 cursor-pointer"
-          style={{ background: "transparent", border: "1.5px solid #E2E8F0", color: "inherit", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
+          style={{ background: "transparent", border: "1px solid #E2E8F0", color: "inherit", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
         >
           <ArrowLeft style={{ width: 16, height: 16 }} />
           Back

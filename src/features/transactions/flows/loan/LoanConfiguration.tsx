@@ -273,7 +273,7 @@ function LoanConfiguration() {
               style={{
                 padding: "12px 36px 12px 16px",
                 borderRadius: 12,
-                border: "1.5px solid #E2E8F0",
+                border: "1px solid #E2E8F0",
                 background: "transparent",
                 fontSize: 14,
                 fontWeight: 500,
@@ -554,7 +554,7 @@ function LoanConfiguration() {
                     style={{
                       padding: "12px 36px 12px 16px",
                       borderRadius: 12,
-                      border: "1.5px solid #E2E8F0",
+                      border: "1px solid #E2E8F0",
                       background: "transparent",
                       fontSize: 14,
                       fontWeight: 600,
@@ -859,7 +859,7 @@ function LoanConfiguration() {
                   display: "flex",
                   alignItems: "center",
                   borderRadius: 10,
-                  border: "1.5px solid #E2E8F0",
+                  border: "1px solid #E2E8F0",
                   background: "transparent",
                   overflow: "hidden",
                   marginBottom: 6 }}
@@ -917,7 +917,7 @@ function LoanConfiguration() {
                   display: "flex",
                   alignItems: "center",
                   borderRadius: 10,
-                  border: "1.5px solid #E2E8F0",
+                  border: "1px solid #E2E8F0",
                   background: "transparent",
                   overflow: "hidden" }}
               >
@@ -1108,7 +1108,7 @@ function LoanConfiguration() {
                           style={{
                             padding: "9px 36px 9px 14px",
                             borderRadius: 10,
-                            border: "1.5px solid #E2E8F0",
+                            border: "1px solid #E2E8F0",
                             background: "transparent",
                             fontSize: 13,
                             fontWeight: 600 }}

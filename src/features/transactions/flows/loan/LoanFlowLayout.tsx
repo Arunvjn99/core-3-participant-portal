@@ -62,6 +62,7 @@ function LoanFlowLayout() {
 
         {/* Progress */}
         <div
+          className="dark:border-gray-800"
           style={{
             background: "transparent",
             borderBottom: "1px solid var(--tx-border-light, #F1F5F9)" }}
