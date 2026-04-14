@@ -137,8 +137,8 @@ function TransferSourceFunds() {
                 style={{
                   padding: "14px 16px",
                   borderRadius: 12,
-                  border: fund.selected ? "1.5px solid #2563EB" : "1.5px solid #E2E8F0",
-                  background: fund.selected ? "#EFF6FF" : "#fff" }}
+                  border: fund.selected ? "1.5px solid var(--brand-primary)" : "1.5px solid var(--c-border-color)",
+                  background: fund.selected ? "var(--c-blue-tint)" : "var(--c-card)" }}
               >
                 <Checkbox
                   checked={fund.selected}
@@ -163,7 +163,7 @@ function TransferSourceFunds() {
                     <span style={{ fontSize: 11, fontWeight: 500, color: "inherit" }}>
                       {fund.allocation}% of portfolio
                     </span>
-                    <span className="flex items-center gap-0.5" style={{ fontSize: 11, fontWeight: 700, color: "#10B981" }}>
+                    <span className="flex items-center gap-0.5" style={{ fontSize: 11, fontWeight: 700, color: "var(--c-green, #10B981)" }}>
                       {fund.ytdReturn > 0 ? (
                         <TrendingUp className="w-3 h-3" />
                       ) : fund.ytdReturn < 0 ? (

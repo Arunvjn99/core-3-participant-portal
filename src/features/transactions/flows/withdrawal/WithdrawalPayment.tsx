@@ -73,7 +73,7 @@ function WithdrawalPayment() {
             onValueChange={setPaymentMethod}
           >
             <div className="space-y-3">
-              <div className="flex items-start space-x-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 transition-colors">
+              <div className="flex items-start space-x-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
                 <RadioGroupItem value="eft" id="eft" />
                 <div className="flex-1">
                   <Label htmlFor="eft" className="font-medium cursor-pointer">
@@ -85,7 +85,7 @@ function WithdrawalPayment() {
                 </div>
               </div>
 
-              <div className="flex items-start space-x-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 transition-colors">
+              <div className="flex items-start space-x-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
                 <RadioGroupItem value="check" id="check" />
                 <div className="flex-1">
                   <Label
@@ -147,9 +147,9 @@ function WithdrawalPayment() {
           >
             <Card className="rounded-2xl border-gray-100 dark:border-gray-700/80 overflow-hidden">
               <CollapsibleTrigger asChild>
-                <button className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 dark:bg-gray-800/50 transition-colors cursor-pointer">
+                <button className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+                    <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400">
                       <Landmark className="w-4 h-4" />
                     </div>
                     <div>
@@ -211,10 +211,10 @@ function WithdrawalPayment() {
                     </Select>
                   </div>
 
-                  <div className="p-3 bg-blue-50/60 rounded-xl border border-blue-100/60">
+                  <div className="p-3 bg-blue-50/60 dark:bg-blue-950/30 rounded-xl border border-blue-100/60 dark:border-blue-800/60">
                     <div className="flex items-start gap-2">
                       <Info className="w-3.5 h-3.5 text-blue-500 mt-0.5 flex-shrink-0" />
-                      <p className="text-[11px] text-blue-700 leading-relaxed">
+                      <p className="text-[11px] text-blue-700 dark:text-blue-300 leading-relaxed">
                         A micro-deposit verification may be required. Two
                         small deposits will be sent to your account within 1-2
                         business days for verification.
@@ -245,7 +245,7 @@ function WithdrawalPayment() {
               onValueChange={setAddressType}
             >
               <div className="space-y-3 mb-4">
-                <div className="flex items-start space-x-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 transition-colors">
+                <div className="flex items-start space-x-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
                   <RadioGroupItem value="employee" id="employee" />
                   <div className="flex-1">
                     <Label
@@ -262,7 +262,7 @@ function WithdrawalPayment() {
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 transition-colors">
+                <div className="flex items-start space-x-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
                   <RadioGroupItem value="custom" id="custom" />
                   <Label
                     htmlFor="custom"

@@ -196,24 +196,24 @@ function RolloverValidation() {
                 transition={{ delay: idx * 0.08, duration: 0.3 }}
                 className={`flex items-center gap-4 p-4 rounded-xl border transition-all duration-300 ${
                   check.status === "passed"
-                    ? "bg-emerald-50/50 border-emerald-100"
+                    ? "bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-800"
                     : check.status === "checking"
-                      ? "bg-blue-50/50 border-blue-100"
+                      ? "bg-blue-50/50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-800"
                       : check.status === "failed"
-                        ? "bg-red-50/50 border-red-100"
-                        : "bg-gray-50/30 border-gray-100"
+                        ? "bg-red-50/50 dark:bg-red-950/20 border-red-100 dark:border-red-800"
+                        : "bg-gray-50/30 dark:bg-gray-800/30 border-gray-100 dark:border-gray-700"
                 }`}
               >
                 {/* Status Icon */}
                 <div
                   className={`p-2 rounded-lg flex-shrink-0 ${
                     check.status === "passed"
-                      ? "bg-emerald-100 text-emerald-600"
+                      ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400"
                       : check.status === "checking"
-                        ? "bg-blue-100 text-blue-600"
+                        ? "bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400"
                         : check.status === "failed"
-                          ? "bg-red-100 text-red-600"
-                          : "bg-gray-100 text-gray-400"
+                          ? "bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-400"
                   }`}
                 >
                   {check.icon}
@@ -240,14 +240,14 @@ function RolloverValidation() {
                         stiffness: 400,
                         damping: 15 }}
                     >
-                      <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                     </motion.div>
                   )}
                   {check.status === "checking" && (
-                    <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+                    <Loader2 className="w-5 h-5 text-blue-600 dark:text-blue-400 animate-spin" />
                   )}
                   {check.status === "failed" && (
-                    <XCircle className="w-5 h-5 text-red-600" />
+                    <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
                   )}
                   {check.status === "pending" && (
                     <div className="w-5 h-5 rounded-full border-2 border-gray-200 dark:border-gray-700" />
@@ -267,12 +267,12 @@ function RolloverValidation() {
           transition={{ duration: 0.4 }}
         >
           <div
-            className="p-5 rounded-2xl bg-gradient-to-br from-emerald-50/80 to-teal-50/60 border border-emerald-100/80"
+            className="p-5 rounded-2xl bg-gradient-to-br from-emerald-50/80 dark:from-emerald-950/30 to-teal-50/60 dark:to-teal-950/20 border border-emerald-100/80 dark:border-emerald-800/80"
             style={{
               boxShadow: "0 1px 3px rgba(16,185,129,0.06)" }}
           >
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-emerald-100 text-emerald-600">
+              <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div>

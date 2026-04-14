@@ -128,7 +128,7 @@ function TransactionsPage() {
 
   return (
     <div
-      className="min-h-screen bg-slate-50 dark:bg-gray-950 dark:bg-gray-950 transactions-page"
+      className="min-h-screen bg-slate-50 dark:bg-gray-950 transactions-page"
       data-page="transactions"
     >
 
@@ -355,7 +355,7 @@ function TransactionsPage() {
               title="Draft Transactions"
               badge={{
                 text: "2 drafts",
-                color: "bg-[#EFF6FF] brand-text" }}
+                color: "bg-[#EFF6FF] dark:bg-blue-950/30 brand-text" }}
               subtitle="Resume where you left off"
             />
             <div
@@ -420,7 +420,7 @@ function TransactionsPage() {
             variant="ai"
             badge={{
               text: "AI Insights",
-              color: "bg-[#F5F3FF] text-purple-600 dark:text-purple-400" }}
+              color: "bg-[#F5F3FF] dark:bg-violet-950/30 text-purple-600 dark:text-purple-400" }}
           />
           <FinancialGuidanceCompact />
         </motion.div>

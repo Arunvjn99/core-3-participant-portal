@@ -202,12 +202,13 @@ export const router = createBrowserRouter([
         path: ':version',
         element: <ValidatedVersionRoute />,
         children: [
+          // Carousel + form layout is implemented inside VerifyOTP (not router AuthLayout).
+          { path: 'verify', element: withSuspense(VerifyOTP) },
           {
             element: <AuthLayout />,
             children: [
               { path: 'login', element: withSuspense(Login) },
               { path: 'signup', element: withSuspense(Signup) },
-              { path: 'verify', element: withSuspense(VerifyOTP) },
               { path: 'forgot-password', element: withSuspense(ForgotPassword) },
               { path: 'reset-password', element: withSuspense(ResetPassword) },
             ],

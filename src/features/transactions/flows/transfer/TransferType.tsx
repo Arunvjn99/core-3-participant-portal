@@ -80,8 +80,8 @@ function TransferType() {
                 style={{
                   padding: "24px 28px",
                   borderRadius: 16,
-                  border: isSelected ? "1.5px solid #2563EB" : "1.5px solid #E2E8F0",
-                  background: isSelected ? "#EFF6FF" : "#fff" }}
+                  border: isSelected ? "1.5px solid var(--brand-primary)" : "1.5px solid var(--c-border-color)",
+                  background: isSelected ? "var(--c-blue-tint)" : "var(--c-card)" }}
               >
                 {isSelected && (
                   <CheckCircle2 className="absolute top-5 right-5" style={{ width: 20, height: 20, color: "var(--brand-primary)" }} />
@@ -92,8 +92,8 @@ function TransferType() {
                     className="flex items-center justify-center flex-shrink-0"
                     style={{
                       width: 44, height: 44, borderRadius: 12,
-                      background: isSelected ? "linear-gradient(135deg, #DBEAFE, #BFDBFE)" : "#F8FAFC",
-                      color: isSelected ? "#2563EB" : "#64748B" }}
+                      background: isSelected ? "linear-gradient(135deg, var(--c-blue-tint), var(--c-blue-tint))" : "var(--c-subtle)",
+                      color: isSelected ? "var(--brand-primary)" : "var(--c-text-muted)" }}
                   >
                     {type.icon}
                   </div>

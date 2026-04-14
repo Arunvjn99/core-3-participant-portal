@@ -88,8 +88,8 @@ function RebalanceAdjustAllocation() {
         <Card
           className={`p-5 rounded-2xl text-center transition-all duration-300 ${
             isValid
-              ? "bg-gradient-to-br from-emerald-50/80 to-teal-50/50 border-emerald-200/60"
-              : "bg-gradient-to-br from-amber-50/80 to-orange-50/50 border-amber-200/60"
+              ? "bg-gradient-to-br from-emerald-50/80 dark:from-emerald-950/30 to-teal-50/50 dark:to-teal-950/20 border-emerald-200/60 dark:border-emerald-800/40"
+              : "bg-gradient-to-br from-amber-50/80 dark:from-amber-950/30 to-orange-50/50 dark:to-orange-950/20 border-amber-200/60 dark:border-amber-800/40"
           }`}
           style={{
             boxShadow: isValid
@@ -99,12 +99,12 @@ function RebalanceAdjustAllocation() {
         >
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Allocation</p>
           <p
-            className={`text-3xl font-bold ${isValid ? "text-emerald-600" : "text-amber-600"}`}
+            className={`text-3xl font-bold ${isValid ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}`}
           >
             {totalAllocation}%
           </p>
           {!isValid && (
-            <p className="text-xs text-amber-700 mt-1">
+            <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
               {totalAllocation > 100
                 ? `Reduce by ${totalAllocation - 100}%`
                 : `Add ${100 - totalAllocation}% more`}
@@ -167,7 +167,7 @@ function RebalanceAdjustAllocation() {
                       </span>
                       {change !== 0 && (
                         <p
-                          className={`text-[10px] font-medium ${change > 0 ? "text-emerald-600" : "text-rose-600"}`}
+                          className={`text-[10px] font-medium ${change > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}
                         >
                           {change > 0 ? "+" : ""}
                           {change}%
@@ -204,10 +204,10 @@ function RebalanceAdjustAllocation() {
       </motion.div>
 
       {!hasChanges && (
-        <div className="p-4 rounded-2xl bg-blue-50/50 border border-blue-100/60">
+        <div className="p-4 rounded-2xl bg-blue-50/50 dark:bg-blue-950/30 border border-blue-100/60 dark:border-blue-800/40">
           <div className="flex items-center gap-2">
             <Info className="w-4 h-4 text-blue-500 flex-shrink-0" />
-            <p className="text-xs text-blue-700">
+            <p className="text-xs text-blue-700 dark:text-blue-300">
               Adjust the sliders above to set your new target allocation.
             </p>
           </div>

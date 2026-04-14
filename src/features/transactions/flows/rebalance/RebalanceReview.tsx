@@ -68,7 +68,7 @@ function RebalanceReview() {
                   className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
                     idx === 0
                       ? "bg-gradient-to-br from-teal-500 to-emerald-600 text-white"
-                      : "bg-gray-100 text-gray-300 border border-gray-200"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-300 dark:text-gray-600 border border-gray-200 dark:border-gray-700"
                   }`}
                   style={
                     idx === 0
@@ -83,7 +83,7 @@ function RebalanceReview() {
                   )}
                 </div>
                 <span
-                  className={`text-sm ${idx === 0 ? "text-gray-900 dark:text-white font-medium" : "text-gray-400"}`}
+                  className={`text-sm ${idx === 0 ? "text-gray-900 dark:text-white font-medium" : "text-gray-400 dark:text-gray-500"}`}
                 >
                   {step}
                 </span>
@@ -155,7 +155,7 @@ function RebalanceReview() {
                         </span>
                         <ArrowRight className="w-3 h-3 text-gray-300 dark:text-gray-600" />
                         <span
-                          className={`text-[10px] font-semibold ${change !== 0 ? "text-blue-600" : "text-gray-500 dark:text-gray-400"}`}
+                          className={`text-[10px] font-semibold ${change !== 0 ? "text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-400"}`}
                         >
                           {fund.targetAllocation}%
                         </span>
@@ -165,7 +165,7 @@ function RebalanceReview() {
                   <div className="text-right">
                     {change !== 0 ? (
                       <span
-                        className={`text-xs font-semibold ${change > 0 ? "text-emerald-600" : "text-rose-600"}`}
+                        className={`text-xs font-semibold ${change > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}
                       >
                         {change > 0 ? "+" : "-"}${tradeAmount.toLocaleString()}
                       </span>

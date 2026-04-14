@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, CheckCircle2 } from 'lucide-react'
 import { supabase } from '@/core/supabase'
+import { ROUTES } from '@/lib/constants'
 import AuthLayout from '../components/AuthLayout'
 
 const CORE_LOGO = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/CORE%20logo.png'
@@ -24,7 +25,7 @@ export default function ForgotPasswordPage() {
     }
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
+      redirectTo: `${window.location.origin}${ROUTES.RESET_PASSWORD}`,
     })
 
     if (resetError) {

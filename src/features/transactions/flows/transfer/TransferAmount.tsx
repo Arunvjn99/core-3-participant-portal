@@ -86,10 +86,10 @@ function TransferAmount() {
               className="flex items-center gap-1.5 transition-all duration-200"
               style={{
                 padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: method === id ? 700 : 500,
-                background: method === id ? "#fff" : "transparent",
-                color: method === id ? "#2563EB" : "#64748B",
+                background: method === id ? "var(--c-card)" : "transparent",
+                color: method === id ? "var(--brand-primary)" : "var(--c-text-muted)",
                 boxShadow: method === id ? "0 1px 3px rgba(0,0,0,0.06)" : undefined,
-                border: method === id ? "1px solid #E2E8F0" : "1px solid transparent",
+                border: method === id ? "1px solid var(--c-border-color)" : "1px solid transparent",
               }}
             >
               {icon}
@@ -131,7 +131,7 @@ function TransferAmount() {
                 </span>
                 <button
                   onClick={() => setAmount(maxBalance.toString())}
-                  className="text-xs text-blue-600 font-medium hover:underline"
+                  className="text-xs text-blue-600 dark:text-blue-400 font-medium hover:underline"
                 >
                   Transfer All (${maxBalance.toLocaleString()})
                 </button>
@@ -165,7 +165,7 @@ function TransferAmount() {
                     <button
                       key={pct}
                       onClick={() => setPercentage(pct.toString())}
-                      className="text-[10px] px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-blue-50 hover:text-blue-600 transition-colors font-medium"
+                      className="text-[10px] px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium"
                     >
                       {pct}%
                     </button>
@@ -189,7 +189,7 @@ function TransferAmount() {
                 style={{
                   width: `${Math.min(100, effectivePercent)}%`,
                   borderRadius: 4,
-                  background: effectivePercent <= 100 ? "#2563EB" : "#EF4444",
+                  background: effectivePercent <= 100 ? "var(--brand-primary)" : "#EF4444",
                 }}
               />
             </div>
@@ -202,8 +202,8 @@ function TransferAmount() {
           className="flex items-center gap-2"
           style={{ background: "rgba(220,38,38,0.1)", border: "1px solid var(--c-border-red)", borderRadius: 14, padding: "14px 16px" }}
         >
-          <Info className="flex-shrink-0" style={{ width: 16, height: 16, color: "#EF4444" }} />
-          <p style={{ fontSize: 12, fontWeight: 500, color: "#B91C1C" }}>
+          <Info className="flex-shrink-0" style={{ width: 16, height: 16, color: "var(--c-red, #EF4444)" }} />
+          <p style={{ fontSize: 12, fontWeight: 500, color: "var(--c-red, #B91C1C)" }}>
             Transfer amount exceeds available balance of $
             {maxBalance.toLocaleString()}.
           </p>

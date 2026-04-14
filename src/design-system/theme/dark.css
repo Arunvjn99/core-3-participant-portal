@@ -4,6 +4,7 @@ html[data-theme='dark'] {
   --surface-card: #111118;
   --surface-elevated: #1a1a24;
   --surface-dark: #0a0a0f;
+  --surface-dark-secondary: #1a1a24;
   --surface-overlay: rgba(0, 0, 0, 0.7);
 
   /* Text */

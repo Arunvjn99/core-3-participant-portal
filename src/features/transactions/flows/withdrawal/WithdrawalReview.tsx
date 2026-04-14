@@ -35,8 +35,8 @@ function WithdrawalReview() {
   if (submitted) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
-        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
-          <CheckCircle2 className="w-8 h-8 text-green-600" />
+        <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-950/30 flex items-center justify-center mb-4">
+          <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
         </div>
         <h2 style={{ fontSize: 26, fontWeight: 800, color: "inherit", letterSpacing: "-0.5px", lineHeight: "34px", marginBottom: 8 }}>
           Withdrawal Submitted
@@ -92,19 +92,19 @@ function WithdrawalReview() {
             </div>
             <div className="flex items-center justify-between">
               <p className="text-gray-900 dark:text-white">Federal Tax Withholding (20%)</p>
-              <p className="font-semibold text-red-600">-${federalTax.toLocaleString()}</p>
+              <p className="font-semibold text-red-600 dark:text-red-400">-${federalTax.toLocaleString()}</p>
             </div>
             <div className="flex items-center justify-between">
               <p className="text-gray-900 dark:text-white">State Tax Withholding (5%)</p>
-              <p className="font-semibold text-red-600">-${stateTax.toLocaleString()}</p>
+              <p className="font-semibold text-red-600 dark:text-red-400">-${stateTax.toLocaleString()}</p>
             </div>
             <div className="flex items-center justify-between">
               <p className="text-gray-900 dark:text-white">Early Withdrawal Penalty (10%)</p>
-              <p className="font-semibold text-red-600">-${earlyPenalty.toLocaleString()}</p>
+              <p className="font-semibold text-red-600 dark:text-red-400">-${earlyPenalty.toLocaleString()}</p>
             </div>
             <div className="flex items-center justify-between">
               <p className="text-gray-900 dark:text-white">Fees</p>
-              <p className="font-semibold text-red-600">-${fees}</p>
+              <p className="font-semibold text-red-600 dark:text-red-400">-${fees}</p>
             </div>
           </div>
 
@@ -112,7 +112,7 @@ function WithdrawalReview() {
 
           <div className="flex items-center justify-between py-2">
             <p className="font-semibold text-gray-900 dark:text-white text-lg">Final Payout</p>
-            <p className="text-2xl font-bold text-green-600">
+            <p className="text-2xl font-bold text-green-600 dark:text-green-400">
               ${finalPayout.toLocaleString()}
             </p>
           </div>

@@ -79,7 +79,7 @@ function RebalanceCurrentAllocation() {
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.05 }}
           className="lg:col-span-1"
         >
-          <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--tx-border-light, #F1F5F9)", padding: "24px 28px" }}>
+          <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--c-border-color)", padding: "24px 28px" }}>
             <h3 style={{ fontSize: 15, fontWeight: 700, color: "inherit", letterSpacing: "-0.3px", marginBottom: 16 }}>
               Portfolio Distribution
             </h3>
@@ -113,7 +113,7 @@ function RebalanceCurrentAllocation() {
               </PieChart>
             </ResponsiveContainer>
 
-            <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--tx-border-light, #F1F5F9)" }}>
+            <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--c-border-color)" }}>
               <div className="flex items-center justify-between mb-1">
                 <span style={{ fontSize: 12, fontWeight: 500, color: "inherit" }}>Total Balance</span>
                 <span style={{ fontSize: 14, fontWeight: 700, color: "inherit" }}>
@@ -137,7 +137,7 @@ function RebalanceCurrentAllocation() {
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
           className="lg:col-span-2"
         >
-          <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--tx-border-light, #F1F5F9)", padding: "24px 28px" }}>
+          <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--c-border-color)", padding: "24px 28px" }}>
             <h3 style={{ fontSize: 15, fontWeight: 700, color: "inherit", letterSpacing: "-0.3px", marginBottom: 20 }}>
               Fund Breakdown
             </h3>
@@ -150,7 +150,7 @@ function RebalanceCurrentAllocation() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.12 + idx * 0.06, duration: 0.3 }}
                   className="transition-all duration-200"
-                  style={{ padding: "14px 16px", borderRadius: 12, border: "1px solid var(--tx-border-light, #F1F5F9)", background: "transparent" }}
+                  style={{ padding: "14px 16px", borderRadius: 12, border: "1px solid var(--c-border-color)", background: "transparent" }}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
@@ -165,7 +165,7 @@ function RebalanceCurrentAllocation() {
                       <p style={{ fontSize: 10, color: "inherit", fontWeight: 500 }}>${fund.currentValue.toLocaleString()}</p>
                     </div>
                   </div>
-                  <div className="overflow-hidden" style={{ height: 6, borderRadius: 3, background: "var(--tx-track, #E2E8F0)" }}>
+                  <div className="overflow-hidden" style={{ height: 6, borderRadius: 3, background: "var(--c-border-color)" }}>
                     <div className="h-full transition-all" style={{ width: `${fund.currentAllocation}%`, backgroundColor: COLORS[idx], borderRadius: 3 }} />
                   </div>
                 </motion.div>

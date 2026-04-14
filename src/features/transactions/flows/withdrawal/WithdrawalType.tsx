@@ -45,8 +45,8 @@ function WithdrawalType() {
                   className="block transition-all duration-200 cursor-pointer"
                   style={{
                     padding: "20px 24px", borderRadius: 16,
-                    border: isSelected ? "1.5px solid #2563EB" : "1.5px solid #E2E8F0",
-                    background: isSelected ? "#EFF6FF" : "#fff",
+                    border: isSelected ? "1.5px solid #2563EB" : "1.5px solid var(--c-border-color)",
+                    background: isSelected ? "var(--c-blue-tint)" : "var(--c-card)",
                   }}
                 >
                   <div className="flex items-start space-x-3">

@@ -37,7 +37,7 @@ const loanTypes = [
     label: "General Purpose Loan",
     description: "For personal expenses like education, travel, or medical",
     icon: Wallet,
-    iconBg: "#EFF6FF",
+    iconBg: "var(--c-blue-tint)",
     iconColor: "var(--brand-primary)" },
   {
     id: "residential",
@@ -51,7 +51,7 @@ const loanTypes = [
     label: "Refinance",
     description: "Refinance an existing plan loan at current rates",
     icon: RefreshCw,
-    iconBg: "#F5F3FF",
+    iconBg: "var(--c-purple-tint, rgba(139,92,246,0.1))",
     iconColor: "var(--brand-purple)" },
 ];
 
@@ -171,7 +171,7 @@ function LoanConfiguration() {
                   onClick={() => setLoanType(type.id)}
                   className={`cursor-pointer transition-all duration-200 ${
                     isSelected
-                      ? "bg-blue-50/60 dark:bg-blue-950/30 border-2 border-blue-600"
+                      ? "bg-blue-50/60 dark:bg-blue-950/30 border-2 border-blue-600 dark:border-blue-500"
                       : "bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 hover:border-slate-300 dark:hover:border-gray-500 hover:shadow-sm"
                   }`}
                   style={{
@@ -419,9 +419,9 @@ function LoanConfiguration() {
                   border:
                     disbursementMethod === "eft"
                       ? "2px solid var(--brand-primary)"
-                      : "1.5px solid #E2E8F0",
+                      : "1.5px solid var(--c-border-color)",
                   background:
-                    disbursementMethod === "eft" ? "#FAFCFF" : "#fff" }}
+                    disbursementMethod === "eft" ? "var(--c-blue-tint)" : "var(--c-card)" }}
               >
                 <RadioGroupItem value="eft" id="eft" />
                 <div className="flex-1">
@@ -457,9 +457,9 @@ function LoanConfiguration() {
                   border:
                     disbursementMethod === "check"
                       ? "2px solid var(--brand-primary)"
-                      : "1.5px solid #E2E8F0",
+                      : "1.5px solid var(--c-border-color)",
                   background:
-                    disbursementMethod === "check" ? "#FAFCFF" : "#fff" }}
+                    disbursementMethod === "check" ? "var(--c-blue-tint)" : "var(--c-card)" }}
               >
                 <RadioGroupItem value="check" id="check" />
                 <div className="flex-1">
@@ -626,7 +626,7 @@ function LoanConfiguration() {
             </div>
             <button
               onClick={() => setShowAmortization(!showAmortization)}
-              className="flex items-center gap-1.5 cursor-pointer transition-all duration-200 border border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 bg-transparent"
+              className="flex items-center gap-1.5 cursor-pointer transition-all duration-200 border border-blue-600 dark:border-blue-500 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 bg-transparent"
               style={{
                 borderRadius: 20,
                 padding: "6px 14px",
@@ -702,11 +702,11 @@ function LoanConfiguration() {
                 border:
                   repaymentMethod === "payroll"
                     ? "2px solid var(--brand-primary)"
-                    : "1.5px solid #E2E8F0",
+                    : "1.5px solid var(--c-border-color)",
                 background:
                   repaymentMethod === "payroll"
-                    ? "#F0F7FF"
-                    : "#fff",
+                    ? "var(--c-blue-tint)"
+                    : "var(--c-card)",
                 textAlign: "center",
                 position: "relative" }}
             >
@@ -751,11 +751,11 @@ function LoanConfiguration() {
                 border:
                   repaymentMethod === "ach"
                     ? "2px solid var(--brand-primary)"
-                    : "1.5px solid #E2E8F0",
+                    : "1.5px solid var(--c-border-color)",
                 background:
                   repaymentMethod === "ach"
-                    ? "#F0F7FF"
-                    : "#fff",
+                    ? "var(--c-blue-tint)"
+                    : "var(--c-card)",
                 textAlign: "center",
                 position: "relative" }}
             >
@@ -800,11 +800,11 @@ function LoanConfiguration() {
                 border:
                   repaymentMethod === "manual"
                     ? "2px solid var(--brand-primary)"
-                    : "1.5px solid #E2E8F0",
+                    : "1.5px solid var(--c-border-color)",
                 background:
                   repaymentMethod === "manual"
-                    ? "#F0F7FF"
-                    : "#fff",
+                    ? "var(--c-blue-tint)"
+                    : "var(--c-card)",
                 textAlign: "center",
                 position: "relative" }}
             >
@@ -976,7 +976,7 @@ function LoanConfiguration() {
             >
               <CollapsibleTrigger asChild>
                 <button
-                  className="w-full flex items-center justify-between text-left cursor-pointer transition-all duration-200 hover:bg-slate-50 dark:bg-gray-900 dark:hover:bg-gray-800"
+                  className="w-full flex items-center justify-between text-left cursor-pointer transition-all duration-200 hover:bg-slate-50 dark:hover:bg-gray-800"
                   style={{ padding: "20px 24px" }}
                 >
                   <div className="flex items-center gap-3.5">

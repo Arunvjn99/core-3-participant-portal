@@ -99,9 +99,9 @@ function RolloverAllocation() {
   };
 
   const riskColors = {
-    Low: "bg-emerald-50 text-emerald-700 border-emerald-200/50",
-    Moderate: "bg-blue-50 text-blue-700 border-blue-200/50",
-    High: "bg-amber-50 text-amber-700 border-amber-200/50" };
+    Low: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-800/50",
+    Moderate: "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border-blue-200/50 dark:border-blue-800/50",
+    High: "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200/50 dark:border-amber-800/50" };
 
   return (
     <div className="space-y-6">
@@ -146,8 +146,8 @@ function RolloverAllocation() {
               <div
                 className={`px-3 py-1 rounded-full text-xs font-semibold ${
                   isValid
-                    ? "bg-emerald-50 text-emerald-700"
-                    : "bg-red-50 text-red-700"
+                    ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400"
+                    : "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400"
                 }`}
               >
                 {totalPercentage}% / 100%
@@ -186,7 +186,7 @@ function RolloverAllocation() {
                           >
                             {fund.risk}
                           </span>
-                          <span className="text-[10px] font-medium text-emerald-600">
+                          <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
                             {fund.ytdReturn} YTD
                           </span>
                         </div>
@@ -218,7 +218,7 @@ function RolloverAllocation() {
                       }
                       className="w-full h-2 rounded-full appearance-none cursor-pointer"
                       style={{
-                        background: `linear-gradient(to right, ${fund.color} 0%, ${fund.color} ${fund.percentage}%, #e5e7eb ${fund.percentage}%, #e5e7eb 100%)` }}
+                        background: `linear-gradient(to right, ${fund.color} 0%, ${fund.color} ${fund.percentage}%, var(--c-border-color) ${fund.percentage}%, var(--c-border-color) 100%)` }}
                     />
                   </div>
                 </motion.div>
@@ -317,11 +317,11 @@ function RolloverAllocation() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="p-4 rounded-2xl bg-amber-50/80 border border-amber-100/60"
+          className="p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-100/60 dark:border-amber-800/60"
         >
           <div className="flex items-center gap-2">
-            <Info className="w-4 h-4 text-amber-600 flex-shrink-0" />
-            <p className="text-xs text-amber-800">
+            <Info className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+            <p className="text-xs text-amber-800 dark:text-amber-300">
               Your allocation totals {totalPercentage}%. Adjust to exactly 100%
               to continue.
             </p>

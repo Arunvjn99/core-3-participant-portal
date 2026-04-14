@@ -101,9 +101,9 @@ function TransferDestination() {
 
   const riskColors: Record<string, { bg: string; color: string; border: string }> =
     {
-      Low: { bg: "#ECFDF5", color: "#059669", border: "#BBF7D0" },
-      Moderate: { bg: "#EFF6FF", color: "var(--brand-primary)", border: "#BFDBFE" },
-      High: { bg: "rgba(245,158,11,0.1)", color: "#B45309", border: "#FED7AA" } };
+      Low: { bg: "var(--c-green-tint, #ECFDF5)", color: "var(--c-green, #059669)", border: "var(--c-border-green, #BBF7D0)" },
+      Moderate: { bg: "var(--c-blue-tint)", color: "var(--brand-primary)", border: "var(--c-border-blue, #BFDBFE)" },
+      High: { bg: "var(--c-amber-tint, rgba(245,158,11,0.1))", color: "var(--c-amber, #B45309)", border: "var(--c-border-amber, #FED7AA)" } };
 
   const handleContinue = () => {
     navigate("/transactions/transfer/amount");
@@ -182,8 +182,8 @@ function TransferDestination() {
                 style={{
                   padding: "16px 20px",
                   borderRadius: 14,
-                  border: fund.selected ? "1.5px solid #2563EB" : "1.5px solid #E2E8F0",
-                  background: fund.selected ? "#EFF6FF" : "#fff" }}
+                  border: fund.selected ? "1.5px solid var(--brand-primary)" : "1.5px solid var(--c-border-color)",
+                  background: fund.selected ? "var(--c-blue-tint)" : "var(--c-card)" }}
               >
                 {fund.selected && (
                   <CheckCircle2
@@ -200,9 +200,9 @@ function TransferDestination() {
                       height: 36,
                       borderRadius: 10,
                       background: fund.selected
-                        ? "linear-gradient(135deg, #DBEAFE, #BFDBFE)"
-                        : "#F8FAFC",
-                      color: fund.selected ? "#2563EB" : "#64748B" }}
+                        ? "linear-gradient(135deg, var(--c-blue-tint), var(--c-blue-tint))"
+                        : "var(--c-subtle)",
+                      color: fund.selected ? "var(--brand-primary)" : "var(--c-text-muted)" }}
                   >
                     {fund.icon}
                   </div>
@@ -253,7 +253,7 @@ function TransferDestination() {
                         style={{
                           fontSize: 11,
                           fontWeight: 700,
-                          color: "#10B981" }}
+                          color: "var(--c-green, #10B981)" }}
                       >
                         {fund.ytdReturn} YTD
                       </span>
@@ -296,7 +296,7 @@ function TransferDestination() {
           className="flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
             background: "var(--brand-primary)",
-            color: "#fff",
+            color: "var(--c-brand-text, #fff)",
             padding: "10px 20px",
             borderRadius: 10,
             fontSize: 13,

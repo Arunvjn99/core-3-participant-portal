@@ -4,6 +4,8 @@ import { STORAGE_KEYS } from '../../lib/constants'
 
 export function applyTheme(resolved: 'light' | 'dark') {
   document.documentElement.setAttribute('data-theme', resolved)
+  document.documentElement.classList.remove('light', 'dark')
+  document.documentElement.classList.add(resolved)
 }
 
 export function applyBrand(slug: string) {

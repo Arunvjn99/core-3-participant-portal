@@ -93,7 +93,7 @@ function RolloverDocuments() {
         transition={{ duration: 0.4, delay: 0.05 }}
       >
         <div
-          className="p-5 rounded-2xl border-2 border-dashed border-indigo-200 bg-gradient-to-br from-indigo-50/50 to-blue-50/30 hover:border-indigo-300 transition-all cursor-pointer group"
+          className="p-5 rounded-2xl border-2 border-dashed border-indigo-200 dark:border-indigo-800 bg-gradient-to-br from-indigo-50/50 dark:from-indigo-950/30 to-blue-50/30 dark:to-blue-950/20 hover:border-indigo-300 dark:hover:border-indigo-700 transition-all cursor-pointer group"
           onClick={() => {
             // Simulate uploading all required docs
             requiredDocuments.forEach((doc) => {
@@ -107,7 +107,7 @@ function RolloverDocuments() {
           }}
         >
           <div className="flex flex-col items-center text-center py-4">
-            <div className="p-3 rounded-xl bg-indigo-100/70 text-indigo-600 mb-3 group-hover:bg-indigo-100 transition-colors">
+            <div className="p-3 rounded-xl bg-indigo-100/70 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 mb-3 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/60 transition-colors">
               <Camera className="w-6 h-6" />
             </div>
             <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">
@@ -141,8 +141,8 @@ function RolloverDocuments() {
               <Card
                 className={`p-5 rounded-2xl transition-all duration-300 ${
                   isUploaded
-                    ? "border-emerald-200/60 bg-emerald-50/20"
-                    : "border-gray-100/80"
+                    ? "border-emerald-200/60 dark:border-emerald-800/60 bg-emerald-50/20 dark:bg-emerald-950/20"
+                    : "border-gray-100/80 dark:border-gray-700/80"
                 }`}
                 style={{
                   boxShadow: isUploaded
@@ -154,8 +154,8 @@ function RolloverDocuments() {
                     <div
                       className={`p-2.5 rounded-xl flex-shrink-0 ${
                         isUploaded
-                          ? "bg-emerald-100 text-emerald-600"
-                          : "bg-gray-100 text-gray-500"
+                          ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-500"
                       }`}
                     >
                       {doc.icon}
@@ -166,7 +166,7 @@ function RolloverDocuments() {
                           {doc.name}
                         </h3>
                         {doc.required ? (
-                          <span className="text-[9px] font-semibold bg-red-50 text-red-600 px-2 py-0.5 rounded-full border border-red-100/60">
+                          <span className="text-[9px] font-semibold bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full border border-red-100/60 dark:border-red-800/60">
                             Required
                           </span>
                         ) : (
@@ -185,7 +185,7 @@ function RolloverDocuments() {
                   </div>
 
                   {isUploaded ? (
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-1" />
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-1" />
                   ) : (
                     <Button
                       variant="outline"

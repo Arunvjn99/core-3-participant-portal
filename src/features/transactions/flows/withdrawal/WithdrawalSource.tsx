@@ -41,7 +41,7 @@ function WithdrawalSource() {
       setValue: setPretax,
       max: maxPretax,
       color: "brand-bg",
-      bgColor: "bg-blue-200",
+      bgColor: "bg-blue-200 dark:bg-blue-800",
       taxNote: "Subject to ordinary income tax" },
     {
       label: "Roth Contributions",
@@ -50,7 +50,7 @@ function WithdrawalSource() {
       setValue: setRoth,
       max: maxRoth,
       color: "bg-violet-600",
-      bgColor: "bg-violet-200",
+      bgColor: "bg-violet-200 dark:bg-violet-800",
       taxNote: "Tax-free if qualified distribution" },
     {
       label: "Employer Contributions",
@@ -128,7 +128,7 @@ function WithdrawalSource() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
       >
-        <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--tx-border-light, #F1F5F9)", padding: "24px 28px" }}>
+        <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--c-border-color)", padding: "24px 28px" }}>
           <h3 style={{ fontSize: 15, fontWeight: 700, color: "inherit", letterSpacing: "-0.3px", marginBottom: 24 }}>
             Contribution Sources
           </h3>
@@ -195,9 +195,9 @@ function WithdrawalSource() {
         <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
           <Card className="rounded-2xl border-gray-100 dark:border-gray-700/80 overflow-hidden">
             <CollapsibleTrigger asChild>
-              <button className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 dark:bg-gray-800/50 transition-colors cursor-pointer">
+              <button className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600">
+                  <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600">
                     <Settings2 className="w-4 h-4" />
                   </div>
                   <div>
@@ -227,7 +227,7 @@ function WithdrawalSource() {
                     onValueChange={setGrossNetElection}
                   >
                     <div className="space-y-2">
-                      <div className="flex items-start space-x-3 p-3.5 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-blue-200 transition-colors">
+                      <div className="flex items-start space-x-3 p-3.5 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-blue-200 dark:hover:border-blue-800 transition-colors">
                         <RadioGroupItem value="gross" id="gross" />
                         <div className="flex-1">
                           <Label
@@ -243,7 +243,7 @@ function WithdrawalSource() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-start space-x-3 p-3.5 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-blue-200 transition-colors">
+                      <div className="flex items-start space-x-3 p-3.5 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-blue-200 dark:hover:border-blue-800 transition-colors">
                         <RadioGroupItem value="net" id="net" />
                         <div className="flex-1">
                           <Label
@@ -263,10 +263,10 @@ function WithdrawalSource() {
                   </RadioGroup>
 
                   {grossNetElection === "net" && (
-                    <div className="mt-3 p-3 bg-blue-50/60 rounded-xl border border-blue-100/60">
+                    <div className="mt-3 p-3 bg-blue-50/60 dark:bg-blue-950/30 rounded-xl border border-blue-100/60 dark:border-blue-800/60">
                       <div className="flex items-start gap-2">
                         <Info className="w-3.5 h-3.5 text-blue-500 mt-0.5 flex-shrink-0" />
-                        <p className="text-[11px] text-blue-700 leading-relaxed">
+                        <p className="text-[11px] text-blue-700 dark:text-blue-300 leading-relaxed">
                           When choosing Net, a larger gross amount will be
                           withdrawn to ensure you receive exactly $
                           {totalAmount.toLocaleString()} after taxes and

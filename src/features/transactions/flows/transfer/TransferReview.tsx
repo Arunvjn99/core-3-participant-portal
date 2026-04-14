@@ -65,7 +65,7 @@ function TransferReview() {
                   </div>
                 </div>
                 {hasChanged && (
-                  <p style={{ fontSize: 12, fontWeight: 700, color: change > 0 ? "#10B981" : "#EF4444" }}>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: change > 0 ? "var(--c-green, #10B981)" : "var(--c-red, #EF4444)" }}>
                     {change > 0 ? "+" : ""}{change}% change
                   </p>
                 )}

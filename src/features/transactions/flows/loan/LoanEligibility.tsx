@@ -19,7 +19,7 @@ function LoanEligibility() {
       icon: <DollarSign className="w-5 h-5" />,
       label: "Maximum Loan Available",
       value: "$10,000",
-      bg: "#EFF6FF",
+      bg: "var(--c-blue-tint)",
       color: "var(--brand-primary)",
     },
     {
@@ -33,7 +33,7 @@ function LoanEligibility() {
       icon: <DollarSign className="w-5 h-5" />,
       label: "Available Loan Balance",
       value: "$10,000",
-      bg: "#DBEAFE",
+      bg: "var(--c-blue-tint)",
       color: "var(--brand-primary)",
     },
     {

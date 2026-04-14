@@ -79,7 +79,7 @@ function RolloverPlanDetails() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.05 }}
       >
-        <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--tx-border-light, #F1F5F9)", padding: "24px 28px" }}>
+        <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--tx-border-light, var(--c-border-color))", padding: "24px 28px" }}>
           <h3 style={{ fontSize: 15, fontWeight: 700, color: "inherit", letterSpacing: "-0.3px", marginBottom: 4 }}>Rollover Type</h3>
           <p style={{ fontSize: 13, fontWeight: 500, color: "inherit", marginBottom: 20 }}>
             Select the type of account you're rolling over
@@ -93,8 +93,8 @@ function RolloverPlanDetails() {
                 className="relative text-left transition-all duration-200 cursor-pointer"
                 style={{
                   padding: "16px 20px", borderRadius: 14,
-                  border: rolloverType === type.id ? "1.5px solid #2563EB" : "1.5px solid #E2E8F0",
-                  background: rolloverType === type.id ? "#EFF6FF" : "#fff" }}
+                  border: rolloverType === type.id ? "1.5px solid #2563EB" : "1.5px solid var(--c-border-color)",
+                  background: rolloverType === type.id ? "var(--c-blue-tint)" : "var(--c-card)" }}
               >
                 {rolloverType === type.id && (
                   <CheckCircle2 className="absolute top-3 right-3" style={{ width: 16, height: 16, color: "var(--brand-primary)" }} />
@@ -102,8 +102,8 @@ function RolloverPlanDetails() {
                 <div
                   className={`p-2 rounded-lg inline-flex mb-3 ${
                     rolloverType === type.id
-                      ? "bg-indigo-100 text-indigo-600"
-                      : "bg-gray-100 text-gray-500"
+                      ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-500"
                   }`}
                 >
                   {type.icon}
@@ -218,12 +218,12 @@ function RolloverPlanDetails() {
         transition={{ duration: 0.4, delay: 0.15 }}
       >
         <div
-          className="p-5 rounded-2xl bg-gradient-to-br from-blue-50/70 to-indigo-50/50 border border-blue-100/60"
+          className="p-5 rounded-2xl bg-gradient-to-br from-blue-50/70 dark:from-blue-950/30 to-indigo-50/50 dark:to-indigo-950/20 border border-blue-100/60 dark:border-blue-800/60"
           style={{
             boxShadow: "0 1px 3px rgba(59,130,246,0.04)" }}
         >
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-blue-100/70 text-blue-600 flex-shrink-0">
+            <div className="p-2 rounded-lg bg-blue-100/70 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex-shrink-0">
               <Info className="w-4 h-4" />
             </div>
             <div>

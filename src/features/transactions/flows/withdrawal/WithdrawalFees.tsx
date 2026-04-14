@@ -62,7 +62,7 @@ function WithdrawalFees() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.05 }}
       >
-        <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--tx-border-light, #F1F5F9)", padding: "24px 28px" }}>
+        <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--c-border-color)", padding: "24px 28px" }}>
           <h3 style={{ fontSize: 15, fontWeight: 700, color: "inherit", letterSpacing: "-0.3px", marginBottom: 24 }}>
             Withdrawal Breakdown
           </h3>
@@ -92,7 +92,7 @@ function WithdrawalFees() {
                     Mandatory minimum withholding
                   </p>
                 </div>
-                <p className="font-medium text-red-600">
+                <p className="font-medium text-red-600 dark:text-red-400">
                   -${federalTax.toLocaleString()}
                 </p>
               </div>
@@ -106,7 +106,7 @@ function WithdrawalFees() {
                     Based on your state of residence
                   </p>
                 </div>
-                <p className="font-medium text-red-600">
+                <p className="font-medium text-red-600 dark:text-red-400">
                   -${stateTax.toLocaleString()}
                 </p>
               </div>
@@ -123,7 +123,7 @@ function WithdrawalFees() {
                       </p>
                     </div>
                   </div>
-                  <p className="font-medium text-red-600">
+                  <p className="font-medium text-red-600 dark:text-red-400">
                     -${earlyPenalty.toLocaleString()}
                   </p>
                 </div>
@@ -136,13 +136,13 @@ function WithdrawalFees() {
                     Investment liquidation fee
                   </p>
                 </div>
-                <p className="font-medium text-red-600">-${redemptionFee}</p>
+                <p className="font-medium text-red-600 dark:text-red-400">-${redemptionFee}</p>
               </div>
             </div>
 
             <Separator className="border-gray-300 dark:border-gray-600" />
 
-            <div className="flex items-center justify-between py-3 bg-green-50 -mx-6 px-6 rounded-lg">
+            <div className="flex items-center justify-between py-3 bg-green-50 dark:bg-green-950/30 -mx-6 px-6 rounded-lg">
               <div>
                 <p className="font-semibold text-gray-900 dark:text-white text-lg">
                   Final Payout
@@ -151,7 +151,7 @@ function WithdrawalFees() {
                   Amount you will receive
                 </p>
               </div>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                 ${finalPayout.toLocaleString()}
               </p>
             </div>
@@ -165,9 +165,9 @@ function WithdrawalFees() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.1 }}
       >
-        <Card className="p-5 bg-blue-50 border-blue-200">
+        <Card className="p-5 bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
           <div className="flex items-start gap-3">
-            <TrendingDown className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <TrendingDown className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
                 Remaining Retirement Balance
@@ -180,7 +180,7 @@ function WithdrawalFees() {
                   after withdrawal
                 </span>
               </div>
-              <div className="h-2 bg-blue-200 rounded-full overflow-hidden">
+              <div className="h-2 bg-blue-200 dark:bg-blue-800 rounded-full overflow-hidden">
                 <div
                   className="brand-progress h-full transition-all"
                   style={{
@@ -207,9 +207,9 @@ function WithdrawalFees() {
         <Collapsible open={taxSettingsOpen} onOpenChange={setTaxSettingsOpen}>
           <Card className="rounded-2xl border-gray-100 dark:border-gray-700/80 overflow-hidden">
             <CollapsibleTrigger asChild>
-              <button className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 dark:bg-gray-800/50 transition-colors cursor-pointer">
+              <button className="w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-violet-50 text-violet-600">
+                  <div className="p-2 rounded-lg bg-violet-50 dark:bg-violet-950/30 text-violet-600">
                     <Settings2 className="w-4 h-4" />
                   </div>
                   <div>
@@ -299,9 +299,9 @@ function WithdrawalFees() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
       >
-        <Card className="p-4 bg-amber-50 border-amber-200">
+        <Card className="p-4 bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800">
           <div className="flex items-start gap-2.5">
-            <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+            <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm text-gray-700 dark:text-gray-200">
                 <span className="font-semibold">Tax Notice:</span> This

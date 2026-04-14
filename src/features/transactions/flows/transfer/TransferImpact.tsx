@@ -84,7 +84,7 @@ function TransferImpact() {
       {/* Expected Returns */}
       <FlowCard delay={0.15}>
         <div className="flex items-start gap-4">
-          <div className="flex items-center justify-center flex-shrink-0" style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(16,185,129,0.1)", color: "#10B981" }}>
+          <div className="flex items-center justify-center flex-shrink-0" style={{ width: 44, height: 44, borderRadius: 12, background: "var(--c-green-tint, rgba(16,185,129,0.1))", color: "var(--c-green, #10B981)" }}>
             <TrendingUp className="w-5 h-5" />
           </div>
           <div className="flex-1">
@@ -106,8 +106,8 @@ function TransferImpact() {
       {newRiskLevel === "Moderate–High" && (
         <FlowInfoBanner variant="warning">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="flex-shrink-0 mt-0.5" style={{ width: 20, height: 20, color: "#F59E0B" }} />
-            <p className="leading-relaxed" style={{ fontSize: 13, fontWeight: 500, color: "#92400E" }}>
+            <AlertTriangle className="flex-shrink-0 mt-0.5" style={{ width: 20, height: 20, color: "var(--c-amber, #F59E0B)" }} />
+            <p className="leading-relaxed" style={{ fontSize: 13, fontWeight: 500, color: "var(--c-amber-dark, #92400E)" }}>
               <span style={{ fontWeight: 700 }}>Higher Risk Notice:</span> Your new allocation
               has a higher risk profile. While this may offer greater return potential, it
               also means increased volatility and potential for losses.

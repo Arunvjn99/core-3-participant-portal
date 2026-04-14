@@ -51,7 +51,7 @@ export function SelectItem({ value, children, className = '' }: { value: string;
       role="option"
       aria-selected={selected === value}
       onClick={() => { onValueChange?.(value); setOpen(false) }}
-      className={`cursor-pointer px-3 py-2 text-sm hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 ${selected === value ? 'font-medium text-blue-600' : 'text-gray-900 dark:text-white'} ${className}`}
+      className={`cursor-pointer px-3 py-2 text-sm hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 ${selected === value ? 'font-medium text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'} ${className}`}
     >
       {children}
     </div>

@@ -79,19 +79,19 @@ function RebalanceTradePreview() {
           transition={{ duration: 0.3, delay: 0.05 }}
         >
           <Card
-            className="p-5 rounded-2xl border-emerald-100/60 bg-gradient-to-br from-emerald-50/50 to-teal-50/30"
+            className="p-5 rounded-2xl border-emerald-100/60 dark:border-emerald-800/40 bg-gradient-to-br from-emerald-50/50 dark:from-emerald-950/30 to-teal-50/30 dark:to-teal-950/20"
             style={{ boxShadow: "0 1px 3px rgba(16,185,129,0.06)" }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <ArrowUpRight className="w-4 h-4 text-emerald-600" />
-              <span className="text-xs font-semibold text-emerald-700">
+              <ArrowUpRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                 Total Buys
               </span>
             </div>
-            <p className="text-2xl font-bold text-emerald-700">
+            <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
               ${totalBuy.toLocaleString()}
             </p>
-            <p className="text-[10px] text-emerald-600/70 mt-1">
+            <p className="text-[10px] text-emerald-600/70 dark:text-emerald-400/70 mt-1">
               {trades.filter((t) => t.action === "Buy").length} fund
               {trades.filter((t) => t.action === "Buy").length !== 1
                 ? "s"
@@ -106,19 +106,19 @@ function RebalanceTradePreview() {
           transition={{ duration: 0.3, delay: 0.1 }}
         >
           <Card
-            className="p-5 rounded-2xl border-rose-100/60 bg-gradient-to-br from-rose-50/50 to-pink-50/30"
+            className="p-5 rounded-2xl border-rose-100/60 dark:border-rose-800/40 bg-gradient-to-br from-rose-50/50 dark:from-rose-950/30 to-pink-50/30 dark:to-pink-950/20"
             style={{ boxShadow: "0 1px 3px rgba(244,63,94,0.06)" }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <ArrowDownRight className="w-4 h-4 text-rose-600" />
-              <span className="text-xs font-semibold text-rose-700">
+              <ArrowDownRight className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+              <span className="text-xs font-semibold text-rose-700 dark:text-rose-300">
                 Total Sells
               </span>
             </div>
-            <p className="text-2xl font-bold text-rose-700">
+            <p className="text-2xl font-bold text-rose-700 dark:text-rose-300">
               ${totalSell.toLocaleString()}
             </p>
-            <p className="text-[10px] text-rose-600/70 mt-1">
+            <p className="text-[10px] text-rose-600/70 dark:text-rose-400/70 mt-1">
               {trades.filter((t) => t.action === "Sell").length} fund
               {trades.filter((t) => t.action === "Sell").length !== 1
                 ? "s"
@@ -133,19 +133,19 @@ function RebalanceTradePreview() {
           transition={{ duration: 0.3, delay: 0.15 }}
         >
           <Card
-            className="p-5 rounded-2xl border-blue-100/60 bg-gradient-to-br from-blue-50/50 to-indigo-50/30"
+            className="p-5 rounded-2xl border-blue-100/60 dark:border-blue-800/40 bg-gradient-to-br from-blue-50/50 dark:from-blue-950/30 to-indigo-50/30 dark:to-indigo-950/20"
             style={{ boxShadow: "0 1px 3px rgba(59,130,246,0.06)" }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <Shield className="w-4 h-4 text-blue-600" />
-              <span className="text-xs font-semibold text-blue-700">
+              <Shield className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">
                 Risk Impact
               </span>
             </div>
-            <p className="text-lg font-bold text-blue-700 capitalize">
+            <p className="text-lg font-bold text-blue-700 dark:text-blue-300 capitalize">
               {riskChange}
             </p>
-            <p className="text-[10px] text-blue-600/70 mt-1">
+            <p className="text-[10px] text-blue-600/70 dark:text-blue-400/70 mt-1">
               Equity: {currentEquity}% → {equityAlloc}%
             </p>
           </Card>
@@ -177,16 +177,16 @@ function RebalanceTradePreview() {
                 transition={{ delay: 0.22 + idx * 0.06, duration: 0.3 }}
                 className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
                   trade.action === "Buy"
-                    ? "bg-emerald-50/30 border-emerald-100/60"
-                    : "bg-rose-50/30 border-rose-100/60"
+                    ? "bg-emerald-50/30 dark:bg-emerald-950/20 border-emerald-100/60 dark:border-emerald-800/40"
+                    : "bg-rose-50/30 dark:bg-rose-950/20 border-rose-100/60 dark:border-rose-800/40"
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div
                     className={`p-2 rounded-lg ${
                       trade.action === "Buy"
-                        ? "bg-emerald-100 text-emerald-600"
-                        : "bg-rose-100 text-rose-600"
+                        ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400"
+                        : "bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400"
                     }`}
                   >
                     {trade.action === "Buy" ? (
@@ -200,8 +200,8 @@ function RebalanceTradePreview() {
                       <span
                         className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                           trade.action === "Buy"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-rose-100 text-rose-700"
+                            ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+                            : "bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300"
                         }`}
                       >
                         {trade.action}
@@ -225,8 +225,8 @@ function RebalanceTradePreview() {
                   <p
                     className={`text-sm font-semibold ${
                       trade.action === "Buy"
-                        ? "text-emerald-700"
-                        : "text-rose-700"
+                        ? "text-emerald-700 dark:text-emerald-300"
+                        : "text-rose-700 dark:text-rose-300"
                     }`}
                   >
                     {trade.action === "Buy" ? "+" : "-"}$
@@ -234,7 +234,7 @@ function RebalanceTradePreview() {
                   </p>
                   <p
                     className={`text-[10px] font-medium ${
-                      trade.change > 0 ? "text-emerald-600" : "text-rose-600"
+                      trade.change > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
                     }`}
                   >
                     {trade.change > 0 ? "+" : ""}

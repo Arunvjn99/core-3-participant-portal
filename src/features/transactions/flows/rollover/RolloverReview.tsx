@@ -99,7 +99,7 @@ function RolloverReview() {
                   className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                     step.active
                       ? "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white"
-                      : "bg-gray-100 text-gray-300 border border-gray-200"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-300 border border-gray-200 dark:border-gray-700"
                   }`}
                   style={
                     step.active
@@ -318,8 +318,8 @@ function RolloverReview() {
                 <div className="flex items-center gap-1.5">
                   {doc.status === "Uploaded" ? (
                     <>
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      <span className="text-xs text-emerald-600 font-medium">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                         {doc.status}
                       </span>
                     </>
@@ -342,7 +342,7 @@ function RolloverReview() {
         transition={{ duration: 0.4, delay: 0.2 }}
       >
         <Card
-          className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80 bg-gradient-to-br from-indigo-50/30 to-blue-50/20"
+          className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80 bg-gradient-to-br from-indigo-50/30 dark:from-indigo-950/30 to-blue-50/20 dark:to-blue-950/20"
           style={{
             boxShadow:
               "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
@@ -371,13 +371,13 @@ function RolloverReview() {
                 desc: "Funds invested" },
             ].map((item, idx) => (
               <div key={idx} className="text-center">
-                <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-900 border-2 border-indigo-200 flex items-center justify-center mx-auto mb-2 text-xs font-semibold text-indigo-600">
+                <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-900 border-2 border-indigo-200 dark:border-indigo-800 flex items-center justify-center mx-auto mb-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
                   {idx + 1}
                 </div>
                 <p className="text-xs font-semibold text-gray-900 dark:text-white mb-0.5">
                   {item.step}
                 </p>
-                <p className="text-[10px] text-indigo-600 font-medium">
+                <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium">
                   {item.time}
                 </p>
                 <p className="text-[10px] text-gray-400 dark:text-gray-500">{item.desc}</p>
