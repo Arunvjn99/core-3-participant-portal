@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
 import {
   ArrowRight,
-  ArrowLeft,
   Sparkles,
   ArrowUpRight,
   CheckCircle2,
@@ -14,8 +13,9 @@ import {
   Info,
   Globe,
 } from 'lucide-react'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { getGrowthRate, projectBalanceConstantAnnualContributions, type RiskLevel } from '@/lib/retirementCalculations'
+import { useEnrollmentStepNav } from '@/features/enrollment/components/EnrollmentStepNavContext'
 
 /* ─── Types ─── */
 
@@ -262,6 +262,7 @@ function ConfirmationModal({
 
 function RetirementReadiness() {
   const navigate = useNavigate()
+  const { setStepNav } = useEnrollmentStepNav()
   const { data, updateData, personalization, advanceStep } = useEnrollment()
   const [appliedChanges, setAppliedChanges] = useState<string[]>([])
   const [confirmingSuggestion, setConfirmingSuggestion] = useState<Suggestion | null>(null)
@@ -446,21 +447,24 @@ function RetirementReadiness() {
     setTimeout(() => setSuccessMessage(null), 3000)
   }
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     advanceStep({ score, acknowledgedAt: Date.now() }, 'readiness')
     navigate('/enrollment/review')
-  }
+  }, [advanceStep, score, navigate])
+
+  useEffect(() => {
+    setStepNav({
+      showBack: true,
+      onBack: () => navigate('/enrollment/investment'),
+      onNext: handleNext,
+      primaryLabel: 'Next',
+    })
+    return () => setStepNav(null)
+  }, [setStepNav, navigate, handleNext])
 
   return (
     <div className="mx-auto max-w-5xl">
       <div className="mb-5">
-        <button
-          type="button"
-          onClick={() => navigate('/enrollment/investment')}
-          className="mb-3 flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-        >
-          <ArrowLeft className="h-4 w-4" /> Back
-        </button>
         <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">Your Retirement Readiness</h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Here&apos;s how your choices add up before you finalize.
@@ -701,35 +705,7 @@ function RetirementReadiness() {
             </div>
           )}
 
-          <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700 mt-4">
-            <button
-              type="button"
-              onClick={handleNext}
-              className="btn-brand flex flex-1 items-center justify-center gap-2 rounded-xl py-3 px-4 font-semibold shadow-md transition-all"
-              style={{ fontSize: '0.85rem' }}
-            >
-              Apply Selected <ArrowRight className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={handleNext}
-              className="flex-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 py-3 px-4 rounded-xl flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-all font-semibold"
-              style={{ fontSize: '0.85rem' }}
-            >
-              Customize Allocation
-            </button>
-          </div>
         </div>
-      </div>
-
-      <div className="sticky bottom-4 pt-4 md:hidden">
-        <button
-          type="button"
-          onClick={handleNext}
-          className="btn-brand flex w-full items-center justify-center gap-2 rounded-xl px-8 py-3.5 font-semibold active:scale-[0.98]"
-        >
-          Continue to Review <ArrowRight className="h-4 w-4" />
-        </button>
       </div>
 
       <ConfirmationModal

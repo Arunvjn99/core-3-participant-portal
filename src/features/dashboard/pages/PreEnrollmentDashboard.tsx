@@ -9,6 +9,7 @@ import { useAuth } from '@/core/hooks/useAuth'
 import { useUser } from '@/core/hooks/useUser'
 import { EnrollmentPersonalizationModal } from '../components/EnrollmentPersonalizationModal'
 import AdvisorModal from '@/features/advisors/AdvisorModal'
+import { formatFirstNameForDisplay, getAuthenticatedFirstName } from '@/lib/userDisplayName'
 import type { TFunction } from 'i18next'
 
 function getTimeGreeting(t: TFunction): string {
@@ -16,18 +17,6 @@ function getTimeGreeting(t: TFunction): string {
   if (hour < 12) return t('greeting.morning')
   if (hour < 17) return t('greeting.afternoon')
   return t('greeting.evening')
-}
-
-function formatGreetingDisplayName(fullName: string | undefined | null, fallbackFirst: string): string {
-  if (fullName?.trim()) {
-    return fullName
-      .trim()
-      .split(/\s+/)
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-      .join(' ')
-  }
-  if (fallbackFirst === 'there') return 'there'
-  return fallbackFirst.charAt(0).toUpperCase() + fallbackFirst.slice(1).toLowerCase()
 }
 
 export function PreEnrollmentDashboard() {
@@ -40,15 +29,8 @@ export function PreEnrollmentDashboard() {
   const { profile } = useUser()
   const learningRef = useRef<HTMLElement | null>(null)
 
-  const firstName = profile?.full_name?.trim()
-    ? profile.full_name.split(/\s+/)[0]
-    : profile?.email
-      ? profile.email.split('@')[0]
-      : user?.email
-        ? user.email.split('@')[0]
-        : 'there'
-
-  const greetingName = formatGreetingDisplayName(profile?.full_name, firstName)
+  const firstNameRaw = getAuthenticatedFirstName(profile, user)
+  const displayFirstName = formatFirstNameForDisplay(firstNameRaw)
 
   return (
     <AnimatedPage className="min-h-full">
@@ -56,7 +38,7 @@ export function PreEnrollmentDashboard() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onComplete={() => navigate('/enrollment/plan')}
-        userName={firstName}
+        userName={displayFirstName}
       />
 
       <div className="relative min-h-screen overflow-hidden bg-white font-sans transition-colors dark:bg-gray-950">
@@ -85,7 +67,9 @@ export function PreEnrollmentDashboard() {
                   aria-hidden
                 />
                 <span className="text-sm font-semibold text-[#2b59c3] dark:text-blue-400">
-                  {getTimeGreeting(t)}, {greetingName}
+                  {displayFirstName !== 'there'
+                    ? `${getTimeGreeting(t)}, ${displayFirstName}!`
+                    : `${getTimeGreeting(t)}!`}
                 </span>
               </div>
 

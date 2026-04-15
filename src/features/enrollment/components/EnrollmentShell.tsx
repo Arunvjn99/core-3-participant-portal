@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react'
 import { AnimatedPage } from '../../../design-system/motion/AnimatedPage'
 import { ENROLLMENT_STEPS, getStepByPath } from '../enrollmentSteps'
 import AppFooter from '@/features/dashboard/components/AppFooter'
+import { EnrollmentStepNavProvider } from './EnrollmentStepNavContext'
 
 /** Steps shown in the progress UI (excludes success / confirmation-only step). */
 const STEPPER_STEPS = ENROLLMENT_STEPS.filter((s) => s.step <= 7)
@@ -183,9 +184,11 @@ export function EnrollmentShell() {
 
       <div className="flex min-h-0 flex-1 flex-col">
         <AnimatedPage>
-          <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">
-            <Outlet />
-          </main>
+          <EnrollmentStepNavProvider>
+            <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">
+              <Outlet />
+            </main>
+          </EnrollmentStepNavProvider>
         </AnimatedPage>
       </div>
 

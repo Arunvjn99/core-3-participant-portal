@@ -1,31 +1,40 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
+import { useEnrollmentStepNav } from '@/features/enrollment/components/EnrollmentStepNavContext'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { cn } from '@/lib/cn'
-import { Check, Sparkles, ArrowRight, MessageCircle, Info, Landmark, HelpCircle } from 'lucide-react'
+import { Check, Sparkles, ArrowRight, MessageCircle, Landmark, HelpCircle } from 'lucide-react'
 
 export default function PlanSelection() {
   const navigate = useNavigate()
+  const { setStepNav } = useEnrollmentStepNav()
   const { data, updateData } = useEnrollment()
   const [showAI, setShowAI] = useState(false)
   const [showCompare, setShowCompare] = useState(false)
-  const [selectedPlan, setSelectedPlan] = useState<'traditional' | 'roth' | null>(data.plan)
   const [showTooltip, setShowTooltip] = useState(false)
-
-  useEffect(() => {
-    setSelectedPlan(data.plan)
-  }, [data.plan])
 
   const confirmPlan = (plan: 'traditional' | 'roth') => {
     if (import.meta.env.DEV) {
       // eslint-disable-next-line no-console -- confirm navigation debugging
       console.log('[PlanSelection] confirmPlan called with:', plan)
     }
-    setSelectedPlan(plan)
     updateData({ plan })
     navigate('/enrollment/contribution')
   }
+
+  useEffect(() => {
+    setStepNav({
+      showBack: false,
+      onNext: () => {
+        if (!data.plan) return
+        navigate('/enrollment/contribution')
+      },
+      primaryLabel: 'Next',
+      nextDisabled: !data.plan,
+    })
+    return () => setStepNav(null)
+  }, [data.plan, navigate, setStepNav])
 
   const hasTwoPlans = data.companyPlans.length >= 2
 
@@ -47,10 +56,6 @@ export default function PlanSelection() {
                   : 'This plan allows you to contribute after-tax dollars and withdraw tax-free in retirement.'}
               </p>
             </div>
-            <div className="flex items-center gap-2 rounded-xl border border-green-100 bg-green-50 p-3 dark:border-green-900/40 dark:bg-green-950/30">
-              <Info className="h-4 w-4 shrink-0 text-green-600" />
-              <p className="text-left text-xs text-green-700 dark:text-green-400">Your employer matches contributions up to 6%.</p>
-            </div>
             <button
               type="button"
               onClick={() => confirmPlan(onlyPlan)}
@@ -58,7 +63,6 @@ export default function PlanSelection() {
             >
               Continue to Contributions <ArrowRight className="h-4 w-4" />
             </button>
-            <p className="text-xs text-gray-400">You can change this plan later from your account settings.</p>
           </div>
         </div>
       </AnimatedPage>
@@ -73,34 +77,8 @@ export default function PlanSelection() {
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 sm:text-base">Select the retirement plan that fits your tax strategy.</p>
         </div>
 
-        <div className="flex items-center gap-2.5 rounded-xl border border-gray-100 bg-gray-50 px-4 py-2.5 dark:border-gray-600 dark:bg-gray-800">
-          <Info className="h-4 w-4 shrink-0 text-gray-400" />
-          <p className="text-xs text-gray-600 dark:text-gray-400 sm:text-sm">
-            Your employer matches contributions up to <strong className="text-gray-800 dark:text-gray-200">6%</strong> of your salary —
-            that&apos;s free money toward your retirement.
-          </p>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={() => setSelectedPlan('traditional')}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') setSelectedPlan('traditional')
-            }}
-            className={cn(
-              'flex cursor-pointer flex-col rounded-2xl p-5 text-left transition-all sm:p-6',
-              'bg-white border border-gray-200 shadow-sm',
-              'dark:bg-gray-800 dark:border-gray-600',
-              'hover:shadow-md hover:border-blue-200 dark:hover:border-blue-600',
-              selectedPlan === 'traditional' && [
-                'border-2 border-blue-500 bg-blue-50/60',
-                'dark:bg-blue-950/40 dark:border-blue-400',
-                'shadow-md ring-2 ring-blue-100 dark:ring-blue-900/50',
-              ]
-            )}
-          >
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 text-left shadow-sm transition-shadow sm:p-6 dark:border-gray-700 dark:bg-gray-900 hover:shadow-md">
             <div className="relative mb-1">
               <span
                 className="inline-flex cursor-default items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
@@ -134,35 +112,14 @@ export default function PlanSelection() {
 
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                confirmPlan('traditional')
-              }}
+              onClick={() => confirmPlan('traditional')}
               className="btn-brand mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold shadow-sm active:scale-[0.98] sm:text-base"
             >
               Continue with Traditional 401(k) <ArrowRight className="h-4 w-4" />
             </button>
           </div>
 
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={() => setSelectedPlan('roth')}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') setSelectedPlan('roth')
-            }}
-            className={cn(
-              'flex cursor-pointer flex-col rounded-2xl p-5 text-left transition-all sm:p-6',
-              'bg-white border border-gray-200 shadow-sm',
-              'dark:bg-gray-800 dark:border-gray-600',
-              'hover:shadow-md hover:border-blue-200 dark:hover:border-blue-600',
-              selectedPlan === 'roth' && [
-                'border-2 border-blue-500 bg-blue-50/60',
-                'dark:bg-blue-950/40 dark:border-blue-400',
-                'shadow-md ring-2 ring-blue-100 dark:ring-blue-900/50',
-              ]
-            )}
-          >
+          <div className="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 text-left shadow-sm transition-shadow sm:p-6 dark:border-gray-700 dark:bg-gray-900 hover:shadow-md">
             <h3 className="mt-3 text-xl font-bold text-gray-900 dark:text-white">Roth 401(k)</h3>
             <p className="mt-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
               Pay taxes now and withdraw tax-free in retirement.
@@ -179,60 +136,52 @@ export default function PlanSelection() {
 
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                confirmPlan('roth')
-              }}
-              className={cn(
-                'mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold shadow-sm transition-all active:scale-[0.98] sm:text-base',
-                selectedPlan === 'roth'
-                  ? 'btn-brand text-white'
-                  : 'border-2 border-[color:var(--brand-primary)] bg-white text-[color:var(--brand-primary)] hover:bg-[color:var(--brand-primary-light)] dark:border-[color:var(--brand-primary)] dark:bg-gray-800 dark:hover:bg-[color:var(--brand-primary-light)]'
-              )}
+              onClick={() => confirmPlan('roth')}
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[color:var(--brand-primary)] bg-white py-3.5 text-sm font-semibold text-[color:var(--brand-primary)] shadow-sm transition-all hover:bg-[color:var(--brand-primary-light)] active:scale-[0.98] sm:text-base dark:border-[color:var(--brand-primary)] dark:bg-gray-900 dark:hover:bg-[color:var(--brand-primary-light)]"
             >
               Choose Roth 401(k) <ArrowRight className="h-4 w-4" />
             </button>
           </div>
         </div>
 
-        <p className="text-center text-xs text-gray-400 dark:text-gray-600">You can change this plan later from your account settings.</p>
-
-        <div className="border-t border-gray-100 dark:border-gray-800" />
-
-        <div className="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-gray-600 dark:bg-gray-800">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 sm:text-base">Not sure which plan is right for you?</p>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Our AI assistant can help explain the differences.</p>
-          <div className="mt-3 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                setShowAI(!showAI)
-                setShowCompare(false)
-              }}
-              className={cn(
-                'flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors',
-                showAI
-                  ? 'bg-purple-200 text-purple-800 dark:bg-purple-800/50 dark:text-purple-200'
-                  : 'bg-purple-50 text-purple-700 hover:bg-purple-100 dark:bg-purple-950/30 dark:text-purple-400 dark:hover:bg-purple-900/40'
-              )}
-            >
-              <Sparkles className="h-4 w-4" /> Ask AI
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowCompare(!showCompare)
-                setShowAI(false)
-              }}
-              className={cn(
-                'flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors',
-                showCompare
-                  ? 'bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-gray-200'
-                  : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-              )}
-            >
-              <MessageCircle className="h-4 w-4" /> Compare Plans
-            </button>
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900 sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 sm:text-base">Not sure which plan is right for you?</p>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Our AI assistant can help explain the differences.</p>
+            </div>
+            <div className="flex shrink-0 flex-wrap items-center gap-3 sm:justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAI(!showAI)
+                  setShowCompare(false)
+                }}
+                className={cn(
+                  'flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors',
+                  showAI
+                    ? 'bg-purple-200 text-purple-800 dark:bg-purple-800/50 dark:text-purple-200'
+                    : 'bg-purple-50 text-purple-700 hover:bg-purple-100 dark:bg-purple-950/30 dark:text-purple-400 dark:hover:bg-purple-900/40'
+                )}
+              >
+                <Sparkles className="h-4 w-4" /> Ask AI
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCompare(!showCompare)
+                  setShowAI(false)
+                }}
+                className={cn(
+                  'flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors',
+                  showCompare
+                    ? 'bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-gray-200'
+                    : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                )}
+              >
+                <MessageCircle className="h-4 w-4" /> Compare Plans
+              </button>
+            </div>
           </div>
 
           {showAI && (

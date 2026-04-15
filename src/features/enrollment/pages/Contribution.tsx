@@ -1,8 +1,9 @@
 import { useState, useId, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
+import { useEnrollmentStepNav } from '@/features/enrollment/components/EnrollmentStepNavContext'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
-import { Sparkles, ArrowRight, Info, Minus, Plus } from 'lucide-react'
+import { Sparkles, Info, Minus, Plus } from 'lucide-react'
 import {
   AreaChart,
   Area,
@@ -42,7 +43,8 @@ function generateProjectionData(percent: number, salary: number) {
 
 export default function Contribution() {
   const navigate = useNavigate()
-  const { data, updateData, advanceStep, personalization } = useEnrollment()
+  const { setStepNav } = useEnrollmentStepNav()
+  const { data, updateData, personalization, advanceStep } = useEnrollment()
   const [compareMode, setCompareMode] = useState(false)
   const [comparePercent, setComparePercent] = useState(12)
   const [percentInput, setPercentInput] = useState(String(data.contributionPercent))
@@ -78,18 +80,6 @@ export default function Contribution() {
     { label: '15% Fast', value: 15, icon: '🚀' },
   ]
 
-  const handleNext = () => {
-    advanceStep(
-      {
-        percent: data.contributionPercent,
-        rate: data.contributionPercent,
-        type: 'percentage' as const,
-      },
-      'contribution'
-    )
-    navigate('/enrollment/contribution-source')
-  }
-
   const adjustPercent = (delta: number) => {
     const newValue = Math.max(1, Math.min(25, percent + delta))
     updateData({ contributionPercent: newValue })
@@ -123,6 +113,26 @@ export default function Contribution() {
     setPercentInput(String(value))
     setDollarInput(String(Math.round((salary * value) / 100)))
   }
+
+  useEffect(() => {
+    setStepNav({
+      showBack: true,
+      onBack: () => navigate('/enrollment/plan'),
+      onNext: () => {
+        advanceStep(
+          {
+            percent: data.contributionPercent,
+            rate: data.contributionPercent,
+            type: 'percentage' as const,
+          },
+          'contribution'
+        )
+        navigate('/enrollment/contribution-source')
+      },
+      primaryLabel: 'Next',
+    })
+    return () => setStepNav(null)
+  }, [setStepNav, navigate, advanceStep, data.contributionPercent])
 
   return (
     <AnimatedPage>
@@ -420,17 +430,6 @@ export default function Contribution() {
               )}
             </div>
           </div>
-        </div>
-
-        <div className="sticky bottom-0 space-y-3 bg-[#f5f7fa] pb-4 pt-3 dark:bg-gray-950 md:static md:bg-transparent md:pb-0 md:pt-0">
-          <button
-            type="button"
-            onClick={handleNext}
-            className="btn-brand flex w-full items-center justify-center gap-2 rounded-xl px-8 py-4 text-base font-semibold shadow-lg active:scale-[0.98] md:shadow-md"
-          >
-            Save &amp; Continue <ArrowRight className="h-5 w-5" />
-          </button>
-          <p className="text-center text-sm text-gray-500 dark:text-gray-400">You can adjust anytime</p>
         </div>
       </div>
     </AnimatedPage>

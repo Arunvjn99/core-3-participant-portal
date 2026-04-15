@@ -8,7 +8,6 @@ import {
   TrendingUp,
   User,
   Search,
-  Bot,
   Bell,
   LogOut,
   Sun,
@@ -25,8 +24,6 @@ import { useTheme } from '@/core/hooks/useTheme'
 import { useAIStore } from '@/core/store/aiStore'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { useBrandTheme } from '@/core/theme/BrandThemeContext'
-import { CoreAIPanel } from '@/features/ai/components/CoreAIPanel'
-import { AISearchPalette } from '@/features/ai/components/AISearchPalette'
 import AppFooter from '@/features/dashboard/components/AppFooter'
 import { supabase } from '@/core/supabase'
 
@@ -59,8 +56,6 @@ export function AppShell() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
-  const openChat = useAIStore((s) => s.openChat)
-  const isChatOpen = useAIStore((s) => s.isChatOpen)
   const toggleSearch = useAIStore((s) => s.toggleSearch)
   const enrollmentStatus = useEnrollmentDraftStore((s) => s.enrollmentStatus)
   const navItems = getNavItems(enrollmentStatus === 'complete')
@@ -339,21 +334,6 @@ export function AppShell() {
       </main>
 
       <AppFooter />
-      <CoreAIPanel />
-      <AISearchPalette />
-
-      {!isChatOpen && (
-        <button
-          type="button"
-          onClick={openChat}
-          className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-full px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-black/10 transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] dark:shadow-black/40"
-          style={{ backgroundColor: 'var(--brand-primary)' }}
-          aria-label="Ask Core AI"
-        >
-          <Bot className="h-5 w-5 shrink-0 opacity-95" aria-hidden />
-          <span>Ask Core AI</span>
-        </button>
-      )}
     </div>
   )
 }

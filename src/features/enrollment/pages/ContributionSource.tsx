@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
+import { useEnrollmentStepNav } from '@/features/enrollment/components/EnrollmentStepNavContext'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { cn } from '@/lib/cn'
 import {
@@ -17,6 +18,7 @@ import {
 
 export default function ContributionSource() {
   const navigate = useNavigate()
+  const { setStepNav } = useEnrollmentStepNav()
   const { data, updateData, advanceStep } = useEnrollment()
   const [showAdvanced, setShowAdvanced] = useState(data.contributionSources.afterTax > 0)
 
@@ -87,19 +89,28 @@ export default function ContributionSource() {
     }
   }
 
-  const handleNext = () => {
-    advanceStep(
-      {
-        preTax: sources.preTax,
-        roth: sources.roth,
-        afterTax: sources.afterTax,
-      },
-      'source'
-    )
-    navigate('/enrollment/auto-increase')
-  }
-
   const total = sources.preTax + sources.roth + sources.afterTax
+
+  useEffect(() => {
+    setStepNav({
+      showBack: true,
+      onBack: () => navigate('/enrollment/contribution'),
+      onNext: () => {
+        advanceStep(
+          {
+            preTax: sources.preTax,
+            roth: sources.roth,
+            afterTax: sources.afterTax,
+          },
+          'source'
+        )
+        navigate('/enrollment/auto-increase')
+      },
+      primaryLabel: 'Next',
+      nextDisabled: total !== 100,
+    })
+    return () => setStepNav(null)
+  }, [setStepNav, navigate, advanceStep, sources.preTax, sources.roth, sources.afterTax, total])
 
   return (
     <AnimatedPage>
@@ -418,16 +429,7 @@ export default function ContributionSource() {
                   <p className="text-2xl font-extrabold text-gray-900 dark:text-white">${totalMonthlyInvestment.toLocaleString()}</p>
                   <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">per month</p>
                 </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleNext}
-                disabled={total !== 100}
-                className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-              >
-                Continue
-              </button>
+                </div>
             </div>
           </div>
         </div>

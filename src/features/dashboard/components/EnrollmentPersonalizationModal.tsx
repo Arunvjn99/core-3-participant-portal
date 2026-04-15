@@ -313,6 +313,7 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
       {isOpen && (
         <motion.div
           key="enrollment-personalization-modal"
+          data-app-blocking-overlay
           className="fixed inset-0 z-[100] flex items-end justify-center p-0 sm:items-center sm:p-4 sm:p-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -345,7 +346,7 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
               <div className="relative z-10 flex items-start justify-between">
                 <div>
                   <h1 className="mb-1 text-2xl font-bold text-white sm:text-3xl">
-                    Hi{userName && userName !== 'there' ? `, ${userName}` : ''} 👋
+                    {userName && userName !== 'there' ? `Hi, ${userName} 👋` : 'Hi 👋'}
                   </h1>
                   <p className="text-sm text-blue-100 sm:text-base">
                     Let&apos;s personalize your retirement journey.

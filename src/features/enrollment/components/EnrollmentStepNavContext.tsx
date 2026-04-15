@@ -1,0 +1,102 @@
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react'
+
+export type EnrollmentPrimaryLabel = 'Continue' | 'Next' | 'Submit'
+
+export interface EnrollmentNavConfig {
+  onBack?: () => void
+  onNext?: () => void
+  /** @default true on most steps */
+  showBack?: boolean
+  /** @default true */
+  showNext?: boolean
+  primaryLabel?: EnrollmentPrimaryLabel
+  nextDisabled?: boolean
+}
+
+type Ctx = {
+  setStepNav: (config: EnrollmentNavConfig | null) => void
+}
+
+const EnrollmentStepNavContext = createContext<Ctx | null>(null)
+
+export function EnrollmentStepNavProvider({ children }: { children: ReactNode }) {
+  const [nav, setNav] = useState<EnrollmentNavConfig | null>(null)
+
+  const setStepNav = useCallback((config: EnrollmentNavConfig | null) => {
+    setNav(config)
+  }, [])
+
+  const value = useMemo(() => ({ setStepNav }), [setStepNav])
+
+  return (
+    <EnrollmentStepNavContext.Provider value={value}>
+      <>
+        {children}
+        <EnrollmentStepFooterBar config={nav} />
+      </>
+    </EnrollmentStepNavContext.Provider>
+  )
+}
+
+export function useEnrollmentStepNav() {
+  const ctx = useContext(EnrollmentStepNavContext)
+  if (!ctx) {
+    throw new Error('useEnrollmentStepNav must be used within EnrollmentStepNavProvider')
+  }
+  return ctx
+}
+
+function EnrollmentStepFooterBar({ config }: { config: EnrollmentNavConfig | null }) {
+  if (!config) return null
+
+  const showBack = config.showBack !== false && Boolean(config.onBack)
+  const showNext = config.showNext !== false && Boolean(config.onNext)
+  const label = config.primaryLabel ?? 'Next'
+  const nextDisabled = config.nextDisabled ?? false
+
+  if (!showBack && !showNext) return null
+
+  return (
+    <div className="sticky bottom-0 z-10 mt-8 w-full border-t border-gray-200 bg-[#f5f7fa]/95 px-4 py-4 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-950/95 sm:px-8">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-h-[48px] flex-1 items-center justify-start">
+          {showBack && config.onBack && (
+            <button
+              type="button"
+              onClick={config.onBack}
+              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+            >
+              <span aria-hidden className="text-base leading-none">
+                ←
+              </span>
+              Back
+            </button>
+          )}
+        </div>
+        <div className="flex min-h-[48px] flex-1 items-center justify-end">
+          {showNext && config.onNext && (
+            <button
+              type="button"
+              onClick={config.onNext}
+              disabled={nextDisabled}
+              className="inline-flex items-center gap-2 rounded-xl px-8 py-4 text-sm font-semibold text-white shadow-md transition-all disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[160px]"
+              style={{ backgroundColor: 'var(--brand-primary, #2563eb)' }}
+            >
+              {label}
+              <span aria-hidden className="text-base leading-none">
+                →
+              </span>
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

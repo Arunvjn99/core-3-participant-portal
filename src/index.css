@@ -349,3 +349,17 @@ html[data-theme="dark"] [style*="linear-gradient"][style*="#DBEAFE"] {
     background-color: var(--brand-primary-hover) !important;
   }
 }
+
+/* Floating Ask CORE AI — subtle icon glow */
+@keyframes core-ai-sparkle-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px rgba(168, 85, 247, 0.45));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.55));
+  }
+}
+.core-ai-sparkle-icon {
+  animation: core-ai-sparkle-glow 2.2s ease-in-out infinite;
+}

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useEnrollmentStepNav } from '@/features/enrollment/components/EnrollmentStepNavContext'
 
 /* ─── Types ─── */
 interface FundDetail { name: string; ticker: string; expense: string }
@@ -352,6 +353,7 @@ function InactiveSourceCard({ sourceKey }: { sourceKey: SourceKey }) {
 /* ─── Main Component ─── */
 function InvestmentStrategy() {
   const navigate = useNavigate()
+  const { setStepNav } = useEnrollmentStepNav()
   const { data, updateData } = useEnrollment()
   const [showRiskEditor, setShowRiskEditor] = useState(false)
   const [showCustomizeModal, setShowCustomizeModal] = useState(false)
@@ -382,7 +384,20 @@ function InvestmentStrategy() {
   const monthlyTotal = (data.salary * data.contributionPercent) / 100 / 12
   const getMonthlyForSource = (src: SourceKey) => monthlyTotal * (data.contributionSources[src] / 100)
 
-  const handleNext = () => { updateData({ useRecommendedPortfolio: !customAllocations }); navigate('/enrollment/readiness') }
+  const handleNext = useCallback(() => {
+    updateData({ useRecommendedPortfolio: !customAllocations })
+    navigate('/enrollment/readiness')
+  }, [updateData, customAllocations, navigate])
+
+  useEffect(() => {
+    setStepNav({
+      showBack: true,
+      onBack: () => navigate('/enrollment/auto-increase'),
+      onNext: handleNext,
+      primaryLabel: 'Next',
+    })
+    return () => setStepNav(null)
+  }, [setStepNav, navigate, handleNext])
 
   const handleOpenCustomize = (sourceKey: SourceKey) => {
     const initial: PerSourceAllocations = customAllocations || {
@@ -476,9 +491,6 @@ function InvestmentStrategy() {
                 <p className="text-blue-900 dark:text-blue-300 mb-1" style={{ fontSize: '0.78rem', fontWeight: 600 }}>Why this works for you:</p>
                 <p className="text-blue-800 dark:text-blue-400" style={{ fontSize: '0.75rem', lineHeight: 1.5 }}>Balanced for growth with your retirement timeline</p>
               </div>
-              <button type="button" onClick={handleNext} className="btn-brand flex w-full items-center justify-center gap-2 rounded-xl py-3 px-6 transition-all active:scale-[0.98]" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-                Continue with recommended plan <ArrowRight className="w-4 h-4" />
-              </button>
             </div>
 
             {/* Customize Portfolio — 40% */}

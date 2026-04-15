@@ -1,7 +1,13 @@
 import { Outlet, useRouteError, isRouteErrorResponse } from 'react-router-dom'
+import { GlobalAskCoreAILayer } from '@/features/ai/components/GlobalAskCoreAILayer'
 
 export function RootLayout() {
-  return <Outlet />
+  return (
+    <>
+      <Outlet />
+      <GlobalAskCoreAILayer />
+    </>
+  )
 }
 
 export function RootErrorBoundary() {

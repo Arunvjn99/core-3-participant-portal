@@ -1,15 +1,17 @@
-import { useState, useMemo, useId } from 'react'
+import { useState, useMemo, useId, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
+import { useEnrollmentStepNav } from '@/features/enrollment/components/EnrollmentStepNavContext'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
-import { ArrowRight, TrendingUp, Calendar, Target, DollarSign, Info } from 'lucide-react'
+import { TrendingUp, Calendar, Target, DollarSign, Info } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 type IncrementCycle = 'calendar' | 'participant' | 'plan'
 
 export default function AutoIncreaseSetup() {
   const navigate = useNavigate()
+  const { setStepNav } = useEnrollmentStepNav()
   const { data, updateData, personalization } = useEnrollment()
 
   const [increaseAmount, setIncreaseAmount] = useState(data.autoIncreaseAmount)
@@ -93,7 +95,7 @@ export default function AutoIncreaseSetup() {
     return `$${Math.round(val).toLocaleString()}`
   }
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     updateData({ autoIncrease: true, autoIncreaseAmount: increaseAmount, autoIncreaseMax: maxContribution })
     useEnrollmentDraftStore.getState().advanceStep(
       {
@@ -105,7 +107,18 @@ export default function AutoIncreaseSetup() {
       'autoIncrease'
     )
     navigate('/enrollment/investment')
-  }
+  }, [updateData, increaseAmount, maxContribution, navigate])
+
+  useEffect(() => {
+    setStepNav({
+      showBack: true,
+      onBack: () => navigate('/enrollment/auto-increase'),
+      onNext: handleSave,
+      primaryLabel: 'Next',
+      nextDisabled: increaseAmount === 0,
+    })
+    return () => setStepNav(null)
+  }, [setStepNav, navigate, handleSave, increaseAmount])
 
   interface TooltipPayloadItem {
     value?: number
@@ -331,20 +344,6 @@ export default function AutoIncreaseSetup() {
               </p>
             </div>
 
-            <div className="hidden pt-1 lg:block">
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={increaseAmount === 0}
-                className={`flex w-full items-center justify-center gap-2 rounded-xl px-8 py-3.5 transition-all ${
-                  increaseAmount > 0
-                    ? 'bg-green-600 text-white hover:bg-green-700 active:scale-[0.98]'
-                    : 'cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-gray-800'
-                }`}
-              >
-                Save Auto Increase <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
           </div>
 
           {/* Right — Projection (2/5) — above controls on mobile */}
@@ -519,21 +518,6 @@ export default function AutoIncreaseSetup() {
               )}
             </div>
           </div>
-        </div>
-
-        <div className="sticky bottom-4 lg:hidden">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={increaseAmount === 0}
-            className={`flex w-full items-center justify-center gap-2 rounded-xl px-8 py-3.5 shadow-lg transition-all ${
-              increaseAmount > 0
-                ? 'bg-green-600 text-white hover:bg-green-700 active:scale-[0.98]'
-                : 'cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-gray-800'
-            }`}
-          >
-            Save Auto Increase <ArrowRight className="h-4 w-4" />
-          </button>
         </div>
       </div>
     </AnimatedPage>

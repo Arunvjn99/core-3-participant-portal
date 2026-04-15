@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
+import { useEnrollmentStepNav } from '@/features/enrollment/components/EnrollmentStepNavContext'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { ArrowRight, TrendingUp, Minus, AlertTriangle, X } from 'lucide-react'
 
 export default function AutoIncrease() {
   const navigate = useNavigate()
+  const { setStepNav } = useEnrollmentStepNav()
   const { data, updateData } = useEnrollment()
   const [showSkipModal, setShowSkipModal] = useState(false)
 
@@ -35,6 +37,15 @@ export default function AutoIncrease() {
     updateData({ autoIncrease: true })
     navigate('/enrollment/auto-increase-setup')
   }
+
+  useEffect(() => {
+    setStepNav({
+      showBack: true,
+      onBack: () => navigate('/enrollment/contribution-source'),
+      showNext: false,
+    })
+    return () => setStepNav(null)
+  }, [setStepNav, navigate])
 
   return (
     <AnimatedPage>
@@ -120,7 +131,7 @@ export default function AutoIncrease() {
 
       {/* Skip Confirmation Modal */}
       {showSkipModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" data-app-blocking-overlay>
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowSkipModal(false)} />
           <div className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-900">
             <button

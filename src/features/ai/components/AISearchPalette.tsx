@@ -104,7 +104,15 @@ export function AISearchPalette() {
   return (
     <AnimatePresence>
       {isSearchOpen && (
-        <motion.div key="search-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-start justify-center bg-black/20 p-4 pt-[10vh] dark:bg-black/50" onClick={closeSearch}>
+        <motion.div
+          key="search-overlay"
+          data-core-ai-ignore-overlay
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-start justify-center bg-black/20 p-4 pt-[10vh] dark:bg-black/50"
+          onClick={closeSearch}
+        >
           <motion.div initial={{ opacity: 0, y: -16, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -16, scale: 0.97 }} transition={{ duration: 0.18 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-900">
             {/* Search input */}
             <div className="p-4">

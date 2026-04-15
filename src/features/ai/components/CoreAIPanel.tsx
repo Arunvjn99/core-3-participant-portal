@@ -304,8 +304,24 @@ export function CoreAIPanel() {
     <AnimatePresence>
       {isChatOpen && (
         <>
-          <motion.div key="ai-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-40 bg-black/30 dark:bg-black/50" onClick={closeChat} />
-          <motion.div key="ai-modal" initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: 'spring', stiffness: 320, damping: 30 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+          <motion.div
+            key="ai-backdrop"
+            data-core-ai-ignore-overlay
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 bg-black/30 dark:bg-black/50"
+            onClick={closeChat}
+          />
+          <motion.div
+            key="ai-modal"
+            data-core-ai-ignore-overlay
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+            className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4"
+          >
             <div className="pointer-events-auto flex w-full max-w-lg flex-col rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-900" style={{ maxHeight: '85vh' }}>
               {/* Header */}
               <div className="flex shrink-0 items-center justify-between border-b border-gray-100 p-4 dark:border-gray-800">

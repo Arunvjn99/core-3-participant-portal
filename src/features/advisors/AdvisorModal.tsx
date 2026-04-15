@@ -438,6 +438,7 @@ export default function AdvisorModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div
+      data-app-blocking-overlay
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >

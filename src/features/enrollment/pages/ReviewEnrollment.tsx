@@ -1,12 +1,15 @@
 import { useNavigate } from 'react-router-dom'
+import { useCallback, useEffect } from 'react'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { useEnrollmentSave } from '@/core/hooks/useEnrollmentSave'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
-import { Edit3, Shield, DollarSign, Briefcase, TrendingUp, Clock, Sparkles, ExternalLink } from 'lucide-react'
+import { useEnrollmentStepNav } from '@/features/enrollment/components/EnrollmentStepNavContext'
+import { Edit3, DollarSign, Briefcase, TrendingUp, Clock, Sparkles, ExternalLink } from 'lucide-react'
 
 export default function ReviewEnrollment() {
   const navigate = useNavigate()
+  const { setStepNav } = useEnrollmentStepNav()
   const { data, updateData, personalization } = useEnrollment()
   const { advanceStep } = useEnrollmentDraftStore()
   const { saveCompleteEnrollment } = useEnrollmentSave()
@@ -63,11 +66,22 @@ export default function ReviewEnrollment() {
     { label: 'Investment strategy', value: `${riskLabels[data.riskLevel]} Portfolio`, editStep: 5, editPath: '/enrollment/investment' },
   ]
 
-  const handleConfirm = async () => {
+  const handleConfirm = useCallback(async () => {
     advanceStep({ confirmedAt: Date.now(), agreed: true }, 'review')
     await saveCompleteEnrollment()
     navigate('/enrollment/success')
-  }
+  }, [advanceStep, saveCompleteEnrollment, navigate])
+
+  useEffect(() => {
+    setStepNav({
+      showBack: true,
+      onBack: () => navigate('/enrollment/readiness'),
+      onNext: () => void handleConfirm(),
+      primaryLabel: 'Submit',
+      nextDisabled: !data.agreedToTerms,
+    })
+    return () => setStepNav(null)
+  }, [setStepNav, navigate, handleConfirm, data.agreedToTerms])
 
   const confidenceMessage =
     employerContribution >= annualContribution * 0.5
@@ -188,22 +202,6 @@ export default function ReviewEnrollment() {
               </a>
             </span>
           </label>
-        </div>
-
-        {/* Submit */}
-        <div className="sticky bottom-4 md:static">
-          <button
-            type="button"
-            onClick={() => void handleConfirm()}
-            disabled={!data.agreedToTerms}
-            className={`flex w-full items-center justify-center gap-2 rounded-xl px-8 py-3.5 shadow-lg transition-all md:shadow-none ${
-              data.agreedToTerms
-                ? 'btn-brand text-white active:scale-[0.98]'
-                : 'cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-gray-800'
-            }`}
-          >
-            <Shield className="h-4 w-4" /> Enroll in Retirement Plan
-          </button>
         </div>
       </div>
     </AnimatedPage>
