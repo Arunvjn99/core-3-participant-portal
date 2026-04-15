@@ -47,7 +47,7 @@ export function resolveIntent(input: string): ResolvedIntent {
     const hint = match.queries[0] ?? 'that topic'
     return {
       kind: 'answer',
-      content: `I don't have a detailed scripted answer for "${hint}" yet. Rules vary by employer—check your summary plan description or HR. You can also try loans, withdrawals, enrollment, or the suggestion chips below.`,
+      content: `I don't have a ready-made answer for "${hint}" — every employer's plan is a little different. Your summary plan description or HR is the best source for the exact rules. Meanwhile, we can talk **loans**, **withdrawals**, **enrollment**, or you can use the chips below.`,
     }
   }
 

@@ -39,7 +39,7 @@ function buildReviewPayload(loanAI: LoanAIState): ReviewCardPayload {
   const tenureMonths = loanAI.data.tenureMonths ?? LOAN_AI_TENURE_MONTHS
   const method = (loanAI.data.paymentMethod === 'check' ? 'check' : 'eft') as 'eft' | 'check'
   const { emi: monthlyPayment, rows } = generateSchedule(amt, LOAN_AI_ANNUAL_RATE_PERCENT, tenureMonths, 3)
-  return { title: 'Review & submit', amount: amt, netAmount: netLoanAmount(amt), tenureMonths, monthlyPayment, annualRatePercent: LOAN_AI_ANNUAL_RATE_PERCENT, disbursementLabel: disbursementLabel(method), schedulePreview: rows }
+  return { title: 'Almost there — review & submit', amount: amt, netAmount: netLoanAmount(amt), tenureMonths, monthlyPayment, annualRatePercent: LOAN_AI_ANNUAL_RATE_PERCENT, disbursementLabel: disbursementLabel(method), schedulePreview: rows }
 }
 
 function loanPayloadFromState(loan: LoanAIState) {
@@ -61,7 +61,7 @@ export function startGuidedLoanFlow(amount: number, purpose: string, financials:
   return {
     messages: [
       assistantMessage(
-        [`Here's what we see on your account:`, '', `**Vested balance:** ${money(financials.vestedBalance)}`, `**Max loan (mock rule):** ${money(financials.maxLoan)}`, '', 'You\'re **eligible** to request a loan at this amount. Reply **continue** when you\'re ready for a **live payment preview**.'].join('\n'),
+        [`Here's what your account snapshot looks like right now:`, '', `**Vested balance:** ${money(financials.vestedBalance)}`, `**Approx. max loan (demo rule):** ${money(financials.maxLoan)}`, '', 'Based on that, you\'re **good to request** a loan at this level. When you\'re ready, hit **continue** and we\'ll open the payment preview.'].join('\n'),
         { suggestions: ['Continue', 'Tell me more'] },
       ),
     ],
@@ -84,69 +84,69 @@ export function runGuidedLoanFlow(state: LocalFlowState, input: string, structur
       amount = Math.min(p.maxAmount, Math.max(p.minAmount, amount))
       const tenureMonths = clampTenure(structured.tenureMonths)
       const nextLoan: LoanAIState = { ...loanAI, step: 'configuration', data: { ...loanAI.data, amount, tenureMonths } }
-      const payload: SelectionCardPayload = { title: 'How would you like to receive the loan?', options: [{ label: 'Bank transfer (ACH)', value: 'eft' }, { label: 'Check (mailed)', value: 'check' }], insight: 'Bank transfer is fastest. Check takes 5–7 business days.' }
-      return { messages: [assistantMessage('Choose how you\'d like to receive the funds.', { interactiveType: 'selection_card', interactivePayload: payload })], nextState: guidedNextState(nextLoan, { maxLoan }) }
+      const payload: SelectionCardPayload = { title: 'Where should we send the money?', options: [{ label: 'Bank transfer (ACH)', value: 'eft' }, { label: 'Check (mailed)', value: 'check' }], insight: 'ACH is usually quickest; a mailed check often lands in about 5–7 business days.' }
+      return { messages: [assistantMessage('Where should we send the funds?', { interactiveType: 'selection_card', interactivePayload: payload })], nextState: guidedNextState(nextLoan, { maxLoan }) }
     }
 
     if (loanAI.step === 'configuration' && structured.action === 'selection_card_pick') {
       const method = structured.value
       const amount = loanAI.data.amount ?? 0
       const nextLoan: LoanAIState = { ...loanAI, step: 'fees', data: { ...loanAI.data, paymentMethod: method } }
-      const feesPayload: FeesCardPayload = { title: 'Fees breakdown', processingFee: LOAN_PROCESSING_FEE, otherCharges: LOAN_OTHER_CHARGES, principal: amount, netAmount: netLoanAmount(amount), disbursementLabel: disbursementLabel(method) }
-      return { messages: [assistantMessage('Here\'s how fees affect what hits your account.', { interactiveType: 'fees_card', interactivePayload: feesPayload })], nextState: guidedNextState(nextLoan, { maxLoan }) }
+      const feesPayload: FeesCardPayload = { title: 'Fees at a glance', processingFee: LOAN_PROCESSING_FEE, otherCharges: LOAN_OTHER_CHARGES, principal: amount, netAmount: netLoanAmount(amount), disbursementLabel: disbursementLabel(method) }
+      return { messages: [assistantMessage('Here\'s what gets taken out before the money lands in your pocket — worth a quick look.', { interactiveType: 'fees_card', interactivePayload: feesPayload })], nextState: guidedNextState(nextLoan, { maxLoan }) }
     }
 
     if (loanAI.step === 'fees' && structured.action === 'fees_card_continue') {
       const nextLoan: LoanAIState = { ...loanAI, step: 'documents' }
-      const docPayload: DocumentUploadCardPayload = { title: 'Required documents', items: ['Bank proof', 'Promissory note', 'Spousal consent (if applicable)'], helper: 'Upload now or finish later in the loan center.' }
-      return { messages: [assistantMessage('Documents checklist — upload now or finish in the loan center.', { interactiveType: 'document_upload_card', interactivePayload: docPayload })], nextState: guidedNextState(nextLoan, { maxLoan }) }
+      const docPayload: DocumentUploadCardPayload = { title: 'Documents we\'ll need', items: ['Bank proof', 'Promissory note', 'Spousal consent (if applicable)'], helper: 'You can upload now or wrap this up later in the loan center.' }
+      return { messages: [assistantMessage('A few documents round things out — upload here if you have them handy, or finish up in the loan center whenever works.', { interactiveType: 'document_upload_card', interactivePayload: docPayload })], nextState: guidedNextState(nextLoan, { maxLoan }) }
     }
 
     if (loanAI.step === 'documents' && structured.action === 'document_upload_card_continue') {
       const nextLoan: LoanAIState = { ...loanAI, step: 'review' }
-      return { messages: [assistantMessage('One last look — submit when you\'re ready.', { interactiveType: 'loan_review_card', interactivePayload: buildReviewPayload(nextLoan) })], nextState: guidedNextState(nextLoan, { maxLoan }) }
+      return { messages: [assistantMessage('Take a breath and double-check the numbers — submit whenever it all looks right to you.', { interactiveType: 'loan_review_card', interactivePayload: buildReviewPayload(nextLoan) })], nextState: guidedNextState(nextLoan, { maxLoan }) }
     }
 
     if (loanAI.step === 'review' && (structured.action === 'review_card_submit' || structured.action === 'SUBMIT_LOAN')) {
       const nextLoan: LoanAIState = { ...loanAI, step: 'success' }
-      const successPayload: SuccessCardPayload = { title: 'Loan request submitted', description: 'Your application has been received.', processingTime: '1–2 business days', reassuranceMessage: 'We\'ll send a confirmation email shortly.', actionLabel: 'Go to loan center' }
-      return { messages: [assistantMessage('Your loan request is in. Here\'s what to expect.', { interactiveType: 'loan_success_card', interactivePayload: successPayload })], nextState: guidedNextState(nextLoan, { maxLoan }) }
+      const successPayload: SuccessCardPayload = { title: 'You\'re all set — we got it', description: 'Your loan request is officially in the queue.', processingTime: 'Usually 1–2 business days', reassuranceMessage: 'We\'ll email you a confirmation so you have it on record.', actionLabel: 'Go to loan center' }
+      return { messages: [assistantMessage('Nice — your loan request is submitted. Here\'s what happens next.', { interactiveType: 'loan_success_card', interactivePayload: successPayload })], nextState: guidedNextState(nextLoan, { maxLoan }) }
     }
 
     if (loanAI.step === 'success' && structured.action === 'success_card_dismiss') {
       return { messages: [], nextState: null, navigate: '/transactions/loan' }
     }
 
-    return { messages: [assistantMessage('Continue from the conversation above, or say **apply loan** to restart.')], nextState: guidedNextState(loanAI, { maxLoan }) }
+    return { messages: [assistantMessage('Pick up where you left off above, or say **apply loan** if you\'d like a clean start.')], nextState: guidedNextState(loanAI, { maxLoan }) }
   }
 
   if (loanAI.step === 'eligibility') {
-    if (isNegative(trimmed)) return { messages: [assistantMessage('No problem — ask about a **loan** anytime.')], nextState: null }
-    return { messages: [assistantMessage('Slide to explore **amount** and **length** — your estimated payment updates instantly.', { interactiveType: 'loan_simulator_card', interactivePayload: buildSimulatorPayload({ ...loanAI, step: 'simulation' }, maxLoan) })], nextState: guidedNextState({ ...loanAI, step: 'simulation' }, { maxLoan }) }
+    if (isNegative(trimmed)) return { messages: [assistantMessage('Sounds good — whenever you want to talk **loans**, I\'m here.')], nextState: null }
+    return { messages: [assistantMessage('Play with **amount** and **term** below — you\'ll see the estimated payment move in real time.', { interactiveType: 'loan_simulator_card', interactivePayload: buildSimulatorPayload({ ...loanAI, step: 'simulation' }, maxLoan) })], nextState: guidedNextState({ ...loanAI, step: 'simulation' }, { maxLoan }) }
   }
 
   if (loanAI.step === 'simulation') {
-    if (isNegative(trimmed)) return { messages: [assistantMessage('Understood. Say **apply loan** when you\'re ready.')], nextState: null }
+    if (isNegative(trimmed)) return { messages: [assistantMessage('Okay — say **apply loan** whenever you want to pick this back up.')], nextState: null }
     if (isAffirmative(trimmed)) {
       const tenureMonths = clampTenure(loanAI.data.tenureMonths ?? LOAN_AI_TENURE_MONTHS)
       const p = buildSimulatorPayload(loanAI, maxLoan)
       const nextLoan: LoanAIState = { ...loanAI, step: 'configuration', data: { ...loanAI.data, amount: p.amount, tenureMonths } }
-      const payload: SelectionCardPayload = { title: 'How would you like to receive the loan?', options: [{ label: 'Bank transfer (ACH)', value: 'eft' }, { label: 'Check (mailed)', value: 'check' }], insight: 'Bank transfer is fastest. Check takes 5–7 business days.' }
-      return { messages: [assistantMessage('Choose how you\'d like to receive the funds.', { interactiveType: 'selection_card', interactivePayload: payload })], nextState: guidedNextState(nextLoan, { maxLoan }) }
+      const payload: SelectionCardPayload = { title: 'Where should we send the money?', options: [{ label: 'Bank transfer (ACH)', value: 'eft' }, { label: 'Check (mailed)', value: 'check' }], insight: 'ACH is usually quickest; a mailed check often lands in about 5–7 business days.' }
+      return { messages: [assistantMessage('Where should we send the funds?', { interactiveType: 'selection_card', interactivePayload: payload })], nextState: guidedNextState(nextLoan, { maxLoan }) }
     }
-    return { messages: [assistantMessage('Adjust the **simulator** below, or reply **continue**.', { interactiveType: 'loan_simulator_card', interactivePayload: buildSimulatorPayload(loanAI, maxLoan) })], nextState: guidedNextState(loanAI, { maxLoan }) }
+    return { messages: [assistantMessage('Tweak the **simulator** whenever you like, or type **continue** when you\'re happy with the numbers.', { interactiveType: 'loan_simulator_card', interactivePayload: buildSimulatorPayload(loanAI, maxLoan) })], nextState: guidedNextState(loanAI, { maxLoan }) }
   }
 
   if (loanAI.step === 'review') {
     if (isAffirmative(trimmed)) {
       const nextLoan: LoanAIState = { ...loanAI, step: 'success' }
-      const successPayload: SuccessCardPayload = { title: 'Loan request submitted', description: 'Your application has been received.', processingTime: '1–2 business days', reassuranceMessage: 'We\'ll send a confirmation email shortly.', actionLabel: 'Go to loan center' }
-      return { messages: [assistantMessage('Your loan request is in.', { interactiveType: 'loan_success_card', interactivePayload: successPayload })], nextState: guidedNextState(nextLoan, { maxLoan }) }
+      const successPayload: SuccessCardPayload = { title: 'You\'re all set — we got it', description: 'Your loan request is officially in the queue.', processingTime: 'Usually 1–2 business days', reassuranceMessage: 'We\'ll email you a confirmation so you have it on record.', actionLabel: 'Go to loan center' }
+      return { messages: [assistantMessage('Done — your loan request is in.', { interactiveType: 'loan_success_card', interactivePayload: successPayload })], nextState: guidedNextState(nextLoan, { maxLoan }) }
     }
-    return { messages: [assistantMessage('Tap **Submit loan** on the review card or reply **yes**.', { interactiveType: 'loan_review_card', interactivePayload: buildReviewPayload(loanAI) })], nextState: guidedNextState(loanAI, { maxLoan }) }
+    return { messages: [assistantMessage('When everything looks right, hit **Submit loan** on the card — or just reply **yes**.', { interactiveType: 'loan_review_card', interactivePayload: buildReviewPayload(loanAI) })], nextState: guidedNextState(loanAI, { maxLoan }) }
   }
 
-  return { messages: [assistantMessage('Use the controls above, or say **apply loan** to restart.')], nextState: guidedNextState(loanAI, { maxLoan }) }
+  return { messages: [assistantMessage('Use the controls on the card above, or say **apply loan** if you want to start fresh.')], nextState: guidedNextState(loanAI, { maxLoan }) }
 }
 
 export function isGuidedLoanContext(ctx: Record<string, unknown>): boolean {

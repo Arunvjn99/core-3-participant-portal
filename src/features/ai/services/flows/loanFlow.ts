@@ -31,23 +31,23 @@ export function loanFlow(state: LocalFlowState, input: string, structured: CoreA
       const suggested = ctx.suggestedAmount as number
       const storedPurpose = (ctx.purpose as LoanFlowPurpose) ?? 'general'
       if (isAffirmative(trimmed)) return startGuidedLoanFlow(suggested, storedPurpose, financials)
-      if (isNegative(trimmed)) return { messages: [assistantMessage('Understood. You can enter a **lower amount** anytime, or say **apply loan** to see your snapshot again.')], nextState: null }
-      return { messages: [assistantMessage(`Reply **yes** to borrow **${money(suggested)}**, or **no** to stop.`)], nextState: { type: 'loan', step: 2, context: { ...ctx } } }
+      if (isNegative(trimmed)) return { messages: [assistantMessage('No worries — you can try a **smaller amount** anytime, or say **apply loan** if you want that snapshot again.')], nextState: null }
+      return { messages: [assistantMessage(`Want to move forward with **${money(suggested)}**? Just reply **yes** or **no**.`)], nextState: { type: 'loan', step: 2, context: { ...ctx } } }
     }
 
-    return { messages: [assistantMessage("Let me know how you'd like to proceed, or start with **apply loan**.")], nextState: null }
+    return { messages: [assistantMessage('Tell me what you’d like to do next, or say **apply loan** to start over.')], nextState: null }
   }
 
   if (state.step === 0) {
     if (amount != null) {
       if (amount <= maxLoan) return startGuidedLoanFlow(amount, purpose, financials)
       return {
-        messages: [assistantMessage([`You asked for **${money(amount)}**.`, '', `Based on your **vested balance** (**${money(financials.vestedBalance)}**), the most you can borrow is **${money(maxLoan)}** (mock **50%** rule).`, '', `Would you like to **proceed with ${money(maxLoan)}**? Reply **yes** or **no**.`, '', `Purpose noted: **${purposeDisplayLabel(purpose)}**.`].join('\n'))],
+        messages: [assistantMessage([`You mentioned **${money(amount)}** — thanks for that.`, '', `With your **vested balance** at **${money(financials.vestedBalance)}**, the cap for this demo is **${money(maxLoan)}** (we're using a simple **50%** rule).`, '', `Want to go ahead with **${money(maxLoan)}**? Reply **yes** or **no**.`, '', `I'll keep your purpose as **${purposeDisplayLabel(purpose)}**.`].join('\n'))],
         nextState: { type: 'loan', step: 2, context: { awaitingMaxConfirm: true, suggestedAmount: maxLoan, maxLoan, purpose } },
       }
     }
     return {
-      messages: [assistantMessage(["Here's a quick snapshot of your **retirement loan** capacity (mock data):", '', `**Total balance:** ${money(financials.totalBalance)}`, `**Vested balance:** ${money(financials.vestedBalance)}`, `**You can borrow up to:** ${money(maxLoan)}`, '', '**How much would you like to borrow?** You can add a purpose (e.g. "$4,500 for a house").'].join('\n'))],
+      messages: [assistantMessage(["Here's a quick look at your **retirement loan** headroom (sample numbers):", '', `**Total balance:** ${money(financials.totalBalance)}`, `**Vested balance:** ${money(financials.vestedBalance)}`, `**Rough max you could borrow:** ${money(maxLoan)}`, '', '**How much are you thinking?** You can toss in a purpose too — something like "$4,500 for a house" works great.'].join('\n'))],
       nextState: { type: 'loan', step: 1, context: { maxLoan } },
     }
   }
@@ -58,10 +58,10 @@ export function loanFlow(state: LocalFlowState, input: string, structured: CoreA
       amount = cap
       purpose = parseLoanInput(trimmed).purpose
     }
-    if (amount == null) return { messages: [assistantMessage('I need a **valid dollar amount** (for example **3000** or **$4,500**). You can also say **max**.')], nextState: { type: 'loan', step: 1, context: { ...ctx } } }
+    if (amount == null) return { messages: [assistantMessage('Could you share a **dollar amount**? Something like **3000** or **$4,500** is perfect — or just say **max** if you want the top of your range.')], nextState: { type: 'loan', step: 1, context: { ...ctx } } }
     if (amount <= cap) return startGuidedLoanFlow(amount, purpose, financials)
     return {
-      messages: [assistantMessage([`You requested **${money(amount)}**, but your **max eligible** loan is **${money(cap)}**.`, '', `Would you like to **proceed with ${money(cap)}** instead? Reply **yes** or **no**.`, '', `Purpose: **${purposeDisplayLabel(purpose)}**.`].join('\n'))],
+      messages: [assistantMessage([`**${money(amount)}** is above what you're eligible for here — your **max** for this demo is **${money(cap)}**.`, '', `Want to continue with **${money(cap)}** instead? **Yes** or **no** is fine.`, '', `I'm still noting your purpose as **${purposeDisplayLabel(purpose)}**.`].join('\n'))],
       nextState: { type: 'loan', step: 2, context: { awaitingMaxConfirm: true, suggestedAmount: cap, maxLoan: cap, purpose } },
     }
   }

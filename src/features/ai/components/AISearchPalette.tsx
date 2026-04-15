@@ -119,13 +119,13 @@ export function AISearchPalette() {
               <div className="rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-red-400 p-[2px]">
                 <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 dark:bg-gray-900">
                   <Search className="h-5 w-5 shrink-0 text-purple-500" />
-                  <input ref={inputRef} type="text" value={query} onChange={(e) => { setQuery(e.target.value); setSelectedIdx(0) }} onKeyDown={handleKeyDown} placeholder="Search or ask anything about your account..." className="flex-1 bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-white" />
+                  <input ref={inputRef} type="text" value={query} onChange={(e) => { setQuery(e.target.value); setSelectedIdx(0) }} onKeyDown={handleKeyDown} placeholder="Search the app or ask in plain English…" className="flex-1 bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-white" />
                   {query && (<button type="button" onClick={() => setQuery('')} className="shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"><X className="h-4 w-4" /></button>)}
                 </div>
               </div>
               <div className="mt-2 flex items-center gap-1.5 px-1">
                 <Sparkles className="h-3 w-3 text-purple-500" />
-                <span className="text-xs text-gray-400 dark:text-gray-500">Powered By Core AI</span>
+                <span className="text-xs text-gray-400 dark:text-gray-500">Core AI</span>
                 <span className="ml-auto text-xs text-gray-300 dark:text-gray-600">
                   <kbd className="rounded bg-gray-100 px-1 py-0.5 text-[10px] dark:bg-gray-800">⌘K</kbd>
                 </span>
@@ -144,7 +144,7 @@ export function AISearchPalette() {
                     <p className="mb-1 text-sm font-semibold text-gray-900 dark:text-white">{faqMatch.question}</p>
                     <p className="text-sm text-gray-700 dark:text-gray-300">{faqMatch.shortAnswer}</p>
                     <button type="button" onClick={handleAskAI} className="mt-2 flex items-center gap-1 text-xs font-semibold text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300">
-                      Know more <ArrowRight className="h-3 w-3" />
+                      Tell me more <ArrowRight className="h-3 w-3" />
                     </button>
                   </div>
                 </div>
@@ -174,9 +174,9 @@ export function AISearchPalette() {
               {/* No results */}
               {query && results.length === 0 && !faqMatch && (
                 <div className="mb-4 text-center">
-                  <p className="mb-2 text-sm text-gray-400">No results for &quot;{query}&quot;</p>
+                  <p className="mb-2 text-sm text-gray-400">Nothing matched &quot;{query}&quot; — want to ask Core AI instead?</p>
                   <button type="button" onClick={handleAskAI} className="inline-flex items-center gap-2 rounded-xl bg-purple-50 px-4 py-2.5 text-sm font-semibold text-purple-700 transition-colors hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:hover:bg-purple-900/30">
-                    <Sparkles className="h-4 w-4" /> Ask Core AI
+                    <Sparkles className="h-4 w-4" /> Open chat
                   </button>
                 </div>
               )}
@@ -211,7 +211,7 @@ export function AISearchPalette() {
                   {/* Ask AI */}
                   <button type="button" onClick={handleAskAI} className="flex w-full items-center gap-3 rounded-xl border border-dashed border-purple-300 bg-purple-50/50 px-4 py-3 text-left transition-colors hover:bg-purple-50 dark:border-purple-700 dark:bg-purple-900/10 dark:hover:bg-purple-900/20">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30"><Sparkles className="h-4 w-4 text-purple-600 dark:text-purple-400" /></div>
-                    <div><p className="text-sm font-semibold text-gray-900 dark:text-white">Ask Core AI</p><p className="text-xs text-gray-500 dark:text-gray-400">Loans, withdrawals, enrollment, plan questions...</p></div>
+                    <div><p className="text-sm font-semibold text-gray-900 dark:text-white">Chat with Core AI</p><p className="text-xs text-gray-500 dark:text-gray-400">Loans, withdrawals, enrollment — ask like you would a coworker.</p></div>
                   </button>
                 </>
               )}

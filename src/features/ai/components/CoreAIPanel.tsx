@@ -11,7 +11,7 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   {
     id: 'welcome-0',
     role: 'assistant',
-    content: "Hi, I'm Core AI — your retirement assistant. What would you like to do?",
+    content: "Hey — I'm Core AI, here to help you make sense of your retirement plan. What's on your mind today?",
     timestamp: new Date(),
     suggestions: ['I want to enroll', 'Apply for a loan', 'How much can I withdraw?', 'Check my vested balance'],
   },
@@ -362,7 +362,7 @@ export function CoreAIPanel() {
                     )}
                   </div>
                 ))}
-                {isTyping && (<div className="flex items-center gap-2 px-1"><div className="flex gap-1">{[0, 1, 2].map((i) => (<div key={i} className="h-2 w-2 animate-bounce rounded-full bg-gray-400 dark:bg-gray-500" style={{ animationDelay: `${i * 0.15}s` }} />))}</div><span className="text-xs text-gray-400 dark:text-gray-500">Core AI is typing...</span></div>)}
+                {isTyping && (<div className="flex items-center gap-2 px-1"><div className="flex gap-1">{[0, 1, 2].map((i) => (<div key={i} className="h-2 w-2 animate-bounce rounded-full bg-gray-400 dark:bg-gray-500" style={{ animationDelay: `${i * 0.15}s` }} />))}</div><span className="text-xs text-gray-400 dark:text-gray-500">Writing a reply...</span></div>)}
                 <div ref={bottomRef} />
               </div>
 
@@ -370,11 +370,11 @@ export function CoreAIPanel() {
               <div className="shrink-0 border-t border-gray-100 p-4 dark:border-gray-800">
                 <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800/50">
                   {voiceSupported && (<button type="button" onClick={toggleVoice} className={`shrink-0 transition-colors ${isListening ? 'animate-pulse text-red-500' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`} aria-label={isListening ? 'Stop listening' : 'Voice input'}>{isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}</button>)}
-                  <input ref={inputRef} type="text" placeholder={isListening ? 'Listening...' : 'Ask anything about your retirement plan...'} className="flex-1 bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-gray-500" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage(input)} />
+                  <input ref={inputRef} type="text" placeholder={isListening ? 'Listening…' : 'Ask me anything — loans, withdrawals, vesting…'} className="flex-1 bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-gray-500" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage(input)} />
                   <button type="button" onClick={() => sendMessage(input)} disabled={!input.trim() || isTyping} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 transition-colors hover:bg-blue-200 disabled:opacity-40 dark:bg-blue-900/40 dark:hover:bg-blue-800/60" aria-label="Send"><Send className="h-4 w-4 text-blue-600 dark:text-blue-400" /></button>
                 </div>
                 {isListening && (<div className="mt-2 flex items-center gap-2 px-1"><span className="h-2 w-2 animate-pulse rounded-full bg-red-500" /><span className="text-xs font-medium text-red-500">Listening — speak now...</span></div>)}
-                <p className="mt-2 text-center text-xs text-gray-400 dark:text-gray-500">Core AI can make mistakes. Verify important information with your plan administrator.</p>
+                <p className="mt-2 text-center text-xs text-gray-400 dark:text-gray-500">I'm here to guide you, not replace your plan rules — double-check anything big with your administrator.</p>
               </div>
             </div>
           </motion.div>

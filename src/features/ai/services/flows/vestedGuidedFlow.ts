@@ -19,7 +19,7 @@ function insightPayload(): InfoCardPayload {
   const vestedPct = f.totalBalance > 0 ? Math.round((f.vestedBalance / f.totalBalance) * 100) : 0
   const unvested = f.totalBalance - f.vestedBalance
   return {
-    message: `You are **${vestedPct}%** vested. Vested balance is the amount you fully own.`,
+    message: `Right now you're **${vestedPct}%** vested — that's the slice of your account that's fully yours.`,
     vestedPercent: vestedPct,
     insight: getVestedInsight({ total: f.totalBalance, vested: f.vestedBalance, unvested, percent: vestedPct }),
     actionLabel: 'Done',
@@ -31,7 +31,7 @@ function insightPayload(): InfoCardPayload {
 export function startVestedGuidedFlow(): LocalAIResult {
   const vestedAI: VestedAIState = { step: 'overview', data: {} }
   return {
-    messages: [assistantMessage('Your balance.', { interactiveType: 'balance_card', interactivePayload: balancePayload(), suggestions: ['Continue'] })],
+    messages: [assistantMessage('Here\'s a snapshot of where things stand — total, vested, and what\'s still on the way.', { interactiveType: 'balance_card', interactivePayload: balancePayload(), suggestions: ['Continue'] })],
     nextState: vestedNextState(vestedAI),
   }
 }
@@ -49,16 +49,16 @@ export function runVestedGuidedFlow(state: LocalFlowState, input: string, struct
   if (vestedAI.step === 'overview') {
     if (/^(continue|next|show)\b/i.test(trimmed)) {
       const next: VestedAIState = { ...vestedAI, step: 'insight' }
-      return { messages: [assistantMessage('Insight.', { interactiveType: 'info_card', interactivePayload: insightPayload() })], nextState: vestedNextState(next) }
+      return { messages: [assistantMessage('Here\'s a bit more context on what vesting means for you.', { interactiveType: 'info_card', interactivePayload: insightPayload() })], nextState: vestedNextState(next) }
     }
-    return { messages: [assistantMessage('Say **continue** for insight.', { interactiveType: 'balance_card', interactivePayload: balancePayload(), suggestions: ['Continue'] })], nextState: vestedNextState(vestedAI) }
+    return { messages: [assistantMessage('Say **continue** when you\'re ready for a plain-English take on vesting.', { interactiveType: 'balance_card', interactivePayload: balancePayload(), suggestions: ['Continue'] })], nextState: vestedNextState(vestedAI) }
   }
 
   if (vestedAI.step === 'insight') {
-    return { messages: [assistantMessage('Tap **Done** to return.', { interactiveType: 'info_card', interactivePayload: insightPayload() })], nextState: vestedNextState(vestedAI) }
+    return { messages: [assistantMessage('Tap **Done** when you\'re ready to head back.', { interactiveType: 'info_card', interactivePayload: insightPayload() })], nextState: vestedNextState(vestedAI) }
   }
 
-  return { messages: [assistantMessage('Use the controls above.')], nextState: vestedNextState(vestedAI) }
+  return { messages: [assistantMessage('Use the card above to keep exploring.')], nextState: vestedNextState(vestedAI) }
 }
 
 export function isVestedGuidedContext(ctx: Record<string, unknown>): boolean {
