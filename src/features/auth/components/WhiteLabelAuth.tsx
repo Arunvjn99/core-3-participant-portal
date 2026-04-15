@@ -10,6 +10,7 @@ import {
   Check, X, Building2, ArrowRight, LogIn
 } from 'lucide-react'
 import { signUpUser, signInUser, getAllCompanies } from '../../../lib/supabaseIntegration'
+import { ROUTES } from '@/lib/constants'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -436,7 +437,7 @@ export default function WhiteLabelAuth() {
     try {
       const result = await signInUser(loginEmail, loginPassword)
       if (result.error) throw new Error(result.error.message)
-      navigate('/dashboard')
+      navigate(ROUTES.DASHBOARD)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Sign in failed. Please check your credentials.')
     } finally {

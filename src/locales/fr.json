@@ -9,6 +9,8 @@
 
   "nav": {
     "dashboard": "Tableau de bord",
+    "pre_enrollment_dashboard": "Tableau de bord avant inscription",
+    "post_enrollment_dashboard": "Tableau de bord après inscription",
     "enrollment": "Inscription",
     "transactions": "Transactions",
     "investments": "Investissements",
@@ -88,7 +90,8 @@
     "subtitle": "Vous êtes à un pas d'activer votre 401(k). Nous avons tout simplifié pour que vous puissiez vous concentrer sur l'essentiel.",
     "start_enrollment": "Commencer mon inscription →",
     "learn_plan": "En savoir plus sur le plan",
-    "time_note": "Cela ne prend que 5 minutes"
+    "time_note": "Cela ne prend que 5 minutes",
+    "video_aria": "Vidéo de présentation de votre plan de retraite et du parcours d'inscription"
   },
 
   "learning": {

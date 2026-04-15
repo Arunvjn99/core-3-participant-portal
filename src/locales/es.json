@@ -9,6 +9,8 @@
 
   "nav": {
     "dashboard": "Panel",
+    "pre_enrollment_dashboard": "Panel previo a la inscripción",
+    "post_enrollment_dashboard": "Panel posterior a la inscripción",
     "enrollment": "Inscripción",
     "transactions": "Transacciones",
     "investments": "Inversiones",
@@ -88,7 +90,8 @@
     "subtitle": "Está a un paso de activar su 401(k). Hemos simplificado todo para que pueda enfocarse en lo que importa.",
     "start_enrollment": "Iniciar mi inscripción →",
     "learn_plan": "Conocer el plan",
-    "time_note": "Solo toma 5 minutos"
+    "time_note": "Solo toma 5 minutos",
+    "video_aria": "Vídeo de presentación de su plan de jubilación y la experiencia de inscripción"
   },
 
   "learning": {

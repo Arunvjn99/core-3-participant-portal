@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components -- route module: lazy page chunks + router factory */
 import { lazy, Suspense, useState, useEffect } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { ROUTES, dashboardPath } from '@/lib/constants'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import PreEnrollmentDashboard from '@/features/dashboard/pages/PreEnrollmentDashboard'
 import PostEnrollmentDashboard from '@/features/dashboard/pages/PostEnrollmentDashboard'
@@ -132,14 +133,28 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
-// ─── Dashboard route (enrollment-aware) ──────────────────────────────────────
+// ─── Dashboard routes (pre vs post enrollment) ───────────────────────────────
 
-function DashboardRoute() {
+function DashboardLegacyRedirect() {
   const enrollmentStatus = useEnrollmentDraftStore((s) => s.enrollmentStatus)
+  const to = dashboardPath(enrollmentStatus === 'complete')
+  return <Navigate to={to} replace />
+}
 
-  return enrollmentStatus === 'complete'
-    ? <PostEnrollmentDashboard />
-    : <PreEnrollmentDashboard />
+function PreEnrollmentDashboardGate() {
+  const enrollmentStatus = useEnrollmentDraftStore((s) => s.enrollmentStatus)
+  if (enrollmentStatus === 'complete') {
+    return <Navigate to={ROUTES.POST_ENROLLMENT_DASHBOARD} replace />
+  }
+  return <PreEnrollmentDashboard />
+}
+
+function PostEnrollmentDashboardGate() {
+  const enrollmentStatus = useEnrollmentDraftStore((s) => s.enrollmentStatus)
+  if (enrollmentStatus !== 'complete') {
+    return <Navigate to={ROUTES.PRE_ENROLLMENT_DASHBOARD} replace />
+  }
+  return <PostEnrollmentDashboard />
 }
 
 // ─── Router ──────────────────────────────────────────────────────────────────
@@ -208,7 +223,9 @@ export const router = createBrowserRouter([
           </AuthGuard>
         ),
         children: [
-          { path: 'dashboard', element: <DashboardRoute /> },
+          { path: 'dashboard', element: <DashboardLegacyRedirect /> },
+          { path: 'pre-enrollment-dashboard', element: <PreEnrollmentDashboardGate /> },
+          { path: 'post-enrollment-dashboard', element: <PostEnrollmentDashboardGate /> },
           { path: 'enrollment/manage', element: <EnrollmentManagement /> },
           { path: 'enrollment/manage/:planId', element: <PlanDetail /> },
           { path: 'investments', element: withSuspense(InvestmentsPage) },

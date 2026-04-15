@@ -1,3 +1,5 @@
+import { dashboardPath } from '@/lib/constants'
+import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { assistantMessage } from '../messageUtils'
 import { getUserFinancials } from '../userFinancials'
 import type { BalanceCardPayload, CoreAIStructuredPayload, InfoCardPayload } from '../../types'
@@ -41,7 +43,11 @@ export function runVestedGuidedFlow(state: LocalFlowState, input: string, struct
   const vestedAI = ctx[VESTED_AI_STATE_KEY] as VestedAIState
 
   if (structured && structured.action === 'vested_dismiss') {
-    return { messages: [], nextState: null, navigate: '/dashboard' }
+    return {
+      messages: [],
+      nextState: null,
+      navigate: dashboardPath(useEnrollmentDraftStore.getState().enrollmentStatus === 'complete'),
+    }
   }
 
   const trimmed = input.trim()

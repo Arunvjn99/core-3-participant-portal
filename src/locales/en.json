@@ -9,6 +9,8 @@
 
   "nav": {
     "dashboard": "Dashboard",
+    "pre_enrollment_dashboard": "Pre-enrollment dashboard",
+    "post_enrollment_dashboard": "Post-enrollment dashboard",
     "enrollment": "Enrollment",
     "transactions": "Transactions",
     "investments": "Investments",
@@ -88,7 +90,8 @@
     "subtitle": "You're one step away from activating your 401(k). We've simplified everything so you can focus on what matters.",
     "start_enrollment": "Start my enrollment →",
     "learn_plan": "Learn about the plan",
-    "time_note": "It only takes 5 minutes"
+    "time_note": "It only takes 5 minutes",
+    "video_aria": "Video introducing your retirement plan and enrollment experience"
   },
 
   "learning": {

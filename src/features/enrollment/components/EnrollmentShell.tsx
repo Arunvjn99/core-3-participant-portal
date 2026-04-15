@@ -4,6 +4,7 @@ import { AnimatedPage } from '../../../design-system/motion/AnimatedPage'
 import { ENROLLMENT_STEPS, getStepByPath } from '../enrollmentSteps'
 import AppFooter from '@/features/dashboard/components/AppFooter'
 import { EnrollmentStepNavProvider } from './EnrollmentStepNavContext'
+import { ROUTES } from '@/lib/constants'
 
 /** Steps shown in the progress UI (excludes success / confirmation-only step). */
 const STEPPER_STEPS = ENROLLMENT_STEPS.filter((s) => s.step <= 7)
@@ -50,7 +51,7 @@ export function EnrollmentShell() {
         </div>
         <button
           type="button"
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate(ROUTES.PRE_ENROLLMENT_DASHBOARD)}
           className="brand-text text-sm font-medium transition-colors hover:opacity-80"
         >
           Save &amp; Exit

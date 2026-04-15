@@ -1,3 +1,4 @@
+import { ROUTES } from '@/lib/constants'
 import type { SearchScenario } from './types'
 
 export const ROUTE_SCENARIOS: SearchScenario[] = [
@@ -11,11 +12,11 @@ export const ROUTE_SCENARIOS: SearchScenario[] = [
   { id: 'fund_performance', keywords: ['fund performance', 'returns', 'performance ytd'], queries: ['Fund performance'], subtitle: 'Investments', type: 'navigation', route: '/investments' },
   { id: 'investment_options', keywords: ['fund lineup', 'investment options', 'available funds'], queries: ['What funds can I choose?'], subtitle: 'Investments', type: 'navigation', route: '/investments' },
   { id: 'transaction_history', keywords: ['history', 'past transactions', 'activity'], queries: ['Transaction history'], subtitle: 'Transactions', type: 'navigation', route: '/transactions' },
-  { id: 'view_balance', keywords: ['balance', 'account balance', 'how much saved'], queries: ['Check my balance'], subtitle: 'Dashboard', type: 'navigation', route: '/dashboard' },
+  { id: 'view_balance', keywords: ['balance', 'account balance', 'how much saved'], queries: ['Check my balance'], subtitle: 'Dashboard', type: 'navigation', route: ROUTES.DASHBOARD },
   { id: 'transactions_hub', keywords: ['transactions', 'loans transfers'], queries: ['Transactions'], subtitle: 'Transactions', type: 'navigation', route: '/transactions' },
   { id: 'update_profile', keywords: ['profile', 'update address', 'personal info'], queries: ['Update my profile'], subtitle: 'Profile', type: 'navigation', route: '/profile' },
   { id: 'beneficiaries', keywords: ['beneficiary', 'beneficiaries'], queries: ['Update beneficiaries'], subtitle: 'Profile', type: 'navigation', route: '/profile' },
-  { id: 'contact_support', keywords: ['help', 'support', 'contact'], queries: ['Contact support'], subtitle: 'Help', type: 'navigation', route: '/dashboard' },
+  { id: 'contact_support', keywords: ['help', 'support', 'contact'], queries: ['Contact support'], subtitle: 'Help', type: 'navigation', route: ROUTES.DASHBOARD },
 ]
 
 export const FLOW_SCENARIOS: SearchScenario[] = [

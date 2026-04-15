@@ -12,6 +12,9 @@ import AdvisorModal from '@/features/advisors/AdvisorModal'
 import { formatFirstNameForDisplay, getAuthenticatedFirstName } from '@/lib/userDisplayName'
 import type { TFunction } from 'i18next'
 
+const HERO_MEETING_VIDEO =
+  'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/Heromeeting%20(1).webm'
+
 function getTimeGreeting(t: TFunction): string {
   const hour = new Date().getHours()
   if (hour < 12) return t('greeting.morning')
@@ -109,18 +112,22 @@ export function PreEnrollmentDashboard() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex flex-col items-center gap-8 lg:items-end"
+              className="flex w-full flex-col items-center gap-8 lg:items-start"
             >
-              <div className="relative w-full max-w-[500px]">
-                <img
-                  src="/hero-enrollment-illustration.png"
-                  alt="Illustration of retirement plan onboarding with character and floating UI cards"
-                  width={500}
-                  height={700}
-                  className="mx-auto block h-auto w-full max-h-[min(700px,85vh)] object-contain"
-                  loading="eager"
-                  decoding="async"
-                />
+              <div className="relative mx-auto h-[380px] w-full max-w-[450px] overflow-hidden rounded-lg lg:mx-0 lg:-translate-x-2">
+                <video
+                  width={450}
+                  height={380}
+                  className="absolute inset-0 h-full w-full object-cover object-right"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                  aria-label={t('hero.video_aria')}
+                >
+                  <source src={HERO_MEETING_VIDEO} type="video/webm" />
+                </video>
               </div>
             </motion.div>
           </section>

@@ -26,10 +26,15 @@ import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { useBrandTheme } from '@/core/theme/BrandThemeContext'
 import AppFooter from '@/features/dashboard/components/AppFooter'
 import { supabase } from '@/core/supabase'
+import { ROUTES } from '@/lib/constants'
 
 function getNavItems(isEnrolled: boolean) {
   return [
-    { labelKey: 'nav.dashboard', href: '/dashboard', icon: LayoutDashboard },
+    {
+      labelKey: isEnrolled ? 'nav.post_enrollment_dashboard' : 'nav.pre_enrollment_dashboard',
+      href: isEnrolled ? ROUTES.POST_ENROLLMENT_DASHBOARD : ROUTES.PRE_ENROLLMENT_DASHBOARD,
+      icon: LayoutDashboard,
+    },
     {
       labelKey: 'nav.enrollment',
       href: isEnrolled ? '/enrollment/manage' : '/enrollment/plan',
@@ -42,7 +47,9 @@ function getNavItems(isEnrolled: boolean) {
 }
 
 function isNavActive(href: string, pathname: string): boolean {
-  if (href === '/dashboard') return pathname === '/dashboard'
+  if (href === ROUTES.PRE_ENROLLMENT_DASHBOARD || href === ROUTES.POST_ENROLLMENT_DASHBOARD) {
+    return pathname === href || pathname === ROUTES.DASHBOARD
+  }
   if (href === '/enrollment/plan' || href === '/enrollment/manage')
     return pathname.startsWith('/enrollment')
   return pathname.startsWith(href)

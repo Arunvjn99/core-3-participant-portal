@@ -1,3 +1,5 @@
+import { dashboardPath } from '@/lib/constants'
+import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { buildResponse } from './responseBuilder'
 import { resolveIntent } from './intentResolver'
 import { assistantMessage } from './messageUtils'
@@ -32,7 +34,12 @@ export function handleLocalAI(
 
     if (!flowState?.type) {
       if (structured.action === 'success_card_dismiss') return { messages: [], nextState: null, navigate: '/transactions/loan' }
-      if (structured.action === 'vested_dismiss') return { messages: [], nextState: null, navigate: '/dashboard' }
+      if (structured.action === 'vested_dismiss')
+        return {
+          messages: [],
+          nextState: null,
+          navigate: dashboardPath(useEnrollmentDraftStore.getState().enrollmentStatus === 'complete'),
+        }
       return { messages: [assistantMessage("Yeah, I can't resume that halfway from here — annoying, I know. Say **apply loan** and we'll run it from the top.", { suggestions: ['Apply for a loan'] })], nextState: null }
     }
     return runFlow(flowState, '', structured)

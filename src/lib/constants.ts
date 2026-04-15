@@ -8,10 +8,18 @@ export const ROUTES = {
   VERIFY_OTP: `/${APP_VERSION}/verify`,
   FORGOT_PASSWORD: `/${APP_VERSION}/forgot-password`,
   RESET_PASSWORD: `/${APP_VERSION}/reset-password`,
+  /** Legacy entry: redirects to pre- or post-enrollment dashboard based on status */
   DASHBOARD: '/dashboard',
+  PRE_ENROLLMENT_DASHBOARD: '/pre-enrollment-dashboard',
+  POST_ENROLLMENT_DASHBOARD: '/post-enrollment-dashboard',
   ENROLLMENT: '/enrollment',
   TRANSACTIONS: '/transactions',
 } as const
+
+/** Use for navigation when enrollment completion is known (e.g. after login redirect). */
+export function dashboardPath(enrollmentComplete: boolean): string {
+  return enrollmentComplete ? ROUTES.POST_ENROLLMENT_DASHBOARD : ROUTES.PRE_ENROLLMENT_DASHBOARD
+}
 
 export const ENV = {
   SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL as string | undefined,

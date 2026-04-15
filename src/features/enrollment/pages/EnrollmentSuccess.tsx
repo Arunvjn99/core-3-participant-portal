@@ -3,6 +3,7 @@ import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { CheckCircle, Mail, Calendar, BarChart3 } from 'lucide-react'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { supabase } from '@/core/supabase'
+import { ROUTES } from '@/lib/constants'
 
 
 const nextSteps = [
@@ -42,7 +43,7 @@ export default function EnrollmentSuccess() {
       }
     }
     useEnrollmentDraftStore.getState().setEnrollmentStatus('complete')
-    navigate('/dashboard')
+    navigate(ROUTES.POST_ENROLLMENT_DASHBOARD)
   }
 
   return (

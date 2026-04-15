@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/core/supabase'
+import { ROUTES } from '@/lib/constants'
 import AuthLayout from '../components/AuthLayout'
 
 const CORE_LOGO = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/CORE%20logo.png'
@@ -23,7 +24,7 @@ export default function LoginPage() {
 
     if (!supabase) {
       // Demo mode — navigate directly
-      navigate('/dashboard')
+      navigate(ROUTES.DASHBOARD)
       return
     }
 
@@ -32,7 +33,7 @@ export default function LoginPage() {
       setError(signInError.message)
       setLoading(false)
     } else {
-      navigate('/dashboard')
+      navigate(ROUTES.DASHBOARD)
     }
   }
 
