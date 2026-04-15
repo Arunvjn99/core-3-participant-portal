@@ -4,7 +4,8 @@ import { useEnrollment } from '@/core/hooks/useEnrollment'
 import { useEnrollmentStepNav } from '@/features/enrollment/components/EnrollmentStepNavContext'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
-import { ArrowRight, TrendingUp, Minus, AlertTriangle, X, XCircle } from 'lucide-react'
+import { AutoIncreaseSkipPanel } from '@/features/enrollment/components/AutoIncreaseSkipPanel'
+import { ArrowRight, TrendingUp, Minus } from 'lucide-react'
 
 export default function AutoIncrease() {
   const navigate = useNavigate()
@@ -15,6 +16,9 @@ export default function AutoIncrease() {
   const fixedProjection = 124621
   const autoProjection = 185943
   const difference = autoProjection - fixedProjection
+
+  const planDisplayName =
+    data.plan === 'roth' ? 'Roth 401(k)' : data.plan === 'traditional' ? 'Traditional 401(k)' : '401(k)'
 
   const handleSelect = (autoIncrease: boolean) => {
     updateData({ autoIncrease })
@@ -46,6 +50,15 @@ export default function AutoIncrease() {
     })
     return () => setStepNav(null)
   }, [setStepNav, navigate])
+
+  useEffect(() => {
+    if (!showSkipModal) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowSkipModal(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [showSkipModal])
 
   return (
     <AnimatedPage>
@@ -132,101 +145,27 @@ export default function AutoIncrease() {
       {/* Skip Confirmation Modal */}
       {showSkipModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" data-app-blocking-overlay>
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowSkipModal(false)} />
-          <div className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-900">
-            <button
-              type="button"
-              onClick={() => setShowSkipModal(false)}
-              className="absolute right-4 top-4 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            <div className="mb-5 flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/40">
-                <AlertTriangle className="h-4 w-4 text-amber-600" />
-              </div>
-              <h2 className="text-gray-900 dark:text-white" style={{ fontSize: '1.1rem', fontWeight: 700 }}>
-                Skip automatic increases?
-              </h2>
-            </div>
-
-            <div className="mb-4 grid gap-3 sm:grid-cols-2">
-              {/* Without Auto Increase — shown first so the "With" option on the right looks better */}
-              <div className="flex flex-col rounded-xl border border-gray-200 bg-gray-50 p-4 opacity-75 dark:border-gray-700 dark:bg-gray-800/50">
-                <div className="mb-2 flex items-center gap-1.5">
-                  <Minus className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-500 dark:text-gray-400" style={{ fontSize: '0.82rem', fontWeight: 600 }}>
-                    Without Auto Increase
-                  </span>
-                </div>
-                <p className="text-gray-400 dark:text-gray-500" style={{ fontSize: '0.65rem', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.04em' }}>
-                  Est. savings in 10 years
-                </p>
-                <p className="mt-0.5 text-gray-500 dark:text-gray-400" style={{ fontSize: '1.5rem', fontWeight: 700 }}>
-                  ${fixedProjection.toLocaleString()}
-                </p>
-              </div>
-
-              {/* With Auto Increase — recommended, on the right */}
-              <div className="relative flex flex-col rounded-xl border-2 border-green-500 bg-white p-4 dark:bg-gray-800">
-                <span
-                  className="absolute -top-2.5 left-3 rounded-full bg-green-600 px-2.5 py-0.5 text-white"
-                  style={{ fontSize: '0.68rem', fontWeight: 600 }}
-                >
-                  Recommended
-                </span>
-                <div className="mb-2 mt-1 flex items-center gap-1.5">
-                  <TrendingUp className="h-4 w-4 text-green-600" />
-                  <span className="text-gray-900 dark:text-white" style={{ fontSize: '0.82rem', fontWeight: 600 }}>
-                    With Auto Increase
-                  </span>
-                </div>
-                <p className="text-gray-400 dark:text-gray-500" style={{ fontSize: '0.65rem', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.04em' }}>
-                  Est. savings in 10 years
-                </p>
-                <p className="mt-0.5 text-green-700 dark:text-green-400" style={{ fontSize: '1.5rem', fontWeight: 700 }}>
-                  ${autoProjection.toLocaleString()}
-                </p>
-              </div>
-            </div>
-
-            <div
-              className="mb-5 w-full rounded-[12px] border border-red-100 bg-[#FFF0F0] p-4 dark:border-red-900/40 dark:bg-[rgba(220,38,38,0.12)]"
-              role="alert"
-            >
-              <div className="flex items-center gap-2.5">
-                <XCircle className="h-5 w-5 shrink-0 text-red-600 dark:text-red-500" aria-hidden />
-                <p className="font-bold text-red-700 dark:text-red-400" style={{ fontSize: '0.9rem' }}>
-                  Potential Missed Savings
-                </p>
-              </div>
-              <p className="mt-2 leading-relaxed text-red-700 dark:text-red-300" style={{ fontSize: '0.85rem' }}>
-                By skipping, you will be losing{' '}
-                <span className="font-bold text-red-700 dark:text-red-400">${difference.toLocaleString()}</span> in potential
-                retirement savings over 10 years.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleReconsiderFromModal}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 py-3 text-white transition-all hover:bg-green-700 active:scale-[0.98]"
-              style={{ fontSize: '0.9rem', fontWeight: 500 }}
-            >
-              Reconsider Auto Increase <ArrowRight className="h-4 w-4" />
-            </button>
-            <p className="mt-3 text-center text-gray-500 dark:text-gray-400" style={{ fontSize: '0.85rem' }}>
-              Tap{' '}
-              <button
-                type="button"
-                onClick={handleConfirmSkip}
-                className="font-medium text-gray-700 underline decoration-gray-400 underline-offset-2 transition-colors hover:text-gray-900 dark:text-gray-300 dark:decoration-gray-500 dark:hover:text-white"
-              >
-                here
-              </button>{' '}
-              to skip this step
-            </p>
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowSkipModal(false)}
+            aria-hidden
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="auto-increase-skip-title"
+            className="relative w-full max-w-md rounded-2xl border border-slate-200/90 bg-white p-6 shadow-2xl dark:border-gray-700 dark:bg-gray-900"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <AutoIncreaseSkipPanel
+              planDisplayName={planDisplayName}
+              contributionPercent={data.contributionPercent}
+              missedSavingsAmount={difference}
+              onReconsider={handleReconsiderFromModal}
+              onContinueWithout={handleConfirmSkip}
+              onDismiss={() => setShowSkipModal(false)}
+              showDismissButton
+            />
           </div>
         </div>
       )}
