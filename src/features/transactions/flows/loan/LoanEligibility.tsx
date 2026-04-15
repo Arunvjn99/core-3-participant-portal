@@ -166,7 +166,7 @@ function LoanEligibility() {
       <div className="flex justify-between items-center gap-3" style={{ paddingTop: 16 }}>
         <button
           onClick={() => navigate("/transactions")}
-          className="flex items-center gap-2 transition-all duration-200 cursor-pointer flex-1 sm:flex-none justify-center"
+          className="flex min-h-[2.75rem] items-center gap-2 transition-all duration-200 cursor-pointer flex-1 sm:flex-none justify-center"
           style={{ background: "transparent", border: "var(--c-border)", color: "inherit", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
         >
           <ArrowLeft style={{ width: 16, height: 16 }} />

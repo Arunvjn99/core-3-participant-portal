@@ -277,7 +277,7 @@ function TransferDestination() {
       <div className="flex justify-between items-center" style={{ paddingTop: 16 }}>
         <button
           onClick={() => navigate("/transactions/transfer/source")}
-          className="flex items-center gap-2 transition-all duration-200 cursor-pointer"
+          className="flex min-h-[2.75rem] items-center gap-2 transition-all duration-200 cursor-pointer"
           style={{
             background: "transparent",
             border: "var(--c-border)",

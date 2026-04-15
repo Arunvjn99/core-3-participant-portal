@@ -25,20 +25,6 @@
   --color-brand-hover: #1d4ed8;
 }
 
-.btn-brand {
-  background-color: var(--brand-primary) !important;
-  color: #fff !important;
-  transition:
-    background-color 0.15s ease,
-    opacity 0.15s ease;
-}
-.btn-brand:hover {
-  background-color: var(--brand-primary-hover) !important;
-}
-.btn-brand:focus-visible {
-  outline: 2px solid var(--brand-primary) !important;
-}
-
 [data-brand='primary'] {
   background-color: var(--brand-primary) !important;
   color: #fff !important;
@@ -338,6 +324,35 @@ html[data-theme="dark"] [style*="linear-gradient"][style*="#DBEAFE"] {
 
 /* Post-enrollment dashboard tokens */
 @layer components {
+  /* Primary CTA: defaults match transaction-flow nav (Cancel/Back outline pair).
+     Pages can override padding/radius via Tailwind utilities (utilities win over this layer). */
+  .btn-brand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: 0.625rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.25;
+    cursor: pointer;
+    box-shadow: 0 4px 12px var(--brand-primary-ring);
+    background-color: var(--brand-primary) !important;
+    color: #fff !important;
+    transition:
+      background-color 0.15s ease,
+      opacity 0.15s ease;
+  }
+  .btn-brand:hover {
+    background-color: var(--brand-primary-hover) !important;
+  }
+  .btn-brand:focus-visible {
+    outline: 2px solid var(--brand-primary) !important;
+  }
+
   .premium-card {
     @apply bg-white dark:bg-gray-900 rounded-2xl p-6 border border-slate-100 dark:border-gray-700 transition-all duration-200 hover:shadow-lg hover:border-slate-200 dark:hover:border-gray-600;
   }

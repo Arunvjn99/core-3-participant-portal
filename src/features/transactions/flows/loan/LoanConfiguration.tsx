@@ -1136,7 +1136,7 @@ function LoanConfiguration() {
       >
         <button
           onClick={() => navigate("/transactions/loan/simulator")}
-          className="flex items-center gap-2 transition-all duration-200 cursor-pointer bg-white dark:bg-gray-900 text-slate-600 dark:text-gray-300 border border-slate-200 dark:border-gray-600 hover:bg-slate-50 dark:hover:bg-gray-800 hover:border-slate-300 dark:hover:border-gray-500"
+          className="flex min-h-[2.75rem] items-center gap-2 transition-all duration-200 cursor-pointer bg-white dark:bg-gray-900 text-slate-600 dark:text-gray-300 border border-slate-200 dark:border-gray-600 hover:bg-slate-50 dark:hover:bg-gray-800 hover:border-slate-300 dark:hover:border-gray-500"
           style={{ padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
         >
           <ArrowLeft style={{ width: 16, height: 16 }} />
@@ -1147,16 +1147,7 @@ function LoanConfiguration() {
           disabled={
             !reason || (disbursementMethod === "eft" && !bankAccount)
           }
-          className="flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:bg-blue-700 active:translate-y-0"
-          style={{
-            background: "var(--brand-primary)",
-            color: "#fff",
-            padding: "10px 20px",
-            borderRadius: 10,
-            fontSize: 13,
-            fontWeight: 600,
-            border: "none",
-            boxShadow: "0 4px 12px rgba(37,99,235,0.3)" }}
+          className="btn-brand flex min-h-[2.75rem] items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 active:translate-y-0"
         >
           Continue to Fees
           <ArrowRight style={{ width: 16, height: 16 }} />

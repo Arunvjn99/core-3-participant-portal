@@ -220,7 +220,7 @@ function LoanSimulator() {
       <div className="flex justify-between items-center" style={{ paddingTop: 8 }}>
         <button
           onClick={() => navigate("/transactions/loan")}
-          className="flex items-center gap-2 transition-all duration-200 cursor-pointer"
+          className="flex min-h-[2.75rem] items-center gap-2 transition-all duration-200 cursor-pointer"
           style={{ background: "transparent", border: "var(--c-border)", color: "inherit", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
         >
           <ArrowLeft style={{ width: 16, height: 16 }} />
