@@ -376,7 +376,7 @@ export default function PostEnrollmentDashboard() {
                   </p>
                   <button
                     type="button"
-                    className="flex w-fit items-center gap-2 rounded-xl bg-white px-8 py-3 text-sm font-bold text-slate-950 shadow-lg transition-all hover:bg-[var(--brand-primary)] hover:text-white active:scale-95"
+                    className="flex w-fit items-center gap-1.5 rounded-xl bg-white px-5 py-3 text-sm font-bold text-slate-950 shadow-lg transition-all hover:bg-[var(--brand-primary)] hover:text-white active:scale-95"
                   >
                     Read Article <ArrowRight className="h-4 w-4" />
                   </button>

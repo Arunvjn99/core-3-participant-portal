@@ -4,7 +4,7 @@ import { useEnrollment } from '@/core/hooks/useEnrollment'
 import { useEnrollmentStepNav } from '@/features/enrollment/components/EnrollmentStepNavContext'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
-import { ArrowRight, TrendingUp, Minus, AlertTriangle, X } from 'lucide-react'
+import { ArrowRight, TrendingUp, Minus, AlertTriangle, X, XCircle } from 'lucide-react'
 
 export default function AutoIncrease() {
   const navigate = useNavigate()
@@ -32,7 +32,7 @@ export default function AutoIncrease() {
     navigate('/enrollment/investment')
   }
 
-  const handleEnableFromModal = () => {
+  const handleReconsiderFromModal = () => {
     setShowSkipModal(false)
     updateData({ autoIncrease: true })
     navigate('/enrollment/auto-increase-setup')
@@ -142,7 +142,7 @@ export default function AutoIncrease() {
               <X className="h-4 w-4" />
             </button>
 
-            <div className="mb-1 flex items-center gap-2.5">
+            <div className="mb-5 flex items-center gap-2.5">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/40">
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
               </div>
@@ -150,9 +150,6 @@ export default function AutoIncrease() {
                 Skip automatic increases?
               </h2>
             </div>
-            <p className="mb-5 mt-1 text-gray-500 dark:text-gray-400" style={{ fontSize: '0.85rem' }}>
-              Automatic increases help grow your retirement savings gradually without requiring large changes today.
-            </p>
 
             <div className="mb-4 grid gap-3 sm:grid-cols-2">
               {/* Without Auto Increase — shown first so the "With" option on the right looks better */}
@@ -194,30 +191,42 @@ export default function AutoIncrease() {
               </div>
             </div>
 
-            <div className="mb-5 rounded-xl border border-green-100 bg-green-50 p-3 text-center dark:border-green-900/40 dark:bg-green-950/30">
-              <p className="text-green-800 dark:text-green-400" style={{ fontSize: '0.82rem', fontWeight: 500 }}>
-                Auto increase could add approximately <span style={{ fontWeight: 700 }}>${difference.toLocaleString()}</span> to your savings.
+            <div
+              className="mb-5 w-full rounded-[12px] border border-red-100 bg-[#FFF0F0] p-4 dark:border-red-900/40 dark:bg-[rgba(220,38,38,0.12)]"
+              role="alert"
+            >
+              <div className="flex items-center gap-2.5">
+                <XCircle className="h-5 w-5 shrink-0 text-red-600 dark:text-red-500" aria-hidden />
+                <p className="font-bold text-red-700 dark:text-red-400" style={{ fontSize: '0.9rem' }}>
+                  Potential Missed Savings
+                </p>
+              </div>
+              <p className="mt-2 leading-relaxed text-red-700 dark:text-red-300" style={{ fontSize: '0.85rem' }}>
+                By skipping, you will be losing{' '}
+                <span className="font-bold text-red-700 dark:text-red-400">${difference.toLocaleString()}</span> in potential
+                retirement savings over 10 years.
               </p>
             </div>
 
-            <div className="flex flex-col gap-2.5 sm:flex-row">
-              <button
-                type="button"
-                onClick={handleEnableFromModal}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-600 py-3 text-white transition-all hover:bg-green-700 active:scale-[0.98]"
-                style={{ fontSize: '0.9rem', fontWeight: 500 }}
-              >
-                Enable Auto Increase <ArrowRight className="h-4 w-4" />
-              </button>
+            <button
+              type="button"
+              onClick={handleReconsiderFromModal}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 py-3 text-white transition-all hover:bg-green-700 active:scale-[0.98]"
+              style={{ fontSize: '0.9rem', fontWeight: 500 }}
+            >
+              Reconsider Auto Increase <ArrowRight className="h-4 w-4" />
+            </button>
+            <p className="mt-3 text-center text-gray-500 dark:text-gray-400" style={{ fontSize: '0.85rem' }}>
+              Tap{' '}
               <button
                 type="button"
                 onClick={handleConfirmSkip}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white py-3 text-gray-600 transition-all hover:bg-gray-50 active:scale-[0.98] dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-                style={{ fontSize: '0.9rem', fontWeight: 500 }}
+                className="font-medium text-gray-700 underline decoration-gray-400 underline-offset-2 transition-colors hover:text-gray-900 dark:text-gray-300 dark:decoration-gray-500 dark:hover:text-white"
               >
-                Skip for Now
-              </button>
-            </div>
+                here
+              </button>{' '}
+              to skip this step
+            </p>
           </div>
         </div>
       )}

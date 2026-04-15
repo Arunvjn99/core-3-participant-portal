@@ -91,7 +91,16 @@
     "start_enrollment": "Iniciar mi inscripción →",
     "learn_plan": "Conocer el plan",
     "time_note": "Solo toma 5 minutos",
-    "video_aria": "Vídeo de presentación de su plan de jubilación y la experiencia de inscripción"
+    "video_aria": "Vídeo de presentación de su plan de jubilación y la experiencia de inscripción",
+    "greeting_morning": "Buenos días",
+    "greeting_afternoon": "Buenas tardes",
+    "greeting_evening": "Buenas noches",
+    "greeting_morning_with_name": "Buenos días, {{name}}",
+    "greeting_afternoon_with_name": "Buenas tardes, {{name}}",
+    "greeting_evening_with_name": "Buenas noches, {{name}}",
+    "modal_greeting_with_name": "Hola, {{name}} 👋",
+    "modal_greeting_generic": "Hola 👋",
+    "modal_personalize_subtitle": "Personalicemos su viaje de jubilación."
   },
 
   "learning": {

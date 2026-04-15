@@ -10,16 +10,26 @@ import { useUser } from '@/core/hooks/useUser'
 import { EnrollmentPersonalizationModal } from '../components/EnrollmentPersonalizationModal'
 import AdvisorModal from '@/features/advisors/AdvisorModal'
 import { formatFirstNameForDisplay, getAuthenticatedFirstName } from '@/lib/userDisplayName'
-import type { TFunction } from 'i18next'
 
 const HERO_MEETING_VIDEO =
   'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/Heromeeting%20(1).webm'
 
-function getTimeGreeting(t: TFunction): string {
-  const hour = new Date().getHours()
-  if (hour < 12) return t('greeting.morning')
-  if (hour < 17) return t('greeting.afternoon')
-  return t('greeting.evening')
+type DayPeriod = 'morning' | 'afternoon' | 'evening'
+
+function getLocalDayPeriod(): DayPeriod {
+  const h = new Date().getHours()
+  if (h >= 5 && h < 12) return 'morning'
+  if (h >= 12 && h < 17) return 'afternoon'
+  return 'evening'
+}
+
+const HERO_TIME_GREETING_KEYS: Record<
+  DayPeriod,
+  { generic: string; withName: string }
+> = {
+  morning: { generic: 'hero.greeting_morning', withName: 'hero.greeting_morning_with_name' },
+  afternoon: { generic: 'hero.greeting_afternoon', withName: 'hero.greeting_afternoon_with_name' },
+  evening: { generic: 'hero.greeting_evening', withName: 'hero.greeting_evening_with_name' },
 }
 
 export function PreEnrollmentDashboard() {
@@ -28,12 +38,15 @@ export function PreEnrollmentDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [advisorModalOpen, setAdvisorModalOpen] = useState(false)
   const { openChat } = useAIStore()
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const { profile } = useUser()
   const learningRef = useRef<HTMLElement | null>(null)
 
   const firstNameRaw = getAuthenticatedFirstName(profile, user)
   const displayFirstName = formatFirstNameForDisplay(firstNameRaw)
+  const showPersonalWelcome = !authLoading && displayFirstName !== 'there'
+  const dayPeriod = getLocalDayPeriod()
+  const heroGreetingKeys = HERO_TIME_GREETING_KEYS[dayPeriod]
 
   return (
     <AnimatedPage className="min-h-full">
@@ -41,7 +54,7 @@ export function PreEnrollmentDashboard() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onComplete={() => navigate('/enrollment/plan')}
-        userName={displayFirstName}
+        userName={authLoading ? 'there' : displayFirstName}
       />
 
       <div className="relative min-h-screen overflow-hidden bg-white font-sans transition-colors dark:bg-gray-950">
@@ -70,9 +83,9 @@ export function PreEnrollmentDashboard() {
                   aria-hidden
                 />
                 <span className="text-sm font-semibold text-[#2b59c3] dark:text-blue-400">
-                  {displayFirstName !== 'there'
-                    ? `${getTimeGreeting(t)}, ${displayFirstName}!`
-                    : `${getTimeGreeting(t)}!`}
+                  {showPersonalWelcome
+                    ? t(heroGreetingKeys.withName, { name: displayFirstName })
+                    : t(heroGreetingKeys.generic)}
                 </span>
               </div>
 
@@ -89,14 +102,14 @@ export function PreEnrollmentDashboard() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(true)}
-                  className="btn-brand flex items-center gap-2 rounded-xl px-7 py-3 text-sm font-semibold shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] sm:px-8 sm:py-3.5 sm:text-[0.9375rem]"
+                  className="btn-brand flex items-center gap-1.5 rounded-xl px-5 py-3 text-sm font-semibold shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] sm:px-6 sm:py-3.5 sm:text-[0.9375rem]"
                 >
                   {t('hero.start_enrollment')}
                 </button>
                 <button
                   type="button"
                   onClick={() => learningRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                  className="rounded-xl border border-slate-200 px-7 py-3 text-sm font-semibold text-slate-600 transition-all hover:scale-[1.02] hover:bg-slate-50 active:scale-[0.98] dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800/50 sm:px-8 sm:py-3.5 sm:text-[0.9375rem]"
+                  className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition-all hover:scale-[1.02] hover:bg-slate-50 active:scale-[0.98] dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800/50 sm:px-6 sm:py-3.5 sm:text-[0.9375rem]"
                 >
                   {t('hero.learn_plan')}
                 </button>

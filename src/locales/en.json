@@ -91,7 +91,16 @@
     "start_enrollment": "Start my enrollment →",
     "learn_plan": "Learn about the plan",
     "time_note": "It only takes 5 minutes",
-    "video_aria": "Video introducing your retirement plan and enrollment experience"
+    "video_aria": "Video introducing your retirement plan and enrollment experience",
+    "greeting_morning": "Good morning",
+    "greeting_afternoon": "Good afternoon",
+    "greeting_evening": "Good evening",
+    "greeting_morning_with_name": "Good morning, {{name}}!",
+    "greeting_afternoon_with_name": "Good afternoon, {{name}}!",
+    "greeting_evening_with_name": "Good evening, {{name}}!",
+    "modal_greeting_with_name": "Hi, {{name}} 👋",
+    "modal_greeting_generic": "Hi 👋",
+    "modal_personalize_subtitle": "Let's personalize your retirement journey."
   },
 
   "learning": {

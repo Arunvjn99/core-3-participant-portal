@@ -89,7 +89,7 @@ function FlowNavButtons({
       <button
         onClick={onBack}
         className="flex min-h-[2.75rem] items-center gap-2 transition-all duration-200 cursor-pointer bg-white dark:bg-gray-900 text-slate-600 dark:text-gray-300 border border-slate-200 dark:border-gray-600 hover:bg-slate-50 dark:hover:bg-gray-800"
-        style={{ padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
+        style={{ padding: "10px 14px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
       >
         <ArrowLeft style={{ width: 16, height: 16 }} />
         {backLabel}
@@ -98,6 +98,7 @@ function FlowNavButtons({
         onClick={onNext}
         disabled={disabled || isSubmitting}
         className="btn-brand flex min-h-[2.75rem] items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{ padding: "10px 14px", borderRadius: 10, fontSize: 13, fontWeight: 600, border: "none", boxShadow: "0 4px 12px var(--brand-primary-ring)" }}
       >
         {isSubmitting ? "Submitting..." : nextLabel}
         {!isSubmitting && <ArrowRight style={{ width: 16, height: 16 }} />}

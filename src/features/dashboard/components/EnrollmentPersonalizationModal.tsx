@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import * as SliderPrimitive from '@radix-ui/react-slider'
 import {
@@ -238,6 +239,7 @@ interface Props {
 }
 
 export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, userName }: Props) {
+  const { t } = useTranslation()
   const [currentStep, setCurrentStep] = useState(1)
   const [retirementAge, setRetirementAge] = useState(62)
   const [isEditingBirthDate, setIsEditingBirthDate] = useState(false)
@@ -346,11 +348,11 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
               <div className="relative z-10 flex items-start justify-between">
                 <div>
                   <h1 className="mb-1 text-2xl font-bold text-white sm:text-3xl">
-                    {userName && userName !== 'there' ? `Hi, ${userName} 👋` : 'Hi 👋'}
+                    {userName && userName !== 'there'
+                      ? t('hero.modal_greeting_with_name', { name: userName })
+                      : t('hero.modal_greeting_generic')}
                   </h1>
-                  <p className="text-sm text-blue-100 sm:text-base">
-                    Let&apos;s personalize your retirement journey.
-                  </p>
+                  <p className="text-sm text-blue-100 sm:text-base">{t('hero.modal_personalize_subtitle')}</p>
                 </div>
                 <button
                   type="button"
@@ -950,7 +952,7 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
               <button
                 type="button"
                 onClick={currentStep === 4 ? handleComplete : () => setCurrentStep((s) => s + 1)}
-                className="btn-brand flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] dark:shadow-blue-900/30"
+                className="btn-brand flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-sm font-semibold shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] dark:shadow-blue-900/30"
               >
                 {currentStep === 4 ? 'View My Plan' : 'Continue'}
                 <ChevronRight className="h-4 w-4" />

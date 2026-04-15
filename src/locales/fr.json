@@ -91,7 +91,16 @@
     "start_enrollment": "Commencer mon inscription →",
     "learn_plan": "En savoir plus sur le plan",
     "time_note": "Cela ne prend que 5 minutes",
-    "video_aria": "Vidéo de présentation de votre plan de retraite et du parcours d'inscription"
+    "video_aria": "Vidéo de présentation de votre plan de retraite et du parcours d'inscription",
+    "greeting_morning": "Bonjour",
+    "greeting_afternoon": "Bon après-midi",
+    "greeting_evening": "Bonsoir",
+    "greeting_morning_with_name": "Bonjour, {{name}} !",
+    "greeting_afternoon_with_name": "Bon après-midi, {{name}} !",
+    "greeting_evening_with_name": "Bonsoir, {{name}} !",
+    "modal_greeting_with_name": "Bonjour, {{name}} 👋",
+    "modal_greeting_generic": "Bonjour 👋",
+    "modal_personalize_subtitle": "Personnalisons votre parcours retraite."
   },
 
   "learning": {

@@ -14,6 +14,7 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
+  PieChart,
 } from 'lucide-react'
 
 export default function ContributionSource() {
@@ -21,6 +22,7 @@ export default function ContributionSource() {
   const { setStepNav } = useEnrollmentStepNav()
   const { data, updateData, advanceStep } = useEnrollment()
   const [showAdvanced, setShowAdvanced] = useState(data.contributionSources.afterTax > 0)
+  const [canEditTaxAllocation, setCanEditTaxAllocation] = useState(false)
 
   const sources = data.contributionSources
   const salary = data.salary
@@ -186,7 +188,7 @@ export default function ContributionSource() {
               }}
               className="btn-brand w-full rounded-xl px-4 py-3 text-sm font-semibold shadow-md"
             >
-              Continue with Plan Default
+              Select Plan Default
             </button>
           </div>
 
@@ -199,7 +201,7 @@ export default function ContributionSource() {
                 </div>
                 <div className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 dark:border-blue-800/40 dark:bg-blue-950/30">
                   <Sparkles className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-                  <p className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">Recommended</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">Customize</p>
                 </div>
               </div>
 
@@ -233,7 +235,12 @@ export default function ContributionSource() {
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div
+                className={cn(
+                  'space-y-4 transition-opacity',
+                  !canEditTaxAllocation && 'opacity-[0.85]',
+                )}
+              >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div>
@@ -250,8 +257,12 @@ export default function ContributionSource() {
                     min={0}
                     max={100}
                     value={sources.preTax}
+                    disabled={!canEditTaxAllocation}
                     onChange={(e) => handlePreTaxChange(Number(e.target.value))}
-                    className="h-2 w-full cursor-pointer appearance-none rounded-full"
+                    className={cn(
+                      'h-2 w-full appearance-none rounded-full',
+                      canEditTaxAllocation ? 'cursor-pointer' : 'cursor-not-allowed',
+                    )}
                     style={{
                       background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${sources.preTax}%, #e5e7eb ${sources.preTax}%, #e5e7eb 100%)`,
                     }}
@@ -279,8 +290,12 @@ export default function ContributionSource() {
                     min={0}
                     max={100}
                     value={sources.roth}
+                    disabled={!canEditTaxAllocation}
                     onChange={(e) => handleRothChange(Number(e.target.value))}
-                    className="h-2 w-full cursor-pointer appearance-none rounded-full"
+                    className={cn(
+                      'h-2 w-full appearance-none rounded-full',
+                      canEditTaxAllocation ? 'cursor-pointer' : 'cursor-not-allowed',
+                    )}
                     style={{
                       background: `linear-gradient(to right, #a855f7 0%, #a855f7 ${sources.roth}%, #e5e7eb ${sources.roth}%, #e5e7eb 100%)`,
                     }}
@@ -314,8 +329,12 @@ export default function ContributionSource() {
                       min={0}
                       max={100}
                       value={sources.afterTax}
+                      disabled={!canEditTaxAllocation}
                       onChange={(e) => handleAfterTaxChange(Number(e.target.value))}
-                      className="h-2 w-full cursor-pointer appearance-none rounded-full"
+                      className={cn(
+                        'h-2 w-full appearance-none rounded-full',
+                        canEditTaxAllocation ? 'cursor-pointer' : 'cursor-not-allowed',
+                      )}
                       style={{
                         background: `linear-gradient(to right, #ea580c 0%, #ea580c ${sources.afterTax}%, #e5e7eb ${sources.afterTax}%, #e5e7eb 100%)`,
                       }}
@@ -369,15 +388,10 @@ export default function ContributionSource() {
                       <p className="text-xs font-extrabold text-green-700 dark:text-green-400">Score: 72</p>
                     </div>
                   </div>
-                  <p className="mb-2.5 text-xs leading-relaxed text-gray-700 dark:text-gray-300">
+                  <p className="mb-0 text-xs leading-relaxed text-gray-700 dark:text-gray-300">
                     {recommended.preTax}% Pre-Tax / {recommended.roth}% Roth — optimized for your profile
                   </p>
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-blue-200 bg-blue-50 dark:border-blue-800/40 dark:bg-blue-950/30">
-                <div className="p-3">
-                  <div className="flex items-start gap-2.5">
+                  <div className="mt-2.5 flex items-start gap-2.5 border-t border-blue-200/70 pt-2.5 dark:border-blue-800/50">
                     <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
                     <p className="text-xs font-semibold leading-relaxed text-blue-900 dark:text-blue-300">
                       Roth may be better — tax-free income later
@@ -385,6 +399,29 @@ export default function ContributionSource() {
                   </div>
                 </div>
               </div>
+
+              {!canEditTaxAllocation ? (
+                <button
+                  type="button"
+                  onClick={() => setCanEditTaxAllocation(true)}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[color:var(--brand-primary)] bg-white py-2.5 text-sm font-semibold text-[color:var(--brand-primary)] shadow-sm transition-all hover:bg-[color:var(--brand-primary-light)] active:scale-[0.99] dark:bg-gray-900 dark:hover:bg-[color:var(--brand-primary-light)]"
+                >
+                  <PieChart className="h-4 w-4 shrink-0" aria-hidden />
+                  Customize Your Portfolio
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => navigate('/enrollment/investment')}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[color:var(--brand-primary)] bg-white py-2.5 text-sm font-semibold text-[color:var(--brand-primary)] shadow-sm transition-all hover:bg-[color:var(--brand-primary-light)] active:scale-[0.99] dark:bg-gray-900 dark:hover:bg-[color:var(--brand-primary-light)]"
+                >
+                  <PieChart className="h-4 w-4 shrink-0" aria-hidden />
+                  Choose your investments
+                  <span aria-hidden className="text-base leading-none">
+                    →
+                  </span>
+                </button>
+              )}
             </div>
 
             <div className="flex w-full flex-col justify-between space-y-4 border-t border-gray-100 pt-5 dark:border-gray-800 sm:w-[38%] sm:border-l sm:border-t-0 sm:pl-5 sm:pt-0 lg:w-[30%]">
@@ -420,7 +457,7 @@ export default function ContributionSource() {
 
                 <div className="rounded-lg border border-green-200 bg-gradient-to-br from-green-50 to-green-100/50 p-3 dark:border-green-800/40 dark:from-green-950/30 dark:to-green-900/10">
                   <p className="mb-1 text-xs font-bold uppercase tracking-wider text-green-700 dark:text-green-400">Employer match</p>
-                  <p className="text-xl font-extrabold text-green-700 dark:text-green-400">+${monthlyMatch.toLocaleString()}/month</p>
+                  <p className="text-base font-extrabold text-green-700 dark:text-green-400">+${monthlyMatch.toLocaleString()}/month</p>
                   <p className="mt-1 text-xs text-green-600 dark:text-green-500">100% on first {matchPercent}%</p>
                 </div>
 
