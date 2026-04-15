@@ -26,7 +26,7 @@ function buildSuccessPayload(): SuccessCardPayload {
 export function startEnrollmentGuidedFlow(): LocalAIResult {
   const enrollmentAI: EnrollmentAIState = { step: 'setup', data: {} }
   return {
-    messages: [assistantMessage('Enrollment sounds scarier than it is — tap through the card and we\'ll keep it simple.', { interactiveType: 'enrollment_setup_card', interactivePayload: setupPayload() })],
+    messages: [assistantMessage('Enrolment sounds scarier than it is — tap through the card and we\'ll keep it simple.', { interactiveType: 'enrollment_setup_card', interactivePayload: setupPayload() })],
     nextState: enrollmentNextState(enrollmentAI),
   }
 }

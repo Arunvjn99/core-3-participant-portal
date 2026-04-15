@@ -152,7 +152,7 @@ function getSavingsInsight(savingsNum: number, yearsUntilRetirement: number) {
   if (savingsNum === 0) {
     return {
       title: 'Perfect Timing! ⚡',
-      message: `Starting from zero with ${yearsUntilRetirement} years ahead is actually great. The average American who starts at your stage retires with $800K+. Your 401(k) enrollment today is the single best financial decision you can make.`,
+      message: `Starting from zero with ${yearsUntilRetirement} years ahead is actually great. The average American who starts at your stage retires with $800K+. Your 401(k) enrolment today is the single best financial decision you can make.`,
     }
   }
   if (savingsNum < 10000) {
@@ -343,7 +343,6 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                 <TrendingUp className="h-24 w-24 text-white" />
               </div>
               <div className="absolute -left-4 -top-4 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-              <div className="absolute -bottom-4 -right-4 h-32 w-32 rounded-full bg-indigo-400/20 blur-3xl" />
 
               <div className="relative z-10 flex items-start justify-between">
                 <div>

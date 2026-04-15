@@ -10,7 +10,7 @@ import { getFAQMatch } from '../services/faqAnswers'
 const TRENDING = ['Contribution limits', 'Roth vs Traditional', 'Loan rules', 'Vested balance']
 
 const QUICK_ACTIONS = [
-  { label: 'Start enrollment', path: '/enrollment/plan', icon: Navigation },
+  { label: 'Start enrolment', path: '/enrollment/plan', icon: Navigation },
   { label: 'Apply for loan', path: '/transactions/loan', icon: Zap },
   { label: 'View investments', path: '/investments', icon: Lightbulb },
 ]
@@ -211,7 +211,7 @@ export function AISearchPalette() {
                   {/* Ask AI */}
                   <button type="button" onClick={handleAskAI} className="flex w-full items-center gap-3 rounded-xl border border-dashed border-purple-300 bg-purple-50/50 px-4 py-3 text-left transition-colors hover:bg-purple-50 dark:border-purple-700 dark:bg-purple-900/10 dark:hover:bg-purple-900/20">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30"><Sparkles className="h-4 w-4 text-purple-600 dark:text-purple-400" /></div>
-                    <div><p className="text-sm font-semibold text-gray-900 dark:text-white">Chat with Core AI</p><p className="text-xs text-gray-500 dark:text-gray-400">Loans, withdrawals, enrollment — ask like you would a coworker.</p></div>
+                    <div><p className="text-sm font-semibold text-gray-900 dark:text-white">Chat with Core AI</p><p className="text-xs text-gray-500 dark:text-gray-400">Loans, withdrawals, enrolment — ask like you would a coworker.</p></div>
                   </button>
                 </>
               )}

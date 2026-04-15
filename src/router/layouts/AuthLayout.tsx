@@ -17,7 +17,7 @@ export function AuthLayout() {
             </p>
           </div>
           <div className="grid grid-cols-2 gap-4 text-left">
-            {['Secure Access', 'Real-time Data', 'Easy Enrollment', '24/7 Support'].map((f) => (
+            {['Secure Access', 'Real-time Data', 'Easy Enrolment', '24/7 Support'].map((f) => (
               <div key={f} className="rounded-lg bg-white/10 px-4 py-3 text-sm font-medium">
                 {f}
               </div>

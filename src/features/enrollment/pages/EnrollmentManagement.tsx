@@ -160,7 +160,7 @@ function PlanCard({ plan }: { plan: Plan }) {
             onClick={() => navigate('/enrollment/plan')}
             className="text-sm font-semibold text-[var(--color-primary)] transition-colors hover:underline dark:text-blue-400"
           >
-            Start Enrollment
+            Start Enrolment
           </button>
         </>
       )}
@@ -197,11 +197,11 @@ export default function EnrollmentManagement() {
             <Shield className="h-5 w-5 text-[var(--color-primary)] dark:text-blue-400" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] sm:text-3xl">
-            Enrollment Management
+            Enrolment Management
           </h1>
         </div>
         <p className="text-sm text-[var(--text-secondary)] sm:text-base">
-          View and manage your retirement plan enrollments across all available assets.
+          View and manage your retirement plan enrolments across all available assets.
         </p>
       </div>
 

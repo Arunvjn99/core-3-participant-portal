@@ -148,7 +148,7 @@ export default function PlanDetail() {
             onClick={() => navigate('/enrollment/manage')}
             className="mt-4 text-sm font-medium text-[var(--color-primary)] hover:underline"
           >
-            Back to Enrollment
+            Back to Enrolment
           </button>
         </div>
       </div>
@@ -177,7 +177,7 @@ export default function PlanDetail() {
         onClick={() => navigate('/enrollment/manage')}
         className="mb-6 flex items-center gap-1.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
       >
-        <ArrowLeft className="h-4 w-4" /> Back to Enrollment
+        <ArrowLeft className="h-4 w-4" /> Back to Enrolment
       </button>
 
       {/* Header */}

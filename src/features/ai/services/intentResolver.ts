@@ -47,7 +47,7 @@ export function resolveIntent(input: string): ResolvedIntent {
     const hint = match.queries[0] ?? 'that topic'
     return {
       kind: 'answer',
-      content: `"${hint}" is one of those "depends on your employer" things — I'm not gonna fake a legal answer. Your SPD or HR has the real rules. I can still help with loans, withdrawals, enrollment, or whatever's on the chips.`,
+      content: `"${hint}" is one of those "depends on your employer" things — I'm not gonna fake a legal answer. Your SPD or HR has the real rules. I can still help with loans, withdrawals, enrolment, or whatever's on the chips.`,
     }
   }
 

@@ -26,7 +26,7 @@ function insightPayload(): InfoCardPayload {
     insight: getVestedInsight({ total: f.totalBalance, vested: f.vestedBalance, unvested, percent: vestedPct }),
     actionLabel: 'Done',
     action: { action: 'vested_dismiss' },
-    suggestions: ['Apply for loan', 'Withdraw', 'Start enrollment'],
+    suggestions: ['Apply for loan', 'Withdraw', 'Start enrolment'],
   }
 }
 

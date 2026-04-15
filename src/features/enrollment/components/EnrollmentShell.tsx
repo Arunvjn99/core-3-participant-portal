@@ -39,7 +39,7 @@ export function EnrollmentShell() {
               <span className="hidden sm:inline">Back</span>
             </button>
           )}
-          <span className="text-sm text-gray-400 dark:text-gray-500">Enrollment</span>
+          <span className="text-sm text-gray-400 dark:text-gray-500">Enrolment</span>
           {activeStep <= STEPPER_STEPS.length && (
             <>
               <span className="text-sm text-gray-300 dark:text-gray-600">/</span>

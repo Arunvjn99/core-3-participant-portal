@@ -50,7 +50,7 @@ export function PreferencesPanel() {
           <Checkbox label="Email summaries" description="Monthly account performance digest" defaultChecked />
           <Checkbox label="Contribution alerts" description="Notify when payroll contributions are posted" defaultChecked />
           <Checkbox label="Market updates" description="Weekly market commentary for your funds" />
-          <Checkbox label="Enrollment reminders" description="Annual open enrollment period notifications" defaultChecked />
+          <Checkbox label="Enrolment reminders" description="Annual open enrolment period notifications" defaultChecked />
         </div>
       </div>
 

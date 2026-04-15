@@ -206,7 +206,7 @@ export default function AutoIncreaseSetup() {
                 {(
                   [
                     { value: 'calendar' as const, label: 'Calendar Year', sub: 'Every Jan 1st' },
-                    { value: 'participant' as const, label: 'Participant Date', sub: 'On enrollment date' },
+                    { value: 'participant' as const, label: 'Participant Date', sub: 'On enrolment date' },
                     { value: 'plan' as const, label: 'Plan Year', sub: 'Every April 1' },
                   ] as const
                 ).map((opt) => (
@@ -340,7 +340,7 @@ export default function AutoIncreaseSetup() {
             <div className="flex items-start gap-2.5 px-1">
               <Info className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
               <p className="text-gray-400 dark:text-gray-500" style={{ fontSize: '0.78rem' }}>
-                Automatic increases apply once per year on your enrollment anniversary. You can change or disable automatic increases at any time.
+                Automatic increases apply once per year on your enrolment anniversary. You can change or disable automatic increases at any time.
               </p>
             </div>
 

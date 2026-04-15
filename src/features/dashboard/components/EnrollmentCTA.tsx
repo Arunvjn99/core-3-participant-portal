@@ -30,7 +30,7 @@ export function EnrollmentCTA() {
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex items-center gap-2">
           <h3 className="text-lg font-bold text-text-primary">
-            {isInProgress ? 'Continue your enrollment' : 'Start your enrollment'}
+            {isInProgress ? 'Continue your enrolment' : 'Start your enrolment'}
           </h3>
           {isInProgress && <Badge variant="warning">In progress</Badge>}
         </div>

@@ -12,7 +12,7 @@ import { getFAQById } from './faqAnswers'
 const FALLBACK_SUGGESTIONS = [
   'Apply for a loan',
   'Withdraw money',
-  'Start enrollment',
+  'Start enrolment',
   'What is my vested balance?',
 ]
 
@@ -66,5 +66,5 @@ export function handleLocalAI(
   if (intent.kind === 'flow') return runFlow({ type: intent.flow, step: 0, context: {} }, trimmed, null)
   if (intent.kind === 'answer' || intent.kind === 'navigate' || intent.kind === 'action') return buildResponse(intent)
 
-  return { messages: [assistantMessage("I didn't quite get that — want to try loans, a withdrawal, enrollment, or something about vesting? Or tap below.", { suggestions: FALLBACK_SUGGESTIONS })], nextState: null }
+  return { messages: [assistantMessage("I didn't quite get that — want to try loans, a withdrawal, enrolment, or something about vesting? Or tap below.", { suggestions: FALLBACK_SUGGESTIONS })], nextState: null }
 }

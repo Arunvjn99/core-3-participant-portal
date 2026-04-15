@@ -95,7 +95,7 @@ export default function ReviewEnrollment() {
         <div>
           <h1 className="text-gray-900 dark:text-white">Review Your Retirement Plan</h1>
           <p className="mt-1 text-gray-500 dark:text-gray-400" style={{ fontSize: '0.9rem' }}>
-            Confirm your selections before enrolling.
+            Confirm your selections before you enrol.
           </p>
         </div>
 
@@ -191,7 +191,7 @@ export default function ReviewEnrollment() {
               />
             </div>
             <span className="text-gray-700 dark:text-gray-300" style={{ fontSize: '0.82rem' }}>
-              I confirm my retirement plan enrollment and understand my contributions will begin next pay period.{' '}
+              I confirm my retirement plan enrolment and understand my contributions will begin next pay period.{' '}
               <a
                 href="#"
                 onClick={(e) => e.preventDefault()}

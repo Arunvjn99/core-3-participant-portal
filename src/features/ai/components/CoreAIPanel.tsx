@@ -14,7 +14,7 @@ const INITIAL_MESSAGES: ChatMessage[] = [
     role: 'assistant',
     content: "Oh hey. If your plan stuff feels like alphabet soup, that's normal — ask me in your own words. What are you trying to figure out?",
     timestamp: new Date(),
-    suggestions: ['I want to enroll', 'I need a loan', 'How much can I pull out?', 'What does vested even mean?'],
+    suggestions: ['I want to enrol', 'I need a loan', 'How much can I pull out?', 'What does vested even mean?'],
   },
 ]
 
@@ -200,7 +200,7 @@ function InteractiveCard({ msg, onStructured }: { msg: ChatMessage; onStructured
     const [invest, setInvest] = useState(d.investmentOptions[0])
     return (
       <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-        <div className="mb-3 flex items-center gap-2"><GraduationCap className="h-4 w-4 text-gray-500 dark:text-gray-400" /><p className="text-sm font-bold text-gray-900 dark:text-white">Enrollment Setup</p></div>
+        <div className="mb-3 flex items-center gap-2"><GraduationCap className="h-4 w-4 text-gray-500 dark:text-gray-400" /><p className="text-sm font-bold text-gray-900 dark:text-white">Enrolment Setup</p></div>
         <div className="mb-3"><label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">Plan type</label><select value={plan} onChange={(e) => setPlan(e.target.value)} className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white">{d.planOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
         <div className="mb-3"><label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">Contribution: {contrib}%</label><input type="range" min={d.contributionMin} max={d.contributionMax} value={contrib} onChange={(e) => setContrib(+e.target.value)} className="w-full accent-blue-600" /></div>
         <div className="mb-3"><label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">Investment strategy</label><select value={invest} onChange={(e) => setInvest(e.target.value)} className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white">{d.investmentOptions.map((o) => <option key={o} value={o}>{o}</option>)}</select></div>
@@ -213,13 +213,13 @@ function InteractiveCard({ msg, onStructured }: { msg: ChatMessage; onStructured
     const d = p as unknown as EnrollmentReviewPayload
     return (
       <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-        <p className="mb-3 text-sm font-bold text-gray-900 dark:text-white">Enrollment Review</p>
+        <p className="mb-3 text-sm font-bold text-gray-900 dark:text-white">Enrolment Review</p>
         <div className="space-y-1.5 text-sm">
           <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Plan</span><span className="font-medium text-gray-900 dark:text-white capitalize">{d.plan}</span></div>
           <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Contribution</span><span className="font-medium text-gray-900 dark:text-white">{d.contribution}%</span></div>
           <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Investment</span><span className="font-medium text-gray-900 dark:text-white">{d.investment}</span></div>
         </div>
-        <button onClick={() => onStructured({ action: 'enrollment_review_submit' })} className="btn-brand mt-3 w-full rounded-lg py-2.5 text-sm font-semibold">Submit enrollment</button>
+        <button onClick={() => onStructured({ action: 'enrollment_review_submit' })} className="btn-brand mt-3 w-full rounded-lg py-2.5 text-sm font-semibold">Submit enrolment</button>
       </div>
     )
   }

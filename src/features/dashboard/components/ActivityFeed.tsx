@@ -18,7 +18,7 @@ const mockActivities: Activity[] = [
   { id: '1', type: 'contribution', description: 'Employee contribution', amount: 800, date: '2026-04-01', status: 'completed' },
   { id: '2', type: 'contribution', description: 'Employer match', amount: 400, date: '2026-04-01', status: 'completed' },
   { id: '3', type: 'rebalance', description: 'Portfolio rebalanced', date: '2026-03-15', status: 'completed' },
-  { id: '4', type: 'enrollment', description: 'Enrollment updated', date: '2026-03-01', status: 'completed' },
+  { id: '4', type: 'enrollment', description: 'Enrolment updated', date: '2026-03-01', status: 'completed' },
 ]
 
 const statusVariant: Record<Activity['status'], BadgeProps['variant']> = {
