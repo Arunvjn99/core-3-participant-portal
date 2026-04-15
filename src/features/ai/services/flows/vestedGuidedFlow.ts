@@ -31,7 +31,7 @@ function insightPayload(): InfoCardPayload {
 export function startVestedGuidedFlow(): LocalAIResult {
   const vestedAI: VestedAIState = { step: 'overview', data: {} }
   return {
-    messages: [assistantMessage('Here\'s a snapshot of where things stand — total, vested, and what\'s still on the way.', { interactiveType: 'balance_card', interactivePayload: balancePayload(), suggestions: ['Continue'] })],
+    messages: [assistantMessage('Big picture: total vs what\'s actually yours vs what\'s still cooking. Peek below.', { interactiveType: 'balance_card', interactivePayload: balancePayload(), suggestions: ['Continue'] })],
     nextState: vestedNextState(vestedAI),
   }
 }
@@ -49,16 +49,16 @@ export function runVestedGuidedFlow(state: LocalFlowState, input: string, struct
   if (vestedAI.step === 'overview') {
     if (/^(continue|next|show)\b/i.test(trimmed)) {
       const next: VestedAIState = { ...vestedAI, step: 'insight' }
-      return { messages: [assistantMessage('Here\'s a bit more context on what vesting means for you.', { interactiveType: 'info_card', interactivePayload: insightPayload() })], nextState: vestedNextState(next) }
+      return { messages: [assistantMessage('Vesting is one of those words HR loves — I\'ll translate.', { interactiveType: 'info_card', interactivePayload: insightPayload() })], nextState: vestedNextState(next) }
     }
-    return { messages: [assistantMessage('Say **continue** when you\'re ready for a plain-English take on vesting.', { interactiveType: 'balance_card', interactivePayload: balancePayload(), suggestions: ['Continue'] })], nextState: vestedNextState(vestedAI) }
+    return { messages: [assistantMessage('Want the plain-English version? Hit continue.', { interactiveType: 'balance_card', interactivePayload: balancePayload(), suggestions: ['Continue'] })], nextState: vestedNextState(vestedAI) }
   }
 
   if (vestedAI.step === 'insight') {
-    return { messages: [assistantMessage('Tap **Done** when you\'re ready to head back.', { interactiveType: 'info_card', interactivePayload: insightPayload() })], nextState: vestedNextState(vestedAI) }
+    return { messages: [assistantMessage('Cool — done brings you back.', { interactiveType: 'info_card', interactivePayload: insightPayload() })], nextState: vestedNextState(vestedAI) }
   }
 
-  return { messages: [assistantMessage('Use the card above to keep exploring.')], nextState: vestedNextState(vestedAI) }
+  return { messages: [assistantMessage('Everything else is on the card.')], nextState: vestedNextState(vestedAI) }
 }
 
 export function isVestedGuidedContext(ctx: Record<string, unknown>): boolean {

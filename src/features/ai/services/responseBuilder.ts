@@ -7,11 +7,11 @@ export function buildResponse(intent: ResolvedIntent): LocalAIResult {
   }
 
   if (intent.kind === 'navigate') {
-    return { messages: [assistantMessage("Sure — I'll take you there.")], nextState: null, navigate: intent.route }
+    return { messages: [assistantMessage('On it — opening that now.')], nextState: null, navigate: intent.route }
   }
 
   if (intent.kind === 'action') {
-    return { messages: [assistantMessage('Got it. Jumping you to the screen that handles that.')], nextState: null, action: intent.action }
+    return { messages: [assistantMessage('Yep — sending you to the right screen.')], nextState: null, action: intent.action }
   }
 
   return { messages: [], nextState: null }

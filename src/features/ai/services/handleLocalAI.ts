@@ -27,13 +27,13 @@ export function handleLocalAI(
     if (structured.action === 'FAQ_DETAIL') {
       const entry = getFAQById(structured.faqId)
       if (entry) return { messages: [assistantMessage(entry.fullAnswer)], nextState: null }
-      return { messages: [assistantMessage("Hmm — I couldn't pull up that topic just now. Try rephrasing, or tap one of the suggestions below.", { suggestions: FALLBACK_SUGGESTIONS })], nextState: null }
+      return { messages: [assistantMessage("That one glitched on me — mind asking again a different way? Or tap a suggestion.", { suggestions: FALLBACK_SUGGESTIONS })], nextState: null }
     }
 
     if (!flowState?.type) {
       if (structured.action === 'success_card_dismiss') return { messages: [], nextState: null, navigate: '/transactions/loan' }
       if (structured.action === 'vested_dismiss') return { messages: [], nextState: null, navigate: '/dashboard' }
-      return { messages: [assistantMessage("That screen doesn't pick up mid-flow here — no worries. Say **apply loan** and we'll start fresh.", { suggestions: ['Apply for a loan'] })], nextState: null }
+      return { messages: [assistantMessage("Yeah, I can't resume that halfway from here — annoying, I know. Say **apply loan** and we'll run it from the top.", { suggestions: ['Apply for a loan'] })], nextState: null }
     }
     return runFlow(flowState, '', structured)
   }
@@ -42,7 +42,7 @@ export function handleLocalAI(
   if (!trimmed) return { messages: [], nextState: flowState }
 
   if (/^(cancel|stop|never mind|forget it)\b/i.test(trimmed)) {
-    return { messages: [assistantMessage("All good — whenever you're ready, ask me anything about your plan.")], nextState: null }
+    return { messages: [assistantMessage("No stress — when something pops up, just ask.")], nextState: null }
   }
 
   if (flowState?.type) return runFlow(flowState, trimmed, null)
@@ -59,5 +59,5 @@ export function handleLocalAI(
   if (intent.kind === 'flow') return runFlow({ type: intent.flow, step: 0, context: {} }, trimmed, null)
   if (intent.kind === 'answer' || intent.kind === 'navigate' || intent.kind === 'action') return buildResponse(intent)
 
-  return { messages: [assistantMessage("I'm happy to walk through **loans**, **withdrawals**, **enrollment**, **vesting**, contributions, or general plan questions — what should we tackle?", { suggestions: FALLBACK_SUGGESTIONS })], nextState: null }
+  return { messages: [assistantMessage("I didn't quite get that — want to try loans, a withdrawal, enrollment, or something about vesting? Or tap below.", { suggestions: FALLBACK_SUGGESTIONS })], nextState: null }
 }

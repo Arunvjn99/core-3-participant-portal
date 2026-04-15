@@ -39,7 +39,7 @@ export function startWithdrawalGuidedFlow(): LocalAIResult {
   const maxWithdraw = Math.min(5000, Math.round(financials.vestedBalance * 0.3))
   const withdrawalAI: WithdrawalAIState = { step: 'amount_selection', data: {} }
   return {
-    messages: [assistantMessage(`Here's how much you can take in this demo — up to **${money(maxWithdraw)}**. Drag the slider to pick an amount, then tap continue.`, { interactiveType: 'withdrawal_slider_card', interactivePayload: withdrawalSliderPayload(maxWithdraw, 2000) })],
+    messages: [assistantMessage(`So in this demo you can pull up to about ${money(maxWithdraw)} — slide to whatever feels reasonable, then hit continue.`, { interactiveType: 'withdrawal_slider_card', interactivePayload: withdrawalSliderPayload(maxWithdraw, 2000) })],
     nextState: withdrawalNextState(withdrawalAI),
   }
 }
@@ -53,15 +53,15 @@ export function runWithdrawalGuidedFlow(state: LocalFlowState, _input: string, s
   if (structured) {
     if (withdrawalAI.step === 'amount_selection' && structured.action === 'withdrawal_amount_continue') {
       const next: WithdrawalAIState = { ...withdrawalAI, step: 'method', data: { ...withdrawalAI.data, amount: structured.value } }
-      return { messages: [assistantMessage('How would you like this sent — bank transfer or check?', { interactiveType: 'selection_card', interactivePayload: methodPayload() })], nextState: withdrawalNextState(next) }
+      return { messages: [assistantMessage('Direct deposit or old-school check — what works for you?', { interactiveType: 'selection_card', interactivePayload: methodPayload() })], nextState: withdrawalNextState(next) }
     }
     if (withdrawalAI.step === 'method' && structured.action === 'selection_card_pick') {
       const next: WithdrawalAIState = { ...withdrawalAI, step: 'review', data: { ...withdrawalAI.data, method: structured.value } }
-      return { messages: [assistantMessage('Give this a quick once-over before we send it.', { interactiveType: 'withdrawal_review_card', interactivePayload: withdrawalReviewPayload(next) })], nextState: withdrawalNextState(next) }
+      return { messages: [assistantMessage('Skim this — taxes and timing are the parts people miss.', { interactiveType: 'withdrawal_review_card', interactivePayload: withdrawalReviewPayload(next) })], nextState: withdrawalNextState(next) }
     }
     if (withdrawalAI.step === 'review' && structured.action === 'withdrawal_review_submit') {
       const next: WithdrawalAIState = { ...withdrawalAI, step: 'success' }
-      return { messages: [assistantMessage('Hang tight — we\'re processing that now.', { interactiveType: 'success_card', interactivePayload: buildSuccessPayload() })], nextState: withdrawalNextState(next) }
+      return { messages: [assistantMessage('Kicking that off now — shouldn\'t take long.', { interactiveType: 'success_card', interactivePayload: buildSuccessPayload() })], nextState: withdrawalNextState(next) }
     }
     if (withdrawalAI.step === 'success' && structured.action === 'success_card_dismiss') {
       return { messages: [], nextState: null, navigate: '/transactions' }
@@ -69,12 +69,12 @@ export function runWithdrawalGuidedFlow(state: LocalFlowState, _input: string, s
   }
 
   const amt = withdrawalAI.data.amount ?? 2000
-  if (withdrawalAI.step === 'amount_selection') return { messages: [assistantMessage('Slide to the amount you want, then hit **Continue**.', { interactiveType: 'withdrawal_slider_card', interactivePayload: withdrawalSliderPayload(maxWithdraw, amt) })], nextState: withdrawalNextState(withdrawalAI) }
-  if (withdrawalAI.step === 'method') return { messages: [assistantMessage('Choose how you\'d like to receive it.', { interactiveType: 'selection_card', interactivePayload: methodPayload() })], nextState: withdrawalNextState(withdrawalAI) }
-  if (withdrawalAI.step === 'review') return { messages: [assistantMessage('Looks good? Tap **Submit withdrawal** when you\'re ready.', { interactiveType: 'withdrawal_review_card', interactivePayload: withdrawalReviewPayload(withdrawalAI) })], nextState: withdrawalNextState(withdrawalAI) }
-  if (withdrawalAI.step === 'success') return { messages: [assistantMessage('All set — tap **Done** when you\'re finished here.', { interactiveType: 'success_card', interactivePayload: buildSuccessPayload() })], nextState: withdrawalNextState(withdrawalAI) }
+  if (withdrawalAI.step === 'amount_selection') return { messages: [assistantMessage('Drag the slider, then continue — you can always change your mind before it\'s final.', { interactiveType: 'withdrawal_slider_card', interactivePayload: withdrawalSliderPayload(maxWithdraw, amt) })], nextState: withdrawalNextState(withdrawalAI) }
+  if (withdrawalAI.step === 'method') return { messages: [assistantMessage('ACH or check — your call.', { interactiveType: 'selection_card', interactivePayload: methodPayload() })], nextState: withdrawalNextState(withdrawalAI) }
+  if (withdrawalAI.step === 'review') return { messages: [assistantMessage('If the numbers look sane, submit. If not, don\'t — seriously.', { interactiveType: 'withdrawal_review_card', interactivePayload: withdrawalReviewPayload(withdrawalAI) })], nextState: withdrawalNextState(withdrawalAI) }
+  if (withdrawalAI.step === 'success') return { messages: [assistantMessage('That\'s a wrap — hit done when you\'re ready to close this.', { interactiveType: 'success_card', interactivePayload: buildSuccessPayload() })], nextState: withdrawalNextState(withdrawalAI) }
 
-  return { messages: [assistantMessage('Use the card above to keep going.')], nextState: withdrawalNextState(withdrawalAI) }
+  return { messages: [assistantMessage('The card above is where the action is.')], nextState: withdrawalNextState(withdrawalAI) }
 }
 
 export function isWithdrawalGuidedContext(ctx: Record<string, unknown>): boolean {

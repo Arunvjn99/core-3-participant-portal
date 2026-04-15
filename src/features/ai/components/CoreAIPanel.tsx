@@ -4,6 +4,7 @@ import { X, Sparkles, Send, Mic, MicOff, Copy, ThumbsUp, ThumbsDown, Volume2, Vo
 import { useAIStore } from '@/core/store/aiStore'
 import { useNavigate } from 'react-router-dom'
 import { handleLocalAI } from '../services/handleLocalAI'
+import { textForSpeech } from '../services/speechText'
 import type { ChatMessage, CoreAIStructuredPayload, LoanSimulatorCardPayload, SelectionCardPayload, FeesCardPayload, DocumentUploadCardPayload, ReviewCardPayload, SuccessCardPayload, EnrollmentSetupPayload, EnrollmentReviewPayload, WithdrawalSliderPayload, WithdrawalReviewPayload, BalanceCardPayload, InfoCardPayload } from '../types'
 import type { LocalFlowState } from '../store/flowTypes'
 
@@ -11,9 +12,9 @@ const INITIAL_MESSAGES: ChatMessage[] = [
   {
     id: 'welcome-0',
     role: 'assistant',
-    content: "Hey — I'm Core AI, here to help you make sense of your retirement plan. What's on your mind today?",
+    content: "Oh hey. If your plan stuff feels like alphabet soup, that's normal — ask me in your own words. What are you trying to figure out?",
     timestamp: new Date(),
-    suggestions: ['I want to enroll', 'Apply for a loan', 'How much can I withdraw?', 'Check my vested balance'],
+    suggestions: ['I want to enroll', 'I need a loan', 'How much can I pull out?', 'What does vested even mean?'],
   },
 ]
 
@@ -35,14 +36,53 @@ function useSpeechRecognition(onResult: (text: string) => void) {
   return { isListening, toggle, isSupported: typeof window !== 'undefined' && !!(window.SpeechRecognition || window.webkitSpeechRecognition) }
 }
 
+function pickNaturalVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
+  const en = voices.filter((v) => v.lang.startsWith('en'))
+  if (en.length === 0) return null
+  const score = (v: SpeechSynthesisVoice) => {
+    const n = v.name
+    if (/Samantha|Karen|Moira|Tessa|Fiona|Allison|Ava|Siri/.test(n)) return 5
+    if (/Google.*English|Microsoft Aria|English \(US\)|en-US/.test(n)) return 4
+    if (/Premium|Neural|Enhanced/i.test(n)) return 3
+    if (v.lang === 'en-US') return 2
+    return 1
+  }
+  return [...en].sort((a, b) => score(b) - score(a))[0] ?? null
+}
+
 function useTextToSpeech() {
   const [isSpeaking, setIsSpeaking] = useState(false)
+  const [, bumpVoices] = useState(0)
+
+  useEffect(() => {
+    const synth = window.speechSynthesis
+    if (!synth) return
+    const onVoices = () => bumpVoices((n) => n + 1)
+    synth.addEventListener('voiceschanged', onVoices)
+    onVoices()
+    return () => synth.removeEventListener('voiceschanged', onVoices)
+  }, [])
+
   const speak = useCallback((text: string) => {
     if (!window.speechSynthesis) return
     window.speechSynthesis.cancel()
-    const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = 1
-    u.onend = () => setIsSpeaking(false); u.onerror = () => setIsSpeaking(false)
-    setIsSpeaking(true); window.speechSynthesis.speak(u)
+    const cleaned = textForSpeech(text)
+    if (!cleaned) return
+    const u = new SpeechSynthesisUtterance(cleaned)
+    const voice = pickNaturalVoice(window.speechSynthesis.getVoices())
+    if (voice) {
+      u.voice = voice
+      u.lang = voice.lang
+    } else {
+      u.lang = 'en-US'
+    }
+    u.rate = 0.92
+    u.pitch = 1
+    u.volume = 1
+    u.onend = () => setIsSpeaking(false)
+    u.onerror = () => setIsSpeaking(false)
+    setIsSpeaking(true)
+    window.speechSynthesis.speak(u)
   }, [])
   const stop = useCallback(() => { window.speechSynthesis?.cancel(); setIsSpeaking(false) }, [])
   return { isSpeaking, speak, stop }
@@ -64,7 +104,7 @@ function InteractiveCard({ msg, onStructured }: { msg: ChatMessage; onStructured
     const emi = r === 0 ? amt / tenure : (amt * r * f) / (f - 1)
     return (
       <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-        <p className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Loan Simulator</p>
+        <p className="mb-3 text-xs font-medium text-gray-600 dark:text-gray-300">Play with amount & term</p>
         <div className="mb-2"><label className="text-xs text-gray-500 dark:text-gray-400">Amount: {money(amt)}</label><input type="range" min={d.minAmount} max={d.maxAmount} step={d.amountStep ?? 100} value={amt} onChange={(e) => setAmt(+e.target.value)} className="w-full accent-blue-600" /></div>
         <div className="mb-3"><label className="text-xs text-gray-500 dark:text-gray-400">Term: {tenure} months</label><input type="range" min={d.minTenureMonths} max={d.maxTenureMonths} step={d.tenureStep} value={tenure} onChange={(e) => setTenure(+e.target.value)} className="w-full accent-blue-600" /></div>
         <div className="mb-3 rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20"><p className="text-xs text-gray-500 dark:text-gray-400">Est. monthly payment</p><p className="text-lg font-bold text-gray-900 dark:text-white">{money(Math.round(emi))}/mo</p></div>
@@ -236,7 +276,7 @@ function InteractiveCard({ msg, onStructured }: { msg: ChatMessage; onStructured
     const d = p as unknown as InfoCardPayload
     return (
       <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-        <div className="mb-2 flex items-center gap-2"><AlertCircle className="h-4 w-4 text-blue-500" /><p className="text-sm font-bold text-gray-900 dark:text-white">Insight</p></div>
+        <div className="mb-2 flex items-center gap-2"><AlertCircle className="h-4 w-4 text-blue-500" /><p className="text-sm font-bold text-gray-900 dark:text-white">In plain English</p></div>
         <p className="mb-2 text-sm text-gray-700 dark:text-gray-300">{d.message.replace(/\*\*/g, '')}</p>
         {d.insight && <p className="mb-2 text-xs text-blue-600 dark:text-blue-400">{d.insight}</p>}
         {d.actionLabel && d.action && <button onClick={() => onStructured(d.action!)} className="btn-brand w-full rounded-lg py-2.5 text-sm font-semibold">{d.actionLabel}</button>}
@@ -327,7 +367,7 @@ export function CoreAIPanel() {
               <div className="flex shrink-0 items-center justify-between border-b border-gray-100 p-4 dark:border-gray-800">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600"><Sparkles className="h-5 w-5 text-white" /></div>
-                  <div><p className="text-sm font-bold text-gray-900 dark:text-white">Core AI</p><div className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-green-500" /><span className="text-xs font-medium text-green-600 dark:text-green-400">Online</span></div></div>
+                  <div><p className="text-sm font-bold text-gray-900 dark:text-white">Core AI</p><p className="text-xs text-gray-500 dark:text-gray-400">Plain-language help for your plan</p></div>
                 </div>
                 <button type="button" onClick={closeChat} className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"><X className="h-4 w-4 text-gray-500 dark:text-gray-400" /></button>
               </div>
@@ -362,7 +402,7 @@ export function CoreAIPanel() {
                     )}
                   </div>
                 ))}
-                {isTyping && (<div className="flex items-center gap-2 px-1"><div className="flex gap-1">{[0, 1, 2].map((i) => (<div key={i} className="h-2 w-2 animate-bounce rounded-full bg-gray-400 dark:bg-gray-500" style={{ animationDelay: `${i * 0.15}s` }} />))}</div><span className="text-xs text-gray-400 dark:text-gray-500">Writing a reply...</span></div>)}
+                {isTyping && (<div className="flex items-center gap-2 px-1"><div className="flex gap-1">{[0, 1, 2].map((i) => (<div key={i} className="h-2 w-2 animate-bounce rounded-full bg-gray-400 dark:bg-gray-500" style={{ animationDelay: `${i * 0.15}s` }} />))}</div><span className="text-xs text-gray-400 dark:text-gray-500">One sec…</span></div>)}
                 <div ref={bottomRef} />
               </div>
 
@@ -370,11 +410,11 @@ export function CoreAIPanel() {
               <div className="shrink-0 border-t border-gray-100 p-4 dark:border-gray-800">
                 <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800/50">
                   {voiceSupported && (<button type="button" onClick={toggleVoice} className={`shrink-0 transition-colors ${isListening ? 'animate-pulse text-red-500' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`} aria-label={isListening ? 'Stop listening' : 'Voice input'}>{isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}</button>)}
-                  <input ref={inputRef} type="text" placeholder={isListening ? 'Listening…' : 'Ask me anything — loans, withdrawals, vesting…'} className="flex-1 bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-gray-500" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage(input)} />
+                  <input ref={inputRef} type="text" placeholder={isListening ? 'Listening…' : 'Type like you\'re texting a friend…'} className="flex-1 bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-gray-500" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage(input)} />
                   <button type="button" onClick={() => sendMessage(input)} disabled={!input.trim() || isTyping} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 transition-colors hover:bg-blue-200 disabled:opacity-40 dark:bg-blue-900/40 dark:hover:bg-blue-800/60" aria-label="Send"><Send className="h-4 w-4 text-blue-600 dark:text-blue-400" /></button>
                 </div>
                 {isListening && (<div className="mt-2 flex items-center gap-2 px-1"><span className="h-2 w-2 animate-pulse rounded-full bg-red-500" /><span className="text-xs font-medium text-red-500">Listening — speak now...</span></div>)}
-                <p className="mt-2 text-center text-xs text-gray-400 dark:text-gray-500">I'm here to guide you, not replace your plan rules — double-check anything big with your administrator.</p>
+                <p className="mt-2 text-center text-xs text-gray-400 dark:text-gray-500">{"I'm not your plan document — for anything legally binding, your administrator still wins."}</p>
               </div>
             </div>
           </motion.div>
