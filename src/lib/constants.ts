@@ -21,11 +21,39 @@ export function dashboardPath(enrollmentComplete: boolean): string {
   return enrollmentComplete ? ROUTES.POST_ENROLLMENT_DASHBOARD : ROUTES.PRE_ENROLLMENT_DASHBOARD
 }
 
+function trimEnv(v: unknown): string {
+  return typeof v === 'string' ? v.trim() : ''
+}
+
+/** True when URL/key look like README placeholders or are empty — do not create a real Supabase client. */
+function isPlaceholderSupabaseUrl(url: string): boolean {
+  if (!url) return true
+  const lower = url.toLowerCase()
+  return lower.includes('your-project.supabase.co') || lower.includes('your_project.supabase.co')
+}
+
+function isPlaceholderAnonKey(key: string): boolean {
+  if (!key) return true
+  const k = key.trim().toLowerCase()
+  return k === 'your-anon-key' || k.startsWith('your-anon')
+}
+
+/** Non-empty env vars that are not template placeholders; required to enable live Supabase. */
+export function hasValidSupabaseEnv(): boolean {
+  const url = trimEnv(import.meta.env.VITE_SUPABASE_URL)
+  const key = trimEnv(import.meta.env.VITE_SUPABASE_ANON_KEY)
+  if (!url || !key) return false
+  if (isPlaceholderSupabaseUrl(url)) return false
+  if (isPlaceholderAnonKey(key)) return false
+  if (!url.startsWith('https://')) return false
+  return true
+}
+
 export const ENV = {
-  SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL as string | undefined,
-  SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined,
+  SUPABASE_URL: trimEnv(import.meta.env.VITE_SUPABASE_URL) || undefined,
+  SUPABASE_ANON_KEY: trimEnv(import.meta.env.VITE_SUPABASE_ANON_KEY) || undefined,
   DEBUG_BYPASS_AUTH: import.meta.env.VITE_DEBUG_BYPASS_AUTH === 'true',
-  DEMO_MODE: !import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY,
+  DEMO_MODE: !hasValidSupabaseEnv(),
 } as const
 
 export const STORAGE_KEYS = {

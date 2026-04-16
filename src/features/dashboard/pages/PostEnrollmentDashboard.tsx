@@ -2,6 +2,7 @@ import React, { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/core/hooks/useAuth'
 import { useUser } from '@/core/hooks/useUser'
+import { useTheme } from '@/core/hooks/useTheme'
 import { formatFirstNameForDisplay, getAuthenticatedFirstName } from '@/lib/userDisplayName'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import {
@@ -26,7 +27,7 @@ import {
 import { ResponsiveContainer, RadialBarChart, RadialBar, PolarAngleAxis } from 'recharts'
 import { PremiumBalanceChart } from '@/features/dashboard/components/PremiumBalanceChart'
 
-/** Card shell — spec: 12px radius, #E5E7EB border, white bg, shadow, 20px padding */
+/** Card shell — uses theme tokens so light/dark follow `data-theme` on `html`. */
 function SpecCard({
   children,
   className = '',
@@ -38,7 +39,7 @@ function SpecCard({
 }) {
   return (
     <div
-      className={`rounded-[12px] border border-[#E5E7EB] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)] ${noPadding ? '' : 'p-5'} ${className}`}
+      className={`rounded-[12px] border border-border-default bg-surface-card shadow-card ${noPadding ? '' : 'p-5'} ${className}`}
     >
       {children}
     </div>
@@ -78,12 +79,14 @@ const portfolioSegments = [
   { key: 'us', label: 'US STOCKS', pct: 55, amount: '$78,591', color: '#2563EB' },
   { key: 'intl', label: 'INTL STOCKS', pct: 25, amount: '$35,723', color: '#0D9488' },
   { key: 'bonds', label: 'BONDS', pct: 15, amount: '$21,433', color: '#16A34A' },
-  { key: 'cash', label: 'CASH', pct: 5, amount: '$7,144', color: '#D1D5DB' },
+  { key: 'cash', label: 'CASH', pct: 5, amount: '$7,144', color: '#94A3B8' },
 ]
 
 export default function PostEnrollmentDashboard() {
   const { user } = useAuth()
   const { profile } = useUser()
+  const { resolvedMode } = useTheme()
+  const isDark = resolvedMode === 'dark'
 
   const firstName = useMemo(() => {
     const raw = getAuthenticatedFirstName(profile, user)
@@ -94,12 +97,12 @@ export default function PostEnrollmentDashboard() {
 
   return (
     <AnimatedPage className="min-h-full">
-      <div className="min-h-screen bg-[#F9FAFB] font-sans text-[#111827]">
+      <div className="min-h-screen bg-surface-page font-sans text-text-primary">
         <main className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           {/* Page header */}
-          <header className="border-b border-[#F3F4F6] pb-6">
-            <h1 className="text-[28px] font-bold leading-tight text-[#111827]">Overview</h1>
-            <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">{subtitle}</p>
+          <header className="border-b border-border-default pb-6">
+            <h1 className="text-[28px] font-bold leading-tight text-text-primary">Overview</h1>
+            <p className="mt-2 text-[14px] leading-relaxed text-text-secondary">{subtitle}</p>
           </header>
 
           <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-6">
@@ -109,48 +112,48 @@ export default function PostEnrollmentDashboard() {
               <SpecCard className="relative overflow-hidden">
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-[#6B7280]">Total Balance</p>
-                    <p className="mt-1 text-[36px] font-bold leading-none tracking-tight text-[#111827]">$142,893</p>
-                    <p className="mt-2 flex items-center gap-1 text-[14px] font-medium text-[#16A34A]">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">Total Balance</p>
+                    <p className="mt-1 text-[36px] font-bold leading-none tracking-tight text-text-primary">$142,893</p>
+                    <p className="mt-2 flex items-center gap-1 text-[14px] font-medium text-status-success">
                       <TrendingUp className="h-4 w-4 shrink-0" aria-hidden />
                       4.2% this quarter
                     </p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-[#DCFCE7] px-3 py-1 text-xs font-semibold text-[#16A34A]">
+                  <span className="shrink-0 rounded-full bg-status-success-bg px-3 py-1 text-xs font-semibold text-status-success">
                     ON TRACK
                   </span>
                 </div>
 
                 <div className="h-[120px] w-full">
-                  <PremiumBalanceChart data={balanceChartData} />
+                  <PremiumBalanceChart data={balanceChartData} isDark={isDark} />
                 </div>
 
-                <div className="mt-5 grid grid-cols-1 divide-y divide-[#E5E7EB] border-t border-[#E5E7EB] pt-5 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:pt-5">
+                <div className="mt-5 grid grid-cols-1 divide-y divide-border-default border-t border-border-default pt-5 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:pt-5">
                   <div className="flex items-start gap-2 pb-4 sm:pb-0 sm:pr-4">
                     <span className="text-base" aria-hidden>
                       🔒
                     </span>
-                    <p className="text-[12px] text-[#6B7280]">
-                      <span className="text-[#6B7280]">Vested Balance: </span>
-                      <span className="font-semibold text-[#111827]">$138,450</span>
+                    <p className="text-[12px] text-text-secondary">
+                      <span className="text-text-secondary">Vested Balance: </span>
+                      <span className="font-semibold text-text-primary">$138,450</span>
                     </p>
                   </div>
                   <div className="flex items-start gap-2 py-4 sm:px-4 sm:py-0">
                     <span className="text-base" aria-hidden>
                       📅
                     </span>
-                    <p className="text-[12px] text-[#6B7280]">
+                    <p className="text-[12px] text-text-secondary">
                       <span>Retirement: </span>
-                      <span className="font-semibold text-[#111827]">Est. 2046</span>
+                      <span className="font-semibold text-text-primary">Est. 2046</span>
                     </p>
                   </div>
                   <div className="flex items-start gap-2 pt-4 sm:pt-0 sm:pl-4">
                     <span className="text-base" aria-hidden>
                       ⚡
                     </span>
-                    <p className="text-[12px] text-[#6B7280]">
+                    <p className="text-[12px] text-text-secondary">
                       <span>Vested: </span>
-                      <span className="font-semibold text-[#111827]">100%</span>
+                      <span className="font-semibold text-text-primary">100%</span>
                     </p>
                   </div>
                 </div>
@@ -158,9 +161,9 @@ export default function PostEnrollmentDashboard() {
 
               {/* Card 2: Quick Actions — one card, 4 tiles with dividers */}
               <div>
-                <h2 className="mb-3 text-[16px] font-bold text-[#111827]">Quick Actions</h2>
+                <h2 className="mb-3 text-[16px] font-bold text-text-primary">Quick Actions</h2>
                 <SpecCard noPadding className="overflow-hidden">
-                  <div className="grid grid-cols-1 divide-y divide-[#E5E7EB] sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
+                  <div className="grid grid-cols-1 divide-y divide-border-default sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
                     {(
                       [
                         {
@@ -169,7 +172,7 @@ export default function PostEnrollmentDashboard() {
                           sub: 'Borrow up to $10,000',
                           hint: 'Typical approval: 1-3 days',
                           href: '/transactions/loan',
-                          circle: 'bg-blue-100 text-blue-600',
+                          circle: 'bg-primary/15 text-primary',
                         },
                         {
                           Icon: DollarSign,
@@ -177,7 +180,7 @@ export default function PostEnrollmentDashboard() {
                           sub: 'Available: $5,000',
                           hint: 'Tax impact: 10-20%',
                           href: '/transactions/withdrawal',
-                          circle: 'bg-emerald-100 text-emerald-600',
+                          circle: 'bg-status-success-bg text-status-success',
                         },
                         {
                           Icon: ArrowLeftRight,
@@ -185,7 +188,7 @@ export default function PostEnrollmentDashboard() {
                           sub: 'Reallocate balance',
                           hint: 'No fees or penalties',
                           href: '/transactions/transfer',
-                          circle: 'bg-blue-100 text-blue-600',
+                          circle: 'bg-primary/15 text-primary',
                         },
                         {
                           Icon: RefreshCcw,
@@ -193,24 +196,24 @@ export default function PostEnrollmentDashboard() {
                           sub: 'Consolidate savings',
                           hint: 'No tax penalty',
                           href: '/transactions/rollover',
-                          circle: 'bg-emerald-100 text-emerald-600',
+                          circle: 'bg-status-success-bg text-status-success',
                         },
                       ] as const
                     ).map((tile) => (
                       <Link
                         key={tile.title}
                         to={tile.href}
-                        className="relative block p-5 transition-colors hover:bg-[#F9FAFB]"
+                        className="relative block p-5 transition-colors hover:bg-surface-elevated"
                       >
-                        <span className="absolute right-3 top-3 text-lg text-[#9CA3AF]">›</span>
+                        <span className="absolute right-3 top-3 text-lg text-text-muted">›</span>
                         <div
                           className={`mb-3 flex h-10 w-10 items-center justify-center rounded-full ${tile.circle}`}
                         >
                           <tile.Icon className="h-5 w-5" aria-hidden />
                         </div>
-                        <p className="pr-6 text-[13px] font-bold text-[#111827]">{tile.title}</p>
-                        <p className="mt-1 text-[13px] font-medium text-[#2563EB]">{tile.sub}</p>
-                        <p className="mt-0.5 text-[11px] text-[#6B7280]">{tile.hint}</p>
+                        <p className="pr-6 text-[13px] font-bold text-text-primary">{tile.title}</p>
+                        <p className="mt-1 text-[13px] font-medium text-primary">{tile.sub}</p>
+                        <p className="mt-0.5 text-[11px] text-text-secondary">{tile.hint}</p>
                       </Link>
                     ))}
                   </div>
@@ -221,32 +224,32 @@ export default function PostEnrollmentDashboard() {
               <SpecCard>
                 <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-[#16A34A]" aria-hidden />
-                    <span className="text-[15px] font-bold text-[#111827]">Monthly Contributions</span>
+                    <Calendar className="h-5 w-5 text-status-success" aria-hidden />
+                    <span className="text-[15px] font-bold text-text-primary">Monthly Contributions</span>
                   </div>
-                  <span className="text-[12px] text-[#6B7280]">October 2024</span>
+                  <span className="text-[12px] text-text-secondary">October 2024</span>
                 </div>
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
                   <div>
-                    <p className="text-[11px] text-[#6B7280]">You (8%)</p>
-                    <p className="mt-1 text-[20px] font-bold text-[#2563EB]">$450</p>
-                    <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#E5E7EB]">
-                      <div className="h-full w-[85%] rounded-full bg-[#2563EB]" />
+                    <p className="text-[11px] text-text-secondary">You (8%)</p>
+                    <p className="mt-1 text-[20px] font-bold text-primary">$450</p>
+                    <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface-elevated">
+                      <div className="h-full w-[85%] rounded-full bg-primary" />
                     </div>
                   </div>
                   <div>
-                    <p className="text-[11px] text-[#6B7280]">Employer (4%)</p>
-                    <p className="mt-1 text-[20px] font-bold text-[#16A34A]">+$225</p>
-                    <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#E5E7EB]">
-                      <div className="h-full w-[70%] rounded-full bg-[#16A34A]" />
+                    <p className="text-[11px] text-text-secondary">Employer (4%)</p>
+                    <p className="mt-1 text-[20px] font-bold text-status-success">+$225</p>
+                    <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface-elevated">
+                      <div className="h-full w-[70%] rounded-full bg-status-success" />
                     </div>
                   </div>
                   <div>
-                    <p className="text-[11px] text-[#6B7280]">Total/Mo</p>
-                    <p className="mt-1 text-[20px] font-bold text-[#111827]">$675</p>
+                    <p className="text-[11px] text-text-secondary">Total/Mo</p>
+                    <p className="mt-1 text-[20px] font-bold text-text-primary">$675</p>
                     <div className="mt-3">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-[#DCFCE7] px-2.5 py-0.5 text-[11px] font-semibold text-[#16A34A]">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#16A34A]" aria-hidden />
+                      <span className="inline-flex items-center gap-1 rounded-full bg-status-success-bg px-2.5 py-0.5 text-[11px] font-semibold text-status-success">
+                        <span className="h-1.5 w-1.5 rounded-full bg-status-success" aria-hidden />
                         Active
                       </span>
                     </div>
@@ -256,7 +259,7 @@ export default function PostEnrollmentDashboard() {
 
               {/* Learning Hub */}
               <div>
-                <h2 className="mb-3 text-[18px] font-bold text-[#111827]">Learning Hub</h2>
+                <h2 className="mb-3 text-[18px] font-bold text-text-primary">Learning Hub</h2>
                 <SpecCard noPadding className="overflow-hidden">
                   <div className="grid min-h-[220px] grid-cols-1 md:grid-cols-[35%_minmax(0,1fr)]">
                     <div className="relative flex min-h-[200px] flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-500 via-blue-600 to-violet-600 p-6 md:min-h-0">
@@ -274,17 +277,17 @@ export default function PostEnrollmentDashboard() {
                       </div>
                     </div>
                     <div className="flex flex-col justify-center p-6 md:p-8">
-                      <span className="mb-3 inline-flex w-fit items-center gap-1.5 rounded-md bg-[#111827] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" aria-hidden />
+                      <span className="mb-3 inline-flex w-fit items-center gap-1.5 rounded-md border border-border-default bg-surface-elevated px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-text-primary">
+                        <span className="h-1.5 w-1.5 rounded-full bg-status-success" aria-hidden />
                         RETIREMENT PLANNING
                       </span>
-                      <h3 className="text-[22px] font-bold text-[#111827]">Financial Wellness</h3>
-                      <p className="mt-2 text-[14px] leading-relaxed text-[#6B7280]">
+                      <h3 className="text-[22px] font-bold text-text-primary">Financial Wellness</h3>
+                      <p className="mt-2 text-[14px] leading-relaxed text-text-secondary">
                         Master your money mindset with our comprehensive guide to building sustainable wealth.
                       </p>
                       <Link
                         to="/post-enrollment-dashboard"
-                        className="mt-4 inline-flex w-fit items-center gap-1 text-[14px] font-semibold text-[#2563EB] underline-offset-2 hover:underline"
+                        className="mt-4 inline-flex w-fit items-center gap-1 text-[14px] font-semibold text-primary underline-offset-2 hover:underline"
                       >
                         Know more →
                       </Link>
@@ -298,17 +301,17 @@ export default function PostEnrollmentDashboard() {
                 <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <PieChart className="h-5 w-5 text-[#6B7280]" aria-hidden />
-                      <span className="text-[15px] font-bold text-[#111827]">Portfolio Allocation</span>
+                      <PieChart className="h-5 w-5 text-text-secondary" aria-hidden />
+                      <span className="text-[15px] font-bold text-text-primary">Portfolio Allocation</span>
                     </div>
-                    <p className="mt-0.5 pl-7 text-[12px] text-[#6B7280]">Current asset mix</p>
+                    <p className="mt-0.5 pl-7 text-[12px] text-text-secondary">Current asset mix</p>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[12px] text-[#6B7280]">
-                    <span className="h-2 w-2 rounded-full bg-orange-500" aria-hidden />
+                  <div className="flex items-center gap-1.5 text-[12px] text-text-secondary">
+                    <span className="h-2 w-2 rounded-full bg-status-warning" aria-hidden />
                     Moderately Aggressive
                   </div>
                 </div>
-                <div className="mb-1 flex justify-between px-0.5 text-[11px] text-[#9CA3AF]">
+                <div className="mb-1 flex justify-between px-0.5 text-[11px] text-text-muted">
                   <span>0%</span>
                   <span>25%</span>
                   <span>50%</span>
@@ -329,12 +332,12 @@ export default function PostEnrollmentDashboard() {
                     <div key={s.key}>
                       <div className="flex items-center gap-1.5">
                         <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: s.color }} />
-                        <span className="text-[10px] font-semibold uppercase tracking-wide text-[#6B7280]">
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary">
                           {s.label}
                         </span>
                       </div>
-                      <p className="mt-1 text-[16px] font-bold text-[#111827]">{s.pct}%</p>
-                      <p className="text-[12px] text-[#6B7280]">{s.amount}</p>
+                      <p className="mt-1 text-[16px] font-bold text-text-primary">{s.pct}%</p>
+                      <p className="text-[12px] text-text-secondary">{s.amount}</p>
                     </div>
                   ))}
                 </div>
@@ -343,49 +346,49 @@ export default function PostEnrollmentDashboard() {
               {/* Card 5: Recent Activity */}
               <SpecCard>
                 <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-[15px] font-bold text-[#111827]">Recent Activity</h3>
-                  <Link to="/post-enrollment-dashboard" className="text-[13px] font-semibold text-[#2563EB] hover:underline">
+                  <h3 className="text-[15px] font-bold text-text-primary">Recent Activity</h3>
+                  <Link to="/post-enrollment-dashboard" className="text-[13px] font-semibold text-primary hover:underline">
                     View All →
                   </Link>
                 </div>
-                <ul className="divide-y divide-[#E5E7EB]">
+                <ul className="divide-y divide-border-default">
                   <li className="flex gap-4 py-4 first:pt-0">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-100 text-teal-700">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-status-success-bg text-status-success">
                       <ArrowDownLeft className="h-5 w-5" aria-hidden />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-bold text-[#111827]">Contribution</p>
-                      <p className="text-[12px] text-[#6B7280]">Payroll Deduction</p>
+                      <p className="font-bold text-text-primary">Contribution</p>
+                      <p className="text-[12px] text-text-secondary">Payroll Deduction</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-[#16A34A]">+$450.00</p>
-                      <p className="text-[12px] text-[#6B7280]">Oct 15</p>
+                      <p className="font-bold text-status-success">+$450.00</p>
+                      <p className="text-[12px] text-text-secondary">Oct 15</p>
                     </div>
                   </li>
                   <li className="flex gap-4 py-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
                       <Building2 className="h-5 w-5" aria-hidden />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-bold text-[#111827]">Employer Match</p>
-                      <p className="text-[12px] text-[#6B7280]">Safe Harbor</p>
+                      <p className="font-bold text-text-primary">Employer Match</p>
+                      <p className="text-[12px] text-text-secondary">Safe Harbor</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-[#16A34A]">+$225.00</p>
-                      <p className="text-[12px] text-[#6B7280]">Oct 15</p>
+                      <p className="font-bold text-status-success">+$225.00</p>
+                      <p className="text-[12px] text-text-secondary">Oct 15</p>
                     </div>
                   </li>
                   <li className="flex gap-4 py-4 last:pb-0">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-600">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-elevated text-text-secondary">
                       <RefreshCcw className="h-5 w-5" aria-hidden />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-bold text-[#111827]">Rebalance</p>
-                      <p className="text-[12px] text-[#6B7280]">Auto Quarterly</p>
+                      <p className="font-bold text-text-primary">Rebalance</p>
+                      <p className="text-[12px] text-text-secondary">Auto Quarterly</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[14px] font-medium text-[#6B7280]">Completed</p>
-                      <p className="text-[12px] text-[#6B7280]">Oct 01</p>
+                      <p className="text-[14px] font-medium text-text-secondary">Completed</p>
+                      <p className="text-[12px] text-text-secondary">Oct 01</p>
                     </div>
                   </li>
                 </ul>
@@ -395,28 +398,28 @@ export default function PostEnrollmentDashboard() {
             {/* RIGHT ~35% */}
             <aside className="flex flex-col gap-5 lg:col-span-4">
               {/* Hardship */}
-              <SpecCard className="border-l-4 border-l-[#F59E0B] pl-4">
+              <SpecCard className="border-l-4 border-l-status-warning pl-4">
                 <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 shrink-0 text-orange-500" aria-hidden />
-                    <span className="text-[14px] font-bold text-[#111827]">Hardship Withdrawal</span>
+                    <AlertTriangle className="h-5 w-5 shrink-0 text-status-warning" aria-hidden />
+                    <span className="text-[14px] font-bold text-text-primary">Hardship Withdrawal</span>
                   </div>
-                  <span className="rounded-full bg-[#FEF3C7] px-2.5 py-0.5 text-[11px] font-bold text-[#D97706]">
+                  <span className="rounded-full bg-status-warning-bg px-2.5 py-0.5 text-[11px] font-bold text-status-warning">
                     PENDING
                   </span>
                 </div>
-                <p className="text-[12px] text-[#6B7280]">Request #9901 · Submitted Oct 22</p>
-                <div className="mt-3 h-1 w-full overflow-hidden rounded-sm bg-[#E5E7EB]">
+                <p className="text-[12px] text-text-secondary">Request #9901 · Submitted Oct 22</p>
+                <div className="mt-3 h-1 w-full overflow-hidden rounded-sm bg-surface-elevated">
                   <div className="h-full w-[60%] rounded-sm bg-gradient-to-r from-amber-400 to-amber-500" />
                 </div>
-                <p className="mt-1 text-right text-[11px] text-[#6B7280]">Under Review</p>
+                <p className="mt-1 text-right text-[11px] text-text-secondary">Under Review</p>
               </SpecCard>
 
               {/* Readiness */}
               <SpecCard className="text-center">
                 <div className="mb-4 flex items-center justify-center gap-2">
-                  <Target className="h-5 w-5 text-[#16A34A]" aria-hidden />
-                  <span className="text-[15px] font-bold text-[#111827]">Readiness Score</span>
+                  <Target className="h-5 w-5 text-status-success" aria-hidden />
+                  <span className="text-[15px] font-bold text-text-primary">Readiness Score</span>
                 </div>
                 <div className="relative mx-auto h-[140px] w-[140px]">
                   <ResponsiveContainer width="100%" height="100%">
@@ -432,30 +435,27 @@ export default function PostEnrollmentDashboard() {
                     >
                       <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
                       <RadialBar
-                        background={{ fill: '#E5E7EB' }}
+                        background={{ fill: isDark ? 'rgba(148, 163, 184, 0.22)' : '#E5E7EB' }}
                         dataKey="value"
                         cornerRadius={6}
-                        fill="#16A34A"
+                        fill="var(--status-success)"
                         animationDuration={1000}
                       />
                     </RadialBarChart>
                   </ResponsiveContainer>
                   <div className="absolute inset-0 flex flex-col items-center justify-center pt-1">
-                    <span className="text-[36px] font-bold leading-none text-[#111827]">80</span>
-                    <span className="text-[14px] text-[#6B7280]">/100</span>
+                    <span className="text-[36px] font-bold leading-none text-text-primary">80</span>
+                    <span className="text-[14px] text-text-secondary">/100</span>
                   </div>
                 </div>
-                <div className="mt-3 flex items-center justify-center gap-1.5 text-[14px] font-semibold text-[#16A34A]">
-                  <span className="h-2 w-2 rounded-full bg-[#16A34A]" aria-hidden />
+                <div className="mt-3 flex items-center justify-center gap-1.5 text-[14px] font-semibold text-status-success">
+                  <span className="h-2 w-2 rounded-full bg-status-success" aria-hidden />
                   On Track
                 </div>
-                <p className="mx-auto mt-3 max-w-[260px] text-[12px] leading-relaxed text-[#6B7280]">
+                <p className="mx-auto mt-3 max-w-[260px] text-[12px] leading-relaxed text-text-secondary">
                   Projected to replace 76% of pre-retirement income.
                 </p>
-                <button
-                  type="button"
-                  className="mt-5 w-full rounded-lg bg-[#111827] py-3 text-sm font-semibold text-white transition hover:bg-[#1F2937]"
-                >
+                <button type="button" className="btn-brand mt-5 w-full">
                   Launch Simulator
                 </button>
               </SpecCard>
@@ -464,36 +464,36 @@ export default function PostEnrollmentDashboard() {
               <SpecCard>
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <CreditCard className="h-4 w-4 text-[#2563EB]" aria-hidden />
-                    <span className="text-[14px] font-bold text-[#111827]">Active Loan</span>
+                    <CreditCard className="h-4 w-4 text-primary" aria-hidden />
+                    <span className="text-[14px] font-bold text-text-primary">Active Loan</span>
                   </div>
-                  <button type="button" className="text-[12px] font-semibold text-[#2563EB] hover:underline">
+                  <button type="button" className="text-[12px] font-semibold text-primary hover:underline">
                     Request New
                   </button>
                 </div>
                 <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
-                  <p className="text-[13px] font-bold text-[#111827]">General Purpose #102</p>
-                  <span className="rounded-full bg-[#DCFCE7] px-2 py-0.5 text-[11px] font-semibold text-[#16A34A]">
+                  <p className="text-[13px] font-bold text-text-primary">General Purpose #102</p>
+                  <span className="rounded-full bg-status-success-bg px-2 py-0.5 text-[11px] font-semibold text-status-success">
                     Active
                   </span>
                 </div>
-                <p className="text-[11px] text-[#6B7280]">Originated Jan 2022</p>
+                <p className="text-[11px] text-text-secondary">Originated Jan 2022</p>
                 <div className="mt-4 grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-[#6B7280]">Remaining</p>
-                    <p className="mt-1 text-[18px] font-bold text-[#111827]">$2,450</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary">Remaining</p>
+                    <p className="mt-1 text-[18px] font-bold text-text-primary">$2,450</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-[#6B7280]">Next Payment</p>
-                    <p className="mt-1 text-[14px] font-bold text-[#111827]">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary">Next Payment</p>
+                    <p className="mt-1 text-[14px] font-bold text-text-primary">
                       $125 · Nov 15
                     </p>
                   </div>
                 </div>
-                <div className="mt-3 h-1.5 w-full overflow-hidden rounded-[3px] bg-[#E5E7EB]">
-                  <div className="h-full w-[60%] rounded-[3px] bg-[#16A34A]" />
+                <div className="mt-3 h-1.5 w-full overflow-hidden rounded-[3px] bg-surface-elevated">
+                  <div className="h-full w-[60%] rounded-[3px] bg-status-success" />
                 </div>
-                <div className="mt-2 flex justify-between text-[11px] text-[#6B7280]">
+                <div className="mt-2 flex justify-between text-[11px] text-text-secondary">
                   <span>60% Paid Off</span>
                   <span>14 Payments Left</span>
                 </div>
@@ -502,34 +502,34 @@ export default function PostEnrollmentDashboard() {
               {/* Next Best Actions */}
               <SpecCard>
                 <div className="mb-4 flex items-center gap-2">
-                  <CheckSquare className="h-4 w-4 text-[#6B7280]" aria-hidden />
-                  <span className="text-[14px] font-bold text-[#111827]">Next Best Actions</span>
+                  <CheckSquare className="h-4 w-4 text-text-secondary" aria-hidden />
+                  <span className="text-[14px] font-bold text-text-primary">Next Best Actions</span>
                 </div>
                 <div className="space-y-3">
-                  <div className="flex gap-3 rounded-[12px] bg-[#FEF2F2] p-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
+                  <div className="flex gap-3 rounded-[12px] bg-status-danger-bg p-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-500/15 text-status-danger">
                       <User className="h-5 w-5" aria-hidden />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-start justify-between gap-2">
-                        <p className="text-[13px] font-bold text-[#111827]">Add a Beneficiary</p>
-                        <span className="shrink-0 rounded bg-[#FEE2E2] px-2 py-0.5 text-[10px] font-bold text-[#DC2626]">
+                        <p className="text-[13px] font-bold text-text-primary">Add a Beneficiary</p>
+                        <span className="shrink-0 rounded bg-red-500/20 px-2 py-0.5 text-[10px] font-bold text-red-400">
                           REQUIRED
                         </span>
                       </div>
-                      <p className="mt-1 text-[12px] text-[#6B7280]">Protect your assets today.</p>
+                      <p className="mt-1 text-[12px] text-text-secondary">Protect your assets today.</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 rounded-[12px] border border-[#E5E7EB] bg-white p-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-600">
+                  <div className="flex items-center gap-3 rounded-[12px] border border-border-default bg-surface-elevated p-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-page text-text-secondary">
                       <Shield className="h-5 w-5" aria-hidden />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
-                        <p className="text-[13px] font-bold text-[#111827]">Review Risk Tolerance</p>
-                        <span className="text-lg text-[#9CA3AF]">›</span>
+                        <p className="text-[13px] font-bold text-text-primary">Review Risk Tolerance</p>
+                        <span className="text-lg text-text-muted">›</span>
                       </div>
-                      <p className="mt-1 text-[12px] text-[#6B7280]">Update your profile.</p>
+                      <p className="mt-1 text-[12px] text-text-secondary">Update your profile.</p>
                     </div>
                   </div>
                 </div>
@@ -537,7 +537,7 @@ export default function PostEnrollmentDashboard() {
 
               {/* Your Advisor */}
               <div
-                className="overflow-hidden rounded-[12px] border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.08)]"
+                className="overflow-hidden rounded-[12px] border border-border-default shadow-card"
                 style={{
                   background: 'linear-gradient(135deg, #1E3A5F 0%, #2563EB 100%)',
                 }}
@@ -578,7 +578,7 @@ export default function PostEnrollmentDashboard() {
                     </button>
                     <button
                       type="button"
-                      className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white py-2.5 text-sm font-semibold text-[#2563EB] transition hover:bg-blue-50"
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white py-2.5 text-sm font-semibold text-primary transition hover:bg-primary/10"
                     >
                       <CalendarDays className="h-4 w-4" aria-hidden />
                       Schedule Call

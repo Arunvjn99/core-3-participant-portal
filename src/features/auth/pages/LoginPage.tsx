@@ -30,6 +30,7 @@ export default function LoginPage() {
 
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
     if (signInError) {
+      console.error('[Login] signInWithPassword error:', signInError)
       setError(signInError.message)
       setLoading(false)
     } else {

@@ -41,9 +41,11 @@ function lengthAtX(pathEl: SVGPathElement | null, targetX: number, totalLen: num
 type Props = {
   data: BalancePoint[]
   className?: string
+  /** When true, grid/area gradient/tooltip match dark surfaces (from `useTheme().resolvedMode`). */
+  isDark?: boolean
 }
 
-export function PremiumBalanceChart({ data, className = '' }: Props) {
+export function PremiumBalanceChart({ data, className = '', isDark = false }: Props) {
   const uid = useId()
   const gradId = `pb-grad-${uid}`
   const blurFilterId = `pb-blur-${uid}`
@@ -78,6 +80,14 @@ export function PremiumBalanceChart({ data, className = '' }: Props) {
     () => buildPoints(values, innerW, innerH, vmin, vmax),
     [values, innerW, innerH, vmin, vmax]
   )
+
+  const gridStroke = isDark ? 'rgba(148, 163, 184, 0.2)' : 'rgba(17, 24, 39, 0.07)'
+  const gridStrokeMuted = isDark ? 'rgba(148, 163, 184, 0.12)' : 'rgba(17, 24, 39, 0.05)'
+  const areaGradientTop = isDark ? 'rgba(34, 197, 94, 0.42)' : 'rgba(34, 197, 94, 0.25)'
+  const areaGradientMid = isDark ? 'rgba(34, 197, 94, 0.22)' : 'rgba(34, 197, 94, 0.12)'
+  const hoverLineStroke = isDark ? 'rgba(34, 197, 94, 0.45)' : 'rgba(22, 163, 74, 0.22)'
+  const dotFillOuter = isDark ? 'rgba(34, 197, 94, 0.22)' : 'rgba(34, 197, 94, 0.14)'
+  const dotFillCenter = isDark ? '#111118' : '#ffffff'
 
   const linePathD = useMemo(() => {
     if (points.length < 2) return ''
@@ -188,8 +198,8 @@ export function PremiumBalanceChart({ data, className = '' }: Props) {
       >
         <defs>
           <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="rgba(34,197,94,0.25)" />
-            <stop offset="45%" stopColor="rgba(34,197,94,0.12)" />
+            <stop offset="0%" stopColor={areaGradientTop} />
+            <stop offset="45%" stopColor={areaGradientMid} />
             <stop offset="100%" stopColor="rgba(34,197,94,0)" />
           </linearGradient>
           <filter id={blurFilterId} x="-80%" y="-80%" width="260%" height="260%">
@@ -208,7 +218,7 @@ export function PremiumBalanceChart({ data, className = '' }: Props) {
           y1={PAD.top + innerH}
           x2={width - PAD.right}
           y2={PAD.top + innerH}
-          stroke="rgba(17,24,39,0.07)"
+          stroke={gridStroke}
           strokeWidth={1}
         />
         <line
@@ -216,7 +226,7 @@ export function PremiumBalanceChart({ data, className = '' }: Props) {
           y1={PAD.top + innerH * 0.55}
           x2={width - PAD.right}
           y2={PAD.top + innerH * 0.55}
-          stroke="rgba(17,24,39,0.05)"
+          stroke={gridStrokeMuted}
           strokeWidth={1}
           strokeDasharray="5 7"
         />
@@ -286,7 +296,7 @@ export function PremiumBalanceChart({ data, className = '' }: Props) {
               y1={PAD.top}
               x2={smoothXNum}
               y2={PAD.top + innerH}
-              stroke="rgba(22,163,74,0.22)"
+              stroke={hoverLineStroke}
               strokeWidth={1}
               strokeDasharray="2 5"
             />
@@ -294,10 +304,10 @@ export function PremiumBalanceChart({ data, className = '' }: Props) {
               cx={dotPt.x}
               cy={dotPt.y}
               r={11}
-              fill="rgba(34,197,94,0.14)"
+              fill={dotFillOuter}
               filter={`url(#${dotGlowId})`}
             />
-            <circle cx={dotPt.x} cy={dotPt.y} r={7} fill="white" stroke={STROKE} strokeWidth={2.5} />
+            <circle cx={dotPt.x} cy={dotPt.y} r={7} fill={dotFillCenter} stroke={STROKE} strokeWidth={2.5} />
           </>
         )}
 
@@ -313,7 +323,11 @@ export function PremiumBalanceChart({ data, className = '' }: Props) {
 
       {hover && tipValue && dotPt && (
         <motion.div
-          className="pointer-events-none absolute z-10 min-w-[4.5rem] rounded-[11px] border border-[#E5E7EB] bg-white/95 px-3 py-2 text-center text-xs font-semibold text-[#111827] shadow-[0_10px_40px_rgba(0,0,0,0.1)] backdrop-blur-[2px]"
+          className={`pointer-events-none absolute z-10 min-w-[4.5rem] rounded-[11px] border px-3 py-2 text-center text-xs font-semibold shadow-card backdrop-blur-[2px] ${
+            isDark
+              ? 'border-border-default bg-surface-elevated/95 text-text-primary'
+              : 'border-border-default bg-white/95 text-text-primary'
+          }`}
           style={{
             left: smoothXNum,
             top: 6,
