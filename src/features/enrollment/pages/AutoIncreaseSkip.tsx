@@ -6,12 +6,11 @@ import { AutoIncreaseSkipPanel } from '@/features/enrollment/components/AutoIncr
 
 export default function AutoIncreaseSkip() {
   const navigate = useNavigate()
-  const { data, updateData } = useEnrollment()
+  const { updateData } = useEnrollment()
 
-  const difference = 185943 - 124621
-
-  const planDisplayName =
-    data.plan === 'roth' ? 'Roth 401(k)' : data.plan === 'traditional' ? 'Traditional 401(k)' : '401(k)'
+  const fixedProjection = 124621
+  const autoProjection = 185943
+  const difference = autoProjection - fixedProjection
 
   const handleReconsider = () => {
     updateData({ autoIncrease: true })
@@ -33,10 +32,10 @@ export default function AutoIncreaseSkip() {
 
   return (
     <AnimatedPage>
-      <div className="mx-auto max-w-md rounded-2xl border border-slate-200/90 bg-white p-6 shadow-lg dark:border-gray-700 dark:bg-gray-900">
+      <div className="mx-auto max-w-lg rounded-[28px] border border-slate-200/90 bg-white p-6 text-left shadow-lg sm:p-8 dark:border-gray-700 dark:bg-gray-900">
         <AutoIncreaseSkipPanel
-          planDisplayName={planDisplayName}
-          contributionPercent={data.contributionPercent}
+          projectedWithout={fixedProjection}
+          projectedWith={autoProjection}
           missedSavingsAmount={difference}
           onReconsider={handleReconsider}
           onContinueWithout={handleContinueWithout}

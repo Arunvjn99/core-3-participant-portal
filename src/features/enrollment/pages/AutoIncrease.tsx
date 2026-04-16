@@ -17,9 +17,6 @@ export default function AutoIncrease() {
   const autoProjection = 185943
   const difference = autoProjection - fixedProjection
 
-  const planDisplayName =
-    data.plan === 'roth' ? 'Roth 401(k)' : data.plan === 'traditional' ? 'Traditional 401(k)' : '401(k)'
-
   const handleSelect = (autoIncrease: boolean) => {
     updateData({ autoIncrease })
     if (autoIncrease) {
@@ -154,12 +151,12 @@ export default function AutoIncrease() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="auto-increase-skip-title"
-            className="relative w-full max-w-md rounded-2xl border border-slate-200/90 bg-white p-6 shadow-2xl dark:border-gray-700 dark:bg-gray-900"
+            className="relative w-full max-w-lg rounded-[28px] border border-slate-200/90 bg-white p-6 text-left shadow-2xl sm:p-8 dark:border-gray-700 dark:bg-gray-900"
             onClick={(e) => e.stopPropagation()}
           >
             <AutoIncreaseSkipPanel
-              planDisplayName={planDisplayName}
-              contributionPercent={data.contributionPercent}
+              projectedWithout={fixedProjection}
+              projectedWith={autoProjection}
               missedSavingsAmount={difference}
               onReconsider={handleReconsiderFromModal}
               onContinueWithout={handleConfirmSkip}
