@@ -51,7 +51,7 @@ function WithdrawalFlowLayout() {
 
   return (
     <WithdrawalFlowContext.Provider value={{ withdrawalData, updateWithdrawalData }}>
-      <div className="min-h-screen bg-slate-50 dark:bg-gray-950">
+      <div className="min-h-screen bg-white dark:bg-gray-950">
         {/* Progress */}
         <div className="bg-white dark:bg-gray-900 border-b border-slate-100 dark:border-gray-700">
           <div className="max-w-[1200px] mx-auto px-4 sm:px-12">

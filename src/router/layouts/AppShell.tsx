@@ -63,6 +63,8 @@ export function AppShell() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
+  const transactionsShellBg =
+    location.pathname.startsWith('/transactions') ? 'bg-white' : 'bg-slate-50/50'
   const toggleSearch = useAIStore((s) => s.toggleSearch)
   const enrollmentStatus = useEnrollmentDraftStore((s) => s.enrollmentStatus)
   const navItems = getNavItems(enrollmentStatus === 'complete')
@@ -332,7 +334,9 @@ export function AppShell() {
         )}
       </header>
 
-      <main className="flex min-h-0 flex-1 flex-col overflow-auto bg-slate-50/50 dark:bg-gray-950">
+      <main
+        className={`flex min-h-0 flex-1 flex-col overflow-auto dark:bg-gray-950 ${transactionsShellBg}`}
+      >
         <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col px-4 pb-6 pt-4 sm:px-6 lg:px-8">
           <AnimatePresence>
             <Outlet />

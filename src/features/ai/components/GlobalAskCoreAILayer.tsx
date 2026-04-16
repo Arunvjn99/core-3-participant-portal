@@ -35,7 +35,7 @@ export function GlobalAskCoreAILayer() {
       type="button"
       onClick={openChat}
       className={cn(
-        'fixed left-1/2 z-[48] flex -translate-x-1/2 items-center gap-2.5 rounded-[9999px] px-5 py-3 text-sm font-medium text-white shadow-[0_4px_24px_rgba(0,0,0,0.35)] transition-transform hover:scale-[1.02] active:scale-[0.98]',
+        'fixed left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-[9999px] px-5 py-3 text-sm font-medium text-white shadow-[0_4px_24px_rgba(0,0,0,0.35)] transition-transform hover:scale-[1.02] active:scale-[0.98]',
         'border border-white/[0.15] backdrop-blur-[8px]',
         enrollmentStepFlow ? 'bottom-6 max-sm:!bottom-20' : 'bottom-6',
       )}

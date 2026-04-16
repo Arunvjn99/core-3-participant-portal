@@ -4,8 +4,6 @@ import { useState } from "react";
 import { useLoanFlow } from "./LoanFlowLayout";
 import { DollarSign, Calendar, ArrowRight, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
-import RetirementImpactWidget from "../../components/RetirementImpactWidget";
-
 function LoanSimulator() {
   const navigate = useNavigate();
   const { updateLoanData } = useLoanFlow();
@@ -24,7 +22,6 @@ function LoanSimulator() {
   const totalInterest = (monthlyPayment * numPayments) - loanAmount;
   const totalPayback = loanAmount + totalInterest;
 
-  const retirementImpact = Math.round(loanAmount * 1.64);
   const loanPayoffDate = new Date(2026 + tenure, 2, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   const handleContinue = () => {
@@ -43,7 +40,7 @@ function LoanSimulator() {
           Loan Simulator
         </h2>
         <p style={{ fontSize: 13, fontWeight: 500, color: "inherit", lineHeight: "20px" }}>
-          Adjust the loan amount and tenure to see how it affects your payments and retirement.
+          Adjust the loan amount and tenure to see how it affects your payments.
         </p>
       </motion.div>
 
@@ -190,29 +187,6 @@ function LoanSimulator() {
                 </span>
               </div>
             </div>
-          </motion.div>
-
-          {/* Remaining Balance After Loan */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut", delay: 0.15 }}
-          >
-            
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
-          >
-            <RetirementImpactWidget
-              compact
-              impactAmount={-retirementImpact}
-              impactLabel={`−$${retirementImpact.toLocaleString()} projected impact from loan`}
-              estimatedValue={38420}
-              onTrack={loanAmount <= 5000}
-            />
           </motion.div>
         </div>
       </div>

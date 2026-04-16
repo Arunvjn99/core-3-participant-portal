@@ -127,10 +127,7 @@ function TransactionsPage() {
   };
 
   return (
-    <div
-      className="min-h-screen bg-slate-50 dark:bg-gray-950 transactions-page"
-      data-page="transactions"
-    >
+    <div className="min-h-screen transactions-page" data-page="transactions">
 
       {/* Main Container */}
       <div

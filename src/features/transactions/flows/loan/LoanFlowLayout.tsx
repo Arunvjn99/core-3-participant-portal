@@ -58,7 +58,7 @@ function LoanFlowLayout() {
 
   return (
     <LoanFlowContext.Provider value={{ loanData, updateLoanData }}>
-      <div className="min-h-screen" style={{ background: "var(--c-subtle)" }}>
+      <div className="min-h-screen bg-white dark:bg-gray-950">
 
         {/* Progress */}
         <div
