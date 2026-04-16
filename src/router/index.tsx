@@ -2,6 +2,11 @@
 import { lazy, Suspense, useState, useEffect } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { ROUTES, dashboardPath } from '@/lib/constants'
+import {
+  PrivacyPolicyPage,
+  TermsOfServicePage,
+  HelpCenterPage,
+} from '@/features/legal/pages/LegalStaticPage'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import PreEnrollmentDashboard from '@/features/dashboard/pages/PreEnrollmentDashboard'
 import PostEnrollmentDashboard from '@/features/dashboard/pages/PostEnrollmentDashboard'
@@ -174,6 +179,9 @@ export const router = createBrowserRouter([
       { path: 'forgot-password', element: <ForgotPasswordPage /> },
       { path: 'v1/forgot-password', element: <ForgotPasswordPage /> },
       { path: 'auth', element: <WhiteLabelAuth /> },
+      { path: 'privacy', element: <PrivacyPolicyPage /> },
+      { path: 'terms', element: <TermsOfServicePage /> },
+      { path: 'help', element: <HelpCenterPage /> },
 
       // Legacy versioned auth (keeps old URLs working)
       {

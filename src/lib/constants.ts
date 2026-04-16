@@ -56,6 +56,30 @@ export const ENV = {
   DEMO_MODE: !hasValidSupabaseEnv(),
 } as const
 
+const env = import.meta.env as Record<string, string | undefined>
+
+/**
+ * Privacy, terms, and help URLs. Set `VITE_PRIVACY_POLICY_URL`, `VITE_TERMS_OF_SERVICE_URL`, or
+ * `VITE_HELP_CENTER_URL` to a full `https://` URL to open an external site; otherwise in-app routes apply.
+ */
+function legalHrefFromEnv(key: string, fallbackPath: string): string {
+  const raw = trimEnv(env[key])
+  if (!raw) return fallbackPath
+  if (/^https?:\/\//i.test(raw)) return raw
+  if (raw.startsWith('/')) return raw
+  return fallbackPath
+}
+
+export const LEGAL = {
+  privacyPolicyHref: legalHrefFromEnv('VITE_PRIVACY_POLICY_URL', '/privacy'),
+  termsOfServiceHref: legalHrefFromEnv('VITE_TERMS_OF_SERVICE_URL', '/terms'),
+  helpCenterHref: legalHrefFromEnv('VITE_HELP_CENTER_URL', '/help'),
+} as const
+
+export function isExternalUrl(href: string): boolean {
+  return /^https?:\/\//i.test(href)
+}
+
 export const STORAGE_KEYS = {
   OTP_VERIFIED: 'otp_verified',
   ENROLLMENT_DRAFT: 'enrollment_draft',

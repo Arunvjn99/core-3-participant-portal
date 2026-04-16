@@ -35,24 +35,40 @@ export type LanguageMenuLang = (typeof LANGUAGE_MENU_LANGS)[number]
 export const SUPPORTED_LANGS = ['en', 'es', 'fr'] as const
 export type SupportedLang = (typeof SUPPORTED_LANGS)[number]
 
+/** Keep `<html lang>` aligned with i18n for accessibility and correct date/number hints. */
+export function syncDocumentLang(lng?: string) {
+  if (typeof document === 'undefined') return
+  const code = ((lng ?? i18n.language) || 'en').split('-')[0]?.toLowerCase() || 'en'
+  document.documentElement.lang = code === 'es' ? 'es' : 'en'
+}
+
 void i18n
   .use(LanguageDetector)
   .use(initReactI18next)
-  .init({
-    fallbackLng: 'en',
-    supportedLngs: SUPPORTED_LANGS as unknown as string[],
-    interpolation: { escapeValue: false },
-    returnNull: false,
-    detection: {
-      order: ['localStorage', 'navigator'],
-      lookupLocalStorage: PREFERRED_LANGUAGE_KEY,
-      caches: ['localStorage'],
+  .init(
+    {
+      fallbackLng: 'en',
+      supportedLngs: SUPPORTED_LANGS as unknown as string[],
+      interpolation: { escapeValue: false },
+      returnNull: false,
+      detection: {
+        order: ['localStorage', 'navigator'],
+        lookupLocalStorage: PREFERRED_LANGUAGE_KEY,
+        caches: ['localStorage'],
+      },
+      resources: {
+        en: { translation: en },
+        es: { translation: es },
+        fr: { translation: fr },
+      },
     },
-    resources: {
-      en: { translation: en },
-      es: { translation: es },
-      fr: { translation: fr },
+    () => {
+      syncDocumentLang()
     },
-  })
+  )
+
+i18n.on('languageChanged', (lng) => {
+  syncDocumentLang(lng)
+})
 
 export default i18n

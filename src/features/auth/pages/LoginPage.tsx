@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/core/supabase'
-import { ROUTES } from '@/lib/constants'
+import { LEGAL, ROUTES } from '@/lib/constants'
+import { LegalHrefLink } from '@/features/legal/components/LegalHrefLink'
 import AuthLayout from '../components/AuthLayout'
 
 const CORE_LOGO = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/CORE%20logo.png'
@@ -134,12 +135,9 @@ export default function LoginPage() {
       {/* Help */}
       <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
         {t('auth.help_text')}{' '}
-        <a
-          href="mailto:support@congruentsolutions.com"
-          className="brand-text font-semibold hover:underline"
-        >
+        <LegalHrefLink href={LEGAL.helpCenterHref} className="brand-text font-semibold hover:underline">
           {t('auth.help_center')}
-        </a>
+        </LegalHrefLink>
       </p>
 
       {/* Don't have account */}
@@ -158,10 +156,25 @@ export default function LoginPage() {
         <p className="text-xs text-gray-400 dark:text-gray-600">
           {t('auth.copyright')}
         </p>
-        <div className="flex items-center gap-4">
-          <a href="#" className="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-600 dark:hover:text-gray-400">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+          <LegalHrefLink
+            href={LEGAL.privacyPolicyHref}
+            className="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-600 dark:hover:text-gray-400"
+          >
             {t('auth.privacy_policy')}
-          </a>
+          </LegalHrefLink>
+          <LegalHrefLink
+            href={LEGAL.termsOfServiceHref}
+            className="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-600 dark:hover:text-gray-400"
+          >
+            {t('footer.terms')}
+          </LegalHrefLink>
+          <LegalHrefLink
+            href={LEGAL.helpCenterHref}
+            className="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-600 dark:hover:text-gray-400"
+          >
+            {t('footer.help')}
+          </LegalHrefLink>
           <img
             src={CORE_LOGO}
             alt="CORE"

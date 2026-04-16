@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/core/hooks/useAuth'
 import { useUser } from '@/core/hooks/useUser'
@@ -65,24 +66,8 @@ const balanceChartData = [
   { i: 14, value: 142893 },
 ]
 
-function buildGreetingSubtitle(firstName: string): string {
-  const h = new Date().getHours()
-  let lead: string
-  if (h >= 5 && h <= 11) lead = `Good morning, ${firstName}.`
-  else if (h >= 12 && h <= 16) lead = `Good afternoon, ${firstName}.`
-  else if (h >= 17 && h <= 20) lead = `Good evening, ${firstName}.`
-  else lead = `Hey, ${firstName}.`
-  return `${lead} Here's your retirement summary.`
-}
-
-const portfolioSegments = [
-  { key: 'us', label: 'US STOCKS', pct: 55, amount: '$78,591', color: '#2563EB' },
-  { key: 'intl', label: 'INTL STOCKS', pct: 25, amount: '$35,723', color: '#0D9488' },
-  { key: 'bonds', label: 'BONDS', pct: 15, amount: '$21,433', color: '#16A34A' },
-  { key: 'cash', label: 'CASH', pct: 5, amount: '$7,144', color: '#94A3B8' },
-]
-
 export default function PostEnrollmentDashboard() {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const { profile } = useUser()
   const { resolvedMode } = useTheme()
@@ -93,7 +78,26 @@ export default function PostEnrollmentDashboard() {
     return formatFirstNameForDisplay(raw)
   }, [profile, user])
 
-  const subtitle = useMemo(() => buildGreetingSubtitle(firstName), [firstName])
+  const subtitle = useMemo(() => {
+    const h = new Date().getHours()
+    let period: 'morning' | 'afternoon' | 'evening' | 'night'
+    if (h >= 5 && h < 12) period = 'morning'
+    else if (h >= 12 && h < 17) period = 'afternoon'
+    else if (h >= 17 && h < 22) period = 'evening'
+    else period = 'night'
+    const lead = t(`postDashboard.greeting_${period}`, { name: firstName })
+    return `${lead} ${t('postDashboard.summary_suffix')}`
+  }, [firstName, t])
+
+  const portfolioSegments = useMemo(
+    () => [
+      { key: 'us', label: t('postDashboard.seg_us'), pct: 55, amount: '$78,591', color: '#2563EB' },
+      { key: 'intl', label: t('postDashboard.seg_intl'), pct: 25, amount: '$35,723', color: '#0D9488' },
+      { key: 'bonds', label: t('postDashboard.seg_bonds'), pct: 15, amount: '$21,433', color: '#16A34A' },
+      { key: 'cash', label: t('postDashboard.seg_cash'), pct: 5, amount: '$7,144', color: '#94A3B8' },
+    ],
+    [t]
+  )
 
   return (
     <AnimatedPage className="min-h-full">
@@ -101,7 +105,7 @@ export default function PostEnrollmentDashboard() {
         <main className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           {/* Page header */}
           <header className="pb-6">
-            <h1 className="text-[28px] font-bold leading-tight text-text-primary">Overview</h1>
+            <h1 className="text-[28px] font-bold leading-tight text-text-primary">{t('dashboard.overview')}</h1>
             <p className="mt-2 text-[14px] leading-relaxed text-text-secondary">{subtitle}</p>
           </header>
 
@@ -112,15 +116,15 @@ export default function PostEnrollmentDashboard() {
               <SpecCard className="relative overflow-hidden">
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">Total Balance</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">{t('dashboard.totalBalance')}</p>
                     <p className="mt-1 text-[36px] font-bold leading-none tracking-tight text-text-primary">$142,893</p>
                     <p className="mt-2 flex items-center gap-1 text-[14px] font-medium text-status-success">
                       <TrendingUp className="h-4 w-4 shrink-0" aria-hidden />
-                      4.2% this quarter
+                      {t('postDashboard.quarter_return')}
                     </p>
                   </div>
                   <span className="shrink-0 rounded-full bg-status-success-bg px-3 py-1 text-xs font-semibold text-status-success">
-                    ON TRACK
+                    {t('postDashboard.on_track_badge')}
                   </span>
                 </div>
 
@@ -134,7 +138,7 @@ export default function PostEnrollmentDashboard() {
                       🔒
                     </span>
                     <p className="text-[12px] text-text-secondary">
-                      <span className="text-text-secondary">Vested Balance: </span>
+                      <span className="text-text-secondary">{t('postDashboard.vested_balance_colon')} </span>
                       <span className="font-semibold text-text-primary">$138,450</span>
                     </p>
                   </div>
@@ -143,8 +147,8 @@ export default function PostEnrollmentDashboard() {
                       📅
                     </span>
                     <p className="text-[12px] text-text-secondary">
-                      <span>Retirement: </span>
-                      <span className="font-semibold text-text-primary">Est. 2046</span>
+                      <span>{t('postDashboard.retirement_label')} </span>
+                      <span className="font-semibold text-text-primary">{t('postDashboard.retirement_est')}</span>
                     </p>
                   </div>
                   <div className="flex items-start gap-2 pt-4 sm:pt-0 sm:pl-4">
@@ -152,7 +156,7 @@ export default function PostEnrollmentDashboard() {
                       ⚡
                     </span>
                     <p className="text-[12px] text-text-secondary">
-                      <span>Vested: </span>
+                      <span>{t('postDashboard.vested_short')} </span>
                       <span className="font-semibold text-text-primary">100%</span>
                     </p>
                   </div>
@@ -161,44 +165,44 @@ export default function PostEnrollmentDashboard() {
 
               {/* Card 2: Quick Actions — one card, 4 tiles with dividers */}
               <div>
-                <h2 className="mb-3 text-[16px] font-bold text-text-primary">Quick Actions</h2>
+                <h2 className="mb-3 text-[16px] font-bold text-text-primary">{t('dashboard.quickActions')}</h2>
                 <SpecCard noPadding className="overflow-hidden">
                   <div className="grid grid-cols-1 divide-y divide-border-default sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
                     {(
                       [
                         {
                           Icon: HandCoins,
-                          title: 'Take a Loan',
-                          sub: 'Borrow up to $10,000',
-                          hint: 'Typical approval: 1-3 days',
+                          title: t('dashboard.takeLoan'),
+                          sub: t('transactions.qa_loan_sub'),
+                          hint: t('postDashboard.take_loan_hint'),
                           href: '/transactions/loan',
                           circle: 'bg-primary/15 text-primary',
                         },
                         {
                           Icon: DollarSign,
-                          title: 'Withdraw Money',
-                          sub: 'Available: $5,000',
-                          hint: 'Tax impact: 10-20%',
+                          title: t('dashboard.withdrawMoney'),
+                          sub: t('transactions.qa_withdraw_sub'),
+                          hint: t('postDashboard.withdraw_hint'),
                           href: '/transactions/withdrawal',
                           circle: 'bg-status-success-bg text-status-success',
                         },
                         {
                           Icon: ArrowLeftRight,
-                          title: 'Transfer Funds',
-                          sub: 'Reallocate balance',
-                          hint: 'No fees or penalties',
+                          title: t('dashboard.transferFunds'),
+                          sub: t('transactions.qa_transfer_sub'),
+                          hint: t('postDashboard.transfer_hint'),
                           href: '/transactions/transfer',
                           circle: 'bg-primary/15 text-primary',
                         },
                         {
                           Icon: RefreshCcw,
-                          title: 'Roll Over',
-                          sub: 'Consolidate savings',
-                          hint: 'No tax penalty',
+                          title: t('dashboard.rollOver'),
+                          sub: t('transactions.qa_rollover_sub'),
+                          hint: t('postDashboard.rollover_hint'),
                           href: '/transactions/rollover',
                           circle: 'bg-status-success-bg text-status-success',
                         },
-                      ] as const
+                      ]
                     ).map((tile) => (
                       <Link
                         key={tile.title}
@@ -225,32 +229,32 @@ export default function PostEnrollmentDashboard() {
                 <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-5 w-5 text-status-success" aria-hidden />
-                    <span className="text-[15px] font-bold text-text-primary">Monthly Contributions</span>
+                    <span className="text-[15px] font-bold text-text-primary">{t('dashboard.monthlyContributions')}</span>
                   </div>
-                  <span className="text-[12px] text-text-secondary">October 2024</span>
+                  <span className="text-[12px] text-text-secondary">{t('postDashboard.contrib_month_sample')}</span>
                 </div>
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
                   <div>
-                    <p className="text-[11px] text-text-secondary">You (8%)</p>
+                    <p className="text-[11px] text-text-secondary">{t('postDashboard.contrib_you')}</p>
                     <p className="mt-1 text-[20px] font-bold text-primary">$450</p>
                     <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface-elevated">
                       <div className="h-full w-[85%] rounded-full bg-primary" />
                     </div>
                   </div>
                   <div>
-                    <p className="text-[11px] text-text-secondary">Employer (4%)</p>
+                    <p className="text-[11px] text-text-secondary">{t('postDashboard.contrib_employer')}</p>
                     <p className="mt-1 text-[20px] font-bold text-status-success">+$225</p>
                     <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface-elevated">
                       <div className="h-full w-[70%] rounded-full bg-status-success" />
                     </div>
                   </div>
                   <div>
-                    <p className="text-[11px] text-text-secondary">Total/Mo</p>
+                    <p className="text-[11px] text-text-secondary">{t('postDashboard.contrib_total_mo')}</p>
                     <p className="mt-1 text-[20px] font-bold text-text-primary">$675</p>
                     <div className="mt-3">
                       <span className="inline-flex items-center gap-1 rounded-full bg-status-success-bg px-2.5 py-0.5 text-[11px] font-semibold text-status-success">
                         <span className="h-1.5 w-1.5 rounded-full bg-status-success" aria-hidden />
-                        Active
+                        {t('common.active')}
                       </span>
                     </div>
                   </div>
@@ -259,7 +263,7 @@ export default function PostEnrollmentDashboard() {
 
               {/* Learning Hub */}
               <div>
-                <h2 className="mb-3 text-[18px] font-bold text-text-primary">Learning Hub</h2>
+                <h2 className="mb-3 text-[18px] font-bold text-text-primary">{t('dashboard.learningHub')}</h2>
                 <SpecCard noPadding className="overflow-hidden">
                   <div className="grid min-h-[220px] grid-cols-1 md:grid-cols-[35%_minmax(0,1fr)]">
                     <div className="relative flex min-h-[200px] flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-500 via-blue-600 to-violet-600 p-6 md:min-h-0">
@@ -279,17 +283,17 @@ export default function PostEnrollmentDashboard() {
                     <div className="flex flex-col justify-center p-6 md:p-8">
                       <span className="mb-3 inline-flex w-fit items-center gap-1.5 rounded-md border border-border-default bg-surface-elevated px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-text-primary">
                         <span className="h-1.5 w-1.5 rounded-full bg-status-success" aria-hidden />
-                        RETIREMENT PLANNING
+                        {t('postDashboard.retirement_planning_badge')}
                       </span>
-                      <h3 className="text-[22px] font-bold text-text-primary">Financial Wellness</h3>
+                      <h3 className="text-[22px] font-bold text-text-primary">{t('postDashboard.financial_wellness_title')}</h3>
                       <p className="mt-2 text-[14px] leading-relaxed text-text-secondary">
-                        Master your money mindset with our comprehensive guide to building sustainable wealth.
+                        {t('postDashboard.learning_blurb')}
                       </p>
                       <Link
                         to="/post-enrollment-dashboard"
                         className="mt-4 inline-flex w-fit items-center gap-1 text-[14px] font-semibold text-primary underline-offset-2 hover:underline"
                       >
-                        Know more →
+                        {t('postDashboard.know_more_arrow')}
                       </Link>
                     </div>
                   </div>
@@ -302,13 +306,13 @@ export default function PostEnrollmentDashboard() {
                   <div>
                     <div className="flex items-center gap-2">
                       <PieChart className="h-5 w-5 text-text-secondary" aria-hidden />
-                      <span className="text-[15px] font-bold text-text-primary">Portfolio Allocation</span>
+                      <span className="text-[15px] font-bold text-text-primary">{t('dashboard.portfolioAllocation')}</span>
                     </div>
-                    <p className="mt-0.5 pl-7 text-[12px] text-text-secondary">Current asset mix</p>
+                    <p className="mt-0.5 pl-7 text-[12px] text-text-secondary">{t('postDashboard.current_asset_mix')}</p>
                   </div>
                   <div className="flex items-center gap-1.5 text-[12px] text-text-secondary">
                     <span className="h-2 w-2 rounded-full bg-status-warning" aria-hidden />
-                    Moderately Aggressive
+                    {t('postDashboard.risk_profile_moderate_agg')}
                   </div>
                 </div>
                 <div className="mb-1 flex justify-between px-0.5 text-[11px] text-text-muted">
@@ -346,9 +350,9 @@ export default function PostEnrollmentDashboard() {
               {/* Card 5: Recent Activity */}
               <SpecCard>
                 <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-[15px] font-bold text-text-primary">Recent Activity</h3>
+                  <h3 className="text-[15px] font-bold text-text-primary">{t('dashboard.recentActivity')}</h3>
                   <Link to="/post-enrollment-dashboard" className="text-[13px] font-semibold text-primary hover:underline">
-                    View All →
+                    {t('postDashboard.view_all_arrow')}
                   </Link>
                 </div>
                 <ul className="divide-y divide-border-default">
@@ -357,12 +361,12 @@ export default function PostEnrollmentDashboard() {
                       <ArrowDownLeft className="h-5 w-5" aria-hidden />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-bold text-text-primary">Contribution</p>
-                      <p className="text-[12px] text-text-secondary">Payroll Deduction</p>
+                      <p className="font-bold text-text-primary">{t('postDashboard.activity_contribution')}</p>
+                      <p className="text-[12px] text-text-secondary">{t('postDashboard.activity_payroll')}</p>
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-status-success">+$450.00</p>
-                      <p className="text-[12px] text-text-secondary">Oct 15</p>
+                      <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct')}</p>
                     </div>
                   </li>
                   <li className="flex gap-4 py-4">
@@ -370,12 +374,12 @@ export default function PostEnrollmentDashboard() {
                       <Building2 className="h-5 w-5" aria-hidden />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-bold text-text-primary">Employer Match</p>
-                      <p className="text-[12px] text-text-secondary">Safe Harbor</p>
+                      <p className="font-bold text-text-primary">{t('postDashboard.activity_employer_match')}</p>
+                      <p className="text-[12px] text-text-secondary">{t('postDashboard.activity_safe_harbor')}</p>
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-status-success">+$225.00</p>
-                      <p className="text-[12px] text-text-secondary">Oct 15</p>
+                      <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct')}</p>
                     </div>
                   </li>
                   <li className="flex gap-4 py-4 last:pb-0">
@@ -383,12 +387,12 @@ export default function PostEnrollmentDashboard() {
                       <RefreshCcw className="h-5 w-5" aria-hidden />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-bold text-text-primary">Rebalance</p>
-                      <p className="text-[12px] text-text-secondary">Auto Quarterly</p>
+                      <p className="font-bold text-text-primary">{t('postDashboard.activity_rebalance')}</p>
+                      <p className="text-[12px] text-text-secondary">{t('postDashboard.activity_auto_quarterly')}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[14px] font-medium text-text-secondary">Completed</p>
-                      <p className="text-[12px] text-text-secondary">Oct 01</p>
+                      <p className="text-[14px] font-medium text-text-secondary">{t('common.completed')}</p>
+                      <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct1')}</p>
                     </div>
                   </li>
                 </ul>
@@ -402,24 +406,24 @@ export default function PostEnrollmentDashboard() {
                 <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5 shrink-0 text-status-warning" aria-hidden />
-                    <span className="text-[14px] font-bold text-text-primary">Hardship Withdrawal</span>
+                    <span className="text-[14px] font-bold text-text-primary">{t('postDashboard.hardship_title')}</span>
                   </div>
                   <span className="rounded-full bg-status-warning-bg px-2.5 py-0.5 text-[11px] font-bold text-status-warning">
-                    PENDING
+                    {t('common.pending').toUpperCase()}
                   </span>
                 </div>
-                <p className="text-[12px] text-text-secondary">Request #9901 · Submitted Oct 22</p>
+                <p className="text-[12px] text-text-secondary">{t('postDashboard.request_line')}</p>
                 <div className="mt-3 h-1 w-full overflow-hidden rounded-sm bg-surface-elevated">
                   <div className="h-full w-[60%] rounded-sm bg-gradient-to-r from-amber-400 to-amber-500" />
                 </div>
-                <p className="mt-1 text-right text-[11px] text-text-secondary">Under Review</p>
+                <p className="mt-1 text-right text-[11px] text-text-secondary">{t('postDashboard.under_review')}</p>
               </SpecCard>
 
               {/* Readiness */}
               <SpecCard className="text-center">
                 <div className="mb-4 flex items-center justify-center gap-2">
                   <Target className="h-5 w-5 text-status-success" aria-hidden />
-                  <span className="text-[15px] font-bold text-text-primary">Readiness Score</span>
+                  <span className="text-[15px] font-bold text-text-primary">{t('dashboard.readinessScore')}</span>
                 </div>
                 <div className="relative mx-auto h-[140px] w-[140px] text-text-primary [&_.recharts-surface]:overflow-visible">
                   <ResponsiveContainer width="100%" height="100%">
@@ -450,13 +454,13 @@ export default function PostEnrollmentDashboard() {
                 </div>
                 <div className="mt-3 flex items-center justify-center gap-1.5 text-[14px] font-semibold text-status-success">
                   <span className="h-2 w-2 rounded-full bg-status-success" aria-hidden />
-                  On Track
+                  {t('dashboard.onTrack')}
                 </div>
                 <p className="mx-auto mt-3 max-w-[260px] text-[12px] leading-relaxed text-text-secondary">
-                  Projected to replace 76% of pre-retirement income.
+                  {t('postDashboard.projected_income')}
                 </p>
                 <button type="button" className="btn-brand mt-5 w-full">
-                  Launch Simulator
+                  {t('dashboard.launchSimulator')}
                 </button>
               </SpecCard>
 
@@ -465,28 +469,28 @@ export default function PostEnrollmentDashboard() {
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <CreditCard className="h-4 w-4 text-primary" aria-hidden />
-                    <span className="text-[14px] font-bold text-text-primary">Active Loan</span>
+                    <span className="text-[14px] font-bold text-text-primary">{t('dashboard.activeLoan')}</span>
                   </div>
                   <button type="button" className="text-[12px] font-semibold text-primary hover:underline">
-                    Request New
+                    {t('postDashboard.request_new_loan')}
                   </button>
                 </div>
                 <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
-                  <p className="text-[13px] font-bold text-text-primary">General Purpose #102</p>
+                  <p className="text-[13px] font-bold text-text-primary">{t('postDashboard.loan_line_gp')}</p>
                   <span className="rounded-full bg-status-success-bg px-2 py-0.5 text-[11px] font-semibold text-status-success">
-                    Active
+                    {t('common.active')}
                   </span>
                 </div>
-                <p className="text-[11px] text-text-secondary">Originated Jan 2022</p>
+                <p className="text-[11px] text-text-secondary">{t('postDashboard.originated')}</p>
                 <div className="mt-4 grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary">Remaining</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary">{t('postDashboard.remaining')}</p>
                     <p className="mt-1 text-[18px] font-bold text-text-primary">$2,450</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary">Next Payment</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary">{t('postDashboard.next_payment')}</p>
                     <p className="mt-1 text-[14px] font-bold text-text-primary">
-                      $125 · Nov 15
+                      {t('postDashboard.loan_payment_line')}
                     </p>
                   </div>
                 </div>
@@ -494,8 +498,8 @@ export default function PostEnrollmentDashboard() {
                   <div className="h-full w-[60%] rounded-[3px] bg-status-success" />
                 </div>
                 <div className="mt-2 flex justify-between text-[11px] text-text-secondary">
-                  <span>60% Paid Off</span>
-                  <span>14 Payments Left</span>
+                  <span>{t('postDashboard.paid_off_progress')}</span>
+                  <span>{t('postDashboard.payments_left')}</span>
                 </div>
               </SpecCard>
 
@@ -503,7 +507,7 @@ export default function PostEnrollmentDashboard() {
               <SpecCard>
                 <div className="mb-4 flex items-center gap-2">
                   <CheckSquare className="h-4 w-4 text-text-secondary" aria-hidden />
-                  <span className="text-[14px] font-bold text-text-primary">Next Best Actions</span>
+                  <span className="text-[14px] font-bold text-text-primary">{t('dashboard.nextBestActions')}</span>
                 </div>
                 <div className="space-y-3">
                   <div className="flex gap-3 rounded-[12px] border border-status-danger/20 bg-status-danger-bg p-4">
@@ -512,12 +516,12 @@ export default function PostEnrollmentDashboard() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-start justify-between gap-2">
-                        <p className="text-[13px] font-bold text-text-primary">Add a Beneficiary</p>
+                        <p className="text-[13px] font-bold text-text-primary">{t('postDashboard.action_beneficiary')}</p>
                         <span className="shrink-0 rounded bg-status-danger/20 px-2 py-0.5 text-[10px] font-bold text-status-danger">
-                          REQUIRED
+                          {t('postDashboard.badge_required')}
                         </span>
                       </div>
-                      <p className="mt-1 text-[12px] text-text-secondary">Protect your assets today.</p>
+                      <p className="mt-1 text-[12px] text-text-secondary">{t('postDashboard.action_beneficiary_sub')}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 rounded-[12px] border border-border-default bg-surface-elevated p-4">
@@ -526,10 +530,10 @@ export default function PostEnrollmentDashboard() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
-                        <p className="text-[13px] font-bold text-text-primary">Review Risk Tolerance</p>
+                        <p className="text-[13px] font-bold text-text-primary">{t('postDashboard.action_risk')}</p>
                         <span className="text-lg text-text-muted">›</span>
                       </div>
-                      <p className="mt-1 text-[12px] text-text-secondary">Update your profile.</p>
+                      <p className="mt-1 text-[12px] text-text-secondary">{t('postDashboard.action_risk_sub')}</p>
                     </div>
                   </div>
                 </div>
@@ -548,25 +552,25 @@ export default function PostEnrollmentDashboard() {
                     alt="Sarah Jenkins"
                     className="absolute right-5 top-5 h-[70px] w-[70px] rounded-full border-2 border-white object-cover ring-2 ring-white/30"
                   />
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/80">Your Advisor</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/80">{t('dashboard.yourAdvisor')}</p>
                   <h3 className="mt-2 pr-20 text-[20px] font-bold">Sarah Jenkins</h3>
-                  <p className="mt-1 text-[13px] text-blue-100">Senior Wealth Advisor</p>
+                  <p className="mt-1 text-[13px] text-blue-100">{t('postDashboard.advisor_title_role')}</p>
                   <div className="mt-6 grid grid-cols-3 divide-x divide-white/20 text-center">
                     <div className="px-2">
                       <p className="text-[16px] font-bold">4.9</p>
-                      <p className="text-[11px] text-white/70">Rating</p>
+                      <p className="text-[11px] text-white/70">{t('postDashboard.advisor_rating')}</p>
                     </div>
                     <div className="px-2">
                       <p className="text-[16px] font-bold">12yr</p>
-                      <p className="text-[11px] text-white/70">Experience</p>
+                      <p className="text-[11px] text-white/70">{t('postDashboard.advisor_experience')}</p>
                     </div>
                     <div className="px-2">
                       <p className="text-[16px] font-bold">240+</p>
-                      <p className="text-[11px] text-white/70">Clients</p>
+                      <p className="text-[11px] text-white/70">{t('postDashboard.advisor_clients')}</p>
                     </div>
                   </div>
                   <p className="mt-4 text-[12px] leading-relaxed text-white/90">
-                    Specializes in retirement planning and tax-efficient wealth strategies for professionals nearing retirement.
+                    {t('postDashboard.advisor_bio')}
                   </p>
                   <div className="mt-5 flex gap-2.5">
                     <button
@@ -574,14 +578,14 @@ export default function PostEnrollmentDashboard() {
                       className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border-2 border-white py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
                     >
                       <Mail className="h-4 w-4" aria-hidden />
-                      Message
+                      {t('dashboard.message')}
                     </button>
                     <button
                       type="button"
                       className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white py-2.5 text-sm font-semibold text-primary shadow-sm transition hover:bg-slate-100"
                     >
                       <CalendarDays className="h-4 w-4" aria-hidden />
-                      Schedule Call
+                      {t('dashboard.scheduleCall')}
                     </button>
                   </div>
                 </div>

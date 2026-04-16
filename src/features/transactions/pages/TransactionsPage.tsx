@@ -16,6 +16,8 @@ import RecentTransactionsCompact from "../components/RecentTransactionsCompact";
 import DraftTransactions from "../components/DraftTransactions";
 import svgPaths from "../svgPaths";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
+
 function SectionHeader({
   icon,
   title,
@@ -119,6 +121,7 @@ function ChartBarIcon({ className }: { className?: string }) {
 }
 
 function TransactionsPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleResolveIssue = () => {
@@ -146,16 +149,16 @@ function TransactionsPage() {
               {/* Left: plan info */}
               <div className="min-w-0 flex-1 sm:pr-6">
                 <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#6B7280] dark:text-[#94A3B8]">
-                  Plan Name
+                  {t("transactions.plan_name_label")}
                 </p>
                 <div className="flex items-center gap-2">
                   <ShieldIcon className="h-4 w-4 shrink-0 text-[#2563EB] dark:text-[#60A5FA]" />
                   <p className="text-[15px] font-bold leading-snug text-[#111827] dark:text-[#F1F5F9]">
-                    401(k) Retirement Plan
+                    {t("transactions.plan_default_name")}
                   </p>
                 </div>
                 <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#6B7280] dark:text-[#94A3B8]">
-                  Plan Balance
+                  {t("transactions.plan_balance_label")}
                 </p>
                 <p className="mt-0.5 text-[22px] font-bold leading-tight tracking-tight text-[#1D4ED8] dark:text-[#60A5FA]">
                   $30,000
@@ -174,7 +177,7 @@ function TransactionsPage() {
               {/* Right: vested */}
               <div className="min-w-0 flex-1 sm:pl-0">
                 <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#6B7280] dark:text-[#94A3B8]">
-                  Vested Balance
+                  {t("transactions.vested_balance_label")}
                 </p>
                 <div className="flex items-center gap-2">
                   <ChartBarIcon className="h-4 w-4 shrink-0 text-[#2563EB] dark:text-[#60A5FA]" />
@@ -192,7 +195,7 @@ function TransactionsPage() {
                   />
                 </div>
                 <p className="mt-[5px] text-[12px] font-medium leading-snug text-[#6B7280] dark:text-[#94A3B8]">
-                  83.3% vested
+                  {t("transactions.vested_percent", { pct: "83.3" })}
                 </p>
               </div>
             </div>
@@ -208,42 +211,42 @@ function TransactionsPage() {
         >
           <SectionHeader
             icon={<Sparkles className="w-4 h-4" />}
-            title="Quick Actions"
+            title={t("transactions.quick_actions")}
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-1.5 sm:gap-2">
             <QuickActionButton
               icon={<HandCoins className="w-4 h-4" />}
-              title="Take a Loan"
-              contextInfo="Borrow up to $10,000"
-              additionalInfo="Repay from payroll over 1–5 years"
+              title={t("dashboard.takeLoan")}
+              contextInfo={t("transactions.qa_loan_sub")}
+              additionalInfo={t("transactions.qa_loan_hint")}
               onClick={() => navigate("/transactions/loan")}
             />
             <QuickActionButton
               icon={<DollarSign className="w-4 h-4" />}
-              title="Withdraw Money"
-              contextInfo="Available: $5,000"
-              additionalInfo="Early withdrawal may incur penalties"
+              title={t("dashboard.withdrawMoney")}
+              contextInfo={t("transactions.qa_withdraw_sub")}
+              additionalInfo={t("transactions.qa_withdraw_hint")}
               onClick={() => navigate("/transactions/withdrawal")}
             />
             <QuickActionButton
               icon={<ArrowLeftRight className="w-4 h-4" />}
-              title="Transfer Funds"
-              contextInfo="Reallocate balance"
-              additionalInfo="Move money between funds fee-free"
+              title={t("dashboard.transferFunds")}
+              contextInfo={t("transactions.qa_transfer_sub")}
+              additionalInfo={t("transactions.qa_transfer_hint")}
               onClick={() => navigate("/transactions/transfer")}
             />
             <QuickActionButton
               icon={<PieChart className="w-4 h-4" />}
-              title="Rebalance"
-              contextInfo="Current: Moderate risk"
-              additionalInfo="Keeps your portfolio aligned with risk"
+              title={t("transactions.rebalance")}
+              contextInfo={t("transactions.qa_rebalance_sub")}
+              additionalInfo={t("transactions.qa_rebalance_hint")}
               onClick={() => navigate("/transactions/rebalance")}
             />
             <QuickActionButton
               icon={<RefreshCcw className="w-4 h-4" />}
-              title="Roll Over"
-              contextInfo="Consolidate savings"
-              additionalInfo="Combine old plans with no tax penalty"
+              title={t("dashboard.rollOver")}
+              contextInfo={t("transactions.qa_rollover_sub")}
+              additionalInfo={t("transactions.qa_rollover_hint")}
               onClick={() => navigate("/transactions/rollover")}
             />
           </div>
@@ -260,11 +263,11 @@ function TransactionsPage() {
           >
             <SectionHeader
               icon={<FilePen className="w-4 h-4" />}
-              title="Draft Transactions"
+              title={t("transactions.draft_transactions")}
               badge={{
-                text: "2 drafts",
+                text: t("transactions.drafts_badge", { count: 2 }),
                 color: "bg-[#EFF6FF] dark:bg-blue-950/30 brand-text" }}
-              subtitle="Resume where you left off"
+              subtitle={t("transactions.resume_subtitle")}
             />
             <div
               style={{
@@ -286,9 +289,9 @@ function TransactionsPage() {
           >
             <SectionHeader
               icon={<AlertTriangle className="w-4 h-4" />}
-              title="Attention Required"
+              title={t("transactions.attention_required")}
               badge={{
-                text: "2 items",
+                text: t("transactions.items_badge", { count: 2 }),
                 color: "bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300" }}
             />
             <AttentionRequiredTimeline onResolve={handleResolveIssue} />
@@ -304,8 +307,8 @@ function TransactionsPage() {
         >
           <SectionHeader
             icon={<ChartBar className="w-4 h-4" />}
-            title="Recent Transactions"
-            subtitle="Last 90 days"
+            title={t("transactions.recent_transactions")}
+            subtitle={t("transactions.last_90_days")}
           />
           <div
             style={{
@@ -327,11 +330,11 @@ function TransactionsPage() {
         >
           <SectionHeader
             icon={<Sparkles className="w-4 h-4" />}
-            title="Financial Guidance"
-            subtitle="Personalized insights"
+            title={t("transactions.financial_guidance")}
+            subtitle={t("transactions.personalized_insights")}
             variant="ai"
             badge={{
-              text: "AI Insights",
+              text: t("transactions.ai_insights"),
               color: "bg-[#F5F3FF] dark:bg-violet-950/30 text-purple-600 dark:text-purple-400" }}
           />
           <FinancialGuidanceCompact />

@@ -1,13 +1,17 @@
 import { type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import AuthCarousel from './AuthCarousel'
 import { Moon, Sun } from 'lucide-react'
 import { useTheme } from '@/core/hooks/useTheme'
+import { LEGAL } from '@/lib/constants'
+import { LegalHrefLink } from '@/features/legal/components/LegalHrefLink'
 
 interface AuthTwoPanelProps {
   children: ReactNode
 }
 
 export default function AuthTwoPanel({ children }: AuthTwoPanelProps) {
+  const { t } = useTranslation()
   const { resolvedMode, setMode } = useTheme()
   const toggleTheme = () => setMode(resolvedMode === 'dark' ? 'light' : 'dark')
 
@@ -56,13 +60,27 @@ export default function AuthTwoPanel({ children }: AuthTwoPanelProps) {
             </div>
 
             {/* Footer */}
-            <div className="mt-6 text-center space-y-1">
+            <div className="mt-6 text-center space-y-2">
               <p className="text-xs text-gray-400 dark:text-gray-600">
                 © Congruent Solutions, Inc. All Rights Reserved
               </p>
-              <a href="#" className="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                Privacy Policy
-              </a>
+              <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-blue-600 dark:text-blue-400">
+                <LegalHrefLink href={LEGAL.privacyPolicyHref} className="hover:underline">
+                  {t('footer.privacy')}
+                </LegalHrefLink>
+                <span className="text-gray-300 dark:text-gray-600" aria-hidden>
+                  ·
+                </span>
+                <LegalHrefLink href={LEGAL.termsOfServiceHref} className="hover:underline">
+                  {t('footer.terms')}
+                </LegalHrefLink>
+                <span className="text-gray-300 dark:text-gray-600" aria-hidden>
+                  ·
+                </span>
+                <LegalHrefLink href={LEGAL.helpCenterHref} className="hover:underline">
+                  {t('footer.help')}
+                </LegalHrefLink>
+              </div>
             </div>
           </div>
         </div>

@@ -117,6 +117,7 @@
   },
 
   "learning": {
+    "illustration_alt": "Ilustración de un camino en un mapa desde donde está ahora hasta su meta de ahorro para la jubilación",
     "step1": "Paso 1",
     "title_line1": "Aprenda cómo funciona",
     "title_line2": "su plan de jubilación",
@@ -146,6 +147,17 @@
     "chip_balance": "Consultar mi saldo adquirido"
   },
 
+  "attention": {
+    "loan_title": "Solicitud de préstamo: acción requerida",
+    "loan_detail": "Suba los documentos requeridos para continuar procesando su solicitud de préstamo.",
+    "withdrawal_title": "Retiro: verificar datos bancarios",
+    "withdrawal_detail": "Confirme la cuenta bancaria registrada antes de enviar los fondos.",
+    "resolve": "Resolver",
+    "review": "Revisar",
+    "amount_prefix": "Monto: {{amount}}",
+    "no_action": "No se requiere ninguna acción"
+  },
+
   "feedback": {
     "title": "Enviar comentarios",
     "subtitle": "¿Cómo calificaría esta página? Los detalles opcionales nos ayudan a mejorar.",
@@ -168,6 +180,10 @@
     "privacy": "Política de privacidad",
     "terms": "Términos de servicio",
     "help": "Centro de ayuda"
+  },
+
+  "legal": {
+    "back": "Volver"
   },
 
   "enrollment": {
@@ -196,7 +212,33 @@
     "back": "Atrás",
     "submit": "Enviar",
     "review": "Revisar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "plan_name_label": "Nombre del plan",
+    "plan_default_name": "Plan 401(k) de jubilación",
+    "plan_balance_label": "Saldo del plan",
+    "vested_balance_label": "Saldo adquirido",
+    "vested_percent": "{{pct}}% adquirido",
+    "quick_actions": "Acciones rápidas",
+    "qa_loan_sub": "Préstamo hasta $10,000",
+    "qa_loan_hint": "Reembolso por nómina en 1–5 años",
+    "qa_withdraw_sub": "Disponible: $5,000",
+    "qa_withdraw_hint": "El retiro anticipado puede conllevar penalidades",
+    "qa_transfer_sub": "Reasignar saldo",
+    "qa_transfer_hint": "Mueva dinero entre fondos sin comisión",
+    "qa_rebalance_sub": "Actual: Riesgo moderado",
+    "qa_rebalance_hint": "Mantiene su cartera alineada al riesgo",
+    "qa_rollover_sub": "Consolidar ahorros",
+    "qa_rollover_hint": "Combine planes anteriores sin penalidad fiscal",
+    "draft_transactions": "Borradores de transacciones",
+    "drafts_badge": "{{count}} borradores",
+    "resume_subtitle": "Continúe donde lo dejó",
+    "attention_required": "Atención requerida",
+    "items_badge": "{{count}} elementos",
+    "recent_transactions": "Transacciones recientes",
+    "last_90_days": "Últimos 90 días",
+    "financial_guidance": "Orientación financiera",
+    "personalized_insights": "Información personalizada",
+    "ai_insights": "Información con IA"
   },
 
   "investments": {
@@ -246,6 +288,69 @@
     "yourAdvisor": "Tu Asesor",
     "scheduleCall": "Agendar Llamada",
     "message": "Mensaje"
+  },
+
+  "postDashboard": {
+    "summary_suffix": "Aquí está el resumen de tu jubilación.",
+    "greeting_morning": "Buenos días, {{name}}.",
+    "greeting_afternoon": "Buenas tardes, {{name}}.",
+    "greeting_evening": "Buenas noches, {{name}}.",
+    "greeting_night": "Hola, {{name}}.",
+    "quarter_return": "4,2% este trimestre",
+    "on_track_badge": "EN CAMINO",
+    "vested_balance_colon": "Saldo adquirido:",
+    "retirement_label": "Jubilación:",
+    "retirement_est": "Aprox. 2046",
+    "vested_short": "Adquirido:",
+    "take_loan_hint": "Aprobación típica: 1-3 días",
+    "withdraw_hint": "Impacto fiscal: 10-20%",
+    "transfer_hint": "Sin comisiones ni penalidades",
+    "rollover_hint": "Sin penalidad fiscal",
+    "contrib_month_sample": "Octubre 2024",
+    "contrib_you": "Usted (8%)",
+    "contrib_employer": "Empleador (4%)",
+    "contrib_total_mo": "Total/mes",
+    "retirement_planning_badge": "PLANIFICACIÓN DE JUBILACIÓN",
+    "financial_wellness_title": "Bienestar financiero",
+    "learning_blurb": "Domine su relación con el dinero con nuestra guía integral para construir patrimonio sostenible.",
+    "know_more_arrow": "Saber más →",
+    "current_asset_mix": "Mezcla actual de activos",
+    "risk_profile_moderate_agg": "Moderadamente agresivo",
+    "seg_us": "ACCIONES EE.UU.",
+    "seg_intl": "ACCIONES INT.",
+    "seg_bonds": "BONOS",
+    "seg_cash": "EFECTIVO",
+    "activity_contribution": "Contribución",
+    "activity_payroll": "Deducción de nómina",
+    "activity_employer_match": "Contrapartida del empleador",
+    "activity_safe_harbor": "Safe Harbor",
+    "activity_rebalance": "Rebalanceo",
+    "activity_auto_quarterly": "Trimestral automático",
+    "hardship_title": "Retiro por dificultades",
+    "request_line": "Solicitud #9901 · Enviada el 22 oct",
+    "under_review": "En revisión",
+    "projected_income": "Se proyecta reemplazar el 76% de los ingresos previos a la jubilación.",
+    "request_new_loan": "Solicitar nuevo",
+    "loan_line_gp": "Propósito general #102",
+    "originated": "Originado ene 2022",
+    "remaining": "Restante",
+    "next_payment": "Próximo pago",
+    "loan_payment_line": "$125 · 15 nov",
+    "paid_off_progress": "60% pagado",
+    "payments_left": "14 pagos restantes",
+    "action_beneficiary": "Agregar un beneficiario",
+    "action_beneficiary_sub": "Proteja sus activos hoy.",
+    "action_risk": "Revisar tolerancia al riesgo",
+    "action_risk_sub": "Actualice su perfil.",
+    "badge_required": "OBLIGATORIO",
+    "advisor_title_role": "Asesora senior de patrimonio",
+    "advisor_rating": "Calificación",
+    "advisor_experience": "Experiencia",
+    "advisor_clients": "Clientes",
+    "advisor_bio": "Especializada en planificación de jubilación y estrategias patrimoniales eficientes fiscalmente para profesionales cercanos a la jubilación.",
+    "view_all_arrow": "Ver todo →",
+    "sample_date_oct": "15 oct",
+    "sample_date_oct1": "01 oct"
   },
 
   "enrolment": {

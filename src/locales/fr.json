@@ -108,15 +108,16 @@
     "greeting_morning": "Bonjour",
     "greeting_afternoon": "Bon après-midi",
     "greeting_evening": "Bonsoir",
-    "greeting_morning_with_name": "Bonjour, {{name}} !",
-    "greeting_afternoon_with_name": "Bon après-midi, {{name}} !",
-    "greeting_evening_with_name": "Bonsoir, {{name}} !",
+    "greeting_morning_with_name": "Bonjour, {{name}}",
+    "greeting_afternoon_with_name": "Bon après-midi, {{name}}",
+    "greeting_evening_with_name": "Bonsoir, {{name}}",
     "modal_greeting_with_name": "Bonjour, {{name}} 👋",
     "modal_greeting_generic": "Bonjour 👋",
     "modal_personalize_subtitle": "Personnalisons votre parcours retraite."
   },
 
   "learning": {
+    "illustration_alt": "Illustration d'un parcours sur une carte de votre situation actuelle jusqu'à votre objectif d'épargne retraite",
     "step1": "Étape 1",
     "title_line1": "Apprenez comment fonctionne",
     "title_line2": "votre plan de retraite",
@@ -168,6 +169,10 @@
     "privacy": "Politique de confidentialité",
     "terms": "Conditions d'utilisation",
     "help": "Centre d'aide"
+  },
+
+  "legal": {
+    "back": "Retour"
   },
 
   "enrollment": {

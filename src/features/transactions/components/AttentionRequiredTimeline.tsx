@@ -1,21 +1,41 @@
 import { motion } from "framer-motion";
 import { AlertCircle } from "lucide-react";
-import { useState } from "react";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
-interface AttentionItem {
+type AttentionDef = {
   id: string;
-  title: string;
-  description: string;
+  titleKey: string;
+  descKey: string;
   amount?: string;
-  actionLabel?: string;
-  onAction?: () => void;
-}
+  actionKey: string;
+};
 
-/** Second line: Amount + middle dot + description (full sentence, wraps naturally). */
-function buildDetailLine(item: AttentionItem): string {
+const ATTENTION_DEFS: AttentionDef[] = [
+  {
+    id: "loan-docs",
+    titleKey: "attention.loan_title",
+    descKey: "attention.loan_detail",
+    amount: "$5,000",
+    actionKey: "attention.resolve",
+  },
+  {
+    id: "withdrawal-verify",
+    titleKey: "attention.withdrawal_title",
+    descKey: "attention.withdrawal_detail",
+    amount: "$2,500",
+    actionKey: "attention.review",
+  },
+];
+
+function buildDetailLine(
+  t: (k: string, o?: Record<string, string>) => string,
+  amount: string | undefined,
+  description: string
+): string {
   const parts: string[] = [];
-  if (item.amount) parts.push(`Amount: ${item.amount}`);
-  parts.push(item.description);
+  if (amount) parts.push(t("attention.amount_prefix", { amount }));
+  parts.push(description);
   return parts.join(" · ");
 }
 
@@ -24,30 +44,24 @@ interface AttentionRequiredTimelineProps {
 }
 
 function AttentionRequiredTimeline({ onResolve }: AttentionRequiredTimelineProps) {
-  const [items] = useState<AttentionItem[]>([
-    {
-      id: "loan-docs",
-      title: "Loan Request - Action Required",
-      description: "Upload required documents to continue processing your loan request.",
-      amount: "$5,000",
-      actionLabel: "Resolve",
-      onAction: onResolve,
-    },
-    {
-      id: "withdrawal-verify",
-      title: "Withdrawal — verify bank details",
-      description: "Confirm the bank account on file before we release funds.",
-      amount: "$2,500",
-      actionLabel: "Review",
-      onAction: onResolve,
-    },
-  ]);
+  const { t } = useTranslation();
+
+  const items = useMemo(
+    () =>
+      ATTENTION_DEFS.map((def) => ({
+        ...def,
+        onAction: onResolve,
+      })),
+    [onResolve]
+  );
 
   if (items.length === 0) {
     return (
       <div className="rounded-[10px] border border-dashed border-slate-200 bg-slate-50/80 px-4 py-8 text-center dark:border-gray-600 dark:bg-gray-900/50">
         <AlertCircle className="mx-auto mb-2 h-8 w-8 text-slate-300 dark:text-gray-600" />
-        <p className="text-[13px] font-medium text-slate-400 dark:text-gray-500">No action required</p>
+        <p className="text-[13px] font-medium text-slate-400 dark:text-gray-500">
+          {t("attention.no_action")}
+        </p>
       </div>
     );
   }
@@ -77,22 +91,22 @@ function AttentionRequiredTimeline({ onResolve }: AttentionRequiredTimelineProps
                 aria-hidden
               />
               <h3 className="min-w-0 flex-1 text-[13px] font-semibold leading-snug tracking-tight text-slate-900 line-clamp-2 break-words dark:text-white">
-                {item.title}
+                {t(item.titleKey)}
               </h3>
             </div>
 
             <p className="mt-1.5 break-words text-[12px] font-normal leading-relaxed text-[#92400E] dark:text-amber-200/95">
-              {buildDetailLine(item)}
+              {buildDetailLine(t, item.amount, t(item.descKey))}
             </p>
 
-            {item.actionLabel && item.onAction ? (
+            {item.onAction ? (
               <div className="mt-2 flex justify-end border-t border-amber-200/70 pt-2 dark:border-amber-800/50">
                 <button
                   type="button"
                   onClick={item.onAction}
                   className="rounded-md px-2.5 py-1 text-[11px] font-semibold text-amber-900 transition-colors hover:bg-amber-200/60 dark:text-amber-200 dark:hover:bg-amber-900/40"
                 >
-                  {item.actionLabel}
+                  {t(item.actionKey)}
                 </button>
               </div>
             ) : null}

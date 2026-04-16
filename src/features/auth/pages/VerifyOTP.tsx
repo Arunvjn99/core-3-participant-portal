@@ -13,7 +13,8 @@ import { useTheme } from '@/core/hooks/useTheme'
 import { supabase } from '@/core/supabase'
 import { useAuth } from '@/core/hooks/useAuth'
 import { useOtpStore } from '@/core/store/otpStore'
-import { ENV, ROUTES } from '@/lib/constants'
+import { ENV, LEGAL, ROUTES } from '@/lib/constants'
+import { LegalHrefLink } from '@/features/legal/components/LegalHrefLink'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import AuthLayout from '../components/AuthLayout'
 
@@ -238,13 +239,25 @@ export function VerifyOTP() {
           <p className="text-xs text-gray-400 dark:text-gray-600">
             {t('auth.copyright')}
           </p>
-          <div className="flex items-center gap-4">
-            <a
-              href="#"
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+            <LegalHrefLink
+              href={LEGAL.privacyPolicyHref}
               className="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-600 dark:hover:text-gray-400"
             >
               {t('auth.privacy_policy')}
-            </a>
+            </LegalHrefLink>
+            <LegalHrefLink
+              href={LEGAL.termsOfServiceHref}
+              className="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-600 dark:hover:text-gray-400"
+            >
+              {t('footer.terms')}
+            </LegalHrefLink>
+            <LegalHrefLink
+              href={LEGAL.helpCenterHref}
+              className="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-600 dark:hover:text-gray-400"
+            >
+              {t('footer.help')}
+            </LegalHrefLink>
             <img
               src={CORE_LOGO}
               alt="CORE"

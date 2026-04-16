@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useBrandTheme } from '@/core/theme/BrandThemeContext'
+import { LEGAL } from '@/lib/constants'
+import { LegalHrefLink } from '@/features/legal/components/LegalHrefLink'
 
 const CORE_LOGO = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/CORE%20logo.png'
 
@@ -28,25 +30,25 @@ export default function AppFooter() {
           </div>
 
           {/* Links */}
-          <div className="flex items-center gap-6 text-xs font-medium text-gray-400 dark:text-gray-600">
-            <a
-              href="#"
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-medium text-gray-400 dark:text-gray-600">
+            <LegalHrefLink
+              href={LEGAL.privacyPolicyHref}
               className="uppercase tracking-wide transition-colors hover:text-gray-700 dark:hover:text-gray-300"
             >
               {t('footer.privacy')}
-            </a>
-            <a
-              href="#"
+            </LegalHrefLink>
+            <LegalHrefLink
+              href={LEGAL.termsOfServiceHref}
               className="uppercase tracking-wide transition-colors hover:text-gray-700 dark:hover:text-gray-300"
             >
               {t('footer.terms')}
-            </a>
-            <a
-              href="#"
+            </LegalHrefLink>
+            <LegalHrefLink
+              href={LEGAL.helpCenterHref}
               className="uppercase tracking-wide transition-colors hover:text-gray-700 dark:hover:text-gray-300"
             >
               {t('footer.help')}
-            </a>
+            </LegalHrefLink>
           </div>
         </div>
       </div>

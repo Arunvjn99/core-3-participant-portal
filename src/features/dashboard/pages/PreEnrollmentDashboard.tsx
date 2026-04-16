@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2, ChevronRight, Sparkles, UserCheck } from 'lucide-react'
@@ -41,6 +41,7 @@ export function PreEnrollmentDashboard() {
   const { user, loading: authLoading } = useAuth()
   const { profile } = useUser()
   const learningRef = useRef<HTMLElement | null>(null)
+  const prefersReducedMotion = useReducedMotion()
 
   const firstNameRaw = getAuthenticatedFirstName(profile, user)
   const displayFirstName = formatFirstNameForDisplay(firstNameRaw)
@@ -53,7 +54,9 @@ export function PreEnrollmentDashboard() {
       : emailLocal
         ? formatFirstNameForDisplay(emailLocal)
         : 'there'
-  const showPersonalWelcome = !authLoading && heroPillName !== 'there'
+  /** Time-based greeting + first name when session is ready and we have a usable name (see getAuthenticatedFirstName). */
+  const heroGreetingName =
+    !authLoading && heroPillName !== 'there' ? heroPillName : null
   const dayPeriod = getLocalDayPeriod()
   const heroGreetingKeys = HERO_TIME_GREETING_KEYS[dayPeriod]
 
@@ -92,8 +95,8 @@ export function PreEnrollmentDashboard() {
                   aria-hidden
                 />
                 <span className="text-sm font-semibold text-[#2b59c3] dark:text-blue-400">
-                  {showPersonalWelcome
-                    ? t(heroGreetingKeys.withName, { name: heroPillName })
+                  {heroGreetingName
+                    ? t(heroGreetingKeys.withName, { name: heroGreetingName })
                     : t(heroGreetingKeys.generic)}
                 </span>
               </div>
@@ -159,7 +162,7 @@ export function PreEnrollmentDashboard() {
 
           {/* Learning */}
           <section ref={learningRef} className="relative z-10">
-            <div className="relative overflow-hidden rounded-[40px] bg-gradient-to-r from-[#2F6BFF] to-[#6FA8FF] text-white shadow-2xl shadow-blue-200/50 dark:shadow-blue-900/30">
+            <div className="relative overflow-hidden rounded-[40px] bg-gradient-to-r from-[#3D82D0] to-[#3F85D2] text-white shadow-2xl shadow-[#3E83D1]/35 dark:shadow-blue-900/40">
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.2),transparent_50%)]" />
 
               <div className="relative z-10 grid items-center gap-8 p-8 md:gap-10 md:p-12 lg:grid-cols-[minmax(0,1fr)_minmax(220px,380px)] lg:gap-12">
@@ -194,21 +197,36 @@ export function PreEnrollmentDashboard() {
                   </div>
                 </div>
 
-                <div className="flex justify-center lg:justify-end lg:self-end">
-                  <img
-                    src="/learning-card-illustration.png"
-                    alt="Student with school supplies learning about your plan"
+                <motion.div
+                  className="flex justify-center lg:justify-end lg:self-end"
+                  initial={prefersReducedMotion ? undefined : { opacity: 0, y: 24 }}
+                  whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.35 }}
+                  transition={{
+                    duration: prefersReducedMotion ? 0 : 0.75,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                >
+                  <motion.img
+                    src="/learning-journey-illustration.png"
+                    alt={t('learning.illustration_alt')}
                     width={380}
-                    height={420}
+                    height={380}
                     className="h-auto w-full max-w-[min(100%,380px)] object-contain object-bottom"
                     loading="lazy"
                     decoding="async"
+                    animate={prefersReducedMotion ? undefined : { y: [0, -6, 0] }}
+                    transition={{
+                      duration: prefersReducedMotion ? 0 : 4.8,
+                      repeat: prefersReducedMotion ? 0 : Infinity,
+                      ease: 'easeInOut',
+                    }}
                   />
-                </div>
+                </motion.div>
               </div>
 
               <div className="pointer-events-none absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-white/10 blur-[80px]" />
-              <div className="pointer-events-none absolute -left-20 -top-20 h-48 w-48 rounded-full bg-blue-400/20 blur-[60px]" />
+              <div className="pointer-events-none absolute -left-20 -top-20 h-48 w-48 rounded-full bg-[#7AB0EA]/25 blur-[60px]" />
             </div>
           </section>
 

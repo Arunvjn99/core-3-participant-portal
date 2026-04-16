@@ -10,7 +10,8 @@ import {
   Check, X, Building2, ArrowRight, LogIn
 } from 'lucide-react'
 import { signUpUser, signInUser, getAllCompanies } from '../../../lib/supabaseIntegration'
-import { ROUTES } from '@/lib/constants'
+import { LEGAL, ROUTES } from '@/lib/constants'
+import { LegalHrefLink } from '@/features/legal/components/LegalHrefLink'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -742,7 +743,17 @@ export default function WhiteLabelAuth() {
             {/* Footer */}
             <p className="mt-4 text-center text-xs text-gray-400 dark:text-gray-600">
               © Congruent Solutions, Inc. All Rights Reserved ·{' '}
-              <a href="#" className="hover:underline" style={accentLink}>Privacy Policy</a>
+              <LegalHrefLink href={LEGAL.privacyPolicyHref} className="hover:underline" style={accentLink}>
+                Privacy Policy
+              </LegalHrefLink>
+              {' · '}
+              <LegalHrefLink href={LEGAL.termsOfServiceHref} className="hover:underline" style={accentLink}>
+                Terms of Service
+              </LegalHrefLink>
+              {' · '}
+              <LegalHrefLink href={LEGAL.helpCenterHref} className="hover:underline" style={accentLink}>
+                Help Center
+              </LegalHrefLink>
             </p>
           </div>
         </div>

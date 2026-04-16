@@ -4,6 +4,8 @@ import { useEnrollment } from '@/core/hooks/useEnrollment'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { useEnrollmentSave } from '@/core/hooks/useEnrollmentSave'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
+import { LEGAL } from '@/lib/constants'
+import { LegalHrefLink } from '@/features/legal/components/LegalHrefLink'
 import { useEnrollmentStepNav } from '@/features/enrollment/components/EnrollmentStepNavContext'
 import { Edit3, DollarSign, Briefcase, TrendingUp, Clock, Sparkles, ExternalLink } from 'lucide-react'
 
@@ -192,14 +194,12 @@ export default function ReviewEnrollment() {
             </div>
             <span className="text-gray-700 dark:text-gray-300" style={{ fontSize: '0.82rem' }}>
               I confirm my retirement plan enrolment and understand my contributions will begin next pay period.{' '}
-              <a
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                className="inline-flex items-center gap-0.5 text-blue-600 hover:text-blue-700 dark:text-blue-400"
-                style={{ fontWeight: 500 }}
+              <LegalHrefLink
+                href={LEGAL.termsOfServiceHref}
+                className="inline-flex items-center gap-0.5 font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
               >
                 View full plan terms <ExternalLink className="h-3 w-3" />
-              </a>
+              </LegalHrefLink>
             </span>
           </label>
         </div>
