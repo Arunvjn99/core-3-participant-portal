@@ -8,9 +8,7 @@ export default function AutoIncreaseSkip() {
   const navigate = useNavigate()
   const { updateData } = useEnrollment()
 
-  const fixedProjection = 124621
-  const autoProjection = 185943
-  const difference = autoProjection - fixedProjection
+  const missedSavingsAmount = 185943 - 124621
 
   const handleReconsider = () => {
     updateData({ autoIncrease: true })
@@ -34,9 +32,7 @@ export default function AutoIncreaseSkip() {
     <AnimatedPage>
       <div className="mx-auto max-w-lg rounded-[28px] border border-slate-200/90 bg-white p-6 text-left shadow-lg sm:p-8 dark:border-gray-700 dark:bg-gray-900">
         <AutoIncreaseSkipPanel
-          projectedWithout={fixedProjection}
-          projectedWith={autoProjection}
-          missedSavingsAmount={difference}
+          missedSavingsAmount={missedSavingsAmount}
           onReconsider={handleReconsider}
           onContinueWithout={handleContinueWithout}
         />

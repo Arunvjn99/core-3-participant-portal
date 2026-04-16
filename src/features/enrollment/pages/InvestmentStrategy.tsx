@@ -361,6 +361,7 @@ function InvestmentStrategy() {
   const [editingSource, setEditingSource] = useState<SourceKey | null>(null)
   const [modalInitialTab, setModalInitialTab] = useState<SourceKey>('preTax')
   const [customAllocations, setCustomAllocations] = useState<PerSourceAllocations | null>(null)
+  const [hasConfirmedPlanDefault, setHasConfirmedPlanDefault] = useState(false)
   const [inlineAllocs, setInlineAllocs] = useState<PerSourceAllocations | null>(null)
 
   const currentAllocation = allocations[data.riskLevel] ?? allocations['balanced']
@@ -413,12 +414,31 @@ function InvestmentStrategy() {
   const handleSaveInline = () => { if (inlineAllocs) setCustomAllocations(inlineAllocs); setEditingSource(null) }
   const handleCloseInline = () => { setEditingSource(null); setInlineAllocs(null) }
 
+  const confirmPlanDefaultChoice = useCallback(() => {
+    setHasConfirmedPlanDefault(true)
+    updateData({ useRecommendedPortfolio: true })
+  }, [updateData])
+
+  const handleSelectPlanDefault = useCallback(() => {
+    setCustomAllocations(null)
+    setShowCustomizeModal(false)
+    setShowBuildPortfolioModal(false)
+    setEditingSource(null)
+    setInlineAllocs(null)
+    setHasConfirmedPlanDefault(true)
+    updateData({ useRecommendedPortfolio: true })
+  }, [updateData])
+
   return (
     <AnimatedPage>
       <div>
         <div className="mb-5">
-          <h1 className="text-gray-900 dark:text-white">Your Investment Strategy</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1" style={{ fontSize: '0.9rem' }}>See how each contribution source is invested.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+            Your Investment Strategy
+          </h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 sm:text-base">
+            See how each contribution source is invested.
+          </p>
         </div>
 
         <div className="space-y-5">
@@ -454,7 +474,7 @@ function InvestmentStrategy() {
           </div>
 
           {/* ── 60/40 Grid ── */}
-          <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {/* Plan Default Investment — 60% */}
             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
               <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:gap-6">
@@ -487,9 +507,38 @@ function InvestmentStrategy() {
                   ))}
                 </div>
               </div>
-              <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 rounded-xl p-3 mb-4">
+              <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 rounded-xl p-3">
                 <p className="text-blue-900 dark:text-blue-300 mb-1" style={{ fontSize: '0.78rem', fontWeight: 600 }}>Why this works for you:</p>
                 <p className="text-blue-800 dark:text-blue-400" style={{ fontSize: '0.75rem', lineHeight: 1.5 }}>Balanced for growth with your retirement timeline</p>
+              </div>
+              <div className="mt-4">
+                {customAllocations ? (
+                  <button
+                    type="button"
+                    onClick={handleSelectPlanDefault}
+                    className="btn-brand flex min-h-[2.75rem] w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm active:scale-[0.98]"
+                  >
+                    Select plan default investments
+                    <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+                  </button>
+                ) : !hasConfirmedPlanDefault ? (
+                  <button
+                    type="button"
+                    onClick={confirmPlanDefaultChoice}
+                    className="btn-brand flex min-h-[2.75rem] w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm active:scale-[0.98]"
+                  >
+                    Select plan default investments
+                    <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+                  </button>
+                ) : (
+                  <div
+                    className="btn-brand pointer-events-none flex min-h-[2.75rem] w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm"
+                    role="status"
+                  >
+                    <Check className="h-4 w-4 shrink-0" aria-hidden />
+                    Selected Plan Default Investments
+                  </div>
+                )}
               </div>
             </div>
 
@@ -506,9 +555,25 @@ function InvestmentStrategy() {
               <h3 className="text-gray-900 dark:text-white mb-2" style={{ fontSize: '1rem', fontWeight: 700 }}>Customize your portfolio</h3>
               <p className="text-gray-700 dark:text-gray-300 mb-3" style={{ fontSize: '0.82rem', lineHeight: 1.6 }}>Adjust your investment allocation based on your preferences and risk tolerance.</p>
               <p className="text-gray-800 dark:text-gray-200 mb-4 flex-1" style={{ fontSize: '0.82rem', lineHeight: 1.5, fontWeight: 500 }}>Best for experienced investors who want more control over their portfolio.</p>
-              <button type="button" onClick={() => setShowBuildPortfolioModal(true)} className="w-full border-2 border-purple-300 dark:border-purple-600 text-purple-700 dark:text-purple-400 py-2.5 px-6 rounded-xl hover:bg-purple-50 dark:hover:bg-purple-950/30 hover:border-purple-400 active:scale-[0.98] transition-all flex items-center justify-center gap-2" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-                Customize my portfolio <ArrowRight className="w-4 h-4" />
-              </button>
+              {customAllocations ? (
+                <div
+                  className="pointer-events-none flex w-full min-h-[2.75rem] items-center justify-center gap-2 rounded-xl border-2 border-purple-500 bg-purple-50 py-2.5 px-6 text-purple-800 dark:border-purple-500 dark:bg-purple-950/40 dark:text-purple-200"
+                  role="status"
+                  style={{ fontSize: '0.85rem', fontWeight: 600 }}
+                >
+                  <Check className="h-4 w-4 shrink-0 text-purple-600 dark:text-purple-400" aria-hidden />
+                  Selected this Portfolio
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowBuildPortfolioModal(true)}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-purple-300 py-2.5 px-6 text-purple-700 transition-all hover:border-purple-400 hover:bg-purple-50 active:scale-[0.98] dark:border-purple-600 dark:text-purple-400 dark:hover:bg-purple-950/30"
+                  style={{ fontSize: '0.85rem', fontWeight: 600 }}
+                >
+                  Customize my portfolio <ArrowRight className="h-4 w-4" />
+                </button>
+              )}
             </div>
           </div>
 
@@ -532,7 +597,11 @@ function InvestmentStrategy() {
                     <div className="flex items-center gap-2"><Check className="w-4 h-4 text-green-600" /><span className="text-gray-700 dark:text-gray-300" style={{ fontSize: '0.75rem' }}>Custom portfolio analysis</span></div>
                   </div>
                 </div>
-                <button type="button" className="border-2 border-amber-500 text-amber-700 dark:text-amber-400 py-2.5 px-6 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-all flex items-center gap-2 shrink-0" style={{ fontSize: '0.85rem', fontWeight: 500 }}>
+                <button
+                  type="button"
+                  className="mt-1 flex shrink-0 items-center gap-2 rounded-xl border-2 border-amber-500 py-2.5 px-6 text-amber-700 transition-all hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950/30 sm:mt-4 sm:self-start"
+                  style={{ fontSize: '0.85rem', fontWeight: 500 }}
+                >
                   Connect Now <ArrowRight className="w-4 h-4" />
                 </button>
               </div>

@@ -10,6 +10,7 @@ import { AuthProvider } from './core/auth/AuthContext'
 import { UserProvider } from './core/user/UserContext'
 import { router } from './router'
 import { GlobalFeedback } from './features/feedback/GlobalFeedback'
+import { LanguageProvider } from './core/language/LanguageContext'
 
 initAcsbAccessibility()
 
@@ -19,8 +20,10 @@ createRoot(document.getElementById('root')!).render(
       <BrandThemeProvider>
         <AuthProvider>
           <UserProvider>
-            <RouterProvider router={router} />
-            <GlobalFeedback />
+            <LanguageProvider>
+              <RouterProvider router={router} />
+              <GlobalFeedback />
+            </LanguageProvider>
           </UserProvider>
         </AuthProvider>
       </BrandThemeProvider>

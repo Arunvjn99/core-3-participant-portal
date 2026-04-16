@@ -44,7 +44,16 @@ export function PreEnrollmentDashboard() {
 
   const firstNameRaw = getAuthenticatedFirstName(profile, user)
   const displayFirstName = formatFirstNameForDisplay(firstNameRaw)
-  const showPersonalWelcome = !authLoading && displayFirstName !== 'there'
+  /** Prefer profile/meta/email from getAuthenticatedFirstName; if still generic, use email local-part when session exists. */
+  const emailLocal =
+    user?.email?.split('@')[0] ?? (profile?.email?.includes('@') ? profile.email.split('@')[0] : undefined)
+  const heroPillName =
+    displayFirstName !== 'there'
+      ? displayFirstName
+      : emailLocal
+        ? formatFirstNameForDisplay(emailLocal)
+        : 'there'
+  const showPersonalWelcome = !authLoading && heroPillName !== 'there'
   const dayPeriod = getLocalDayPeriod()
   const heroGreetingKeys = HERO_TIME_GREETING_KEYS[dayPeriod]
 
@@ -84,7 +93,7 @@ export function PreEnrollmentDashboard() {
                 />
                 <span className="text-sm font-semibold text-[#2b59c3] dark:text-blue-400">
                   {showPersonalWelcome
-                    ? t(heroGreetingKeys.withName, { name: displayFirstName })
+                    ? t(heroGreetingKeys.withName, { name: heroPillName })
                     : t(heroGreetingKeys.generic)}
                 </span>
               </div>
@@ -102,22 +111,25 @@ export function PreEnrollmentDashboard() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(true)}
-                  className="btn-brand flex items-center gap-1.5 rounded-xl px-5 py-3 text-sm font-semibold shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] sm:px-6 sm:py-3.5 sm:text-[0.9375rem]"
+                  className="btn-brand inline-flex !min-h-0 flex-col items-center justify-center gap-0 rounded-full !bg-[#2563EB] px-[28px] py-3 shadow-lg transition-all hover:scale-[1.02] hover:!bg-[#1d4ed8] active:scale-[0.98]"
                 >
-                  {t('hero.start_enrollment')}
+                  <span className="text-center text-[15px] font-semibold leading-tight text-white">
+                    {t('hero.start_enrollment')}
+                  </span>
+                  <span
+                    className="mt-[2px] text-center text-[11px] font-normal leading-tight tracking-[0.01em]"
+                    style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                  >
+                    {t('hero.time_note')}
+                  </span>
                 </button>
                 <button
                   type="button"
                   onClick={() => learningRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                  className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition-all hover:scale-[1.02] hover:bg-slate-50 active:scale-[0.98] dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800/50 sm:px-6 sm:py-3.5 sm:text-[0.9375rem]"
+                  className="inline-flex shrink-0 items-center justify-center self-center rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition-all hover:scale-[1.02] hover:bg-slate-50 active:scale-[0.98] dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800/50 sm:px-6 sm:py-3.5 sm:text-[0.9375rem]"
                 >
                   {t('hero.learn_plan')}
                 </button>
-              </div>
-
-              <div className="flex items-center gap-3 text-sm font-semibold text-slate-400 dark:text-slate-500">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                {t('hero.time_note')}
               </div>
             </motion.div>
 
@@ -205,24 +217,27 @@ export function PreEnrollmentDashboard() {
             {/* Contact Advisor Card */}
             <motion.div
               whileHover={{ y: -8 }}
-              className="relative cursor-pointer overflow-hidden rounded-[32px] shadow-2xl transition-all"
-              style={{ background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)' }}
+              className="relative cursor-pointer overflow-hidden rounded-[32px] border border-slate-200/80 bg-gradient-to-br from-white to-slate-50 shadow-xl shadow-slate-200/60 transition-all hover:border-slate-300 hover:shadow-2xl dark:border-slate-700 dark:from-slate-900 dark:to-slate-950 dark:shadow-none dark:hover:border-slate-600"
               onClick={() => setAdvisorModalOpen(true)}
             >
               <div
-                className="absolute inset-0 opacity-10"
-                style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}
+                className="absolute inset-0 opacity-[0.35] dark:hidden"
+                style={{ backgroundImage: 'radial-gradient(circle, #94a3b8 1px, transparent 1px)', backgroundSize: '20px 20px' }}
+              />
+              <div
+                className="absolute inset-0 hidden opacity-25 dark:block"
+                style={{ backgroundImage: 'radial-gradient(circle, #64748b 1px, transparent 1px)', backgroundSize: '20px 20px' }}
               />
               <div className="relative flex min-h-[280px] flex-col justify-between p-8">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 mb-6">
-                  <UserCheck className="h-6 w-6 text-white" />
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#2b59c3]/10 dark:bg-blue-500/15">
+                  <UserCheck className="h-6 w-6 text-[#2b59c3] dark:text-blue-400" />
                 </div>
                 <div>
-                  <h3 className="mb-2 text-2xl font-bold text-white">{t('advisor.title')}</h3>
-                  <p className="mb-6 text-sm leading-relaxed text-white/60">
+                  <h3 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">{t('advisor.title')}</h3>
+                  <p className="mb-6 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                     {t('advisor.subtitle')}
                   </p>
-                  <div className="group flex items-center gap-2 text-sm font-medium text-white/80 transition-colors hover:text-white">
+                  <div className="group flex items-center gap-2 text-sm font-medium text-[#2b59c3] transition-colors hover:text-[#1e4a9e] dark:text-blue-400 dark:hover:text-blue-300">
                     <span>{t('advisor.browse')}</span>
                     <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </div>
@@ -232,31 +247,29 @@ export function PreEnrollmentDashboard() {
 
             <motion.div
               whileHover={{ y: -8 }}
-              className="flex flex-col overflow-hidden rounded-[32px] border border-white/5 bg-[#0a0a0a] shadow-2xl transition-all"
+              className="flex flex-col overflow-hidden rounded-[32px] border border-slate-200/80 bg-white shadow-xl shadow-slate-200/60 transition-all hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:shadow-none dark:hover:border-slate-600"
             >
-              <div className="relative flex aspect-[16/9] items-center justify-center overflow-hidden border-b border-white/5 bg-[#0d0d0d]">
-                <div
-                  className="absolute inset-0 bg-[radial-gradient(#ffffff08_1px,transparent_1px)] bg-[length:24px_24px]"
-                />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.1),transparent_70%)]" />
+              <div className="relative flex aspect-[16/9] items-center justify-center overflow-hidden border-b border-slate-100 bg-gradient-to-b from-slate-100 to-slate-50 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900">
+                <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] bg-[length:24px_24px] opacity-60 dark:bg-[radial-gradient(#ffffff14_1px,transparent_1px)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(43,89,195,0.08),transparent_70%)] dark:bg-[radial-gradient(circle_at_center,rgba(96,165,250,0.12),transparent_70%)]" />
 
                 <div className="relative z-10 flex w-full flex-col items-center gap-8 px-16">
                   <motion.div
                     animate={{ y: [0, -4, 0] }}
                     transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                    className="flex h-14 w-full items-center gap-4 rounded-full border border-white/10 bg-white/5 px-5 shadow-2xl backdrop-blur-xl"
+                    className="flex h-14 w-full items-center gap-4 rounded-full border border-slate-200/90 bg-white/90 px-5 shadow-lg shadow-slate-200/50 backdrop-blur-xl dark:border-white/10 dark:bg-white/5 dark:shadow-black/30"
                   >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-purple-500 shadow-lg">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#2b59c3] to-purple-500 shadow-md">
                       <Sparkles className="h-4 w-4 text-white" />
                     </div>
-                    <div className="h-2.5 w-40 rounded-full bg-white/20" />
+                    <div className="h-2.5 w-40 rounded-full bg-slate-200 dark:bg-white/20" />
                   </motion.div>
 
                   <div className="flex w-full max-w-[280px] flex-col gap-3">
                     {[1, 0.6, 0.3].map((opacity, i) => (
                       <div
                         key={i}
-                        className="h-12 w-full rounded-2xl border border-white/10 bg-white/5"
+                        className="h-12 w-full rounded-2xl border border-slate-200/80 bg-white/80 dark:border-white/10 dark:bg-white/5"
                         style={{
                           opacity,
                           transform: `scale(${1 - i * 0.05}) translateY(${i * 4}px)`,
@@ -267,17 +280,17 @@ export function PreEnrollmentDashboard() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-4 p-8">
+              <div className="flex flex-col gap-4 bg-slate-50/50 p-8 dark:bg-slate-950/50">
                 <div className="flex flex-col gap-2">
-                  <h3 className="text-2xl font-bold tracking-tight text-white">{t('core_ai.title')}</h3>
-                  <p className="text-base font-medium leading-relaxed text-slate-400">
+                  <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{t('core_ai.title')}</h3>
+                  <p className="text-base font-medium leading-relaxed text-slate-600 dark:text-slate-400">
                     {t('core_ai.description')}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={openChat}
-                  className="flex w-fit items-center gap-2 text-sm font-bold text-white/60 transition-colors hover:text-white"
+                  className="flex w-fit items-center gap-2 text-sm font-bold text-[#2b59c3] transition-colors hover:text-[#1e4a9e] dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   {t('core_ai.start_chatting')} <ChevronRight className="h-4 w-4" />
                 </button>

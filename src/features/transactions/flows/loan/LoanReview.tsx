@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useLoanFlow } from "./LoanFlowLayout";
 import { CheckCircle2, Clock, ArrowRight, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
-import RetirementImpactWidget from "../../components/RetirementImpactWidget";
 
 function LoanReview() {
   const navigate = useNavigate();
@@ -195,16 +194,6 @@ function LoanReview() {
           </div>
         </div>
       </motion.div>
-
-      {/* Retirement Impact */}
-      <RetirementImpactWidget
-        compact
-        impactAmount={-Math.round(loanAmount * 1.64)}
-        impactLabel={`−$${Math.round(loanAmount * 1.64).toLocaleString()} projected retirement impact`}
-        estimatedValue={38420}
-        onTrack={loanAmount <= 5000}
-        delay={0.18}
-      />
 
       {/* Confirmation */}
       <motion.div

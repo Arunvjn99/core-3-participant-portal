@@ -14,7 +14,6 @@ import QuickActionButton from "../components/QuickActionButton";
 import FinancialGuidanceCompact from "../components/FinancialGuidanceCompact";
 import RecentTransactionsCompact from "../components/RecentTransactionsCompact";
 import DraftTransactions from "../components/DraftTransactions";
-import RetirementImpactWidget from "../components/RetirementImpactWidget";
 import svgPaths from "../svgPaths";
 import { motion } from "framer-motion";
 function SectionHeader({
@@ -141,130 +140,60 @@ function TransactionsPage() {
           className="mb-5 sm:mb-6"
         >
           <div
-            className="overflow-hidden"
-            style={{
-              background: "var(--c-blue-tint)",
-              border: "1px solid var(--c-border-blue)",
-              borderRadius: 16,
-              padding: "24px 28px" }}
+            className="w-full overflow-hidden rounded-[14px] border border-[#E0E7FF] bg-[#F8FAFF] px-6 py-5 shadow-[0_2px_12px_rgba(37,99,235,0.06)] dark:border-[#334155] dark:bg-[#1E293B] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
           >
-            <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-0">
-              {/* Plan Name + Balance */}
-              <div className="flex items-center gap-4">
-                <div
-                  className="flex items-center justify-center flex-shrink-0"
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 12,
-                    background: "var(--c-card)",
-                    border: "1px solid var(--c-border-blue)" }}
-                >
-                  <ShieldIcon className="w-5 h-5 brand-text" />
-                </div>
-                <div>
-                  <p
-                    className="uppercase"
-                    style={{
-                      fontSize: 10.5,
-                      color: "var(--c-text-muted)",
-                      letterSpacing: "0.5px",
-                      fontWeight: 700,
-                      lineHeight: "14px" }}
-                  >
-                    Plan Name
-                  </p>
-                  <p
-                    style={{
-                      fontSize: 15,
-                      fontWeight: 800,
-                      color: "var(--c-text-primary)",
-                      letterSpacing: "-0.3px",
-                      lineHeight: "22px",
-                      marginTop: 2 }}
-                  >
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-0">
+              {/* Left: plan info */}
+              <div className="min-w-0 flex-1 sm:pr-6">
+                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#6B7280] dark:text-[#94A3B8]">
+                  Plan Name
+                </p>
+                <div className="flex items-center gap-2">
+                  <ShieldIcon className="h-4 w-4 shrink-0 text-[#2563EB] dark:text-[#60A5FA]" />
+                  <p className="text-[15px] font-bold leading-snug text-[#111827] dark:text-[#F1F5F9]">
                     401(k) Retirement Plan
                   </p>
-                  <div className="flex items-center gap-1.5 mt-1.5">
-                    <span
-                      className="uppercase"
-                      style={{
-                        fontSize: 10,
-                        color: "var(--c-text-faint)",
-                        letterSpacing: "0.5px",
-                        fontWeight: 600 }}
-                    >
-                      Plan Balance :
-                    </span>
-                    <span
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 800,
-                        color: "var(--brand-primary)",
-                        letterSpacing: "-0.3px" }}
-                    >
-                      $30,000
-                    </span>
-                  </div>
                 </div>
+                <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#6B7280] dark:text-[#94A3B8]">
+                  Plan Balance
+                </p>
+                <p className="mt-0.5 text-[22px] font-bold leading-tight tracking-tight text-[#1D4ED8] dark:text-[#60A5FA]">
+                  $30,000
+                </p>
               </div>
 
-              {/* Divider */}
               <div
-                className="hidden sm:block mx-10 lg:mx-14"
-                style={{ width: 1, height: 56, background: "color-mix(in srgb, var(--brand-primary) 30%, transparent)" }}
+                className="hidden w-px shrink-0 self-stretch bg-[#E0E7FF] dark:bg-[#334155] sm:mx-6 sm:block"
+                aria-hidden
               />
               <div
-                className="sm:hidden"
-                style={{ height: 1, background: "color-mix(in srgb, var(--brand-primary) 30%, transparent)" }}
+                className="h-px w-full shrink-0 bg-[#E0E7FF] dark:bg-[#334155] sm:hidden"
+                aria-hidden
               />
 
-              {/* Vested Balance */}
-              <div className="flex items-center gap-4">
-                <div
-                  className="flex items-center justify-center flex-shrink-0"
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 12,
-                    background: "var(--c-card)",
-                    border: "1px solid var(--c-border-blue)" }}
-                >
-                  <ChartBarIcon className="w-5 h-5 brand-text" />
-                </div>
-                <div>
-                  <p
-                    className="uppercase"
-                    style={{
-                      fontSize: 10.5,
-                      color: "var(--c-text-muted)",
-                      letterSpacing: "0.5px",
-                      fontWeight: 700,
-                      lineHeight: "14px" }}
-                  >
-                    Vested Balance
+              {/* Right: vested */}
+              <div className="min-w-0 flex-1 sm:pl-0">
+                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#6B7280] dark:text-[#94A3B8]">
+                  Vested Balance
+                </p>
+                <div className="flex items-center gap-2">
+                  <ChartBarIcon className="h-4 w-4 shrink-0 text-[#2563EB] dark:text-[#60A5FA]" />
+                  <p className="text-[22px] font-bold leading-tight tracking-tight text-[#111827] dark:text-[#F1F5F9]">
+                    $25,000
                   </p>
-                  <div className="flex items-baseline gap-2.5" style={{ marginTop: 2 }}>
-                    <span
-                      style={{
-                        fontSize: 28,
-                        fontWeight: 800,
-                        color: "var(--c-text-primary)",
-                        letterSpacing: "-0.5px",
-                        lineHeight: "36px" }}
-                    >
-                      $25,000
-                    </span>
-                    <span
-                      style={{
-                        fontSize: 12,
-                        color: "var(--c-text-muted)",
-                        fontWeight: 600 }}
-                    >
-                      83.3% vested
-                    </span>
-                  </div>
                 </div>
+                <div
+                  className="mt-2 h-[5px] w-full overflow-hidden rounded-[3px] bg-[#E0E7FF] dark:bg-[#334155]"
+                  role="presentation"
+                >
+                  <div
+                    className="h-full rounded-[3px] bg-[#2563EB] dark:bg-[#60A5FA]"
+                    style={{ width: "83.3%" }}
+                  />
+                </div>
+                <p className="mt-[5px] text-[12px] font-medium leading-snug text-[#6B7280] dark:text-[#94A3B8]">
+                  83.3% vested
+                </p>
               </div>
             </div>
           </div>
@@ -280,7 +209,6 @@ function TransactionsPage() {
           <SectionHeader
             icon={<Sparkles className="w-4 h-4" />}
             title="Quick Actions"
-            subtitle="Start a new transaction"
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-1.5 sm:gap-2">
             <QuickActionButton
@@ -321,31 +249,14 @@ function TransactionsPage() {
           </div>
         </motion.div>
 
-        {/* ROW 3 - ATTENTION REQUIRED + DRAFT TRANSACTIONS (side by side) */}
+        {/* ROW 3 - DRAFT TRANSACTIONS (left) + ATTENTION REQUIRED (right) */}
         <div className="flex flex-col md:flex-row gap-5 sm:gap-6 mb-5 sm:mb-6">
-          {/* Left: Attention Required (60%) */}
+          {/* Left: Draft Transactions (60%) */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.16 }}
             className="w-full md:w-[60%]"
-          >
-            <SectionHeader
-              icon={<AlertTriangle className="w-4 h-4" />}
-              title="Attention Required"
-              badge={{
-                text: "4 items",
-                color: "bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300" }}
-            />
-            <AttentionRequiredTimeline onResolve={handleResolveIssue} />
-          </motion.div>
-
-          {/* Right: Draft Transactions (40%) */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut", delay: 0.24 }}
-            className="w-full md:w-[40%]"
           >
             <SectionHeader
               icon={<FilePen className="w-4 h-4" />}
@@ -365,43 +276,47 @@ function TransactionsPage() {
               <DraftTransactions />
             </div>
           </motion.div>
-        </div>
 
-        {/* ROW 5 - RECENT TRANSACTIONS + RETIREMENT IMPACT */}
-        <div className="flex flex-col md:flex-row gap-5 sm:gap-6 mb-5 sm:mb-6">
-          {/* Left: Recent Transactions (60%) */}
+          {/* Right: Attention Required (40%) */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut", delay: 0.32 }}
-            className="w-full md:w-[60%]"
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.24 }}
+            className="w-full md:w-[40%]"
           >
             <SectionHeader
-              icon={<ChartBar className="w-4 h-4" />}
-              title="Recent Transactions"
-              subtitle="Last 90 days"
+              icon={<AlertTriangle className="w-4 h-4" />}
+              title="Attention Required"
+              badge={{
+                text: "2 items",
+                color: "bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300" }}
             />
-            <div
-              style={{
-                background: "var(--c-card)",
-                borderRadius: 16,
-                border: "var(--c-border-subtle)",
-                padding: "24px 28px" }}
-            >
-              <RecentTransactionsCompact maxItems={4} />
-            </div>
+            <AttentionRequiredTimeline onResolve={handleResolveIssue} />
           </motion.div>
-
-          {/* Right: Retirement Impact Widget (40%) */}
-          <div className="w-full md:w-[40%]">
-            <SectionHeader
-              icon={<ChartBar className="w-4 h-4" />}
-              title="Retirement Outlook"
-              subtitle="Projected growth"
-            />
-            <RetirementImpactWidget delay={0.36} />
-          </div>
         </div>
+
+        {/* ROW 5 - RECENT TRANSACTIONS */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.32 }}
+          className="mb-5 sm:mb-6"
+        >
+          <SectionHeader
+            icon={<ChartBar className="w-4 h-4" />}
+            title="Recent Transactions"
+            subtitle="Last 90 days"
+          />
+          <div
+            style={{
+              background: "var(--c-card)",
+              borderRadius: 16,
+              border: "var(--c-border-subtle)",
+              padding: "24px 28px" }}
+          >
+            <RecentTransactionsCompact maxItems={4} />
+          </div>
+        </motion.div>
 
         {/* ROW 6 - FINANCIAL GUIDANCE (AI Insights - Purple) */}
         <motion.div

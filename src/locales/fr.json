@@ -19,7 +19,20 @@
     "toggle_theme": "Changer de thème",
     "open_search": "Ouvrir la recherche",
     "notifications": "Notifications",
-    "menu": "Menu"
+    "notifications_title": "Notifications",
+    "notification_loan_title": "Demande de prêt en cours",
+    "notification_loan_desc": "Nous examinons les documents soumis.",
+    "notification_stmt_title": "Relevé trimestriel disponible",
+    "notification_stmt_desc": "Votre dernier relevé est disponible.",
+    "notifications_view_activity": "Voir les transactions",
+    "menu": "Menu",
+    "user_menu": "Menu du compte",
+    "share_feedback": "Partager un commentaire",
+    "my_profile": "Mon profil",
+    "settings": "Paramètres",
+    "language_section": "Langue",
+    "theme_label": "Thème",
+    "log_out": "Déconnexion"
   },
 
   "greeting": {

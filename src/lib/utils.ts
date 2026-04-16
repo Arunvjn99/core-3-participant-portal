@@ -1,3 +1,5 @@
+import { getAppDateLocale } from './dateLocale'
+
 /** Format a number as USD currency */
 export function formatCurrency(amount: number, compact = false): string {
   return new Intl.NumberFormat('en-US', {
@@ -8,9 +10,9 @@ export function formatCurrency(amount: number, compact = false): string {
   }).format(amount)
 }
 
-/** Format a date to a readable string */
+/** Format a date (MM/DD/YYYY in English, DD/MM/YYYY in Spanish). */
 export function formatDate(date: string | Date, style: 'short' | 'medium' | 'long' = 'medium'): string {
-  return new Intl.DateTimeFormat('en-US', { dateStyle: style }).format(new Date(date))
+  return new Intl.DateTimeFormat(getAppDateLocale(), { dateStyle: style }).format(new Date(date))
 }
 
 /** Truncate a string with ellipsis */

@@ -13,6 +13,14 @@ export default function PlanSelection() {
   const [showAI, setShowAI] = useState(false)
   const [showCompare, setShowCompare] = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
+  /** Which plan card is highlighted; second action on that card continues. */
+  const [selectedPlan, setSelectedPlan] = useState<'traditional' | 'roth' | null>(() => data.plan ?? null)
+  /** After second "Select this Plan" tap — shows "Selected"; use header Next to continue. */
+  const [confirmedPlan, setConfirmedPlan] = useState<'traditional' | 'roth' | null>(() => data.plan ?? null)
+
+  const clearPendingConfirm = () => {
+    setConfirmedPlan(null)
+  }
 
   const confirmPlan = (plan: 'traditional' | 'roth') => {
     if (import.meta.env.DEV) {
@@ -24,19 +32,37 @@ export default function PlanSelection() {
   }
 
   useEffect(() => {
+    if (data.plan) {
+      setSelectedPlan(data.plan)
+      setConfirmedPlan(data.plan)
+    }
+  }, [data.plan])
+
+  useEffect(() => {
     setStepNav({
       showBack: false,
       onNext: () => {
-        if (!data.plan) return
+        if (!confirmedPlan) return
+        updateData({ plan: confirmedPlan })
         navigate('/enrollment/contribution')
       },
       primaryLabel: 'Next',
-      nextDisabled: !data.plan,
+      nextDisabled: !confirmedPlan,
     })
     return () => setStepNav(null)
-  }, [data.plan, navigate, setStepNav])
+  }, [confirmedPlan, navigate, setStepNav, updateData])
 
   const hasTwoPlans = data.companyPlans.length >= 2
+
+  /** CTA before this plan is the active selection — neutral, no primary stroke */
+  const neutralCtaClass =
+    'border border-gray-300 bg-white text-gray-800 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800'
+  /** Outline CTA once this plan card is selected — subtle primary stroke */
+  const secondaryCtaClass =
+    'border border-[color:var(--brand-primary)] bg-white text-[color:var(--brand-primary)] hover:bg-[color:var(--brand-primary-light)] dark:border-[color:var(--brand-primary)] dark:bg-gray-900 dark:hover:bg-[color:var(--brand-primary-light)]'
+  /** Selected card — subtle blue stroke + light wash */
+  const selectedPlanCardClass =
+    'border border-blue-300 bg-blue-50/70 shadow-sm ring-1 ring-blue-200/60 hover:shadow-md dark:border-blue-500/55 dark:bg-blue-950/30 dark:ring-blue-400/25'
 
   if (!hasTwoPlans) {
     const onlyPlan = data.companyPlans[0] || 'traditional'
@@ -78,7 +104,14 @@ export default function PlanSelection() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 text-left shadow-sm transition-shadow sm:p-6 dark:border-gray-700 dark:bg-gray-900 hover:shadow-md">
+          <div
+            className={cn(
+              'flex flex-col rounded-2xl bg-white p-5 text-left shadow-sm transition-all sm:p-6 dark:bg-gray-900',
+              selectedPlan === 'traditional'
+                ? selectedPlanCardClass
+                : 'border border-gray-200 dark:border-gray-700 hover:shadow-md'
+            )}
+          >
             <div className="relative mb-1">
               <span
                 className="inline-flex cursor-default items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
@@ -112,14 +145,45 @@ export default function PlanSelection() {
 
             <button
               type="button"
-              onClick={() => confirmPlan('traditional')}
-              className="btn-brand mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold shadow-sm active:scale-[0.98] sm:text-base"
+              disabled={confirmedPlan === 'traditional'}
+              onClick={() => {
+                if (selectedPlan !== 'traditional') {
+                  clearPendingConfirm()
+                  setSelectedPlan('traditional')
+                  return
+                }
+                setConfirmedPlan('traditional')
+              }}
+              className={cn(
+                'mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold shadow-sm transition-all active:scale-[0.98] disabled:pointer-events-none disabled:opacity-90 sm:text-base',
+                confirmedPlan === 'traditional'
+                  ? 'btn-brand'
+                  : selectedPlan === 'traditional'
+                    ? secondaryCtaClass
+                    : neutralCtaClass
+              )}
             >
-              Continue with Traditional 401(k) <ArrowRight className="h-4 w-4" />
+              {confirmedPlan === 'traditional' ? (
+                <>
+                  <Check className="h-4 w-4 shrink-0" aria-hidden />
+                  Selected
+                </>
+              ) : (
+                <>
+                  Select this Plan <ArrowRight className="h-4 w-4" />
+                </>
+              )}
             </button>
           </div>
 
-          <div className="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 text-left shadow-sm transition-shadow sm:p-6 dark:border-gray-700 dark:bg-gray-900 hover:shadow-md">
+          <div
+            className={cn(
+              'flex flex-col rounded-2xl bg-white p-5 text-left shadow-sm transition-all sm:p-6 dark:bg-gray-900',
+              selectedPlan === 'roth'
+                ? selectedPlanCardClass
+                : 'border border-gray-200 dark:border-gray-700 hover:shadow-md'
+            )}
+          >
             <h3 className="mt-3 text-xl font-bold text-gray-900 dark:text-white">Roth 401(k)</h3>
             <p className="mt-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
               Pay taxes now and withdraw tax-free in retirement.
@@ -136,10 +200,34 @@ export default function PlanSelection() {
 
             <button
               type="button"
-              onClick={() => confirmPlan('roth')}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[color:var(--brand-primary)] bg-white py-3.5 text-sm font-semibold text-[color:var(--brand-primary)] shadow-sm transition-all hover:bg-[color:var(--brand-primary-light)] active:scale-[0.98] sm:text-base dark:border-[color:var(--brand-primary)] dark:bg-gray-900 dark:hover:bg-[color:var(--brand-primary-light)]"
+              disabled={confirmedPlan === 'roth'}
+              onClick={() => {
+                if (selectedPlan !== 'roth') {
+                  clearPendingConfirm()
+                  setSelectedPlan('roth')
+                  return
+                }
+                setConfirmedPlan('roth')
+              }}
+              className={cn(
+                'mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold shadow-sm transition-all active:scale-[0.98] disabled:pointer-events-none disabled:opacity-90 sm:text-base',
+                confirmedPlan === 'roth'
+                  ? 'btn-brand'
+                  : selectedPlan === 'roth'
+                    ? secondaryCtaClass
+                    : neutralCtaClass
+              )}
             >
-              Choose Roth 401(k) <ArrowRight className="h-4 w-4" />
+              {confirmedPlan === 'roth' ? (
+                <>
+                  <Check className="h-4 w-4 shrink-0" aria-hidden />
+                  Selected
+                </>
+              ) : (
+                <>
+                  Select this Plan <ArrowRight className="h-4 w-4" />
+                </>
+              )}
             </button>
           </div>
         </div>

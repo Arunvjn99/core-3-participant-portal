@@ -5,6 +5,16 @@ import { useState, createContext, useContext } from "react";
 interface LoanData {
   amount?: number;
   tenure?: number;
+  /** Display label e.g. "General Purpose" */
+  selectedLoanType?: string;
+  /** Stable id: general | home | refinance */
+  selectedLoanTypeId?: "general" | "home" | "refinance";
+  /** Display label e.g. "Education" */
+  selectedLoanPurpose?: string;
+  monthlyPayment?: number;
+  totalInterest?: number;
+  totalPayback?: number;
+  payoffDate?: string;
   loanType?: string;
   reason?: string;
   disbursementMethod?: string;

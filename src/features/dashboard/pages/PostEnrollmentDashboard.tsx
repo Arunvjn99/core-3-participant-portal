@@ -100,7 +100,7 @@ export default function PostEnrollmentDashboard() {
       <div className="min-h-screen bg-surface-page font-sans text-text-primary">
         <main className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           {/* Page header */}
-          <header className="border-b border-border-default pb-6">
+          <header className="pb-6">
             <h1 className="text-[28px] font-bold leading-tight text-text-primary">Overview</h1>
             <p className="mt-2 text-[14px] leading-relaxed text-text-secondary">{subtitle}</p>
           </header>
@@ -421,7 +421,7 @@ export default function PostEnrollmentDashboard() {
                   <Target className="h-5 w-5 text-status-success" aria-hidden />
                   <span className="text-[15px] font-bold text-text-primary">Readiness Score</span>
                 </div>
-                <div className="relative mx-auto h-[140px] w-[140px]">
+                <div className="relative mx-auto h-[140px] w-[140px] text-text-primary [&_.recharts-surface]:overflow-visible">
                   <ResponsiveContainer width="100%" height="100%">
                     <RadialBarChart
                       cx="50%"
@@ -506,14 +506,14 @@ export default function PostEnrollmentDashboard() {
                   <span className="text-[14px] font-bold text-text-primary">Next Best Actions</span>
                 </div>
                 <div className="space-y-3">
-                  <div className="flex gap-3 rounded-[12px] bg-status-danger-bg p-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-500/15 text-status-danger">
+                  <div className="flex gap-3 rounded-[12px] border border-status-danger/20 bg-status-danger-bg p-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-status-danger/15 text-status-danger">
                       <User className="h-5 w-5" aria-hidden />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <p className="text-[13px] font-bold text-text-primary">Add a Beneficiary</p>
-                        <span className="shrink-0 rounded bg-red-500/20 px-2 py-0.5 text-[10px] font-bold text-red-400">
+                        <span className="shrink-0 rounded bg-status-danger/20 px-2 py-0.5 text-[10px] font-bold text-status-danger">
                           REQUIRED
                         </span>
                       </div>
@@ -578,7 +578,7 @@ export default function PostEnrollmentDashboard() {
                     </button>
                     <button
                       type="button"
-                      className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white py-2.5 text-sm font-semibold text-primary transition hover:bg-primary/10"
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white py-2.5 text-sm font-semibold text-primary shadow-sm transition hover:bg-slate-100"
                     >
                       <CalendarDays className="h-4 w-4" aria-hidden />
                       Schedule Call

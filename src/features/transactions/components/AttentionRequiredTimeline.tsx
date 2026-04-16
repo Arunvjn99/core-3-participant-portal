@@ -2,27 +2,21 @@ import { motion } from "framer-motion";
 import { AlertCircle } from "lucide-react";
 import { useState } from "react";
 
-
 interface AttentionItem {
   id: string;
   title: string;
   description: string;
   amount?: string;
-  currentStep: "Submitted" | "Processing" | "Approved" | "Funds Sent";
   actionLabel?: string;
   onAction?: () => void;
 }
 
-const statusSteps = ["Submitted", "Processing", "Approved", "Funds Sent"];
-
-function InlineTimeline(_props: { currentStep?: string }) {
-  return (
-    <div className="flex items-center gap-0 w-full min-w-[200px]">
-      {statusSteps.map((_step) => {
-        return null;
-      })}
-    </div>
-  );
+/** Second line: Amount + middle dot + description (full sentence, wraps naturally). */
+function buildDetailLine(item: AttentionItem): string {
+  const parts: string[] = [];
+  if (item.amount) parts.push(`Amount: ${item.amount}`);
+  parts.push(item.description);
+  return parts.join(" · ");
 }
 
 interface AttentionRequiredTimelineProps {
@@ -30,119 +24,83 @@ interface AttentionRequiredTimelineProps {
 }
 
 function AttentionRequiredTimeline({ onResolve }: AttentionRequiredTimelineProps) {
-  const [items, _setItems] = useState<AttentionItem[]>([
+  const [items] = useState<AttentionItem[]>([
     {
-      id: "1",
+      id: "loan-docs",
       title: "Loan Request - Action Required",
       description: "Upload required documents to continue processing your loan request.",
       amount: "$5,000",
-      currentStep: "Processing",
-      actionLabel: "Resolve Issue",
+      actionLabel: "Resolve",
       onAction: onResolve,
     },
     {
-      id: "2",
-      title: "Loan Request - Action Required",
-      description: "Upload required documents to continue processing your loan request.",
-      amount: "$5,000",
-      currentStep: "Processing",
-      actionLabel: "Resolve Issue",
+      id: "withdrawal-verify",
+      title: "Withdrawal — verify bank details",
+      description: "Confirm the bank account on file before we release funds.",
+      amount: "$2,500",
+      actionLabel: "Review",
       onAction: onResolve,
     },
   ]);
 
   if (items.length === 0) {
     return (
-      <div
-        className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-700"
-        style={{ borderRadius: 16, padding: "24px 28px" }}
-      >
-        <div className="text-center py-4">
-          <AlertCircle className="w-8 h-8 mx-auto mb-2 text-slate-200 dark:text-gray-600" />
-          <p className="text-slate-400 dark:text-gray-500" style={{ fontSize: 13, fontWeight: 500 }}>
-            No action required
-          </p>
-        </div>
+      <div className="rounded-[10px] border border-dashed border-slate-200 bg-slate-50/80 px-4 py-8 text-center dark:border-gray-600 dark:bg-gray-900/50">
+        <AlertCircle className="mx-auto mb-2 h-8 w-8 text-slate-300 dark:text-gray-600" />
+        <p className="text-[13px] font-medium text-slate-400 dark:text-gray-500">No action required</p>
       </div>
     );
   }
 
   return (
-    <div
-      className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-700"
-      style={{ borderRadius: 16, padding: "14px 18px" }}
-    >
-      <div className="space-y-2.5">
-        {items.map((item, idx) => (
-          <motion.div
-            key={item.id}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.08, duration: 0.3 }}
-            className="dark:bg-amber-950/20 dark:border-amber-800/40"
-            style={{
-              background: "rgba(245,158,11,0.1)",
-              border: "1px solid var(--c-border-amber)",
-              borderRadius: 12,
-              padding: "10px 16px",
-            }}
+    <div className="flex flex-col gap-2">
+      {items.map((item, idx) => (
+        <motion.div
+          key={item.id}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: idx * 0.06, duration: 0.25 }}
+          className="flex min-h-0 flex-row items-start gap-3 rounded-[10px] border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-800/50 dark:bg-amber-950/25"
+        >
+          <div
+            className="flex shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400"
+            style={{ width: 36, height: 36 }}
           >
-            <div className="flex flex-col lg:flex-row lg:items-center gap-2.5">
-              {/* Left: Icon + Info */}
-              <div className="flex items-center gap-2.5 lg:flex-1 min-w-0">
-                <div
-                  className="flex items-center justify-center flex-shrink-0 dark:bg-amber-950/40 dark:text-amber-400"
-                  style={{ width: 26, height: 26, borderRadius: 7, background: "rgba(245,158,11,0.1)", color: "#F59E0B" }}
-                >
-                  <AlertCircle className="w-[13px] h-[13px]" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="rounded-full" style={{ width: 5, height: 5, background: "var(--c-amber)" }} />
-                    <p
-                      className="text-slate-900 dark:text-white"
-                      style={{ fontSize: 12.5, fontWeight: 700, letterSpacing: "-0.3px", lineHeight: 1.2 }}
-                    >
-                      {item.title}
-                    </p>
-                    {item.amount && (
-                      <span
-                        className="text-slate-500 dark:text-gray-400"
-                        style={{ fontSize: 11, fontWeight: 500 }}
-                      >
-                        Amount: {item.amount}
-                      </span>
-                    )}
-                  </div>
-                  <p
-                    className="text-slate-600 dark:text-gray-300"
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 500,
-                      lineHeight: 1.1,
-                      marginTop: 0,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {item.description}
-                  </p>
-                </div>
-              </div>
+            <AlertCircle className="h-5 w-5" aria-hidden />
+          </div>
 
-              {/* Right: Timeline */}
-              <div className="lg:flex-shrink-0 lg:w-[260px]">
-                <InlineTimeline currentStep={item.currentStep} />
-              </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 items-start gap-1.5">
+              <span
+                className="mt-[5px] mr-1.5 shrink-0 rounded-full bg-[#F59E0B]"
+                style={{ width: 7, height: 7 }}
+                aria-hidden
+              />
+              <h3 className="min-w-0 flex-1 text-[13px] font-semibold leading-snug tracking-tight text-slate-900 line-clamp-2 break-words dark:text-white">
+                {item.title}
+              </h3>
             </div>
 
-            {/* Action Button */}
-            {item.onAction && null}
-          </motion.div>
-        ))}
-      </div>
+            <p className="mt-1.5 break-words text-[12px] font-normal leading-relaxed text-[#92400E] dark:text-amber-200/95">
+              {buildDetailLine(item)}
+            </p>
+
+            {item.actionLabel && item.onAction ? (
+              <div className="mt-2 flex justify-end border-t border-amber-200/70 pt-2 dark:border-amber-800/50">
+                <button
+                  type="button"
+                  onClick={item.onAction}
+                  className="rounded-md px-2.5 py-1 text-[11px] font-semibold text-amber-900 transition-colors hover:bg-amber-200/60 dark:text-amber-200 dark:hover:bg-amber-900/40"
+                >
+                  {item.actionLabel}
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </motion.div>
+      ))}
     </div>
   );
 }
-export default AttentionRequiredTimeline
+
+export default AttentionRequiredTimeline;

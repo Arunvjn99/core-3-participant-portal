@@ -61,8 +61,10 @@ export default function AutoIncrease() {
     <AnimatedPage>
       <div className="space-y-6">
         <div>
-          <h1 className="text-gray-900 dark:text-white">Increase your savings automatically</h1>
-          <p className="mt-1 text-gray-500 dark:text-gray-400" style={{ fontSize: '0.9rem' }}>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+            Increase your savings automatically
+          </h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 sm:text-base">
             Small increases today can grow your retirement savings over time.
           </p>
         </div>
@@ -90,23 +92,23 @@ export default function AutoIncrease() {
             <button
               type="button"
               onClick={() => handleSelect(false)}
-              className="mt-5 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white py-3 text-gray-700 transition-all hover:bg-gray-50 active:scale-[0.98] dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              className="mt-5 flex min-h-[2.75rem] w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50 active:scale-[0.98] dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
             >
               Skip Auto Increase
             </button>
           </div>
 
           {/* Auto Increase - Recommended */}
-          <div className="relative flex flex-col rounded-2xl border-2 border-green-500 bg-white p-5 shadow-sm dark:bg-gray-900">
+          <div className="relative flex flex-col rounded-2xl border-2 border-primary bg-white p-5 shadow-sm dark:bg-gray-900">
             <span
-              className="absolute -top-3 left-4 rounded-full bg-green-600 px-3 py-0.5 text-white"
+              className="absolute -top-3 left-4 rounded-full bg-primary px-3 py-0.5 text-white"
               style={{ fontSize: '0.75rem', fontWeight: 600 }}
             >
               Recommended
             </span>
             <div className="mb-3 mt-1 flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-950/40">
-                <TrendingUp className="h-5 w-5 text-green-600" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 dark:bg-primary/20">
+                <TrendingUp className="h-5 w-5 text-primary" />
               </div>
               <h3 className="text-gray-900 dark:text-white">Enable Auto Increase</h3>
             </div>
@@ -117,24 +119,25 @@ export default function AutoIncrease() {
               <p className="text-gray-400 dark:text-gray-500" style={{ fontSize: '0.75rem' }}>
                 Projected in 10 years
               </p>
-              <p className="text-green-700 dark:text-green-400" style={{ fontSize: '2rem', fontWeight: 700 }}>
+              <p className="text-primary" style={{ fontSize: '2rem', fontWeight: 700 }}>
                 ${autoProjection.toLocaleString()}
               </p>
             </div>
             <button
               type="button"
               onClick={() => handleSelect(true)}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 py-3 text-white transition-all hover:bg-green-700 active:scale-[0.98]"
+              className="btn-brand mt-5 flex min-h-[2.75rem] w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm active:scale-[0.98]"
             >
-              Enable Auto Increase <ArrowRight className="h-4 w-4" />
+              Enable Auto Increase <ArrowRight className="h-4 w-4 shrink-0" />
             </button>
           </div>
         </div>
 
-        {/* Impact Banner */}
-        <div className="rounded-xl border border-green-100 bg-green-50 p-4 text-center dark:border-green-900/40 dark:bg-green-950/30">
-          <p className="text-green-800 dark:text-green-400" style={{ fontSize: '0.9rem', fontWeight: 500 }}>
-            Automatic increases could add <span style={{ fontWeight: 700 }}>+${difference.toLocaleString()}</span> over 10 years.
+        {/* Impact Banner — soft blue wash */}
+        <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-4 text-center dark:border-blue-500/20 dark:bg-blue-950/25">
+          <p className="text-text-primary dark:text-gray-200" style={{ fontSize: '0.9rem', fontWeight: 500 }}>
+            Automatic increases could add{' '}
+            <span className="font-bold text-primary">+${difference.toLocaleString()}</span> over 10 years.
           </p>
         </div>
       </div>
@@ -155,8 +158,6 @@ export default function AutoIncrease() {
             onClick={(e) => e.stopPropagation()}
           >
             <AutoIncreaseSkipPanel
-              projectedWithout={fixedProjection}
-              projectedWith={autoProjection}
               missedSavingsAmount={difference}
               onReconsider={handleReconsiderFromModal}
               onContinueWithout={handleConfirmSkip}

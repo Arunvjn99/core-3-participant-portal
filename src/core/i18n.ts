@@ -6,6 +6,32 @@ import en from '../locales/en.json'
 import es from '../locales/es.json'
 import fr from '../locales/fr.json'
 
+/** Persisted key for language preference (header toggle + i18next). */
+export const PREFERRED_LANGUAGE_KEY = 'preferred_language'
+const LEGACY_I18N_KEY = 'i18nextLng'
+
+function migrateLanguageStorage() {
+  if (typeof window === 'undefined') return
+  try {
+    const hasPreferred = localStorage.getItem(PREFERRED_LANGUAGE_KEY)
+    if (!hasPreferred) {
+      const legacy = localStorage.getItem(LEGACY_I18N_KEY)
+      if (legacy) {
+        const code = legacy.split('-')[0] || 'en'
+        localStorage.setItem(PREFERRED_LANGUAGE_KEY, code)
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+migrateLanguageStorage()
+
+/** Languages shown in the header dropdown (English + Español). */
+export const LANGUAGE_MENU_LANGS = ['en', 'es'] as const
+export type LanguageMenuLang = (typeof LANGUAGE_MENU_LANGS)[number]
+
 export const SUPPORTED_LANGS = ['en', 'es', 'fr'] as const
 export type SupportedLang = (typeof SUPPORTED_LANGS)[number]
 
@@ -16,9 +42,10 @@ void i18n
     fallbackLng: 'en',
     supportedLngs: SUPPORTED_LANGS as unknown as string[],
     interpolation: { escapeValue: false },
+    returnNull: false,
     detection: {
       order: ['localStorage', 'navigator'],
-      lookupLocalStorage: 'i18nextLng',
+      lookupLocalStorage: PREFERRED_LANGUAGE_KEY,
       caches: ['localStorage'],
     },
     resources: {

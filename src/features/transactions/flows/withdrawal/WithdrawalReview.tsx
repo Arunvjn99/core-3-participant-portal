@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useWithdrawalFlow } from "./WithdrawalFlowLayout";
 import { Separator } from "../../components/ui/separator";
 import { CheckCircle2 } from "lucide-react";
-import RetirementImpactWidget from "../../components/RetirementImpactWidget";
 
 function WithdrawalReview() {
   const navigate = useNavigate();
@@ -132,15 +131,6 @@ function WithdrawalReview() {
           </div>
         </div>
       </Card>
-
-      {/* Retirement Impact - Withdrawal permanently reduces savings */}
-      <RetirementImpactWidget
-        compact
-        impactAmount={-Math.round(amount * 2.1)}
-        impactLabel={`−$${Math.round(amount * 2.1).toLocaleString()} projected retirement impact`}
-        estimatedValue={38420}
-        onTrack={false}
-      />
 
       <Card className="p-6">
         <div className="flex items-start gap-3">

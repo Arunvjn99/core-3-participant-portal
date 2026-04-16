@@ -157,9 +157,11 @@ export default function AutoIncreaseSetup() {
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-100 dark:bg-green-950/40">
                 <TrendingUp className="h-4 w-4 text-green-600" />
               </div>
-              <h1 className="text-gray-900 dark:text-white">Configure your automatic increases</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+                Configure your automatic increases
+              </h1>
             </div>
-            <p className="mt-1 text-gray-500 dark:text-gray-400" style={{ fontSize: '0.9rem' }}>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 sm:text-base">
               Your contribution will gradually increase over time.
             </p>
           </div>
