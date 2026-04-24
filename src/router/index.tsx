@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components -- route module: lazy page chunks + router factory */
 import { lazy, Suspense, useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { ROUTES, dashboardPath } from '@/lib/constants'
 import {
@@ -38,7 +39,7 @@ import ReviewEnrollment from '../features/enrollment/pages/ReviewEnrollment'
 import EnrollmentSuccess from '../features/enrollment/pages/EnrollmentSuccess'
 
 // Transaction pages
-import TransactionsPage from '../features/transactions/pages/TransactionsPage'
+import TransactionCenter from '../pages/transactions/TransactionCenter'
 import LoanFlowLayout from '../features/transactions/flows/loan/LoanFlowLayout'
 import LoanEligibility from '../features/transactions/flows/loan/LoanEligibility'
 import LoanSimulator from '../features/transactions/flows/loan/LoanSimulator'
@@ -85,11 +86,15 @@ const ProfilePage = lazy(() => import('../features/profile/pages/ProfilePage').t
 
 // ─── Spinner fallback ────────────────────────────────────────────────────────
 
-const PageFallback = () => (
-  <div className="flex min-h-[40vh] items-center justify-center">
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-  </div>
-)
+function PageFallback() {
+  const { t } = useTranslation()
+  return (
+    <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+      <span className="text-sm text-text-muted">{t('common.loading')}</span>
+    </div>
+  )
+}
 
 const withSuspense = (Component: React.ComponentType) => (
   <Suspense fallback={<PageFallback />}>
@@ -238,7 +243,7 @@ export const router = createBrowserRouter([
           { path: 'enrollment/manage/:planId', element: <PlanDetail /> },
           { path: 'investments', element: withSuspense(InvestmentsPage) },
           { path: 'profile', element: withSuspense(ProfilePage) },
-          { path: 'transactions', element: <TransactionsPage /> },
+          { path: 'transactions', element: <TransactionCenter /> },
           {
             path: 'transactions/loan',
             element: <LoanFlowLayout />,

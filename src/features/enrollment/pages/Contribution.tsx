@@ -1,6 +1,8 @@
-import { useState, useId, useEffect } from 'react'
+import { useState, useId, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
+import { getAppDateLocale } from '@/lib/dateLocale'
 import { useEnrollmentStepNav } from '@/features/enrollment/components/EnrollmentStepNavContext'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { Sparkles, Info, Minus, Plus } from 'lucide-react'
@@ -42,9 +44,11 @@ function generateProjectionData(percent: number, salary: number) {
 }
 
 export default function Contribution() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { setStepNav } = useEnrollmentStepNav()
   const { data, updateData, personalization, advanceStep } = useEnrollment()
+  const locale = getAppDateLocale()
   const [compareMode, setCompareMode] = useState(false)
   const [comparePercent, setComparePercent] = useState(12)
   const [percentInput, setPercentInput] = useState(String(data.contributionPercent))
@@ -73,12 +77,15 @@ export default function Contribution() {
   const onePercentIncrease = generateProjectionData(percent + 1, salary)
   const onePercentImpact = (onePercentIncrease[onePercentIncrease.length - 1]?.value || 0) - projectedTotal
 
-  const quickOptions = [
-    { label: '4% Start', value: 4, icon: null as string | null },
-    { label: '6% Match', value: 6, icon: '✅' },
-    { label: '10% Strong', value: 10, icon: null as string | null },
-    { label: '15% Fast', value: 15, icon: '🚀' },
-  ]
+  const quickOptions = useMemo(
+    () => [
+      { label: t('enrollment.contribution_page.opt_4'), value: 4, icon: null as string | null },
+      { label: t('enrollment.contribution_page.opt_6'), value: 6, icon: '✅' },
+      { label: t('enrollment.contribution_page.opt_10'), value: 10, icon: null as string | null },
+      { label: t('enrollment.contribution_page.opt_15'), value: 15, icon: '🚀' },
+    ],
+    [t],
+  )
 
   const adjustPercent = (delta: number) => {
     const newValue = Math.max(1, Math.min(25, percent + delta))
@@ -138,9 +145,11 @@ export default function Contribution() {
     <AnimatedPage>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">Set your retirement savings</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+            {t('enrollment.contribution_page.title')}
+          </h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 sm:text-base">
-            We&apos;ll guide you to the right contribution for your future
+            {t('enrollment.contribution_page.subtitle')}
           </p>
         </div>
 
@@ -148,13 +157,17 @@ export default function Contribution() {
           <div className="space-y-5 rounded-2xl border border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-900 sm:p-6">
             <div className="rounded-xl border border-blue-200/50 bg-gradient-to-br from-blue-50 to-blue-100/30 p-4 dark:border-blue-800/40 dark:from-blue-950/30 dark:to-blue-900/10">
               <p className="text-center text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Monthly Paycheck
+                {t('enrollment.contribution_page.monthly_paycheck')}
               </p>
-              <p className="mt-1 text-center text-2xl font-bold text-gray-900 dark:text-white">${monthlyPaycheck.toLocaleString()}</p>
+              <p className="mt-1 text-center text-2xl font-bold text-gray-900 dark:text-white">
+                ${monthlyPaycheck.toLocaleString(locale)}
+              </p>
             </div>
 
             <div className="text-center">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Your Contribution</p>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                {t('enrollment.contribution_page.your_contribution')}
+              </p>
               <div className="flex items-center justify-center gap-3">
                 <button
                   type="button"
@@ -177,7 +190,7 @@ export default function Contribution() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Percentage
+                  {t('enrollment.contribution_page.percentage')}
                 </label>
                 <div className="relative">
                   <input
@@ -194,7 +207,7 @@ export default function Contribution() {
               </div>
               <div>
                 <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Annual $
+                  {t('enrollment.contribution_page.annual_dollar')}
                 </label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-400">$</span>
@@ -209,7 +222,9 @@ export default function Contribution() {
             </div>
 
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Quick Select</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                {t('enrollment.contribution_page.quick_select')}
+              </p>
               <div className="flex flex-wrap gap-2">
                 {quickOptions.map((opt) => (
                   <button
@@ -256,9 +271,13 @@ export default function Contribution() {
               <div className="flex items-start gap-2">
                 <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-purple-600 dark:text-purple-400" />
                 <div>
-                  <p className="mb-1 text-xs font-bold text-purple-900 dark:text-purple-300">Pro Tip</p>
+                  <p className="mb-1 text-xs font-bold text-purple-900 dark:text-purple-300">
+                    {t('enrollment.contribution_page.pro_tip')}
+                  </p>
                   <p className="text-xs leading-relaxed text-purple-700 dark:text-purple-400">
-                    Increasing just 1% could add ~${onePercentImpact.toLocaleString()} to your retirement
+                    {t('enrollment.contribution_page.pro_tip_body', {
+                      amount: `$${onePercentImpact.toLocaleString(locale)}`,
+                    })}
                   </p>
                 </div>
               </div>
@@ -268,11 +287,17 @@ export default function Contribution() {
           <div className="space-y-5 rounded-2xl border border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-900 sm:p-6">
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Retirement Savings Projection</h3>
-                <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Growth over 30 years at 7% annual return</p>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                  {t('enrollment.contribution_page.projection_title')}
+                </h3>
+                <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                  {t('enrollment.contribution_page.projection_sub')}
+                </p>
               </div>
               <div className="text-right">
-                <p className="text-sm font-bold text-green-700 dark:text-green-400">{Math.round(progressPercentage)}% on track</p>
+                <p className="text-sm font-bold text-green-700 dark:text-green-400">
+                  {t('enrollment.contribution_page.on_track', { pct: Math.round(progressPercentage) })}
+                </p>
                 <div className="mt-1 h-1.5 w-28 overflow-hidden rounded-full bg-green-100 dark:bg-green-900/40">
                   <div className="h-full rounded-full bg-green-600 transition-all duration-300" style={{ width: `${progressPercentage}%` }} />
                 </div>
@@ -282,25 +307,37 @@ export default function Contribution() {
             <div className="grid grid-cols-2 gap-4">
               <div className="rounded-xl border border-green-200/50 bg-gradient-to-br from-green-50 to-green-100/30 p-4 dark:border-green-800/40 dark:from-green-950/30 dark:to-green-900/10">
                 <p className="text-center text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Projected at Age {personalization.retirementAge}
+                  {t('enrollment.contribution_page.projected_age', { age: personalization.retirementAge })}
                 </p>
                 <p className="mt-1 text-center text-3xl font-extrabold leading-none text-green-700 dark:text-green-400">
                   ${(projectedTotal / 1000000).toFixed(1)}M
                 </p>
                 <p className="mt-1.5 text-center text-xs font-medium text-green-600 dark:text-green-500">
-                  ≈ ${monthlyRetirementIncome.toLocaleString()}/mo
+                  {t('enrollment.contribution_page.per_mo', {
+                    amount: `$${monthlyRetirementIncome.toLocaleString(locale)}`,
+                  })}
                 </p>
               </div>
               <div className="space-y-2.5 rounded-xl border border-blue-100/50 bg-gradient-to-br from-blue-50/50 to-transparent p-4 dark:border-blue-900/30 dark:from-blue-950/20">
-                <p className="text-center text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white">Monthly Impact</p>
+                <p className="text-center text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white">
+                  {t('enrollment.contribution_page.monthly_impact')}
+                </p>
                 <div className="space-y-2">
                   <div>
-                    <p className="text-center text-xs text-gray-500 dark:text-gray-400">You contribute</p>
-                    <p className="mt-0.5 text-center text-base font-bold text-gray-900 dark:text-white">${monthlyContribution.toLocaleString()}</p>
+                    <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+                      {t('enrollment.contribution_page.you_contribute')}
+                    </p>
+                    <p className="mt-0.5 text-center text-base font-bold text-gray-900 dark:text-white">
+                      ${monthlyContribution.toLocaleString(locale)}
+                    </p>
                   </div>
                   <div className="rounded-lg border border-green-200/50 bg-green-50 p-2 dark:border-green-800/40 dark:bg-green-950/30">
-                    <p className="text-center text-xs font-semibold text-green-700 dark:text-green-400">Employer adds</p>
-                    <p className="mt-0.5 text-center text-base font-bold text-green-700 dark:text-green-400">+${monthlyMatch.toLocaleString()}</p>
+                    <p className="text-center text-xs font-semibold text-green-700 dark:text-green-400">
+                      {t('enrollment.contribution_page.employer_adds')}
+                    </p>
+                    <p className="mt-0.5 text-center text-base font-bold text-green-700 dark:text-green-400">
+                      +${monthlyMatch.toLocaleString(locale)}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -331,9 +368,12 @@ export default function Contribution() {
                   <Tooltip
                     formatter={(value, name) => {
                       const v = Number(value)
-                      if (name === 'value') return [`$${v.toLocaleString()}`, 'Total Savings']
-                      if (name === 'contributions') return [`$${v.toLocaleString()}`, 'Your Contributions']
-                      if (name === 'marketGain') return [`$${v.toLocaleString()}`, 'Market Gains']
+                      if (name === 'value')
+                        return [`$${v.toLocaleString(locale)}`, t('enrollment.contribution_page.chart_total')]
+                      if (name === 'contributions')
+                        return [`$${v.toLocaleString(locale)}`, t('enrollment.contribution_page.chart_contrib')]
+                      if (name === 'marketGain')
+                        return [`$${v.toLocaleString(locale)}`, t('enrollment.contribution_page.chart_gains')]
                       return [value, name]
                     }}
                     contentStyle={{ borderRadius: 12, fontSize: 11, border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
@@ -343,7 +383,13 @@ export default function Contribution() {
                     stroke="#10b981"
                     strokeDasharray="5 5"
                     strokeWidth={2}
-                    label={{ value: 'Target', position: 'insideTopRight', fill: '#059669', fontSize: 10, fontWeight: 600 }}
+                    label={{
+                      value: t('enrollment.contribution_page.chart_target'),
+                      position: 'insideTopRight',
+                      fill: '#059669',
+                      fontSize: 10,
+                      fontWeight: 600,
+                    }}
                   />
                   <Area type="monotone" dataKey="contributions" stroke="#64748b" fill="transparent" strokeWidth={2} strokeDasharray="5 5" />
                   <Area type="monotone" dataKey="marketGain" stroke="#10b981" fill={`url(#${gradientId}-market)`} strokeWidth={2} stackId="1" />
@@ -354,8 +400,8 @@ export default function Contribution() {
 
             <div className="flex flex-wrap items-center justify-center gap-4">
               {[
-                { color: 'brand-bg', label: 'Total Savings' },
-                { color: 'bg-green-600', label: 'Market Gains' },
+                { color: 'brand-bg', label: t('enrollment.contribution_page.chart_total') },
+                { color: 'bg-green-600', label: t('enrollment.contribution_page.chart_gains') },
               ].map(({ color, label }) => (
                 <div key={label} className="flex items-center gap-1.5">
                   <div className={`h-3 w-3 rounded-full ${color}`} />
@@ -364,20 +410,24 @@ export default function Contribution() {
               ))}
               <div className="flex items-center gap-1.5">
                 <div className="h-0.5 w-3 border-t-2 border-dashed border-slate-500" />
-                <p className="text-xs text-gray-500 dark:text-gray-400">Your Contributions</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {t('enrollment.contribution_page.chart_contrib')}
+                </p>
               </div>
             </div>
 
             <div className="flex items-start gap-2">
               <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gray-400" />
               <p className="text-xs leading-relaxed text-gray-400 dark:text-gray-600">
-                Projection assumes 7% annual return. Actual results may vary. Monthly income uses 4% withdrawal rule.
+                {t('enrollment.contribution_page.disclaimer')}
               </p>
             </div>
 
             <div className="space-y-3 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white">Compare Scenarios</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white">
+                  {t('enrollment.contribution_page.compare_title')}
+                </p>
                 <button
                   type="button"
                   onClick={() => setCompareMode(!compareMode)}
@@ -387,7 +437,7 @@ export default function Contribution() {
                       : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                   }`}
                 >
-                  {compareMode ? 'Hide' : 'Show'}
+                  {compareMode ? t('enrollment.contribution_page.hide') : t('enrollment.contribution_page.show')}
                 </button>
               </div>
               {compareMode && (
@@ -418,12 +468,13 @@ export default function Contribution() {
                     <p
                       className={`text-sm font-bold ${difference < 0 ? 'text-red-800 dark:text-red-400' : 'text-green-800 dark:text-green-400'}`}
                     >
-                      {difference >= 0 ? '+' : ''}${Math.abs(difference).toLocaleString()}
+                      {difference >= 0 ? '+' : ''}${Math.abs(difference).toLocaleString(locale)}
                     </p>
                     <p
                       className={`text-xs ${difference < 0 ? 'text-red-600 dark:text-red-500' : 'text-green-600 dark:text-green-500'}`}
                     >
-                      {difference >= 0 ? 'more' : 'less'} with {comparePercent}% vs {percent}%
+                      {difference >= 0 ? t('enrollment.contribution_page.more_suffix') : t('enrollment.contribution_page.less_suffix')}{' '}
+                      {t('enrollment.contribution_page.compare_vs', { compare: comparePercent, current: percent })}
                     </p>
                   </div>
                 </div>

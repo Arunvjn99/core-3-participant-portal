@@ -1,4 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import {
   ArrowLeft,
@@ -10,85 +11,44 @@ import {
   FileText,
   Eye,
 } from 'lucide-react'
+import { getAppDateLocale } from '@/lib/dateLocale'
 
-const PLAN_DATA: Record<
-  string,
-  {
-    name: string
-    planId: string
-    type: string
-    totalBalance: number
-    balanceChange: string
-    vestedBalance: number
-    vestedPercent: string
-    contribution: string
-    contributionNote: string
-    healthScore: number
-    contributions: { label: string; value: string }[]
-    investments: { category: string; funds: { name: string; pct: string }[] }[]
-    autoFeatures: { label: string; value: string }[]
-    beneficiaries: { name: string; relation: string; pct: string }[]
-    documents: string[]
-    activity: { date: string; title: string; description: string }[]
-  }
-> = {
-  'roth-401k': {
-    name: 'Roth 401(k)',
-    planId: 'PLAN-ROTH-401K-001',
-    type: 'Roth 401(k)',
-    totalBalance: 125000,
-    balanceChange: '+2.4% this month',
-    vestedBalance: 125000,
-    vestedPercent: '100% Vested',
-    contribution: '10%',
-    contributionNote: '2% below employer match',
-    healthScore: 84,
-    contributions: [
-      { label: 'Roth', value: '10%' },
-      { label: 'Total', value: '10%' },
-    ],
-    investments: [
-      {
-        category: 'Roth',
-        funds: [
-          { name: 'S&P 500 Index Fund', pct: '60%' },
-          { name: 'International Stock Fund', pct: '25%' },
-          { name: 'Bond Index Fund', pct: '15%' },
-        ],
-      },
-    ],
-    autoFeatures: [
-      { label: 'Auto Increase', value: 'Enabled (1% annual, max 15%)' },
-      { label: 'Annual Limit', value: '$23,000' },
-      { label: 'Catch-up Limit', value: '$7,500' },
-      { label: 'Employer Match Cap', value: '6%' },
-      { label: 'Last Modified', value: 'June 1, 2024' },
-    ],
-    beneficiaries: [{ name: 'Jane Doe', relation: 'Spouse', pct: '100%' }],
-    documents: ['Plan Documents', 'Account Statements'],
-    activity: [
-      { date: 'Jan 15, 2024', title: 'Enrolled', description: 'Enrolled in Roth 401(k) plan' },
-      {
-        date: 'Jun 1, 2024',
-        title: 'Contribution Changed',
-        description: 'Updated contribution from 8% to 10%',
-      },
-      {
-        date: 'Sep 15, 2024',
-        title: 'Investment Changed',
-        description: 'Rebalanced portfolio allocation',
-      },
-    ],
-  },
-}
+/** Numeric / structural demo data for roth-401k; all copy from `enrollment.plan_detail` + `roth`. */
+const ROTH_PLAN_CORE = {
+  planId: 'PLAN-ROTH-401K-001',
+  totalBalance: 125000,
+  vestedBalance: 125000,
+  healthScore: 84,
+  contribution: '10%',
+  contributions: [
+    { value: '10%', total: false },
+    { value: '10%', total: true },
+  ],
+  investments: [
+    {
+      funds: [
+        { pct: '60%' },
+        { pct: '25%' },
+        { pct: '15%' },
+      ],
+    },
+  ],
+  autoFeatures: [
+    { valueKey: 'auto1' as const },
+    { valueKey: 'auto2' as const },
+    { valueKey: 'auto3' as const },
+    { valueKey: 'auto4' as const },
+    { valueKey: 'auto5' as const },
+  ],
+  beneficiaries: [{ pct: '100%' }],
+  activity: [
+    { dateKey: 'act1_date' as const, titleKey: 'act1_title' as const, descKey: 'act1_desc' as const },
+    { dateKey: 'act2_date' as const, titleKey: 'act2_title' as const, descKey: 'act2_desc' as const },
+    { dateKey: 'act3_date' as const, titleKey: 'act3_title' as const, descKey: 'act3_desc' as const },
+  ],
+} as const
 
-function fmt(n: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-  }).format(n)
-}
+const FUND_KEYS = ['fund_sp500', 'fund_intl', 'fund_bond'] as const
 
 function Section({
   title,
@@ -134,26 +94,40 @@ function Row({ label, value, bold }: { label: string; value: string; bold?: bool
 }
 
 export default function PlanDetail() {
+  const { t } = useTranslation()
+  const locale = getAppDateLocale()
   const { planId } = useParams<{ planId: string }>()
   const navigate = useNavigate()
-  const plan = planId ? PLAN_DATA[planId] : undefined
 
-  if (!plan) {
+  const tr = (k: string) => t(`enrollment.plan_detail.roth.${k}`)
+
+  const fmt = (n: number) =>
+    new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+    }).format(n)
+
+  if (!planId || planId !== 'roth-401k') {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="text-center">
-          <p className="text-lg font-semibold text-[var(--text-primary)]">Plan not found</p>
+          <p className="text-lg font-semibold text-[var(--text-primary)]">{t('enrollment.plan_detail.not_found')}</p>
           <button
             type="button"
             onClick={() => navigate('/enrollment/manage')}
             className="mt-4 text-sm font-medium text-[var(--color-primary)] hover:underline"
           >
-            Back to Enrolment
+            {t('enrollment.plan_detail.back')}
           </button>
         </div>
       </div>
     )
   }
+
+  const plan = ROTH_PLAN_CORE
+  const planName = t('enrollment.manage_page.plans.roth-401k.name')
+  const planType = t('enrollment.manage_page.plans.roth-401k.type')
 
   const healthColor =
     plan.healthScore >= 80
@@ -171,28 +145,26 @@ export default function PlanDetail() {
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
-      {/* Back link */}
       <button
         type="button"
         onClick={() => navigate('/enrollment/manage')}
         className="mb-6 flex items-center gap-1.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
       >
-        <ArrowLeft className="h-4 w-4" /> Back to Enrolment
+        <ArrowLeft className="h-4 w-4" /> {t('enrollment.plan_detail.back')}
       </button>
 
-      {/* Header */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-              {plan.name}
+              {planName}
             </h1>
             <span className="inline-flex items-center rounded-full bg-[var(--color-primary)] px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-white dark:bg-blue-600">
-              Enrolled
+              {t('enrollment.plan_detail.enrolled')}
             </span>
           </div>
           <p className="mt-1 text-xs text-[var(--text-muted)]">
-            Plan ID: {plan.planId} &nbsp;·&nbsp; {plan.type}
+            {t('enrollment.plan_detail.plan_id_label')} {plan.planId} &nbsp;·&nbsp; {planType}
           </p>
         </div>
         <div className="flex gap-2">
@@ -200,50 +172,54 @@ export default function PlanDetail() {
             type="button"
             className="btn-brand flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold"
           >
-            <Printer className="h-3.5 w-3.5" /> Print
+            <Printer className="h-3.5 w-3.5" /> {t('enrollment.plan_detail.print')}
           </button>
           <button
             type="button"
             className="flex items-center gap-1.5 rounded-lg border border-[var(--status-danger)] px-4 py-2 text-xs font-semibold text-[var(--status-danger)] transition-colors hover:bg-[var(--status-danger-bg)] dark:border-red-500 dark:text-red-400"
           >
-            <XCircle className="h-3.5 w-3.5" /> Opt-out Plan
+            <XCircle className="h-3.5 w-3.5" /> {t('enrollment.plan_detail.opt_out_plan')}
           </button>
         </div>
       </div>
 
-      {/* Stat cards */}
       <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {[
-          {
-            icon: Wallet,
-            label: 'Total Balance',
-            value: fmt(plan.totalBalance),
-            sub: plan.balanceChange,
-            subColor: 'text-[var(--status-success)]',
-          },
-          {
-            icon: Wallet,
-            label: 'Vested Balance',
-            value: fmt(plan.vestedBalance),
-            sub: plan.vestedPercent,
-            subColor: 'text-[var(--text-muted)]',
-          },
-          {
-            icon: TrendingUp,
-            label: 'My Contribution',
-            value: plan.contribution,
-            sub: plan.contributionNote,
-            subColor: 'text-[var(--text-muted)]',
-          },
-          {
-            icon: Activity,
-            label: 'Health Score',
-            value: `${plan.healthScore}/100`,
-            sub: null,
-            subColor: '',
-            isHealth: true,
-          },
-        ].map((stat, i) => (
+        {(
+          [
+            {
+              icon: Wallet,
+              label: t('enrollment.plan_detail.total_balance'),
+              value: fmt(plan.totalBalance),
+              sub: tr('balance_change'),
+              subColor: 'text-[var(--status-success)]' as const,
+              isHealth: false as const,
+            },
+            {
+              icon: Wallet,
+              label: t('enrollment.plan_detail.vested'),
+              value: fmt(plan.vestedBalance),
+              sub: tr('vested_pct'),
+              subColor: 'text-[var(--text-muted)]' as const,
+              isHealth: false as const,
+            },
+            {
+              icon: TrendingUp,
+              label: t('enrollment.plan_detail.stat_my_contribution'),
+              value: plan.contribution,
+              sub: tr('contrib_note'),
+              subColor: 'text-[var(--text-muted)]' as const,
+              isHealth: false as const,
+            },
+            {
+              icon: Activity,
+              label: t('enrollment.plan_detail.stat_health_score'),
+              value: `${plan.healthScore}/100`,
+              sub: '',
+              subColor: '' as const,
+              isHealth: true as const,
+            },
+          ] as const
+        ).map((stat, i) => (
           <div
             key={i}
             className="rounded-xl border border-[var(--border-default)] bg-[var(--color-primary)] p-4 text-white dark:border-blue-800 dark:bg-blue-900"
@@ -270,92 +246,94 @@ export default function PlanDetail() {
         ))}
       </div>
 
-      {/* Sections */}
       <div className="flex flex-col gap-5">
-        {/* Contribution Election */}
-        <Section title="Contribution Election" action={{ label: 'Edit Contribution' }}>
-          {plan.contributions.map((c) => (
-            <Row key={c.label} label={c.label} value={c.value} />
+        <Section
+          title={t('enrollment.plan_detail.section_contribution_election')}
+          action={{ label: t('enrollment.plan_detail.edit_contribution') }}
+        >
+          {plan.contributions.map((c, idx) => (
+            <Row key={idx} label={c.total ? tr('election_total') : tr('election_roth')} value={c.value} />
           ))}
         </Section>
 
-        {/* Investment Election */}
-        <Section title="Investment Election" action={{ label: 'Change Investments' }}>
-          {plan.investments.map((group) => (
-            <div key={group.category}>
+        <Section
+          title={t('enrollment.plan_detail.section_investment_election')}
+          action={{ label: t('enrollment.plan_detail.change_investments') }}
+        >
+          {plan.investments.map((group, gi) => (
+            <div key={gi}>
               <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                {group.category}
+                {tr('inv_category_roth')}
               </p>
-              {group.funds.map((f) => (
-                <Row key={f.name} label={f.name} value={f.pct} />
+              {group.funds.map((f, fi) => (
+                <Row key={fi} label={tr(FUND_KEYS[fi])} value={f.pct} />
               ))}
             </div>
           ))}
         </Section>
 
-        {/* Auto Features */}
-        <Section title="Auto Features" action={{ label: 'Manage Features' }}>
-          {plan.autoFeatures.map((f) => (
-            <Row key={f.label} label={f.label} value={f.value} />
-          ))}
+        <Section title={t('enrollment.plan_detail.auto_features')} action={{ label: t('enrollment.plan_detail.manage_features') }}>
+          {plan.autoFeatures.map((f, idx) => {
+            const labelKeys = ['auto_label_increase', 'auto_label_annual', 'auto_label_catchup', 'auto_label_match', 'auto_label_modified'] as const
+            return (
+              <Row key={idx} label={tr(labelKeys[idx])} value={tr(f.valueKey)} />
+            )
+          })}
         </Section>
 
-        {/* Beneficiaries */}
-        <Section title="Beneficiaries" action={{ label: 'Update' }}>
+        <Section title={t('enrollment.plan_detail.beneficiaries')} action={{ label: t('enrollment.plan_detail.update') }}>
           <p className="mb-3 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-            Primary
+            {t('enrollment.plan_detail.beneficiaries_primary')}
           </p>
-          {plan.beneficiaries.map((b) => (
+          {plan.beneficiaries.map((_, i) => (
             <div
-              key={b.name}
+              key={i}
               className="flex items-center justify-between border-b border-[var(--border-light)] py-3 last:border-0 dark:border-gray-800"
             >
               <div>
-                <p className="text-sm font-semibold text-[var(--text-primary)]">{b.name}</p>
+                <p className="text-sm font-semibold text-[var(--text-primary)]">{tr('bene_name')}</p>
               </div>
               <div className="flex items-center gap-6 text-sm text-[var(--text-secondary)]">
-                <span>{b.relation}</span>
-                <span className="font-semibold text-[var(--text-primary)]">{b.pct}</span>
+                <span>{tr('bene_relation')}</span>
+                <span className="font-semibold text-[var(--text-primary)]">{tr('bene_pct')}</span>
               </div>
             </div>
           ))}
         </Section>
 
-        {/* Documents */}
-        <Section title="Documents">
-          {plan.documents.map((doc) => (
+        <Section title={t('enrollment.plan_detail.documents')}>
+          {(['doc1', 'doc2'] as const).map((dk) => (
             <div
-              key={doc}
+              key={dk}
               className="flex items-center justify-between border-b border-[var(--border-light)] py-3 last:border-0 dark:border-gray-800"
             >
               <div className="flex items-center gap-2.5">
                 <FileText className="h-4 w-4 text-[var(--text-muted)]" />
-                <span className="text-sm font-medium text-[var(--text-primary)]">{doc}</span>
+                <span className="text-sm font-medium text-[var(--text-primary)]">{tr(dk)}</span>
               </div>
               <button
                 type="button"
                 className="btn-brand flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold"
               >
-                <Eye className="h-3 w-3" /> View
+                <Eye className="h-3 w-3" /> {t('enrollment.plan_detail.view')}
               </button>
             </div>
           ))}
         </Section>
 
-        {/* Activity Log */}
         <Section
-          title="Activity Log"
-          action={{ label: 'View All Activity', onClick: undefined }}
+          title={t('enrollment.plan_detail.section_activity_log')}
+          action={{ label: t('enrollment.plan_detail.view_all_activity'), onClick: undefined }}
         >
           <div className="relative pl-4">
-            <div className="absolute left-[7px] top-2 bottom-2 w-px bg-[var(--border-default)] dark:bg-gray-700" />
+            <div className="absolute bottom-2 left-[7px] top-2 w-px bg-[var(--border-default)] dark:bg-gray-700" />
             {plan.activity.map((event, i) => (
               <div key={i} className="relative mb-5 last:mb-0">
                 <div className="absolute -left-4 top-1.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--surface-card)] bg-[var(--color-primary)] dark:border-gray-900" />
                 <div className="ml-2">
-                  <p className="text-[11px] font-medium text-[var(--text-muted)]">{event.date}</p>
-                  <p className="text-sm font-bold text-[var(--text-primary)]">{event.title}</p>
-                  <p className="text-xs text-[var(--text-secondary)]">{event.description}</p>
+                  <p className="text-[11px] font-medium text-[var(--text-muted)]">{tr(event.dateKey)}</p>
+                  <p className="text-sm font-bold text-[var(--text-primary)]">{tr(event.titleKey)}</p>
+                  <p className="text-xs text-[var(--text-secondary)]">{tr(event.descKey)}</p>
                 </div>
               </div>
             ))}

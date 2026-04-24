@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
+import { getAppDateLocale } from '@/lib/dateLocale'
 import {
   ArrowRight,
   ChevronDown,
@@ -21,7 +23,7 @@ import {
 } from 'lucide-react'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { useEnrollmentStepNav } from '@/features/enrollment/components/EnrollmentStepNavContext'
+import { useEnrollmentStepNav, type EnrollmentPrimaryLabel } from '@/features/enrollment/components/EnrollmentStepNavContext'
 
 /* ─── Types ─── */
 interface FundDetail { name: string; ticker: string; expense: string }
@@ -30,11 +32,8 @@ interface SourceFundAllocation { name: string; ticker: string; expense: string; 
 type SourceKey = 'roth' | 'preTax' | 'afterTax'
 interface PerSourceAllocations { sameForAll: boolean; unified: SourceFundAllocation[]; sources: Record<SourceKey, SourceFundAllocation[]> }
 
-// sourceLabels kept for potential future use
-const _sourceLabels: Record<SourceKey, string> = { roth: 'Roth', preTax: 'Pre-Tax', afterTax: 'After-Tax' }
-void _sourceLabels
-const sourceFullLabels: Record<SourceKey, string> = { roth: 'Roth Contributions', preTax: 'Pre-Tax Contributions', afterTax: 'After-Tax Contributions' }
-const sourceTaxLabels: Record<SourceKey, string> = { roth: 'Tax Free', preTax: 'Tax Deferred', afterTax: 'Taxable' }
+const sourceTKey: Record<SourceKey, string> = { roth: 'source_roth', preTax: 'source_preTax', afterTax: 'source_afterTax' }
+const sourceTaxTKey: Record<SourceKey, string> = { roth: 'tax_free', preTax: 'tax_deferred', afterTax: 'taxable' }
 const sourceColors: Record<SourceKey, string> = { roth: '#8b5cf6', preTax: '#3b82f6', afterTax: '#10b981' }
 const sourceBorderColors: Record<SourceKey, string> = { roth: 'border-purple-200', preTax: 'border-blue-200', afterTax: 'border-green-200' }
 const sourceBgColors: Record<SourceKey, string> = { roth: 'bg-purple-50', preTax: 'bg-blue-50', afterTax: 'bg-green-50' }
@@ -67,24 +66,7 @@ const allocations: Record<string, AllocationEntry[]> = {
   ],
 }
 
-const riskLabels: Record<string, string> = {
-  conservative: 'Conservative Investor',
-  balanced: 'Balanced Investor',
-  growth: 'Growth Investor',
-  aggressive: 'Aggressive Investor',
-}
-const riskDescriptions: Record<string, string> = {
-  conservative: 'A focus on capital preservation with steady, predictable returns suited for risk-averse retirement planning.',
-  balanced: 'A mix of growth and stability designed for long-term retirement investing.',
-  growth: 'Emphasizes long-term capital appreciation while accepting higher short-term volatility.',
-  aggressive: 'Maximizes growth potential through equity-heavy allocations, suited for longer time horizons.',
-}
-const riskLevels = [
-  { key: 'conservative' as const, label: 'Conservative', desc: 'Lower risk, steadier returns' },
-  { key: 'balanced' as const, label: 'Balanced', desc: 'Moderate risk and growth' },
-  { key: 'growth' as const, label: 'Growth', desc: 'Higher growth potential' },
-  { key: 'aggressive' as const, label: 'Aggressive', desc: 'Maximum growth potential' },
-]
+const riskLevelKeys = ['conservative', 'balanced', 'growth', 'aggressive'] as const
 
 const fundCatalog: SourceFundAllocation[] = [
   { name: 'Vanguard Total Stock Market', ticker: 'VTSAX', expense: '0.04%', assetClass: 'Equity', color: '#10b981', allocation: 0 },
@@ -110,19 +92,27 @@ function getSourceTotal(funds: SourceFundAllocation[]) {
   return funds.reduce((s, f) => s + f.allocation, 0)
 }
 
-function computeRiskLevel(funds: SourceFundAllocation[]): { label: string; color: string } {
+type ComputedRiskKey = 'conservative' | 'balanced' | 'growth' | 'aggressive' | 'not_set'
+
+function computeRiskLevel(funds: SourceFundAllocation[]): { riskKey: ComputedRiskKey; color: string } {
   const total = funds.reduce((s, f) => s + f.allocation, 0)
-  if (total === 0) return { label: 'Not Set', color: 'text-gray-400' }
+  if (total === 0) return { riskKey: 'not_set', color: 'text-gray-400' }
   const eq = funds.filter((f) => f.assetClass === 'Equity' || f.assetClass === 'International').reduce((s, f) => s + f.allocation, 0)
-  if (eq >= 70) return { label: 'Aggressive', color: 'text-red-600' }
-  if (eq >= 50) return { label: 'Growth', color: 'text-orange-600' }
-  if (eq >= 30) return { label: 'Balanced', color: 'text-blue-600' }
-  return { label: 'Conservative', color: 'text-green-600' }
+  if (eq >= 70) return { riskKey: 'aggressive', color: 'text-red-600' }
+  if (eq >= 50) return { riskKey: 'growth', color: 'text-orange-600' }
+  if (eq >= 30) return { riskKey: 'balanced', color: 'text-blue-600' }
+  return { riskKey: 'conservative', color: 'text-green-600' }
 }
 
 function AllocationIndicator({ total, label }: { total: number; label?: string }) {
+  const { t } = useTranslation()
   const isValid = total === 100
   const diff = total - 100
+  const statusText = isValid
+    ? t('enrollment.investment.alloc_balanced')
+    : diff > 0
+      ? t('enrollment.investment.alloc_over', { n: diff })
+      : t('enrollment.investment.alloc_remaining', { n: Math.abs(diff) })
   return (
     <div className={`flex items-center justify-between rounded-xl px-3.5 py-2 ${isValid ? 'bg-green-50' : 'bg-amber-50'}`}>
       <div className="flex items-center gap-2">
@@ -130,7 +120,7 @@ function AllocationIndicator({ total, label }: { total: number; label?: string }
           ? <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
           : <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />}
         <span className={isValid ? 'text-green-700' : 'text-amber-700'} style={{ fontSize: '0.78rem', fontWeight: 500 }}>
-          {label ? `${label}: ` : ''}{isValid ? 'Balanced' : diff > 0 ? `${diff}% over` : `${Math.abs(diff)}% remaining`}
+          {label ? `${label}: ` : ''}{statusText}
         </span>
       </div>
       <span className={`tabular-nums ${isValid ? 'text-green-800' : 'text-amber-800'}`} style={{ fontSize: '0.9rem', fontWeight: 700 }}>{total}%</span>
@@ -139,6 +129,7 @@ function AllocationIndicator({ total, label }: { total: number; label?: string }
 }
 
 function FundPicker({ existingTickers, onAdd }: { existingTickers: string[]; onAdd: (fund: SourceFundAllocation) => void }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -156,7 +147,7 @@ function FundPicker({ existingTickers, onAdd }: { existingTickers: string[]; onA
   return (
     <div className="relative" ref={ref}>
       <button type="button" onClick={() => setOpen(!open)} className="flex items-center gap-1.5 text-blue-600 hover:text-blue-700 transition-colors py-1.5 px-2 rounded-lg hover:bg-blue-50" style={{ fontSize: '0.8rem', fontWeight: 500 }}>
-        <Plus className="w-3.5 h-3.5" /> Add Fund
+        <Plus className="w-3.5 h-3.5" /> {t('enrollment.investment.add_fund')}
       </button>
       {open && (
         <div className="absolute left-0 top-full mt-1 z-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg w-72 max-h-64 overflow-y-auto">
@@ -167,7 +158,7 @@ function FundPicker({ existingTickers, onAdd }: { existingTickers: string[]; onA
                 <button type="button" key={fund.ticker} onClick={() => { onAdd({ ...fund, allocation: 0 }); setOpen(false) }} className="w-full px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 text-left flex items-center justify-between transition-colors">
                   <div>
                     <p className="text-gray-800 dark:text-white" style={{ fontSize: '0.8rem' }}>{fund.name}</p>
-                    <p className="text-gray-400" style={{ fontSize: '0.68rem' }}>{fund.ticker} · ER: {fund.expense}</p>
+                    <p className="text-gray-400" style={{ fontSize: '0.68rem' }}>{fund.ticker} · {t('enrollment.investment.er')} {fund.expense}</p>
                   </div>
                   <Plus className="w-3.5 h-3.5 text-gray-400" />
                 </button>
@@ -181,6 +172,7 @@ function FundPicker({ existingTickers, onAdd }: { existingTickers: string[]; onA
 }
 
 function SourceFundList({ funds, onUpdate, onRemove, onAdd }: { funds: SourceFundAllocation[]; onUpdate: (t: string, v: number) => void; onRemove: (t: string) => void; onAdd: (f: SourceFundAllocation) => void }) {
+  const { t } = useTranslation()
   const grouped = funds.reduce<Record<string, SourceFundAllocation[]>>((acc, f) => {
     if (!acc[f.assetClass]) acc[f.assetClass] = []
     acc[f.assetClass].push(f)
@@ -203,7 +195,7 @@ function SourceFundList({ funds, onUpdate, onRemove, onAdd }: { funds: SourceFun
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <span className="text-gray-400" style={{ fontSize: '0.68rem' }}>{fund.ticker}</span>
                       <span className="text-gray-300">·</span>
-                      <span className="text-gray-400" style={{ fontSize: '0.68rem' }}>ER: {fund.expense}</span>
+                      <span className="text-gray-400" style={{ fontSize: '0.68rem' }}>{t('enrollment.investment.er')} {fund.expense}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0 ml-2">
@@ -229,11 +221,15 @@ function SourceFundList({ funds, onUpdate, onRemove, onAdd }: { funds: SourceFun
 
 
 function PortfolioEditorContent({ allocs, setAllocs }: { allocs: PerSourceAllocations; setAllocs: React.Dispatch<React.SetStateAction<PerSourceAllocations | null>> }) {
+  const { t } = useTranslation()
   const updateUnifiedFund = useCallback((ticker: string, value: number) => { setAllocs((p) => p ? ({ ...p, unified: p.unified.map((f) => f.ticker === ticker ? { ...f, allocation: value } : f) }) : p) }, [setAllocs])
   const removeUnifiedFund = useCallback((ticker: string) => { setAllocs((p) => p ? ({ ...p, unified: p.unified.filter((f) => f.ticker !== ticker) }) : p) }, [setAllocs])
   const addUnifiedFund = useCallback((fund: SourceFundAllocation) => { setAllocs((p) => p ? ({ ...p, unified: [...p.unified, fund] }) : p) }, [setAllocs])
   const unifiedTotal = getSourceTotal(allocs.unified)
   const currentFunds = allocs.unified
+  const { riskKey, color: riskColor } = computeRiskLevel(currentFunds || [])
+  const riskShort =
+    riskKey === 'not_set' ? t('enrollment.investment.risk_not_set') : t(`enrollment.investment.risk_short_${riskKey}`)
   const chartData = Object.entries(
     (currentFunds || []).filter((f) => f.allocation > 0).reduce<Record<string, { value: number; color: string }>>((acc, f) => {
       if (!acc[f.assetClass]) acc[f.assetClass] = { value: 0, color: f.color }
@@ -253,21 +249,22 @@ function PortfolioEditorContent({ allocs, setAllocs }: { allocs: PerSourceAlloca
           </div>
           <div className="flex-1">
             <div className="flex flex-wrap gap-x-4 gap-y-1">{chartData.map((d) => <div key={d.name} className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: d.color }} /><span className="text-gray-600" style={{ fontSize: '0.72rem' }}>{d.name}: <span className="text-gray-900 dark:text-white" style={{ fontWeight: 600 }}>{d.value}%</span></span></div>)}</div>
-            <div className="flex items-center gap-1.5 mt-1.5"><Gauge className="w-3 h-3 text-gray-400" /><span className="text-gray-500" style={{ fontSize: '0.68rem' }}>Risk: <span className={computeRiskLevel(currentFunds || []).color} style={{ fontWeight: 600 }}>{computeRiskLevel(currentFunds || []).label}</span></span></div>
+            <div className="flex items-center gap-1.5 mt-1.5"><Gauge className="w-3 h-3 text-gray-400" /><span className="text-gray-500" style={{ fontSize: '0.68rem' }}>{t('enrollment.investment.risk_label')} <span className={riskColor} style={{ fontWeight: 600 }}>{riskShort}</span></span></div>
           </div>
         </div>
       )}
       <div>
         {allocs.unified.length === 0
-          ? <div className="text-center py-8"><p className="text-gray-400" style={{ fontSize: '0.85rem' }}>No funds selected.</p><div className="mt-3 flex justify-center"><FundPicker existingTickers={[]} onAdd={addUnifiedFund} /></div></div>
+          ? <div className="text-center py-8"><p className="text-gray-400" style={{ fontSize: '0.85rem' }}>{t('enrollment.investment.no_funds')}</p><div className="mt-3 flex justify-center"><FundPicker existingTickers={[]} onAdd={addUnifiedFund} /></div></div>
           : <SourceFundList funds={allocs.unified} onUpdate={updateUnifiedFund} onRemove={removeUnifiedFund} onAdd={addUnifiedFund} />}
-        <div className="mt-4 space-y-2"><AllocationIndicator total={unifiedTotal} label="Total Allocation" /></div>
+        <div className="mt-4 space-y-2"><AllocationIndicator total={unifiedTotal} label={t('enrollment.investment.total_allocation')} /></div>
       </div>
     </div>
   )
 }
 
 function CustomizeModal({ isOpen, onClose, initialAllocations, onSave }: { isOpen: boolean; onClose: () => void; initialAllocations: PerSourceAllocations; activeSources?: SourceKey[]; contributionSources?: { preTax: number; roth: number; afterTax: number }; onSave: (a: PerSourceAllocations) => void; initialTab?: SourceKey }) {
+  const { t } = useTranslation()
   const [allocs, setAllocs] = useState<PerSourceAllocations>(initialAllocations)
   const backdropRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -281,7 +278,7 @@ function CustomizeModal({ isOpen, onClose, initialAllocations, onSave }: { isOpe
     <div ref={backdropRef} onClick={(e) => { if (e.target === backdropRef.current) onClose() }} className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-          <div><h2 className="text-gray-900 dark:text-white" style={{ fontSize: '1.1rem' }}>Edit Portfolio</h2><p className="text-gray-400 mt-0.5" style={{ fontSize: '0.78rem' }}>Set fund allocations for all contribution sources.</p></div>
+          <div><h2 className="text-gray-900 dark:text-white" style={{ fontSize: '1.1rem' }}>{t('enrollment.investment.modal_edit_title')}</h2><p className="text-gray-400 mt-0.5" style={{ fontSize: '0.78rem' }}>{t('enrollment.investment.modal_edit_sub')}</p></div>
           <button type="button" onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"><X className="w-4 h-4" /></button>
         </div>
         <div className="flex-1 overflow-y-auto px-6 py-4">
@@ -289,10 +286,10 @@ function CustomizeModal({ isOpen, onClose, initialAllocations, onSave }: { isOpe
         </div>
         <div className="border-t border-gray-100 dark:border-gray-800 px-6 py-4">
           <div className="flex items-center gap-3">
-            <button type="button" onClick={() => setAllocs(initialAllocations)} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-700 transition-colors px-3 py-2" style={{ fontSize: '0.82rem', fontWeight: 500 }}><RotateCcw className="w-3.5 h-3.5" /> Reset</button>
+            <button type="button" onClick={() => setAllocs(initialAllocations)} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-700 transition-colors px-3 py-2" style={{ fontSize: '0.82rem', fontWeight: 500 }}><RotateCcw className="w-3.5 h-3.5" /> {t('enrollment.investment.reset')}</button>
             <div className="flex-1" />
-            <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" style={{ fontSize: '0.85rem', fontWeight: 500 }}>Cancel</button>
-            <button type="button" onClick={() => { if (allValid) onSave(allocs) }} disabled={!allValid} className={`px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all ${allValid ? 'btn-brand text-white active:scale-[0.98]' : 'bg-gray-200 dark:bg-gray-800 text-gray-400 cursor-not-allowed'}`} style={{ fontSize: '0.85rem', fontWeight: 500 }}><Check className="w-4 h-4" /> Save Portfolio</button>
+            <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" style={{ fontSize: '0.85rem', fontWeight: 500 }}>{t('enrollment.investment.cancel')}</button>
+            <button type="button" onClick={() => { if (allValid) onSave(allocs) }} disabled={!allValid} className={`px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all ${allValid ? 'btn-brand text-white active:scale-[0.98]' : 'bg-gray-200 dark:bg-gray-800 text-gray-400 cursor-not-allowed'}`} style={{ fontSize: '0.85rem', fontWeight: 500 }}><Check className="w-4 h-4" /> {t('enrollment.investment.save_portfolio')}</button>
           </div>
         </div>
       </div>
@@ -301,6 +298,8 @@ function CustomizeModal({ isOpen, onClose, initialAllocations, onSave }: { isOpe
 }
 
 function SourceCard({ sourceKey, monthlyAmount, funds, isCustomized, onEditPortfolio }: { sourceKey: SourceKey; monthlyAmount: number; funds: SourceFundAllocation[]; isCustomized: boolean; onEditPortfolio: () => void }) {
+  const { t } = useTranslation()
+  const locale = getAppDateLocale()
   const [expanded, setExpanded] = useState(false)
   const activeFunds = funds.filter((f) => f.allocation > 0)
   const assetSummary = Object.entries(activeFunds.reduce<Record<string, { value: number; color: string }>>((acc, f) => {
@@ -313,10 +312,10 @@ function SourceCard({ sourceKey, monthlyAmount, funds, isCustomized, onEditPortf
       <div className="p-4">
         <div className="flex items-start gap-3">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: sourceColors[sourceKey] }} /><p className="text-gray-900 dark:text-white" style={{ fontSize: '0.9rem', fontWeight: 600 }}>{sourceFullLabels[sourceKey]}</p><span className={`${sourceBgColors[sourceKey]} px-1.5 py-0.5 rounded`} style={{ fontSize: '0.6rem', fontWeight: 600, letterSpacing: '0.03em', color: sourceColors[sourceKey] }}>{sourceTaxLabels[sourceKey]}</span></div>
-            <div className="flex items-center gap-3 mt-1.5"><span className="text-gray-700 dark:text-gray-300" style={{ fontSize: '0.82rem', fontWeight: 500 }}>${Math.round(monthlyAmount).toLocaleString()}/mo</span><span className="text-gray-300">·</span><span className="text-gray-500" style={{ fontSize: '0.78rem' }}>{activeFunds.length} {activeFunds.length === 1 ? 'fund' : 'funds'}</span>{isCustomized && <><span className="text-gray-300">·</span><span className="text-blue-600" style={{ fontSize: '0.72rem', fontWeight: 500 }}>Customized</span></>}</div>
+            <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: sourceColors[sourceKey] }} /><p className="text-gray-900 dark:text-white" style={{ fontSize: '0.9rem', fontWeight: 600 }}>{t(`enrollment.investment.${sourceTKey[sourceKey]}`)}</p><span className={`${sourceBgColors[sourceKey]} px-1.5 py-0.5 rounded`} style={{ fontSize: '0.6rem', fontWeight: 600, letterSpacing: '0.03em', color: sourceColors[sourceKey] }}>{t(`enrollment.investment.${sourceTaxTKey[sourceKey]}`)}</span></div>
+            <div className="flex items-center gap-3 mt-1.5"><span className="text-gray-700 dark:text-gray-300" style={{ fontSize: '0.82rem', fontWeight: 500 }}>${Math.round(monthlyAmount).toLocaleString(locale)}/mo</span><span className="text-gray-300">·</span><span className="text-gray-500" style={{ fontSize: '0.78rem' }}>{activeFunds.length} {activeFunds.length === 1 ? t('enrollment.investment.funds_one') : t('enrollment.investment.funds_other')}</span>{isCustomized && <><span className="text-gray-300">·</span><span className="text-blue-600" style={{ fontSize: '0.72rem', fontWeight: 500 }}>{t('enrollment.investment.customized')}</span></>}</div>
           </div>
-          <button type="button" onClick={onEditPortfolio} className="shrink-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors" style={{ fontSize: '0.82rem', fontWeight: 500 }}><Pencil className="w-3.5 h-3.5 inline mr-1.5" />Edit</button>
+          <button type="button" onClick={onEditPortfolio} className="shrink-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors" style={{ fontSize: '0.82rem', fontWeight: 500 }}><Pencil className="w-3.5 h-3.5 inline mr-1.5" />{t('enrollment.investment.edit')}</button>
         </div>
         {assetSummary.length > 0 && (
           <div className="mt-3">
@@ -327,14 +326,14 @@ function SourceCard({ sourceKey, monthlyAmount, funds, isCustomized, onEditPortf
         {activeFunds.length > 0 && (
           <div className="mt-2.5 space-y-0.5">
             {activeFunds.slice(0, 2).map((f) => <p key={f.ticker} className="text-gray-500 truncate" style={{ fontSize: '0.72rem' }}>{f.name}</p>)}
-            {activeFunds.length > 2 && <p className="text-gray-400" style={{ fontSize: '0.68rem' }}>+{activeFunds.length - 2} more</p>}
+            {activeFunds.length > 2 && <p className="text-gray-400" style={{ fontSize: '0.68rem' }}>{t('enrollment.investment.more_funds', { n: activeFunds.length - 2 })}</p>}
           </div>
         )}
       </div>
       {activeFunds.length > 0 && (
         <>
-          <button type="button" onClick={() => setExpanded(!expanded)} className="w-full border-t border-gray-100 dark:border-gray-800 px-4 py-2 flex items-center justify-center gap-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" style={{ fontSize: '0.75rem', fontWeight: 500 }}>{expanded ? 'Hide' : 'View'} funds{expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}</button>
-          {expanded && <div className="border-t border-gray-100 dark:border-gray-800 px-4 py-3 space-y-2">{activeFunds.map((f) => <div key={f.ticker} className="flex items-center justify-between py-1"><div><p className="text-gray-700 dark:text-gray-300" style={{ fontSize: '0.78rem' }}>{f.name}</p><p className="text-gray-400" style={{ fontSize: '0.65rem' }}>{f.ticker} · ER: {f.expense}</p></div><span className="text-gray-900 dark:text-white tabular-nums" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{f.allocation}%</span></div>)}</div>}
+          <button type="button" onClick={() => setExpanded(!expanded)} className="w-full border-t border-gray-100 dark:border-gray-800 px-4 py-2 flex items-center justify-center gap-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" style={{ fontSize: '0.75rem', fontWeight: 500 }}>{expanded ? t('enrollment.investment.hide_funds') : t('enrollment.investment.view_funds')}{expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}</button>
+          {expanded && <div className="border-t border-gray-100 dark:border-gray-800 px-4 py-3 space-y-2">{activeFunds.map((f) => <div key={f.ticker} className="flex items-center justify-between py-1"><div><p className="text-gray-700 dark:text-gray-300" style={{ fontSize: '0.78rem' }}>{f.name}</p><p className="text-gray-400" style={{ fontSize: '0.65rem' }}>{f.ticker} · {t('enrollment.investment.er')} {f.expense}</p></div><span className="text-gray-900 dark:text-white tabular-nums" style={{ fontSize: '0.82rem', fontWeight: 600 }}>{f.allocation}%</span></div>)}</div>}
         </>
       )}
     </div>
@@ -342,16 +341,18 @@ function SourceCard({ sourceKey, monthlyAmount, funds, isCustomized, onEditPortf
 }
 
 function InactiveSourceCard({ sourceKey }: { sourceKey: SourceKey }) {
+  const { t } = useTranslation()
   return (
     <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 px-4 py-3.5 flex items-center gap-3 opacity-60">
       <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: sourceColors[sourceKey] }} />
-      <div><p className="text-gray-500" style={{ fontSize: '0.85rem', fontWeight: 500 }}>{sourceFullLabels[sourceKey]}</p><p className="text-gray-400" style={{ fontSize: '0.72rem' }}>Not currently used</p></div>
+      <div><p className="text-gray-500" style={{ fontSize: '0.85rem', fontWeight: 500 }}>{t(`enrollment.investment.${sourceTKey[sourceKey]}`)}</p><p className="text-gray-400" style={{ fontSize: '0.72rem' }}>{t('enrollment.investment.inactive')}</p></div>
     </div>
   )
 }
 
 /* ─── Main Component ─── */
 function InvestmentStrategy() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { setStepNav } = useEnrollmentStepNav()
   const { data, updateData } = useEnrollment()
@@ -395,10 +396,10 @@ function InvestmentStrategy() {
       showBack: true,
       onBack: () => navigate('/enrollment/auto-increase'),
       onNext: handleNext,
-      primaryLabel: 'Next',
+      primaryLabel: t('enrollment.next') as EnrollmentPrimaryLabel,
     })
     return () => setStepNav(null)
-  }, [setStepNav, navigate, handleNext])
+  }, [setStepNav, navigate, handleNext, t])
 
   const handleOpenCustomize = (sourceKey: SourceKey) => {
     const initial: PerSourceAllocations = customAllocations || {
@@ -434,10 +435,10 @@ function InvestmentStrategy() {
       <div>
         <div className="mb-5">
           <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-            Your Investment Strategy
+            {t('enrollment.investment.title')}
           </h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 sm:text-base">
-            See how each contribution source is invested.
+            {t('enrollment.investment.subtitle')}
           </p>
         </div>
 
@@ -450,22 +451,22 @@ function InvestmentStrategy() {
                   <Gauge className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-gray-400 dark:text-gray-500" style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Investment Style</p>
-                  <p className="text-gray-900 dark:text-white" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{riskLabels[data.riskLevel]}</p>
-                  <p className="text-gray-500 dark:text-gray-400 mt-0.5" style={{ fontSize: '0.78rem' }}>{riskDescriptions[data.riskLevel]}</p>
+                  <p className="text-gray-400 dark:text-gray-500" style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('enrollment.investment.investment_style')}</p>
+                  <p className="text-gray-900 dark:text-white" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{t(`enrollment.investment.profile_${data.riskLevel}`)}</p>
+                  <p className="text-gray-500 dark:text-gray-400 mt-0.5" style={{ fontSize: '0.78rem' }}>{t(`enrollment.investment.profile_desc_${data.riskLevel}`)}</p>
                 </div>
               </div>
               <button type="button" onClick={() => setShowRiskEditor(!showRiskEditor)} className="flex items-center gap-1.5 text-blue-600 hover:text-blue-700 transition-colors shrink-0" style={{ fontSize: '0.82rem', fontWeight: 500 }}>
-                <Pencil className="w-3.5 h-3.5" /> Edit Investment Strategy
+                <Pencil className="w-3.5 h-3.5" /> {t('enrollment.investment.edit_strategy')}
               </button>
             </div>
             {showRiskEditor && (
               <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
                 <div className="grid grid-cols-4 gap-2.5">
-                  {riskLevels.map((level) => (
-                    <button type="button" key={level.key} onClick={() => { updateData({ riskLevel: level.key }); setShowRiskEditor(false); setCustomAllocations(null) }} className={`p-3 rounded-xl border-2 transition-all text-center ${data.riskLevel === level.key ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300'}`}>
-                      <p className={data.riskLevel === level.key ? 'text-blue-700' : 'text-gray-900 dark:text-white'} style={{ fontWeight: 600, fontSize: '0.85rem' }}>{level.label}</p>
-                      <p className="text-gray-500 mt-0.5" style={{ fontSize: '0.72rem' }}>{level.desc}</p>
+                  {riskLevelKeys.map((levelKey) => (
+                    <button type="button" key={levelKey} onClick={() => { updateData({ riskLevel: levelKey }); setShowRiskEditor(false); setCustomAllocations(null) }} className={`p-3 rounded-xl border-2 transition-all text-center ${data.riskLevel === levelKey ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300'}`}>
+                      <p className={data.riskLevel === levelKey ? 'text-blue-700' : 'text-gray-900 dark:text-white'} style={{ fontWeight: 600, fontSize: '0.85rem' }}>{t(`enrollment.investment.level_${levelKey}`)}</p>
+                      <p className="text-gray-500 mt-0.5" style={{ fontSize: '0.72rem' }}>{t(`enrollment.investment.level_desc_${levelKey}`)}</p>
                     </button>
                   ))}
                 </div>
@@ -481,20 +482,20 @@ function InvestmentStrategy() {
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <div className="px-2.5 py-1 bg-blue-100 dark:bg-blue-950/40 rounded-md">
-                      <p className="text-blue-700 dark:text-blue-400" style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Recommended</p>
+                      <p className="text-blue-700 dark:text-blue-400" style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('enrollment.investment.recommended')}</p>
                     </div>
                   </div>
-                  <h3 className="text-gray-900 dark:text-white" style={{ fontSize: '1.1rem', fontWeight: 700 }}>Plan Default Investment</h3>
-                  <p className="text-gray-600 dark:text-gray-400 mt-1" style={{ fontSize: '0.8rem' }}>Professionally managed, diversified portfolio</p>
+                  <h3 className="text-gray-900 dark:text-white" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{t('enrollment.investment.plan_default_title')}</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mt-1" style={{ fontSize: '0.8rem' }}>{t('enrollment.investment.plan_default_sub')}</p>
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg px-4 py-3 space-y-1.5 shrink-0">
-                  <div className="flex items-center gap-3"><span className="text-gray-600 dark:text-gray-400" style={{ fontSize: '0.75rem' }}>Return:</span><span className="text-gray-900 dark:text-white" style={{ fontSize: '0.75rem', fontWeight: 600 }}>~6–7%</span></div>
-                  <div className="flex items-center gap-3"><span className="text-gray-600 dark:text-gray-400" style={{ fontSize: '0.75rem' }}>Risk:</span>
-                    <div className="flex items-center gap-1.5"><span className="text-gray-900 dark:text-white" style={{ fontSize: '0.75rem', fontWeight: 600 }}>Low</span>
+                  <div className="flex items-center gap-3"><span className="text-gray-600 dark:text-gray-400" style={{ fontSize: '0.75rem' }}>{t('enrollment.investment.return_label')}</span><span className="text-gray-900 dark:text-white" style={{ fontSize: '0.75rem', fontWeight: 600 }}>{t('enrollment.investment.return_value')}</span></div>
+                  <div className="flex items-center gap-3"><span className="text-gray-600 dark:text-gray-400" style={{ fontSize: '0.75rem' }}>{t('enrollment.investment.risk_label')}</span>
+                    <div className="flex items-center gap-1.5"><span className="text-gray-900 dark:text-white" style={{ fontSize: '0.75rem', fontWeight: 600 }}>{t('enrollment.investment.risk_low')}</span>
                       <div className="flex gap-0.5"><span className="w-1.5 h-1.5 rounded-full bg-gray-900 dark:bg-gray-100" /><span className="w-1.5 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700" /><span className="w-1.5 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700" /><span className="w-1.5 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700" /><span className="w-1.5 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700" /></div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3"><span className="text-gray-600 dark:text-gray-400" style={{ fontSize: '0.75rem' }}>Timeline:</span><span className="text-gray-900 dark:text-white" style={{ fontSize: '0.75rem', fontWeight: 600 }}>10+ years</span></div>
+                  <div className="flex items-center gap-3"><span className="text-gray-600 dark:text-gray-400" style={{ fontSize: '0.75rem' }}>{t('enrollment.investment.timeline_label')}</span><span className="text-gray-900 dark:text-white" style={{ fontSize: '0.75rem', fontWeight: 600 }}>{t('enrollment.investment.timeline_value')}</span></div>
                 </div>
               </div>
               <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-4">
@@ -508,8 +509,8 @@ function InvestmentStrategy() {
                 </div>
               </div>
               <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 rounded-xl p-3">
-                <p className="text-blue-900 dark:text-blue-300 mb-1" style={{ fontSize: '0.78rem', fontWeight: 600 }}>Why this works for you:</p>
-                <p className="text-blue-800 dark:text-blue-400" style={{ fontSize: '0.75rem', lineHeight: 1.5 }}>Balanced for growth with your retirement timeline</p>
+                <p className="text-blue-900 dark:text-blue-300 mb-1" style={{ fontSize: '0.78rem', fontWeight: 600 }}>{t('enrollment.investment.why_title')}</p>
+                <p className="text-blue-800 dark:text-blue-400" style={{ fontSize: '0.75rem', lineHeight: 1.5 }}>{t('enrollment.investment.why_body')}</p>
               </div>
               <div className="mt-4">
                 {customAllocations ? (
@@ -518,7 +519,7 @@ function InvestmentStrategy() {
                     onClick={handleSelectPlanDefault}
                     className="btn-brand flex min-h-[2.75rem] w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm active:scale-[0.98]"
                   >
-                    Select plan default investments
+                    {t('enrollment.investment.select_plan_default')}
                     <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
                   </button>
                 ) : !hasConfirmedPlanDefault ? (
@@ -527,7 +528,7 @@ function InvestmentStrategy() {
                     onClick={confirmPlanDefaultChoice}
                     className="btn-brand flex min-h-[2.75rem] w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm active:scale-[0.98]"
                   >
-                    Select plan default investments
+                    {t('enrollment.investment.select_plan_default')}
                     <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
                   </button>
                 ) : (
@@ -536,7 +537,7 @@ function InvestmentStrategy() {
                     role="status"
                   >
                     <Check className="h-4 w-4 shrink-0" aria-hidden />
-                    Selected Plan Default Investments
+                    {t('enrollment.investment.selected_plan_default')}
                   </div>
                 )}
               </div>
@@ -549,12 +550,12 @@ function InvestmentStrategy() {
                   <Settings className="w-5 h-5 text-white" />
                 </div>
                 <div className="px-2.5 py-1 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/40 dark:to-blue-900/40 border border-purple-200 dark:border-purple-800/40 rounded-md">
-                  <p className="text-purple-700 dark:text-purple-400" style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Advanced User</p>
+                  <p className="text-purple-700 dark:text-purple-400" style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('enrollment.investment.advanced_user')}</p>
                 </div>
               </div>
-              <h3 className="text-gray-900 dark:text-white mb-2" style={{ fontSize: '1rem', fontWeight: 700 }}>Customize your portfolio</h3>
-              <p className="text-gray-700 dark:text-gray-300 mb-3" style={{ fontSize: '0.82rem', lineHeight: 1.6 }}>Adjust your investment allocation based on your preferences and risk tolerance.</p>
-              <p className="text-gray-800 dark:text-gray-200 mb-4 flex-1" style={{ fontSize: '0.82rem', lineHeight: 1.5, fontWeight: 500 }}>Best for experienced investors who want more control over their portfolio.</p>
+              <h3 className="text-gray-900 dark:text-white mb-2" style={{ fontSize: '1rem', fontWeight: 700 }}>{t('enrollment.investment.customize_title')}</h3>
+              <p className="text-gray-700 dark:text-gray-300 mb-3" style={{ fontSize: '0.82rem', lineHeight: 1.6 }}>{t('enrollment.investment.customize_sub')}</p>
+              <p className="text-gray-800 dark:text-gray-200 mb-4 flex-1" style={{ fontSize: '0.82rem', lineHeight: 1.5, fontWeight: 500 }}>{t('enrollment.investment.customize_for')}</p>
               {customAllocations ? (
                 <div
                   className="pointer-events-none flex w-full min-h-[2.75rem] items-center justify-center gap-2 rounded-xl border-2 border-purple-500 bg-purple-50 py-2.5 px-6 text-purple-800 dark:border-purple-500 dark:bg-purple-950/40 dark:text-purple-200"
@@ -562,7 +563,7 @@ function InvestmentStrategy() {
                   style={{ fontSize: '0.85rem', fontWeight: 600 }}
                 >
                   <Check className="h-4 w-4 shrink-0 text-purple-600 dark:text-purple-400" aria-hidden />
-                  Selected this Portfolio
+                  {t('enrollment.investment.selected_custom')}
                 </div>
               ) : (
                 <button
@@ -571,7 +572,7 @@ function InvestmentStrategy() {
                   className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-purple-300 py-2.5 px-6 text-purple-700 transition-all hover:border-purple-400 hover:bg-purple-50 active:scale-[0.98] dark:border-purple-600 dark:text-purple-400 dark:hover:bg-purple-950/30"
                   style={{ fontSize: '0.85rem', fontWeight: 600 }}
                 >
-                  Customize my portfolio <ArrowRight className="h-4 w-4" />
+                  {t('enrollment.investment.customize_cta')} <ArrowRight className="h-4 w-4" />
                 </button>
               )}
             </div>
@@ -582,7 +583,7 @@ function InvestmentStrategy() {
             <div className="flex flex-col items-start gap-4 sm:flex-row">
               <div className="flex flex-col items-center gap-2">
                 <div className="px-2.5 py-1 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800/40 rounded-md">
-                  <p className="text-amber-700 dark:text-amber-400" style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Expert Help</p>
+                  <p className="text-amber-700 dark:text-amber-400" style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('enrollment.investment.expert_help')}</p>
                 </div>
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shrink-0">
                   <Phone className="w-6 h-6 text-white" />
@@ -590,11 +591,11 @@ function InvestmentStrategy() {
               </div>
               <div className="flex w-full flex-1 flex-col items-start justify-between gap-4 sm:flex-row sm:gap-6">
                 <div>
-                  <h3 className="text-gray-900 dark:text-white mb-2" style={{ fontSize: '1.1rem', fontWeight: 700 }}>Need Guidance? Contact Advisor</h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-3" style={{ fontSize: '0.85rem', lineHeight: 1.6 }}>Get help from a certified financial advisor to choose the right investment strategy for your goals.</p>
+                  <h3 className="text-gray-900 dark:text-white mb-2" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{t('enrollment.investment.advisor_title')}</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-3" style={{ fontSize: '0.85rem', lineHeight: 1.6 }}>{t('enrollment.investment.advisor_sub')}</p>
                   <div className="flex gap-6">
-                    <div className="flex items-center gap-2"><Check className="w-4 h-4 text-green-600" /><span className="text-gray-700 dark:text-gray-300" style={{ fontSize: '0.75rem' }}>Certified professionals</span></div>
-                    <div className="flex items-center gap-2"><Check className="w-4 h-4 text-green-600" /><span className="text-gray-700 dark:text-gray-300" style={{ fontSize: '0.75rem' }}>Custom portfolio analysis</span></div>
+                    <div className="flex items-center gap-2"><Check className="w-4 h-4 text-green-600" /><span className="text-gray-700 dark:text-gray-300" style={{ fontSize: '0.75rem' }}>{t('enrollment.investment.advisor_b1')}</span></div>
+                    <div className="flex items-center gap-2"><Check className="w-4 h-4 text-green-600" /><span className="text-gray-700 dark:text-gray-300" style={{ fontSize: '0.75rem' }}>{t('enrollment.investment.advisor_b2')}</span></div>
                   </div>
                 </div>
                 <button
@@ -602,7 +603,7 @@ function InvestmentStrategy() {
                   className="mt-1 flex shrink-0 items-center gap-2 rounded-xl border-2 border-amber-500 py-2.5 px-6 text-amber-700 transition-all hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950/30 sm:mt-4 sm:self-start"
                   style={{ fontSize: '0.85rem', fontWeight: 500 }}
                 >
-                  Connect Now <ArrowRight className="w-4 h-4" />
+                  {t('enrollment.investment.connect_now')} <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -628,15 +629,15 @@ function InvestmentStrategy() {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center"><Sparkles className="w-4 h-4 text-white" /></div>
-                    <h2 className="text-gray-900 dark:text-white" style={{ fontSize: '1.25rem', fontWeight: 700 }}>Build Custom Portfolio</h2>
+                    <h2 className="text-gray-900 dark:text-white" style={{ fontSize: '1.25rem', fontWeight: 700 }}>{t('enrollment.investment.build_modal_title')}</h2>
                   </div>
-                  <p className="text-gray-500" style={{ fontSize: '0.85rem' }}>{editingSource ? `Customizing ${sourceFullLabels[editingSource]} allocation` : 'Select a source to customize its investment allocation'}</p>
+                  <p className="text-gray-500" style={{ fontSize: '0.85rem' }}>{editingSource ? t('enrollment.investment.build_modal_sub_edit', { source: t(`enrollment.investment.${sourceTKey[editingSource]}`) }) : t('enrollment.investment.build_modal_sub_select')}</p>
                 </div>
                 <button type="button" onClick={() => { setShowBuildPortfolioModal(false); setEditingSource(null); setInlineAllocs(null) }} className="w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center transition-colors"><X className="w-5 h-5 text-gray-500" /></button>
               </div>
               <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
                 <div className={`${editingSource ? 'md:w-2/5' : 'w-full'} border-r border-gray-200 dark:border-gray-700 overflow-y-auto px-6 py-5 transition-all`}>
-                  <p className="text-gray-900 dark:text-white mb-4" style={{ fontSize: '0.95rem', fontWeight: 600 }}>Your Contribution Sources</p>
+                  <p className="text-gray-900 dark:text-white mb-4" style={{ fontSize: '0.95rem', fontWeight: 600 }}>{t('enrollment.investment.sources_heading')}</p>
                   <div className="space-y-3">
                     {activeSources.map((src) => <SourceCard key={src} sourceKey={src} monthlyAmount={getMonthlyForSource(src)} funds={getFundsForSource(src)} isCustomized={isSourceCustomized()} onEditPortfolio={() => handleOpenCustomize(src)} />)}
                     {inactiveSources.map((src) => <InactiveSourceCard key={src} sourceKey={src} />)}
@@ -646,7 +647,7 @@ function InvestmentStrategy() {
                   <div className="flex-1 flex flex-col md:w-3/5 bg-gray-50 dark:bg-gray-800">
                     <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: sourceColors[editingSource] }} /><h3 className="text-gray-900 dark:text-white" style={{ fontSize: '1rem', fontWeight: 600 }}>Customize {sourceFullLabels[editingSource]}</h3></div>
+                        <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: sourceColors[editingSource] }} /><h3 className="text-gray-900 dark:text-white" style={{ fontSize: '1rem', fontWeight: 600 }}>{t('enrollment.investment.customize_source', { source: t(`enrollment.investment.${sourceTKey[editingSource]}`) })}</h3></div>
                         <button type="button" onClick={handleCloseInline} className="text-gray-400 hover:text-gray-600 transition-colors"><X className="w-4 h-4" /></button>
                       </div>
                     </div>
@@ -655,15 +656,15 @@ function InvestmentStrategy() {
                     </div>
                     <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
                       <div className="flex items-center gap-3">
-                        <button type="button" onClick={handleCloseInline} className="flex-1 px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" style={{ fontSize: '0.85rem', fontWeight: 500 }}>Cancel</button>
-                        <button type="button" onClick={handleSaveInline} className="btn-brand flex flex-1 items-center justify-center gap-2 rounded-xl px-5 py-2.5 transition-all" style={{ fontSize: '0.85rem', fontWeight: 500 }}><Check className="w-4 h-4" /> Save Changes</button>
+                        <button type="button" onClick={handleCloseInline} className="flex-1 px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" style={{ fontSize: '0.85rem', fontWeight: 500 }}>{t('enrollment.investment.cancel')}</button>
+                        <button type="button" onClick={handleSaveInline} className="btn-brand flex flex-1 items-center justify-center gap-2 rounded-xl px-5 py-2.5 transition-all" style={{ fontSize: '0.85rem', fontWeight: 500 }}><Check className="w-4 h-4" /> {t('enrollment.investment.save_changes')}</button>
                       </div>
                     </div>
                   </div>
                 )}
               </div>
               <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-                <button type="button" onClick={() => { setShowBuildPortfolioModal(false); setEditingSource(null); setInlineAllocs(null) }} className="btn-brand flex w-full items-center justify-center gap-2 rounded-xl py-3 px-6 transition-all" style={{ fontSize: '0.9rem', fontWeight: 600 }}>Done <ArrowRight className="w-4 h-4" /></button>
+                <button type="button" onClick={() => { setShowBuildPortfolioModal(false); setEditingSource(null); setInlineAllocs(null) }} className="btn-brand flex w-full items-center justify-center gap-2 rounded-xl py-3 px-6 transition-all" style={{ fontSize: '0.9rem', fontWeight: 600 }}>{t('enrollment.investment.done')} <ArrowRight className="w-4 h-4" /></button>
               </div>
             </div>
           </div>

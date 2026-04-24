@@ -1,132 +1,107 @@
-import { Check } from "lucide-react";
-import { motion } from "framer-motion";
+import { Check } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 
 interface Step {
-  number: number;
-  label: string;
-  path: string;
+  number: number
+  label: string
+  path: string
 }
 
 interface FlowProgressProps {
-  steps: Step[];
-  currentStep: number;
+  steps: Step[]
+  currentStep: number
 }
 
 function FlowProgress({ steps, currentStep }: FlowProgressProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="w-full py-4 sm:py-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Mobile: compact horizontal stepper */}
+      <div className="mx-auto max-w-4xl">
         <div className="sm:hidden">
-          <div className="flex items-center justify-between mb-3 px-1">
+          <div className="mb-3 flex items-center justify-between px-1">
             <span className="text-slate-900 dark:text-white" style={{ fontSize: 12, fontWeight: 700 }}>
-              Step {currentStep} of {steps.length}
+              {t('flows.step_of', { current: currentStep, total: steps.length })}
             </span>
             <span className="text-slate-500 dark:text-gray-400" style={{ fontSize: 12, fontWeight: 500 }}>
               {steps[currentStep - 1]?.label}
             </span>
           </div>
-          {/* Progress bar */}
-          <div className="overflow-hidden bg-slate-200 dark:bg-gray-700" style={{ height: 6, borderRadius: 3 }}>
+          <div className="overflow-hidden rounded-[3px] bg-slate-200 dark:bg-gray-700" style={{ height: 6 }}>
             <motion.div
               className="brand-progress h-full"
               style={{ borderRadius: 3 }}
               initial={{ width: 0 }}
-              animate={{ width: `${((currentStep) / steps.length) * 100}%` }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
+              animate={{ width: `${(currentStep / steps.length) * 100}%` }}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
             />
           </div>
-          {/* Step dots */}
-          <div className="flex items-center justify-between mt-2 px-0.5">
+          <div className="mt-2 flex items-center justify-between px-0.5">
             {steps.map((step) => {
-              const isComplete = step.number < currentStep;
-              const isCurrent = step.number === currentStep;
+              const isComplete = step.number < currentStep
+              const isCurrent = step.number === currentStep
               return (
                 <div
                   key={step.number}
                   className={`rounded-full transition-all duration-200 ${
-                    isComplete || isCurrent ? "brand-bg" : "bg-slate-200 dark:bg-gray-600"
+                    isComplete || isCurrent ? 'brand-bg' : 'bg-slate-200 dark:bg-gray-600'
                   }`}
                   style={{
                     width: 8,
                     height: 8,
-                    boxShadow: isCurrent ? "0 0 0 3px var(--brand-primary-ring)" : undefined,
+                    boxShadow: isCurrent ? '0 0 0 3px var(--brand-primary-ring)' : undefined,
                   }}
                 />
-              );
+              )
             })}
           </div>
         </div>
 
-        {/* Desktop: full stepper */}
-        <div className="hidden sm:block relative">
-          {/* Progress Line */}
-          <div className="absolute top-5 left-0 right-0 bg-slate-200 dark:bg-gray-700" style={{ height: 2 }}>
+        <div className="relative hidden sm:block">
+          <div className="absolute left-0 right-0 top-5 bg-slate-200 dark:bg-gray-700" style={{ height: 2 }}>
             <motion.div
               className="brand-progress h-full"
               initial={{ width: 0 }}
               animate={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
             />
           </div>
 
-          {/* Steps */}
           <div className="relative flex justify-between">
             {steps.map((step) => {
-              const isComplete = step.number < currentStep;
-              const isCurrent = step.number === currentStep;
+              const isComplete = step.number < currentStep
+              const isCurrent = step.number === currentStep
 
               return (
                 <div key={step.number} className="flex flex-col items-center">
-                  <motion.div
-                    initial={{ scale: 0.8 }}
-                    animate={{ scale: 1 }}
-                    className={`flex items-center justify-center mb-2 transition-all duration-200 ${
-                      !isComplete && !isCurrent
-                        ? "bg-white dark:bg-gray-900 border-2 border-slate-200 dark:border-gray-600 text-slate-400 dark:text-gray-500"
-                        : "text-white"
+                  <div
+                    className={`relative z-10 flex items-center justify-center rounded-full border-2 transition-all duration-200 ${
+                      isComplete
+                        ? 'border-emerald-500 bg-emerald-500 text-white'
+                        : isCurrent
+                          ? 'brand-border brand-bg text-white'
+                          : 'border-slate-200 bg-white text-slate-400 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-500'
                     }`}
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 20,
-                      background: isComplete || isCurrent ? 'var(--brand-primary)' : undefined,
-                      boxShadow: isCurrent
-                        ? '0 0 0 4px var(--brand-primary-ring), 0 4px 12px color-mix(in srgb, var(--brand-primary) 30%, transparent)'
-                        : isComplete
-                          ? '0 4px 12px color-mix(in srgb, var(--brand-primary) 30%, transparent)'
-                          : undefined,
-                    }}
+                    style={{ width: 40, height: 40 }}
                   >
-                    {isComplete ? (
-                      <Check className="w-5 h-5" />
-                    ) : (
-                      <span style={{ fontSize: 14, fontWeight: 700 }}>{step.number}</span>
-                    )}
-                  </motion.div>
-                  <p
-                    className={`text-center ${
-                      isCurrent
-                        ? "text-slate-900 dark:text-white"
-                        : isComplete
-                          ? "text-slate-600 dark:text-gray-400"
-                          : "text-slate-400 dark:text-gray-500"
+                    {isComplete ? <Check className="h-4 w-4" strokeWidth={3} /> : <span style={{ fontSize: 13, fontWeight: 700 }}>{step.number}</span>}
+                  </div>
+                  <span
+                    className={`mt-2 max-w-[5.5rem] text-center text-[11px] font-semibold leading-tight sm:max-w-[7rem] sm:text-xs ${
+                      isCurrent ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-gray-400'
                     }`}
-                    style={{
-                      fontSize: 12,
-                      maxWidth: 120,
-                      fontWeight: isCurrent ? 700 : isComplete ? 600 : 500,
-                    }}
                   >
                     {step.label}
-                  </p>
+                  </span>
                 </div>
-              );
+              )
             })}
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }
+
 export default FlowProgress

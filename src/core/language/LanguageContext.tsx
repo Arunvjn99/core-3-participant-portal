@@ -8,12 +8,12 @@ import {
   type ReactNode,
 } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { LanguageMenuLang } from '@/core/i18n'
+import { SUPPORTED_LANGS, type LanguageMenuLang, type SupportedLang } from '@/core/i18n'
 
-export type AppLanguage = 'en' | 'es'
+export type AppLanguage = SupportedLang
 
 type LanguageContextValue = {
-  /** Resolved UI language code (`en` or `es`). */
+  /** Resolved UI language code (matches i18n active language). */
   currentLanguage: AppLanguage
   setLanguage: (lang: LanguageMenuLang) => void
 }
@@ -22,7 +22,7 @@ const LanguageContext = createContext<LanguageContextValue | null>(null)
 
 function resolveAppLanguage(code: string | undefined): AppLanguage {
   const base = (code || 'en').split('-')[0]?.toLowerCase() || 'en'
-  return base === 'es' ? 'es' : 'en'
+  return (SUPPORTED_LANGS as readonly string[]).includes(base) ? (base as AppLanguage) : 'en'
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {

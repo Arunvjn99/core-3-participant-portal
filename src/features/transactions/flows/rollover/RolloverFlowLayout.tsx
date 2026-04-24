@@ -1,73 +1,72 @@
-import { Outlet, useLocation } from "react-router-dom";
-import FlowProgress from "../../components/FlowProgress";
-import { useState, createContext, useContext } from "react";
+import { Outlet, useLocation } from 'react-router-dom'
+import { useState, createContext, useContext, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+import FlowProgress from '../../components/FlowProgress'
 
 interface RolloverData {
-  previousEmployer?: string;
-  planAdministrator?: string;
-  accountNumber?: string;
-  estimatedAmount?: number;
-  rolloverType?: string;
-  isCompatible?: boolean;
-  allocation?: { fundName: string; percentage: number }[];
+  previousEmployer?: string
+  planAdministrator?: string
+  accountNumber?: string
+  estimatedAmount?: number
+  rolloverType?: string
+  isCompatible?: boolean
+  allocation?: { fundName: string; percentage: number }[]
 }
 
 interface RolloverFlowContextType {
-  rolloverData: RolloverData;
-  updateRolloverData: (data: Partial<RolloverData>) => void;
+  rolloverData: RolloverData
+  updateRolloverData: (data: Partial<RolloverData>) => void
 }
 
-const RolloverFlowContext = createContext<RolloverFlowContextType | undefined>(
-  undefined
-);
+const RolloverFlowContext = createContext<RolloverFlowContextType | undefined>(undefined)
 
 export function useRolloverFlow() {
-  const context = useContext(RolloverFlowContext);
+  const context = useContext(RolloverFlowContext)
   if (!context) {
-    return { rolloverData: {} as RolloverData, updateRolloverData: (_data: Partial<RolloverData>) => {} };
+    return { rolloverData: {} as RolloverData, updateRolloverData: (_data: Partial<RolloverData>) => {} }
   }
-  return context;
+  return context
 }
 
-const steps = [
-  { number: 1, label: "Plan Details", path: "/transactions/rollover" },
-  { number: 2, label: "Validation", path: "/transactions/rollover/validation" },
-  { number: 3, label: "Allocation", path: "/transactions/rollover/allocation" },
-  { number: 4, label: "Documents", path: "/transactions/rollover/documents" },
-  { number: 5, label: "Review", path: "/transactions/rollover/review" },
-];
+const ROLLOVER_STEP_DEFS = [
+  { number: 1, path: '/transactions/rollover', stepKey: 'plan_details' },
+  { number: 2, path: '/transactions/rollover/validation', stepKey: 'validation' },
+  { number: 3, path: '/transactions/rollover/allocation', stepKey: 'allocation' },
+  { number: 4, path: '/transactions/rollover/documents', stepKey: 'documents' },
+  { number: 5, path: '/transactions/rollover/review', stepKey: 'review' },
+] as const
 
 function RolloverFlowLayout() {
-  const location = useLocation();
-  const [rolloverData, setRolloverData] = useState<RolloverData>({});
+  const { t } = useTranslation()
+  const location = useLocation()
+  const [rolloverData, setRolloverData] = useState<RolloverData>({})
+
+  const progressSteps = useMemo(
+    () => ROLLOVER_STEP_DEFS.map((s) => ({ number: s.number, path: s.path, label: t(`flows.steps.${s.stepKey}`) })),
+    [t],
+  )
 
   const updateRolloverData = (data: Partial<RolloverData>) => {
-    setRolloverData((prev) => ({ ...prev, ...data }));
-  };
+    setRolloverData((prev) => ({ ...prev, ...data }))
+  }
 
-  const currentStepIndex = steps.findIndex(
-    (step) => step.path === location.pathname
-  );
-  const currentStep = currentStepIndex >= 0 ? currentStepIndex + 1 : 1;
-
+  const currentStepIndex = progressSteps.findIndex((step) => step.path === location.pathname)
+  const currentStep = currentStepIndex >= 0 ? currentStepIndex + 1 : 1
 
   return (
     <RolloverFlowContext.Provider value={{ rolloverData, updateRolloverData }}>
       <div className="min-h-screen bg-white dark:bg-gray-950">
-        {/* Progress */}
-        <div className="bg-white dark:bg-gray-900 border-b border-slate-100 dark:border-gray-700">
-          <div className="max-w-[1200px] mx-auto px-4 sm:px-12">
-            <FlowProgress steps={steps} currentStep={currentStep} />
+        <div className="dark:border-gray-800" style={{ background: 'transparent', borderBottom: '1px solid var(--tx-border-light, #F1F5F9)' }}>
+          <div className="mx-auto max-w-[1200px] px-4 sm:px-12">
+            <FlowProgress steps={progressSteps} currentStep={currentStep} />
           </div>
         </div>
-
-        {/* Content */}
-        <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
+        <div className="mx-auto max-w-6xl px-3 py-3 sm:px-4 sm:py-4">
           <Outlet />
         </div>
       </div>
     </RolloverFlowContext.Provider>
-  );
+  )
 }
 
 export default RolloverFlowLayout

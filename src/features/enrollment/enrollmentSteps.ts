@@ -2,19 +2,17 @@ export interface EnrollmentStep {
   step: number
   key: string
   path: string
-  label: string
-  sublabel: string
 }
 
 export const ENROLLMENT_STEPS: EnrollmentStep[] = [
-  { step: 1, key: 'plan',         path: 'plan',          label: 'Plan',           sublabel: 'Choose your plan' },
-  { step: 2, key: 'contribution', path: 'contribution',  label: 'Contribution',   sublabel: 'Set your amount' },
-  { step: 3, key: 'source',       path: 'contribution-source', label: 'Source',   sublabel: 'Pre or post-tax' },
-  { step: 4, key: 'autoIncrease', path: 'auto-increase', label: 'Auto Increase',  sublabel: 'Grow over time' },
-  { step: 5, key: 'investment',   path: 'investment',    label: 'Investment',     sublabel: 'Fund allocation' },
-  { step: 6, key: 'readiness',    path: 'readiness',     label: 'Readiness',      sublabel: 'Retirement score' },
-  { step: 7, key: 'review',       path: 'review',        label: 'Review',         sublabel: 'Confirm choices' },
-  { step: 8, key: 'success',      path: 'success',       label: 'Done',           sublabel: 'Enrolled!' },
+  { step: 1, key: 'plan', path: 'plan' },
+  { step: 2, key: 'contribution', path: 'contribution' },
+  { step: 3, key: 'source', path: 'contribution-source' },
+  { step: 4, key: 'autoIncrease', path: 'auto-increase' },
+  { step: 5, key: 'investment', path: 'investment' },
+  { step: 6, key: 'readiness', path: 'readiness' },
+  { step: 7, key: 'review', path: 'review' },
+  { step: 8, key: 'success', path: 'success' },
 ]
 
 export const TOTAL_STEPS = ENROLLMENT_STEPS.length

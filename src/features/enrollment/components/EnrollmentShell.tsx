@@ -1,4 +1,5 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft } from 'lucide-react'
 import { AnimatedPage } from '../../../design-system/motion/AnimatedPage'
 import { ENROLLMENT_STEPS, getStepByPath } from '../enrollmentSteps'
@@ -12,6 +13,7 @@ const STEPPER_STEPS = ENROLLMENT_STEPS.filter((s) => s.step <= 7)
 const brandRing = { boxShadow: '0 0 0 4px var(--brand-primary-ring)' }
 
 export function EnrollmentShell() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -36,15 +38,15 @@ export function EnrollmentShell() {
               className="flex items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Back</span>
+              <span className="hidden sm:inline">{t('enrollment.shell.back')}</span>
             </button>
           )}
-          <span className="text-sm text-gray-400 dark:text-gray-500">Enrolment</span>
+          <span className="text-sm text-gray-400 dark:text-gray-500">{t('enrollment.shell.title')}</span>
           {activeStep <= STEPPER_STEPS.length && (
             <>
               <span className="text-sm text-gray-300 dark:text-gray-600">/</span>
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {STEPPER_STEPS[activeStep - 1]?.label}
+                {STEPPER_STEPS[activeStep - 1] ? t(`enrollment.steps.${STEPPER_STEPS[activeStep - 1].key}.label`) : ''}
               </span>
             </>
           )}
@@ -54,7 +56,7 @@ export function EnrollmentShell() {
           onClick={() => navigate(ROUTES.PRE_ENROLLMENT_DASHBOARD)}
           className="brand-text text-sm font-medium transition-colors hover:opacity-80"
         >
-          Save &amp; Exit
+          {t('enrollment.shell.save_exit')}
         </button>
       </div>
 
@@ -63,7 +65,7 @@ export function EnrollmentShell() {
           <div className="hidden px-4 py-3 sm:px-6 md:block">
             <div className="mx-auto max-w-5xl">
               <p className="mb-2.5 text-xs text-gray-400 dark:text-gray-500">
-                Step {activeStep} of {STEPPER_STEPS.length}
+                {t('flows.step_of', { current: activeStep, total: STEPPER_STEPS.length })}
               </p>
               <div className="flex items-start gap-1">
                 {STEPPER_STEPS.map((step, i) => {
@@ -71,7 +73,7 @@ export function EnrollmentShell() {
                   const isCompleted = stepNum < activeStep
                   const isCurrent = stepNum === activeStep
                   return (
-                    <div key={step.label} className="flex flex-1 flex-col items-center gap-1.5">
+                    <div key={step.key} className="flex flex-1 flex-col items-center gap-1.5">
                       <div className="flex w-full items-center gap-0.5">
                         <div
                           className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-all ${
@@ -122,7 +124,7 @@ export function EnrollmentShell() {
                         }`}
                         style={{ fontSize: '0.68rem' }}
                       >
-                        {step.label}
+                        {t(`enrollment.steps.${step.key}.label`)}
                       </span>
                     </div>
                   )
@@ -142,16 +144,18 @@ export function EnrollmentShell() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold leading-tight text-gray-900 dark:text-white">
-                    {STEPPER_STEPS[activeStep - 1]?.label ?? ''}
+                    {STEPPER_STEPS[activeStep - 1] ? t(`enrollment.steps.${STEPPER_STEPS[activeStep - 1].key}.label`) : ''}
                   </p>
                   <p className="text-gray-400 dark:text-gray-500" style={{ fontSize: '0.7rem' }}>
-                    Step {activeStep} of {STEPPER_STEPS.length}
+                    {t('flows.step_of', { current: activeStep, total: STEPPER_STEPS.length })}
                   </p>
                 </div>
               </div>
               {activeStep < STEPPER_STEPS.length && (
                 <p className="text-gray-400 dark:text-gray-500" style={{ fontSize: '0.72rem' }}>
-                  Next: {STEPPER_STEPS[activeStep]?.label}
+                  {t('enrollment.shell.next_step', {
+                    step: STEPPER_STEPS[activeStep] ? t(`enrollment.steps.${STEPPER_STEPS[activeStep].key}.label`) : '',
+                  })}
                 </p>
               )}
             </div>

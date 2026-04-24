@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
+import { getAppDateLocale } from '@/lib/dateLocale'
 import {
   ArrowRight,
   Sparkles,
@@ -15,7 +17,7 @@ import {
 } from 'lucide-react'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { getGrowthRate, projectBalanceConstantAnnualContributions, type RiskLevel } from '@/lib/retirementCalculations'
-import { useEnrollmentStepNav } from '@/features/enrollment/components/EnrollmentStepNavContext'
+import { useEnrollmentStepNav, type EnrollmentPrimaryLabel } from '@/features/enrollment/components/EnrollmentStepNavContext'
 
 /* ─── Types ─── */
 
@@ -46,6 +48,7 @@ function AnimatedScore({
   color: string
   circumference: number
 }) {
+  const { t } = useTranslation()
   const [displayValue, setDisplayValue] = useState(value)
   const [animating, setAnimating] = useState(false)
   const prevValue = useRef(value)
@@ -103,7 +106,7 @@ function AnimatedScore({
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-5xl font-bold tabular-nums text-gray-900 dark:text-white">{displayValue}</span>
-        <span className="text-xs text-gray-500 dark:text-gray-400">out of 100</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400">{t('enrollment.readiness.out_of_100')}</span>
       </div>
     </div>
   )
@@ -128,6 +131,8 @@ function ConfirmationModal({
   onCancel: () => void
   onApply: () => void
 }) {
+  const { t } = useTranslation()
+  const locale = getAppDateLocale()
   const backdropRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -163,8 +168,8 @@ function ConfirmationModal({
       <div className="w-full max-w-md overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xl dark:border-gray-800 dark:bg-gray-900">
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-800">
           <div>
-            <p className="text-base font-semibold text-gray-900 dark:text-white">Confirm Change</p>
-            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Review the impact before applying.</p>
+            <p className="text-base font-semibold text-gray-900 dark:text-white">{t('enrollment.readiness.confirm_title')}</p>
+            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{t('enrollment.readiness.confirm_subtitle')}</p>
           </div>
           <button
             type="button"
@@ -178,7 +183,7 @@ function ConfirmationModal({
         <div className="space-y-5 px-6 py-5">
           <div>
             <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-              What&apos;s changing
+              {t('enrollment.readiness.confirm_whats_changing')}
             </p>
             <div className="flex items-center gap-3">
               <div className="flex-1 rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-gray-700 dark:bg-gray-800/50">
@@ -194,10 +199,10 @@ function ConfirmationModal({
           </div>
 
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Impact</p>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t('enrollment.readiness.impact')}</p>
             <div className="space-y-3">
               <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800/50">
-                <span className="text-sm text-gray-500 dark:text-gray-400">Readiness score</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">{t('enrollment.readiness.readiness_score')}</span>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold tabular-nums text-gray-500 dark:text-gray-400">{currentScore}</span>
                   <ArrowRight className="h-3.5 w-3.5 text-gray-400" />
@@ -209,14 +214,14 @@ function ConfirmationModal({
               </div>
 
               <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800/50">
-                <span className="text-sm text-gray-500 dark:text-gray-400">Additional annual savings</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">{t('enrollment.readiness.additional_annual')}</span>
                 <span className="text-sm font-bold tabular-nums text-blue-600 dark:text-blue-400">
-                  +${suggestion.additionalAnnualSavings.toLocaleString()}
+                  +${suggestion.additionalAnnualSavings.toLocaleString(locale)}
                 </span>
               </div>
 
               <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800/50">
-                <span className="text-sm text-gray-500 dark:text-gray-400">Projected retirement balance</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">{t('enrollment.readiness.projected_balance')}</span>
                 <div className="flex items-center gap-2">
                   <span className="text-sm tabular-nums text-gray-500 dark:text-gray-400">{formatCurrency(currentBalance)}</span>
                   <ArrowRight className="h-3.5 w-3.5 text-gray-400" />
@@ -229,7 +234,7 @@ function ConfirmationModal({
               {balanceDiff > 0 && (
                 <div className="rounded-xl border border-gray-200 bg-slate-50 px-4 py-2.5 text-center dark:border-gray-700 dark:bg-gray-800/50">
                   <span className="text-sm font-semibold text-blue-700 dark:text-blue-400">
-                    +{formatCurrency(balanceDiff)} more at retirement
+                    {t('enrollment.readiness.confirm_more_retirement', { amount: `+${formatCurrency(balanceDiff)}` })}
                   </span>
                 </div>
               )}
@@ -243,14 +248,14 @@ function ConfirmationModal({
             onClick={onCancel}
             className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
           >
-            Cancel
+            {t('enrollment.readiness.cancel')}
           </button>
           <button
             type="button"
             onClick={onApply}
             className="btn-brand flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium active:scale-[0.98]"
           >
-            <Zap className="h-3.5 w-3.5" /> Apply Change
+            <Zap className="h-3.5 w-3.5" /> {t('enrollment.readiness.apply_change')}
           </button>
         </div>
       </div>
@@ -261,12 +266,14 @@ function ConfirmationModal({
 /* ─── Main ─── */
 
 function RetirementReadiness() {
+  const { t } = useTranslation()
+  const locale = getAppDateLocale()
   const navigate = useNavigate()
   const { setStepNav } = useEnrollmentStepNav()
   const { data, updateData, personalization, advanceStep } = useEnrollment()
   const [appliedChanges, setAppliedChanges] = useState<string[]>([])
   const [confirmingSuggestion, setConfirmingSuggestion] = useState<Suggestion | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState(false)
 
   const yearsToRetirement = Math.max(1, personalization.retirementAge - personalization.currentAge)
 
@@ -302,18 +309,18 @@ function RetirementReadiness() {
 
   const formatCurrency = (val: number) => {
     if (val >= 1_000_000) return `$${(val / 1_000_000).toFixed(1)}M`
-    if (val >= 1_000) return `$${Math.round(val / 1_000).toLocaleString()}K`
-    return `$${Math.round(val).toLocaleString()}`
+    if (val >= 1_000) return `$${Math.round(val / 1_000).toLocaleString(locale)}K`
+    return `$${Math.round(val).toLocaleString(locale)}`
   }
 
   const circumference = 2 * Math.PI * 70
   const scoreColor = score >= 40 ? '#2563eb' : '#64748b'
 
   const getMessage = () => {
-    if (score >= 80) return "You're on a great track!"
-    if (score >= 60) return "You're building a solid foundation."
-    if (score >= 40) return "You're getting started — keep going!"
-    return 'Every step counts toward your goal.'
+    if (score >= 80) return t('enrollment.readiness.score_message_80')
+    if (score >= 60) return t('enrollment.readiness.score_message_60')
+    if (score >= 40) return t('enrollment.readiness.score_message_40')
+    return t('enrollment.readiness.score_message_low')
   }
 
   const suggestions: Suggestion[] = []
@@ -336,15 +343,15 @@ function RetirementReadiness() {
     suggestions.push({
       id: 'boost-contribution',
       icon: <Percent className="h-4 w-4 text-blue-600 dark:text-blue-400" />,
-      title: `Increase contribution by ${boostPct}%`,
-      description: 'A small increase now compounds into significant retirement savings over time.',
+      title: t('enrollment.readiness.suggest_boost_title', { pct: boostPct }),
+      description: t('enrollment.readiness.suggest_boost_desc'),
       scoreIncrease: boostedScore - score,
       newScore: boostedScore,
       additionalAnnualSavings: additionalPerYear,
       projectedBalance: boostedBalance,
-      currentLabel: 'Current contribution',
+      currentLabel: t('enrollment.readiness.label_current_contrib'),
       currentValue: `${data.contributionPercent}%`,
-      newLabel: 'New contribution',
+      newLabel: t('enrollment.readiness.label_new_contrib'),
       newValue: `${boostedContrib}%`,
       apply: () => {
         updateData({ contributionPercent: boostedContrib })
@@ -370,16 +377,16 @@ function RetirementReadiness() {
     suggestions.push({
       id: 'enable-auto-increase',
       icon: <TrendingUp className="h-4 w-4 text-blue-600 dark:text-blue-400" />,
-      title: 'Enable automatic contribution increases',
-      description: `Automatically increase your contribution by ${data.autoIncreaseAmount}% each year up to ${data.autoIncreaseMax}%.`,
+      title: t('enrollment.readiness.suggest_auto_title'),
+      description: t('enrollment.readiness.suggest_auto_desc', { amt: data.autoIncreaseAmount, max: data.autoIncreaseMax }),
       scoreIncrease: autoIncScore - score,
       newScore: autoIncScore,
       additionalAnnualSavings: avgExtraContrib,
       projectedBalance: autoIncBalance,
-      currentLabel: 'Auto-increase',
-      currentValue: 'Off',
-      newLabel: 'Auto-increase',
-      newValue: `${data.autoIncreaseAmount}%/yr`,
+      currentLabel: t('enrollment.readiness.label_auto'),
+      currentValue: t('enrollment.readiness.value_off'),
+      newLabel: t('enrollment.readiness.label_new_auto'),
+      newValue: t('enrollment.readiness.value_per_yr', { amt: data.autoIncreaseAmount }),
       apply: () => {
         updateData({ autoIncrease: true })
       },
@@ -389,12 +396,6 @@ function RetirementReadiness() {
   const growthUpgrade: Record<string, string> = {
     conservative: 'balanced',
     balanced: 'growth',
-  }
-  const riskLabels: Record<string, string> = {
-    conservative: 'Conservative',
-    balanced: 'Balanced',
-    growth: 'Growth',
-    aggressive: 'Aggressive',
   }
   const nextRiskLevel = growthUpgrade[data.riskLevel]
   if (nextRiskLevel && !appliedChanges.includes('upgrade-strategy')) {
@@ -412,16 +413,19 @@ function RetirementReadiness() {
     suggestions.push({
       id: 'upgrade-strategy',
       icon: <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400" />,
-      title: 'Adjust investment strategy for higher growth',
-      description: `Switch from ${riskLabels[data.riskLevel]} to ${riskLabels[nextRiskLevel]} for potentially higher long-term returns.`,
+      title: t('enrollment.readiness.suggest_upgrade_title'),
+      description: t('enrollment.readiness.suggest_upgrade_desc', {
+        from: t(`enrollment.review_page.risk_${data.riskLevel}`),
+        to: t(`enrollment.review_page.risk_${nextRiskLevel}`),
+      }),
       scoreIncrease: upgradeScore - score,
       newScore: upgradeScore,
       additionalAnnualSavings: extraBalancePerYear > 0 ? extraBalancePerYear : 0,
       projectedBalance: upgradeBalance,
-      currentLabel: 'Current strategy',
-      currentValue: riskLabels[data.riskLevel],
-      newLabel: 'New strategy',
-      newValue: riskLabels[nextRiskLevel],
+      currentLabel: t('enrollment.readiness.label_current_strategy'),
+      currentValue: t(`enrollment.review_page.risk_${data.riskLevel}`),
+      newLabel: t('enrollment.readiness.label_new_strategy'),
+      newValue: t(`enrollment.review_page.risk_${nextRiskLevel}`),
       apply: () => {
         updateData({ riskLevel: nextRiskLevel as 'conservative' | 'balanced' | 'growth' | 'aggressive' })
       },
@@ -443,8 +447,8 @@ function RetirementReadiness() {
     confirmingSuggestion.apply()
     setAppliedChanges((prev) => [...prev, confirmingSuggestion.id])
     setConfirmingSuggestion(null)
-    setSuccessMessage('Change applied successfully')
-    setTimeout(() => setSuccessMessage(null), 3000)
+    setSuccessMessage(true)
+    setTimeout(() => setSuccessMessage(false), 3000)
   }
 
   const handleNext = useCallback(() => {
@@ -457,17 +461,17 @@ function RetirementReadiness() {
       showBack: true,
       onBack: () => navigate('/enrollment/investment'),
       onNext: handleNext,
-      primaryLabel: 'Next',
+      primaryLabel: t('enrollment.next') as EnrollmentPrimaryLabel,
     })
     return () => setStepNav(null)
-  }, [setStepNav, navigate, handleNext])
+  }, [setStepNav, navigate, handleNext, t])
 
   return (
     <div className="mx-auto max-w-5xl">
       <div className="mb-5">
-        <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">Your Retirement Readiness</h1>
+        <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">{t('enrollment.readiness.title')}</h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Here&apos;s how your choices add up before you finalize.
+          {t('enrollment.readiness.subtitle')}
         </p>
       </div>
 
@@ -479,10 +483,10 @@ function RetirementReadiness() {
 
               <p className="mt-4 text-center text-base font-semibold text-gray-900 dark:text-white">{getMessage()}</p>
               <p className="mt-1 text-center text-sm text-gray-500 dark:text-gray-400">
-                You are <span className="font-semibold">{score}% on track</span> for your retirement goal.
+                {t('enrollment.readiness.on_track_line', { onTrack: t('enrollment.readiness.on_track_em', { score }) })}
               </p>
               <p className="mt-1 text-center text-xs text-gray-400 dark:text-gray-500">
-                Most participants your age aim for a readiness score of 65 or higher.
+                {t('enrollment.readiness.peer_benchmark')}
               </p>
 
               <div className="mt-4 flex items-center justify-center gap-2">
@@ -490,7 +494,7 @@ function RetirementReadiness() {
                   <div className="h-full rounded-full bg-gray-500 dark:bg-gray-400" style={{ width: '65%' }} />
                 </div>
                 <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                  Target: <span className="font-semibold">65</span>
+                  {t('enrollment.readiness.target')} <span className="font-semibold">65</span>
                 </span>
               </div>
             </div>
@@ -503,7 +507,7 @@ function RetirementReadiness() {
                 <Globe className="w-3.5 h-3.5 text-gray-400" />
                 <p className="text-gray-400 dark:text-gray-500 uppercase tracking-wide"
                    style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.06em' }}>
-                  Projected Balance
+                  {t('enrollment.readiness.projected_balance_label')}
                 </p>
               </div>
               <p className="text-gray-900 dark:text-white tabular-nums"
@@ -511,7 +515,7 @@ function RetirementReadiness() {
                 {formatCurrency(projectedBalance)}
               </p>
               <p className="text-gray-400 dark:text-gray-500 mt-0.5" style={{ fontSize: '0.75rem' }}>
-                At age {personalization.retirementAge}
+                {t('enrollment.readiness.at_age', { age: personalization.retirementAge })}
               </p>
             </div>
           </div>
@@ -523,19 +527,18 @@ function RetirementReadiness() {
                 <Info className="w-3 h-3 text-blue-600" />
               </div>
               <p className="text-gray-900 dark:text-white font-semibold" style={{ fontSize: '0.88rem' }}>
-                Understanding Your Score
+                {t('enrollment.readiness.understanding_title')}
               </p>
             </div>
             <p className="text-gray-500 dark:text-gray-400" style={{ fontSize: '0.78rem', lineHeight: 1.6 }}>
-              Your score of <span className="font-semibold text-gray-900 dark:text-white">{score}</span> is based
-              on contributions, timeline, and projected growth—there's room to improve.
+              {t('enrollment.readiness.understanding_body', { score })}
             </p>
           </div>
 
           {/* Annual Funding Summary card */}
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-4">
             <p className="text-gray-900 dark:text-white font-bold mb-3" style={{ fontSize: '0.9rem' }}>
-              Annual Funding Summary
+              {t('enrollment.readiness.annual_summary_title')}
             </p>
             <div className="space-y-2.5">
               {/* Retirement Income Goal */}
@@ -543,11 +546,11 @@ function RetirementReadiness() {
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-gray-400 dark:bg-gray-500 shrink-0" />
                   <span className="text-gray-600 dark:text-gray-400" style={{ fontSize: '0.8rem' }}>
-                    Retirement Income Goal
+                    {t('enrollment.readiness.income_goal')}
                   </span>
                 </div>
                 <span className="text-gray-900 dark:text-white font-semibold tabular-nums" style={{ fontSize: '0.85rem' }}>
-                  ${retirementIncomeGoal.toLocaleString()}.00
+                  ${retirementIncomeGoal.toLocaleString(locale)}.00
                 </span>
               </div>
               {/* Current Annual Contributions */}
@@ -555,11 +558,11 @@ function RetirementReadiness() {
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0" />
                   <span className="text-gray-600 dark:text-gray-400" style={{ fontSize: '0.8rem' }}>
-                    Current Annual Contributions
+                    {t('enrollment.readiness.current_annual')}
                   </span>
                 </div>
                 <span className="text-blue-600 dark:text-blue-400 font-semibold tabular-nums" style={{ fontSize: '0.85rem' }}>
-                  ${totalAnnualContributions.toLocaleString()}
+                  ${totalAnnualContributions.toLocaleString(locale)}
                 </span>
               </div>
               {/* Annual Savings Gap */}
@@ -567,19 +570,18 @@ function RetirementReadiness() {
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0" />
                   <span className="text-gray-600 dark:text-gray-400" style={{ fontSize: '0.8rem' }}>
-                    Annual Savings Gap
+                    {t('enrollment.readiness.savings_gap')}
                   </span>
                 </div>
                 <span className="text-red-600 dark:text-red-400 font-semibold tabular-nums" style={{ fontSize: '0.85rem' }}>
-                  ${annualSavingsGap.toLocaleString()}.00
+                  ${annualSavingsGap.toLocaleString(locale)}.00
                 </span>
               </div>
             </div>
             {/* Footnote */}
             <p className="text-gray-400 dark:text-gray-600 mt-3 pt-3 border-t border-gray-100 dark:border-gray-800"
                style={{ fontSize: '0.72rem', lineHeight: 1.5 }}>
-              This shows the gap between your retirement income goal and current annual contributions.
-              Close this gap by increasing contributions or adjusting your retirement timeline.
+              {t('enrollment.readiness.annual_footnote')}
             </p>
           </div>
 
@@ -589,7 +591,7 @@ function RetirementReadiness() {
               style={{ animation: 'fadeSlideIn 0.4s ease' }}
             >
               <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600 dark:text-green-400" />
-              <p className="text-sm font-semibold text-gray-900 dark:text-gray-200">{successMessage}</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-200">{t('enrollment.readiness.success_applied')}</p>
             </div>
           )}
 
@@ -602,15 +604,14 @@ function RetirementReadiness() {
               <div className="mb-3 flex items-start justify-between">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  <p className="text-sm font-bold text-gray-900 dark:text-white">Recommended for You</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white">{t('enrollment.readiness.reco_title')}</p>
                 </div>
                 <div className="rounded-lg bg-blue-100 px-2 py-1 dark:bg-blue-950/50">
-                  <p className="text-xs font-extrabold text-blue-700 dark:text-blue-400">Score: {potentialScore}</p>
+                  <p className="text-xs font-extrabold text-blue-700 dark:text-blue-400">{t('enrollment.readiness.reco_score', { score: potentialScore })}</p>
                 </div>
               </div>
               <p className="mb-3 text-xs leading-normal text-gray-800 dark:text-gray-200">
-                You can reach a score of <span className="font-semibold text-blue-600 dark:text-blue-400">{potentialScore}</span> —
-                apply the recommendations below to boost your readiness by <span className="font-semibold">+{totalPotentialIncrease} points</span>.
+                {t('enrollment.readiness.reco_body', { potentialScore, points: totalPotentialIncrease })}
               </p>
             </div>
           )}
@@ -618,9 +619,9 @@ function RetirementReadiness() {
           {suggestions.length > 0 && (
             <div>
               <div className="mb-3">
-                <p className="text-base font-semibold text-gray-900 dark:text-white">Optional ways to improve your readiness</p>
+                <p className="text-base font-semibold text-gray-900 dark:text-white">{t('enrollment.readiness.optional_title')}</p>
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  You can apply one of these improvements to increase your retirement readiness score.
+                  {t('enrollment.readiness.optional_sub')}
                 </p>
               </div>
 
@@ -641,7 +642,7 @@ function RetirementReadiness() {
                           <div className="mb-2.5 flex items-center gap-1">
                             <Award className="h-3 w-3 text-blue-600 dark:text-blue-400" />
                             <span className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">
-                              Recommended
+                              {t('enrollment.readiness.recommended_badge')}
                             </span>
                           </div>
                         )}
@@ -659,7 +660,7 @@ function RetirementReadiness() {
 
                             <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1.5">
                               <div>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Score</p>
+                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{t('enrollment.readiness.score_col')}</p>
                                 <div className="mt-0.5 flex items-center gap-1">
                                   <span className="text-sm font-semibold tabular-nums text-gray-500 dark:text-gray-400">{score}</span>
                                   <ArrowRight className="h-3 w-3 text-gray-400" />
@@ -667,13 +668,13 @@ function RetirementReadiness() {
                                 </div>
                               </div>
                               <div>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Savings</p>
+                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{t('enrollment.readiness.savings_col')}</p>
                                 <p className="mt-0.5 text-sm font-bold tabular-nums text-blue-600 dark:text-blue-400">
-                                  +${suggestion.additionalAnnualSavings.toLocaleString()}/yr
+                                  {t('enrollment.readiness.savings_yr', { amount: suggestion.additionalAnnualSavings.toLocaleString(locale) })}
                                 </p>
                               </div>
                               <div>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Balance</p>
+                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{t('enrollment.readiness.balance_col')}</p>
                                 <p className="mt-0.5 text-sm font-bold tabular-nums text-gray-900 dark:text-white">
                                   {formatCurrency(suggestion.projectedBalance)}
                                 </p>
@@ -687,7 +688,7 @@ function RetirementReadiness() {
                           onClick={() => handleOpenConfirm(suggestion)}
                           className="mt-3 w-full rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-900 transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:hover:bg-gray-800"
                         >
-                          Apply Recommendation
+                          {t('enrollment.readiness.apply_reco')}
                         </button>
                       </div>
                     </div>
@@ -700,8 +701,8 @@ function RetirementReadiness() {
           {suggestions.length === 0 && appliedChanges.length > 0 && (
             <div className="rounded-2xl border border-gray-200 bg-white px-5 py-4 text-center shadow-lg dark:border-gray-700 dark:bg-gray-900">
               <CheckCircle2 className="mx-auto mb-2 h-6 w-6 text-blue-600 dark:text-blue-400" />
-              <p className="text-sm font-semibold text-gray-900 dark:text-white">All improvements applied</p>
-              <p className="mt-0.5 text-xs text-blue-600 dark:text-blue-400">Your score and balance have been optimized.</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">{t('enrollment.readiness.all_applied_title')}</p>
+              <p className="mt-0.5 text-xs text-blue-600 dark:text-blue-400">{t('enrollment.readiness.all_applied_sub')}</p>
             </div>
           )}
 

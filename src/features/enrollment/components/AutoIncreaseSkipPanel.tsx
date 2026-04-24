@@ -1,5 +1,7 @@
+import { useTranslation } from 'react-i18next'
 import { ArrowRight, Pause, X } from 'lucide-react'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
+import { getAppDateLocale } from '@/lib/dateLocale'
 
 export interface AutoIncreaseSkipPanelProps {
   /** Difference (with − without auto increase), shown in the alert */
@@ -18,9 +20,14 @@ export function AutoIncreaseSkipPanel({
   onDismiss,
   showDismissButton = false,
 }: AutoIncreaseSkipPanelProps) {
-  const missed = missedSavingsAmount.toLocaleString()
+  const { t } = useTranslation()
+  const locale = getAppDateLocale()
+  const missed = missedSavingsAmount.toLocaleString(locale)
   const { data } = useEnrollment()
-  const planLabel = data.plan === 'traditional' ? 'Traditional 401(k)' : 'Roth 401(k)'
+  const planLabel =
+    data.plan === 'traditional'
+      ? t('enrollment.auto_increase_skip.plan_traditional')
+      : t('enrollment.auto_increase_skip.plan_roth')
   const rate = data.contributionPercent
 
   return (
@@ -30,7 +37,7 @@ export function AutoIncreaseSkipPanel({
           type="button"
           onClick={onDismiss}
           className="absolute right-0 top-0 z-10 shrink-0 rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/50 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-          aria-label="Close"
+          aria-label={t('enrollment.auto_increase_skip.close')}
         >
           <X className="h-5 w-5" aria-hidden />
         </button>
@@ -47,11 +54,10 @@ export function AutoIncreaseSkipPanel({
           id="auto-increase-skip-title"
           className="mt-4 text-lg font-bold leading-snug tracking-tight text-gray-900 dark:text-white sm:text-xl"
         >
-          No Auto Increase Configured
+          {t('enrollment.auto_increase_skip.title')}
         </h2>
         <p className="mt-3 max-w-md text-sm leading-relaxed text-gray-500 dark:text-gray-400">
-          Your {planLabel} contribution rate will stay at {rate}%. You can always enable auto increase later from your
-          plan settings.
+          {t('enrollment.auto_increase_skip.body', { plan: planLabel, rate })}
         </p>
       </div>
 
@@ -66,12 +72,10 @@ export function AutoIncreaseSkipPanel({
           </span>
           <div className="min-w-0 flex-1">
             <p id="auto-increase-skip-alert-title" className="text-sm font-bold text-red-800 dark:text-red-200">
-              Potential Missed Savings
+              {t('enrollment.auto_increase_skip.alert_title')}
             </p>
             <p className="mt-2 text-sm leading-relaxed text-red-700 dark:text-red-200/95">
-              By skipping, you will be losing{' '}
-              <span className="font-bold text-red-600 dark:text-red-100">${missed}</span> in potential retirement
-              savings over 10 years.
+              {t('enrollment.auto_increase_skip.alert_body', { amount: `$${missed}` })}
             </p>
           </div>
         </div>
@@ -83,20 +87,20 @@ export function AutoIncreaseSkipPanel({
           onClick={onReconsider}
           className="btn-brand flex w-full min-h-[48px] items-center justify-center gap-2 rounded-xl py-3.5 text-sm active:scale-[0.99]"
         >
-          Reconsider Auto Increase
+          {t('enrollment.auto_increase_skip.reconsider')}
           <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
         </button>
 
         <p className="text-center text-sm leading-normal text-gray-500 dark:text-gray-400">
-          Tap{' '}
+          {t('enrollment.auto_increase_skip.tap_here')}{' '}
           <button
             type="button"
             onClick={onContinueWithout}
             className="font-medium text-gray-600 underline decoration-gray-400 underline-offset-2 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
           >
-            here
+            {t('enrollment.auto_increase_skip.here')}
           </button>{' '}
-          to skip this step
+          {t('enrollment.auto_increase_skip.skip_step')}
         </p>
       </div>
     </div>

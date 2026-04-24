@@ -1,89 +1,48 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { Shield, ChevronRight, AlertCircle } from 'lucide-react'
+import { getAppDateLocale } from '@/lib/dateLocale'
 
 type PlanStatus = 'enrolled' | 'eligible' | 'ineligible'
 type FilterTab = 'all' | PlanStatus
 
+type PlanId = 'roth-401k' | 'trad-401k' | 'roth-ira' | '403b'
+
 interface Plan {
-  id: string
-  name: string
+  id: PlanId
   planId: string
-  type: string
   status: PlanStatus
   balance?: number
-  balanceChange?: string
-  description?: string
-  ineligibleReason?: string
 }
 
-const PLANS: Plan[] = [
+const PLANS_BASE: Plan[] = [
   {
     id: 'roth-401k',
-    name: 'Roth 401(k)',
     planId: 'PLAN-ROTH-401K-001',
-    type: 'Roth 401(k)',
     status: 'enrolled',
     balance: 125000,
-    balanceChange: '+2.4% this month',
   },
   {
     id: 'trad-401k',
-    name: 'Traditional 401(k)',
     planId: 'PLAN-TRAD-401K-001',
-    type: 'Traditional 401(k)',
     status: 'eligible',
-    description:
-      'Maximize your savings with pre-tax contributions. This plan allows you to defer taxes on your contributions and earnings until withdrawal.',
   },
   {
     id: 'roth-ira',
-    name: 'Roth IRA',
     planId: 'PLAN-ROTH-IRA-001',
-    type: 'Roth IRA',
     status: 'eligible',
-    description:
-      'Tax-free growth and tax-free withdrawals in retirement. Perfect for those who expect to be in a higher tax bracket later in life.',
   },
   {
     id: '403b',
-    name: '403(b) Plan',
     planId: 'PLAN-403B-001',
-    type: '403(b)',
     status: 'ineligible',
-    ineligibleReason:
-      'Not available for your current employment classification. Please contact HR for more information regarding eligibility requirements.',
   },
 ]
 
-const STATUS_STYLES: Record<PlanStatus, { label: string; bg: string; text: string }> = {
-  enrolled: {
-    label: 'Enrolled',
-    bg: 'bg-[var(--color-primary)] dark:bg-blue-600',
-    text: 'text-white',
-  },
-  eligible: {
-    label: 'Eligible',
-    bg: 'bg-[var(--status-success-bg)] dark:bg-emerald-950/40',
-    text: 'text-[var(--status-success)] dark:text-emerald-400',
-  },
-  ineligible: {
-    label: 'Ineligible',
-    bg: 'bg-[var(--surface-elevated)] dark:bg-gray-800',
-    text: 'text-[var(--text-muted)] dark:text-gray-500',
-  },
-}
-
-const FILTER_TABS: { key: FilterTab; label: string }[] = [
-  { key: 'all', label: 'All Plans' },
-  { key: 'enrolled', label: 'Enrolled' },
-  { key: 'eligible', label: 'Eligible' },
-  { key: 'ineligible', label: 'Ineligible' },
-]
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('en-US', {
+function formatCurrency(amount: number, locale: string) {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2,
@@ -91,15 +50,35 @@ function formatCurrency(amount: number) {
 }
 
 function StatusBadge({ status }: { status: PlanStatus }) {
-  const s = STATUS_STYLES[status]
+  const { t } = useTranslation()
+  const styles: Record<PlanStatus, { labelKey: string; bg: string; text: string }> = {
+    enrolled: {
+      labelKey: 'status_enrolled',
+      bg: 'bg-[var(--color-primary)] dark:bg-blue-600',
+      text: 'text-white',
+    },
+    eligible: {
+      labelKey: 'status_eligible',
+      bg: 'bg-[var(--status-success-bg)] dark:bg-emerald-950/40',
+      text: 'text-[var(--status-success)] dark:text-emerald-400',
+    },
+    ineligible: {
+      labelKey: 'status_ineligible',
+      bg: 'bg-[var(--surface-elevated)] dark:bg-gray-800',
+      text: 'text-[var(--text-muted)] dark:text-gray-500',
+    },
+  }
+  const s = styles[status]
   return (
     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${s.bg} ${s.text}`}>
-      {s.label}
+      {t(`enrollment.manage_page.${s.labelKey}`)}
     </span>
   )
 }
 
-function PlanCard({ plan }: { plan: Plan }) {
+function PlanCard({ plan }: { plan: Plan & { name: string; balanceChange?: string; description?: string; ineligibleReason?: string } }) {
+  const { t } = useTranslation()
+  const locale = getAppDateLocale()
   const navigate = useNavigate()
   const isEnrolled = plan.status === 'enrolled'
   const isEligible = plan.status === 'eligible'
@@ -119,7 +98,7 @@ function PlanCard({ plan }: { plan: Plan }) {
         <div className="min-w-0">
           <h3 className="text-lg font-bold text-[var(--text-primary)]">{plan.name}</h3>
           <p className="mt-0.5 text-xs font-medium text-[var(--text-muted)]">
-            PLAN ID: {plan.planId}
+            {t('enrollment.manage_page.plan_id', { id: plan.planId })}
           </p>
         </div>
         <StatusBadge status={plan.status} />
@@ -129,9 +108,9 @@ function PlanCard({ plan }: { plan: Plan }) {
         <>
           <div className="mb-5 rounded-xl border border-[var(--border-default)] px-5 py-4 dark:border-gray-700">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-[var(--text-secondary)]">Current Balance</span>
+              <span className="text-sm font-medium text-[var(--text-secondary)]">{t('enrollment.manage_page.current_balance')}</span>
               <span className="text-2xl font-extrabold tracking-tight text-[var(--text-primary)]">
-                {formatCurrency(plan.balance)}
+                {formatCurrency(plan.balance, locale)}
               </span>
             </div>
             {plan.balanceChange && (
@@ -145,7 +124,7 @@ function PlanCard({ plan }: { plan: Plan }) {
             onClick={() => navigate(`/enrollment/manage/${plan.id}`)}
             className="btn-brand flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all active:scale-[0.98]"
           >
-            Manage Plan <ChevronRight className="h-4 w-4" />
+            {t('enrollment.manage_page.manage_plan')} <ChevronRight className="h-4 w-4" />
           </button>
         </>
       )}
@@ -160,7 +139,7 @@ function PlanCard({ plan }: { plan: Plan }) {
             onClick={() => navigate('/enrollment/plan')}
             className="text-sm font-semibold text-[var(--color-primary)] transition-colors hover:underline dark:text-blue-400"
           >
-            Start Enrolment
+            {t('enrollment.manage_page.start_enrolment')}
           </button>
         </>
       )}
@@ -178,35 +157,56 @@ function PlanCard({ plan }: { plan: Plan }) {
 }
 
 export default function EnrollmentManagement() {
+  const { t } = useTranslation()
   const [filter, setFilter] = useState<FilterTab>('all')
 
-  const filtered = filter === 'all' ? PLANS : PLANS.filter((p) => p.status === filter)
+  const plans = useMemo(
+    () =>
+      PLANS_BASE.map((p) => ({
+        ...p,
+        name: t(`enrollment.manage_page.plans.${p.id}.name`),
+        balanceChange:
+          p.id === 'roth-401k' ? t(`enrollment.manage_page.plans.${p.id}.balance_change`) : undefined,
+        description: p.status === 'eligible' ? t(`enrollment.manage_page.plans.${p.id}.description`) : undefined,
+        ineligibleReason: p.status === 'ineligible' ? t(`enrollment.manage_page.plans.${p.id}.ineligible`) : undefined,
+      })),
+    [t],
+  )
+
+  const filtered = filter === 'all' ? plans : plans.filter((p) => p.status === filter)
 
   const counts: Record<FilterTab, number> = {
-    all: PLANS.length,
-    enrolled: PLANS.filter((p) => p.status === 'enrolled').length,
-    eligible: PLANS.filter((p) => p.status === 'eligible').length,
-    ineligible: PLANS.filter((p) => p.status === 'ineligible').length,
+    all: plans.length,
+    enrolled: plans.filter((p) => p.status === 'enrolled').length,
+    eligible: plans.filter((p) => p.status === 'eligible').length,
+    ineligible: plans.filter((p) => p.status === 'ineligible').length,
   }
+
+  const filterTabs: { key: FilterTab; labelKey: string }[] = [
+    { key: 'all', labelKey: 'tab_all' },
+    { key: 'enrolled', labelKey: 'tab_enrolled' },
+    { key: 'eligible', labelKey: 'tab_eligible' },
+    { key: 'ineligible', labelKey: 'tab_ineligible' },
+  ]
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
+        <div className="mb-2 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-primary-subtle)] dark:bg-blue-950/40">
             <Shield className="h-5 w-5 text-[var(--color-primary)] dark:text-blue-400" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] sm:text-3xl">
-            Enrolment Management
+            {t('enrollment.manage_page.title')}
           </h1>
         </div>
         <p className="text-sm text-[var(--text-secondary)] sm:text-base">
-          View and manage your retirement plan enrolments across all available assets.
+          {t('enrollment.manage_page.subtitle')}
         </p>
       </div>
 
       <div className="mb-6 flex flex-wrap gap-2">
-        {FILTER_TABS.map((tab) => (
+        {filterTabs.map((tab) => (
           <button
             key={tab.key}
             type="button"
@@ -217,7 +217,7 @@ export default function EnrollmentManagement() {
                 : 'border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-elevated)] dark:border-gray-700 dark:bg-gray-900 dark:hover:border-gray-600'
             }`}
           >
-            {tab.label}
+            {t(`enrollment.manage_page.${tab.labelKey}`)}
             <span
               className={`inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold ${
                 filter === tab.key
@@ -225,7 +225,7 @@ export default function EnrollmentManagement() {
                   : 'bg-[var(--surface-elevated)] text-[var(--text-muted)] dark:bg-gray-800'
               }`}
             >
-              {counts[tab.key]}
+              {counts[tab.key].toLocaleString(getAppDateLocale())}
             </span>
           </button>
         ))}
@@ -237,7 +237,7 @@ export default function EnrollmentManagement() {
         ))}
         {filtered.length === 0 && (
           <div className="col-span-full flex items-center justify-center rounded-2xl border border-dashed border-[var(--border-default)] py-16 dark:border-gray-700">
-            <p className="text-sm text-[var(--text-muted)]">No plans match this filter.</p>
+            <p className="text-sm text-[var(--text-muted)]">{t('enrollment.manage_page.empty_filter')}</p>
           </div>
         )}
       </div>

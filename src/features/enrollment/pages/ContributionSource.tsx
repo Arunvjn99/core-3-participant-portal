@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
-import { useEnrollmentStepNav } from '@/features/enrollment/components/EnrollmentStepNavContext'
+import { useEnrollmentStepNav, type EnrollmentPrimaryLabel } from '@/features/enrollment/components/EnrollmentStepNavContext'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
+import { getAppDateLocale } from '@/lib/dateLocale'
 import { cn } from '@/lib/cn'
 import {
   Lightbulb,
@@ -18,6 +20,8 @@ import {
 } from 'lucide-react'
 
 export default function ContributionSource() {
+  const { t } = useTranslation()
+  const locale = getAppDateLocale()
   const navigate = useNavigate()
   const { setStepNav } = useEnrollmentStepNav()
   const { data, updateData, advanceStep } = useEnrollment()
@@ -108,24 +112,29 @@ export default function ContributionSource() {
         )
         navigate('/enrollment/auto-increase')
       },
-      primaryLabel: 'Next',
+      primaryLabel: t('enrollment.next') as EnrollmentPrimaryLabel,
       nextDisabled: total !== 100,
     })
     return () => setStepNav(null)
-  }, [setStepNav, navigate, advanceStep, sources.preTax, sources.roth, sources.afterTax, total])
+  }, [setStepNav, navigate, advanceStep, sources.preTax, sources.roth, sources.afterTax, total, t])
 
   return (
     <AnimatedPage>
       <div className="space-y-5">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">How do you want to pay taxes?</h1>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 sm:text-base">Choose when you want to pay taxes on your savings.</p>
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+              {t('enrollment.source_page.title')}
+            </h1>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 sm:text-base">{t('enrollment.source_page.subtitle')}</p>
           </div>
           <div className="inline-flex shrink-0 items-center gap-3 rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 px-4 py-3 dark:border-blue-800/40 dark:from-blue-950/30 dark:to-blue-900/20">
             <Wallet className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             <p className="text-sm font-bold text-blue-900 dark:text-blue-300">
-              You&apos;re contributing {percent}% (${monthlyTotal.toLocaleString()}/month)
+              {t('enrollment.source_page.banner', {
+                pct: percent,
+                amount: monthlyTotal.toLocaleString(locale),
+              })}
             </p>
           </div>
         </div>
@@ -135,11 +144,13 @@ export default function ContributionSource() {
             <div>
               <div className="mb-2 flex items-center gap-2">
                 <div className="rounded-md bg-gray-100 px-2.5 py-1 dark:bg-gray-800">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Default</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    {t('enrollment.source_page.default_badge')}
+                  </p>
                 </div>
               </div>
-              <h3 className="text-base font-bold text-gray-900 dark:text-white">Plan Default</h3>
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Applied if no changes are made</p>
+              <h3 className="text-base font-bold text-gray-900 dark:text-white">{t('enrollment.source_page.plan_default_title')}</h3>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{t('enrollment.source_page.plan_default_sub')}</p>
             </div>
 
             <div className="flex h-2.5 overflow-hidden rounded-full">
@@ -151,22 +162,30 @@ export default function ContributionSource() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="brand-bg h-2 w-2 rounded-full" />
-                  <p className="text-sm text-gray-700 dark:text-gray-300">Pre-Tax ({planDefault.preTax}%)</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    {t('enrollment.source_page.pre_tax_pct', { pct: planDefault.preTax })}
+                  </p>
                 </div>
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">${planDefaultPreTax.toLocaleString()}</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                  ${planDefaultPreTax.toLocaleString(locale)}
+                </p>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-purple-600" />
-                  <p className="text-sm text-gray-700 dark:text-gray-300">Roth ({planDefault.roth}%)</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    {t('enrollment.source_page.roth_pct', { pct: planDefault.roth })}
+                  </p>
                 </div>
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">${planDefaultRoth.toLocaleString()}</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                  ${planDefaultRoth.toLocaleString(locale)}
+                </p>
               </div>
             </div>
 
             <div className="flex flex-1 items-end border-t border-gray-100 pt-3 dark:border-gray-800">
               <p className="w-full text-center text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-                Your employer&apos;s default allocation balances tax benefits.
+                {t('enrollment.source_page.default_footer')}
               </p>
             </div>
 
@@ -188,7 +207,7 @@ export default function ContributionSource() {
               }}
               className="btn-brand w-full rounded-xl px-4 py-3 text-sm font-semibold shadow-md"
             >
-              Select Plan Default
+              {t('enrollment.source_page.select_plan_default')}
             </button>
           </div>
 
@@ -196,12 +215,14 @@ export default function ContributionSource() {
             <div className="flex min-w-0 flex-1 flex-col space-y-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Your Tax Strategy</h3>
-                  <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Total allocation: 100%</p>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">{t('enrollment.source_page.your_tax_strategy')}</h3>
+                  <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{t('enrollment.source_page.total_allocation')}</p>
                 </div>
                 <div className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 dark:border-blue-800/40 dark:bg-blue-950/30">
                   <Sparkles className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-                  <p className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">Customize</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">
+                    {t('enrollment.source_page.customize_badge')}
+                  </p>
                 </div>
               </div>
 
@@ -220,16 +241,22 @@ export default function ContributionSource() {
                 <div className="flex flex-wrap items-center gap-4 text-xs">
                   <div className="flex items-center gap-1.5">
                     <div className="brand-bg h-2 w-2 rounded-full" />
-                    <span className="text-gray-500 dark:text-gray-400">{sources.preTax}% Pre-Tax</span>
+                    <span className="text-gray-500 dark:text-gray-400">
+                      {sources.preTax}% {t('enrollment.source_page.pre_tax')}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="h-2 w-2 rounded-full bg-purple-600" />
-                    <span className="text-gray-500 dark:text-gray-400">{sources.roth}% Roth</span>
+                    <span className="text-gray-500 dark:text-gray-400">
+                      {sources.roth}% {t('enrollment.source_page.roth')}
+                    </span>
                   </div>
                   {sources.afterTax > 0 && (
                     <div className="flex items-center gap-1.5">
                       <div className="h-2 w-2 rounded-full bg-orange-600" />
-                      <span className="text-gray-500 dark:text-gray-400">{sources.afterTax}% After-Tax</span>
+                      <span className="text-gray-500 dark:text-gray-400">
+                        {sources.afterTax}% {t('enrollment.source_page.after_tax')}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -246,9 +273,9 @@ export default function ContributionSource() {
                     <div>
                       <div className="flex items-center gap-2">
                         <div className="brand-bg h-3 w-3 rounded-full" />
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white">Pre-Tax</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{t('enrollment.source_page.pre_tax')}</p>
                       </div>
-                      <p className="ml-5 text-xs text-gray-500 dark:text-gray-400">Lower taxes today</p>
+                      <p className="ml-5 text-xs text-gray-500 dark:text-gray-400">{t('enrollment.source_page.pre_tax_hint')}</p>
                     </div>
                     <p className="text-xl font-extrabold text-blue-700 dark:text-blue-400">{sources.preTax}%</p>
                   </div>
@@ -269,7 +296,9 @@ export default function ContributionSource() {
                   />
                   <div className="flex items-center justify-between text-xs text-gray-400">
                     <span>0%</span>
-                    <span className="font-semibold text-gray-700 dark:text-gray-300">${monthlyPreTax.toLocaleString()}/mo</span>
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">
+                      ${monthlyPreTax.toLocaleString(locale)}/mo
+                    </span>
                     <span>100%</span>
                   </div>
                 </div>
@@ -279,9 +308,9 @@ export default function ContributionSource() {
                     <div>
                       <div className="flex items-center gap-2">
                         <div className="h-3 w-3 rounded-full bg-purple-600" />
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white">Roth</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{t('enrollment.source_page.roth')}</p>
                       </div>
-                      <p className="ml-5 text-xs text-gray-500 dark:text-gray-400">Tax-free withdrawals later</p>
+                      <p className="ml-5 text-xs text-gray-500 dark:text-gray-400">{t('enrollment.source_page.roth_hint')}</p>
                     </div>
                     <p className="text-xl font-extrabold text-purple-700 dark:text-purple-400">{sources.roth}%</p>
                   </div>
@@ -302,7 +331,9 @@ export default function ContributionSource() {
                   />
                   <div className="flex items-center justify-between text-xs text-gray-400">
                     <span>0%</span>
-                    <span className="font-semibold text-gray-700 dark:text-gray-300">${monthlyRoth.toLocaleString()}/mo</span>
+                    <span className="font-semibold text-gray-700 dark:text-gray-300">
+                      ${monthlyRoth.toLocaleString(locale)}/mo
+                    </span>
                     <span>100%</span>
                   </div>
                 </div>
@@ -311,16 +342,18 @@ export default function ContributionSource() {
                   <div className="space-y-2 border-t border-gray-100 pt-4 dark:border-gray-800">
                     <div className="mb-1 flex items-center gap-2">
                       <div className="rounded border border-orange-200 bg-orange-50 px-2 py-0.5 dark:border-orange-800/40 dark:bg-orange-950/30">
-                        <p className="text-xs font-bold uppercase text-orange-700 dark:text-orange-400">Advanced</p>
+                        <p className="text-xs font-bold uppercase text-orange-700 dark:text-orange-400">
+                          {t('enrollment.source_page.advanced')}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="flex items-center gap-2">
                           <div className="h-3 w-3 rounded-full bg-orange-600" />
-                          <p className="text-sm font-semibold text-gray-900 dark:text-white">After-Tax</p>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white">{t('enrollment.source_page.after_tax')}</p>
                         </div>
-                        <p className="ml-5 text-xs text-gray-500 dark:text-gray-400">For advanced strategies (e.g., backdoor Roth)</p>
+                        <p className="ml-5 text-xs text-gray-500 dark:text-gray-400">{t('enrollment.source_page.after_tax_hint')}</p>
                       </div>
                       <p className="text-xl font-extrabold text-orange-700 dark:text-orange-400">{sources.afterTax}%</p>
                     </div>
@@ -341,7 +374,9 @@ export default function ContributionSource() {
                     />
                     <div className="flex items-center justify-between text-xs text-gray-400">
                       <span>0%</span>
-                      <span className="font-semibold text-gray-700 dark:text-gray-300">${monthlyAfterTax.toLocaleString()}/mo</span>
+                      <span className="font-semibold text-gray-700 dark:text-gray-300">
+                        ${monthlyAfterTax.toLocaleString(locale)}/mo
+                      </span>
                       <span>100%</span>
                     </div>
                   </div>
@@ -354,7 +389,7 @@ export default function ContributionSource() {
                   onClick={() => setShowAdvanced(true)}
                   className="flex items-center gap-1.5 self-start text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                 >
-                  <ChevronDown className="h-4 w-4" /> Show advanced options
+                  <ChevronDown className="h-4 w-4" /> {t('enrollment.source_page.show_advanced')}
                 </button>
               ) : (
                 <button
@@ -373,7 +408,7 @@ export default function ContributionSource() {
                   }}
                   className="flex items-center gap-1.5 self-start text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                 >
-                  <ChevronUp className="h-4 w-4" /> Hide advanced options
+                  <ChevronUp className="h-4 w-4" /> {t('enrollment.source_page.hide_advanced')}
                 </button>
               )}
 
@@ -382,19 +417,21 @@ export default function ContributionSource() {
                   <div className="mb-2 flex items-start justify-between">
                     <div className="flex items-center gap-2">
                       <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                      <p className="text-sm font-bold text-blue-900 dark:text-blue-300">Recommended for You</p>
+                      <p className="text-sm font-bold text-blue-900 dark:text-blue-300">{t('enrollment.source_page.reco_title')}</p>
                     </div>
                     <div className="rounded-lg bg-green-100 px-2 py-1 dark:bg-green-900/40">
-                      <p className="text-xs font-extrabold text-green-700 dark:text-green-400">Score: 72</p>
+                      <p className="text-xs font-extrabold text-green-700 dark:text-green-400">
+                        {t('enrollment.source_page.reco_score', { score: 72 })}
+                      </p>
                     </div>
                   </div>
                   <p className="mb-0 text-xs leading-relaxed text-gray-700 dark:text-gray-300">
-                    {recommended.preTax}% Pre-Tax / {recommended.roth}% Roth — optimized for your profile
+                    {t('enrollment.source_page.reco_mix', { pre: recommended.preTax, roth: recommended.roth })}
                   </p>
                   <div className="mt-2.5 flex items-start gap-2.5 border-t border-blue-200/70 pt-2.5 dark:border-blue-800/50">
                     <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
                     <p className="text-xs font-semibold leading-relaxed text-blue-900 dark:text-blue-300">
-                      Roth may be better — tax-free income later
+                      {t('enrollment.source_page.reco_hint')}
                     </p>
                   </div>
                 </div>
@@ -407,7 +444,7 @@ export default function ContributionSource() {
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[color:var(--brand-primary)] bg-white py-2.5 text-sm font-semibold text-[color:var(--brand-primary)] shadow-sm transition-all hover:bg-[color:var(--brand-primary-light)] active:scale-[0.99] dark:bg-gray-900 dark:hover:bg-[color:var(--brand-primary-light)]"
                 >
                   <PieChart className="h-4 w-4 shrink-0" aria-hidden />
-                  Customize Your Portfolio
+                  {t('enrollment.source_page.customize_portfolio')}
                 </button>
               ) : (
                 <button
@@ -416,7 +453,7 @@ export default function ContributionSource() {
                   className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[color:var(--brand-primary)] bg-white py-2.5 text-sm font-semibold text-[color:var(--brand-primary)] shadow-sm transition-all hover:bg-[color:var(--brand-primary-light)] active:scale-[0.99] dark:bg-gray-900 dark:hover:bg-[color:var(--brand-primary-light)]"
                 >
                   <PieChart className="h-4 w-4 shrink-0" aria-hidden />
-                  Choose your investments
+                  {t('enrollment.source_page.choose_investments')}
                   <span aria-hidden className="text-base leading-none">
                     →
                   </span>
@@ -426,93 +463,113 @@ export default function ContributionSource() {
 
             <div className="flex w-full flex-col justify-between space-y-4 border-t border-gray-100 pt-5 dark:border-gray-800 sm:w-[38%] sm:border-l sm:border-t-0 sm:pl-5 sm:pt-0 lg:w-[30%]">
               <div className="space-y-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white">Your monthly impact</h4>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white">
+                  {t('enrollment.source_page.monthly_impact_title')}
+                </h4>
                 <div>
-                  <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">You contribute:</p>
-                  <p className="mb-3 text-xl font-extrabold text-gray-900 dark:text-white">${monthlyTotal.toLocaleString()}</p>
+                  <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">{t('enrollment.source_page.you_contribute_label')}</p>
+                  <p className="mb-3 text-xl font-extrabold text-gray-900 dark:text-white">
+                    ${monthlyTotal.toLocaleString(locale)}
+                  </p>
                   <div className="space-y-1.5 border-l-2 border-gray-200 pl-3 dark:border-gray-700">
                     {[
-                      { color: 'brand-bg', label: 'Pre-Tax', amount: monthlyPreTax },
-                      { color: 'bg-purple-600', label: 'Roth', amount: monthlyRoth },
-                    ].map(({ color, label, amount }) => (
-                      <div key={label} className="flex items-center justify-between">
+                      { color: 'brand-bg', labelKey: 'pre_tax_label' as const, amount: monthlyPreTax },
+                      { color: 'bg-purple-600', labelKey: 'roth_label' as const, amount: monthlyRoth },
+                    ].map(({ color, labelKey, amount }) => (
+                      <div key={labelKey} className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5">
                           <div className={cn('h-1.5 w-1.5 rounded-full', color)} />
-                          <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {t(`enrollment.source_page.${labelKey}`)}
+                          </p>
                         </div>
-                        <p className="text-xs font-semibold text-gray-900 dark:text-white">${amount.toLocaleString()}</p>
+                        <p className="text-xs font-semibold text-gray-900 dark:text-white">${amount.toLocaleString(locale)}</p>
                       </div>
                     ))}
                     {monthlyAfterTax > 0 && (
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5">
                           <div className="h-1.5 w-1.5 rounded-full bg-orange-600" />
-                          <p className="text-xs text-gray-500 dark:text-gray-400">After-Tax</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{t('enrollment.source_page.after_tax_label')}</p>
                         </div>
-                        <p className="text-xs font-semibold text-gray-900 dark:text-white">${monthlyAfterTax.toLocaleString()}</p>
+                        <p className="text-xs font-semibold text-gray-900 dark:text-white">
+                          ${monthlyAfterTax.toLocaleString(locale)}
+                        </p>
                       </div>
                     )}
                   </div>
                 </div>
 
                 <div className="rounded-lg border border-green-200 bg-gradient-to-br from-green-50 to-green-100/50 p-3 dark:border-green-800/40 dark:from-green-950/30 dark:to-green-900/10">
-                  <p className="mb-1 text-xs font-bold uppercase tracking-wider text-green-700 dark:text-green-400">Employer match</p>
-                  <p className="text-base font-extrabold text-green-700 dark:text-green-400">+${monthlyMatch.toLocaleString()}/month</p>
-                  <p className="mt-1 text-xs text-green-600 dark:text-green-500">100% on first {matchPercent}%</p>
+                  <p className="mb-1 text-xs font-bold uppercase tracking-wider text-green-700 dark:text-green-400">
+                    {t('enrollment.source_page.employer_match')}
+                  </p>
+                  <p className="text-base font-extrabold text-green-700 dark:text-green-400">
+                    {t('enrollment.source_page.match_amount_monthly', {
+                      amount: `$${monthlyMatch.toLocaleString(locale)}`,
+                    })}
+                  </p>
+                  <p className="mt-1 text-xs text-green-600 dark:text-green-500">
+                    {t('enrollment.source_page.match_line', { pct: matchPercent })}
+                  </p>
                 </div>
 
                 <div className="rounded-lg bg-gray-100 p-3 dark:bg-gray-800">
-                  <p className="mb-1 text-xs font-semibold text-gray-500 dark:text-gray-400">Total investment</p>
-                  <p className="text-2xl font-extrabold text-gray-900 dark:text-white">${totalMonthlyInvestment.toLocaleString()}</p>
-                  <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">per month</p>
+                  <p className="mb-1 text-xs font-semibold text-gray-500 dark:text-gray-400">{t('enrollment.source_page.total_investment')}</p>
+                  <p className="text-2xl font-extrabold text-gray-900 dark:text-white">
+                    ${totalMonthlyInvestment.toLocaleString(locale)}
+                  </p>
+                  <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{t('enrollment.source_page.per_month')}</p>
                 </div>
-                </div>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="space-y-3 opacity-90">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Understanding the Difference</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t('enrollment.source_page.understanding_title')}</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                bg: 'from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/10',
-                border: 'border-blue-200 dark:border-blue-800/40',
-                icon: <TrendingUp className="h-4 w-4 text-white" />,
-                iconBg: 'brand-bg',
-                checkColor: 'text-blue-600',
-                title: 'Pre-Tax',
-                points: ['Lower taxes today', 'Reduces current taxable income', 'Pay taxes when you withdraw'],
-              },
-              {
-                bg: 'from-purple-50 to-purple-100/50 dark:from-purple-950/30 dark:to-purple-900/10',
-                border: 'border-purple-200 dark:border-purple-800/40',
-                icon: <Shield className="h-4 w-4 text-white" />,
-                iconBg: 'bg-purple-600',
-                checkColor: 'text-purple-600',
-                title: 'Roth',
-                points: ['Tax-free withdrawals later', 'Pay taxes now at current rate', 'Growth is tax-free'],
-              },
-              {
-                bg: 'from-orange-50 to-orange-100/50 dark:from-orange-950/30 dark:to-orange-900/10',
-                border: 'border-orange-200 dark:border-orange-800/40',
-                icon: <DollarSign className="h-4 w-4 text-white" />,
-                iconBg: 'bg-orange-600',
-                checkColor: 'text-orange-600',
-                title: 'After-Tax',
-                points: ['For high earners', 'Mega backdoor Roth option', 'Advanced tax strategy'],
-              },
-            ].map(({ bg, border, icon, iconBg, checkColor, title, points }) => (
-              <div key={title} className={cn('rounded-xl border bg-gradient-to-br p-4 sm:col-span-1', bg, border)}>
+            {(
+              [
+                {
+                  bg: 'from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/10',
+                  border: 'border-blue-200 dark:border-blue-800/40',
+                  icon: <TrendingUp className="h-4 w-4 text-white" />,
+                  iconBg: 'brand-bg',
+                  checkColor: 'text-blue-600',
+                  titleKey: 'card_pre_title' as const,
+                  pointKeys: ['card_pre_p1', 'card_pre_p2', 'card_pre_p3'] as const,
+                },
+                {
+                  bg: 'from-purple-50 to-purple-100/50 dark:from-purple-950/30 dark:to-purple-900/10',
+                  border: 'border-purple-200 dark:border-purple-800/40',
+                  icon: <Shield className="h-4 w-4 text-white" />,
+                  iconBg: 'bg-purple-600',
+                  checkColor: 'text-purple-600',
+                  titleKey: 'card_roth_title' as const,
+                  pointKeys: ['card_roth_p1', 'card_roth_p2', 'card_roth_p3'] as const,
+                },
+                {
+                  bg: 'from-orange-50 to-orange-100/50 dark:from-orange-950/30 dark:to-orange-900/10',
+                  border: 'border-orange-200 dark:border-orange-800/40',
+                  icon: <DollarSign className="h-4 w-4 text-white" />,
+                  iconBg: 'bg-orange-600',
+                  checkColor: 'text-orange-600',
+                  titleKey: 'card_after_title' as const,
+                  pointKeys: ['card_after_p1', 'card_after_p2', 'card_after_p3'] as const,
+                },
+              ] as const
+            ).map(({ bg, border, icon, iconBg, checkColor, titleKey, pointKeys }) => (
+              <div key={titleKey} className={cn('rounded-xl border bg-gradient-to-br p-4 sm:col-span-1', bg, border)}>
                 <div className="mb-3 flex items-center gap-2.5">
                   <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg', iconBg)}>{icon}</div>
-                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">{title}</h3>
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">{t(`enrollment.source_page.${titleKey}`)}</h3>
                 </div>
                 <div className="space-y-1.5">
-                  {points.map((point) => (
-                    <div key={point} className="flex items-start gap-2">
+                  {pointKeys.map((pk) => (
+                    <div key={pk} className="flex items-start gap-2">
                       <Check className={cn('mt-0.5 h-3.5 w-3.5 shrink-0', checkColor)} />
-                      <p className="text-xs text-gray-700 dark:text-gray-300">{point}</p>
+                      <p className="text-xs text-gray-700 dark:text-gray-300">{t(`enrollment.source_page.${pk}`)}</p>
                     </div>
                   ))}
                 </div>

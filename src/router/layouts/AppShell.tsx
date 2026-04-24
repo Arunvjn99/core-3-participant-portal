@@ -137,8 +137,10 @@ export function AppShell() {
     : initials
 
   const avatarLetter = (avatarInitials || initials || 'U').slice(0, 1).toUpperCase()
-  const menuLang: LanguageMenuLang =
-    ((i18n.language || 'en').split('-')[0] || 'en') === 'es' ? 'es' : 'en'
+  const menuLangBase = ((i18n.language || 'en').split('-')[0] || 'en').toLowerCase()
+  const menuLang: LanguageMenuLang = LANGUAGE_MENU_LANGS.includes(menuLangBase as LanguageMenuLang)
+    ? (menuLangBase as LanguageMenuLang)
+    : 'en'
 
   const handleSignOut = async () => {
     useEnrollmentDraftStore.getState().resetEnrollment()
@@ -366,6 +368,7 @@ export function AppShell() {
                   >
                     {LANGUAGE_MENU_LANGS.map((lng) => {
                       const active = menuLang === lng
+                      const flag = lng === 'en' ? '🇺🇸' : lng === 'es' ? '🇪🇸' : '🇫🇷'
                       return (
                         <button
                           key={lng}
@@ -380,7 +383,7 @@ export function AppShell() {
                           }`}
                         >
                           <span aria-hidden className="shrink-0 text-base leading-none">
-                            {lng === 'en' ? '🇺🇸' : '🇪🇸'}
+                            {flag}
                           </span>
                           <span className="min-w-0 flex-1 text-left">{t(`lang.${lng}`)}</span>
                           {active ? (

@@ -1,15 +1,19 @@
 import { useState, useMemo, useId, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
-import { useEnrollmentStepNav } from '@/features/enrollment/components/EnrollmentStepNavContext'
+import { useEnrollmentStepNav, type EnrollmentPrimaryLabel } from '@/features/enrollment/components/EnrollmentStepNavContext'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
+import { getAppDateLocale } from '@/lib/dateLocale'
 import { TrendingUp, Calendar, Target, DollarSign, Info } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 type IncrementCycle = 'calendar' | 'participant' | 'plan'
 
 export default function AutoIncreaseSetup() {
+  const { t } = useTranslation()
+  const locale = getAppDateLocale()
   const navigate = useNavigate()
   const { setStepNav } = useEnrollmentStepNav()
   const { data, updateData, personalization } = useEnrollment()
@@ -62,13 +66,13 @@ export default function AutoIncreaseSetup() {
         year: yr,
         percent: Math.round(pct * 10) / 10,
         annual,
-        date: getNextDate(yr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        date: getNextDate(yr).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' }),
       })
       if (pct < maxContribution) pct = Math.min(pct + increaseAmount, maxContribution)
       yr++
     }
     return rows
-  }, [currentPercent, increaseAmount, maxContribution, salary, yearsToMax, incrementCycle])
+  }, [currentPercent, increaseAmount, maxContribution, salary, yearsToMax, incrementCycle, locale])
 
   const financialImpact = useMemo(() => {
     const yearsToRetirement = personalization.retirementAge - personalization.currentAge
@@ -91,8 +95,8 @@ export default function AutoIncreaseSetup() {
 
   const formatCurrency = (val: number) => {
     if (val >= 1_000_000) return `$${(val / 1_000_000).toFixed(2)}M`
-    if (val >= 1_000) return `$${Math.round(val / 1_000).toLocaleString()}K`
-    return `$${Math.round(val).toLocaleString()}`
+    if (val >= 1_000) return `$${Math.round(val / 1_000).toLocaleString(locale)}K`
+    return `$${Math.round(val).toLocaleString(locale)}`
   }
 
   const handleSave = useCallback(() => {
@@ -114,11 +118,11 @@ export default function AutoIncreaseSetup() {
       showBack: true,
       onBack: () => navigate('/enrollment/auto-increase'),
       onNext: handleSave,
-      primaryLabel: 'Next',
+      primaryLabel: t('enrollment.next') as EnrollmentPrimaryLabel,
       nextDisabled: increaseAmount === 0,
     })
     return () => setStepNav(null)
-  }, [setStepNav, navigate, handleSave, increaseAmount])
+  }, [setStepNav, navigate, handleSave, increaseAmount, t])
 
   interface TooltipPayloadItem {
     value?: number
@@ -133,19 +137,28 @@ export default function AutoIncreaseSetup() {
     label?: number
   }) => {
     if (active && payload && payload.length) {
+      const v = payload[0].value
       return (
         <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-lg dark:border-gray-700 dark:bg-gray-800">
           <p className="text-gray-500 dark:text-gray-400" style={{ fontSize: '0.7rem' }}>
-            {label === 0 ? 'Today' : `Year ${label}`}
+            {label === 0 ? t('enrollment.auto_increase_setup.tooltip_today') : t('enrollment.auto_increase_setup.tooltip_year', { n: label })}
           </p>
           <p className="tabular-nums text-gray-900 dark:text-white" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-            {payload[0].value}% of salary
+            {t('enrollment.auto_increase_setup.tooltip_pct', { v })}
           </p>
         </div>
       )
     }
     return null
   }
+
+  const cycleOptions = [
+    { value: 'calendar' as const, labelKey: 'cycle_calendar' as const, subKey: 'cycle_calendar_sub' as const },
+    { value: 'participant' as const, labelKey: 'cycle_participant' as const, subKey: 'cycle_participant_sub' as const },
+    { value: 'plan' as const, labelKey: 'cycle_plan' as const, subKey: 'cycle_plan_sub' as const },
+  ]
+
+  const yearsUnit = yearsToMax === 1 ? t('enrollment.auto_increase_setup.year_one') : t('enrollment.auto_increase_setup.year_other')
 
   return (
     <AnimatedPage>
@@ -158,11 +171,11 @@ export default function AutoIncreaseSetup() {
                 <TrendingUp className="h-4 w-4 text-green-600" />
               </div>
               <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-                Configure your automatic increases
+                {t('enrollment.auto_increase_setup.title')}
               </h1>
             </div>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 sm:text-base">
-              Your contribution will gradually increase over time.
+              {t('enrollment.auto_increase_setup.subtitle')}
             </p>
           </div>
           <div className="shrink-0 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 dark:border-blue-800/40 dark:bg-blue-950/30">
@@ -172,13 +185,13 @@ export default function AutoIncreaseSetup() {
                   className="mb-0.5 text-blue-700 dark:text-blue-400"
                   style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}
                 >
-                  Current
+                  {t('enrollment.auto_increase_setup.current')}
                 </p>
                 <p className="text-blue-900 dark:text-blue-300" style={{ fontSize: '1.5rem', fontWeight: 800, lineHeight: 1 }}>
                   {currentPercent}%
                 </p>
                 <p className="mt-1 text-blue-700 dark:text-blue-400" style={{ fontSize: '0.7rem' }}>
-                  ${currentMonthlyContribution.toLocaleString()}/mo
+                  ${currentMonthlyContribution.toLocaleString(locale)}/mo
                 </p>
               </div>
               <div className="border-l border-blue-300 pl-6 dark:border-blue-700">
@@ -186,7 +199,7 @@ export default function AutoIncreaseSetup() {
                   className="mb-0.5 text-blue-600 dark:text-blue-400"
                   style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}
                 >
-                  Target Max
+                  {t('enrollment.auto_increase_setup.target_max')}
                 </p>
                 <p className="text-blue-900 dark:text-blue-300" style={{ fontSize: '1.5rem', fontWeight: 800, lineHeight: 1 }}>
                   {maxContribution}%
@@ -202,16 +215,10 @@ export default function AutoIncreaseSetup() {
             {/* Increment Cycle */}
             <div className="rounded-2xl border-2 border-blue-200 bg-white px-4 py-3 shadow-sm dark:border-blue-800/40 dark:bg-gray-900">
               <h3 className="mb-2.5 text-gray-900 dark:text-white" style={{ fontSize: '0.9rem', fontWeight: 700 }}>
-                Increment Cycle
+                {t('enrollment.auto_increase_setup.increment_cycle')}
               </h3>
               <div className="grid grid-cols-3 gap-3">
-                {(
-                  [
-                    { value: 'calendar' as const, label: 'Calendar Year', sub: 'Every Jan 1st' },
-                    { value: 'participant' as const, label: 'Participant Date', sub: 'On enrolment date' },
-                    { value: 'plan' as const, label: 'Plan Year', sub: 'Every April 1' },
-                  ] as const
-                ).map((opt) => (
+                {cycleOptions.map((opt) => (
                   <label
                     key={opt.value}
                     className={`flex cursor-pointer flex-col gap-2 rounded-xl border-2 p-3 transition-all hover:border-blue-300 dark:hover:border-blue-700 ${
@@ -230,11 +237,11 @@ export default function AutoIncreaseSetup() {
                         className="h-4 w-4 cursor-pointer text-blue-600"
                       />
                       <p className="text-gray-900 dark:text-white" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-                        {opt.label}
+                        {t(`enrollment.auto_increase_setup.${opt.labelKey}`)}
                       </p>
                     </div>
                     <p className="ml-6 text-gray-500 dark:text-gray-400" style={{ fontSize: '0.7rem' }}>
-                      {opt.sub}
+                      {t(`enrollment.auto_increase_setup.${opt.subKey}`)}
                     </p>
                   </label>
                 ))}
@@ -249,7 +256,7 @@ export default function AutoIncreaseSetup() {
                 </div>
                 <div className="flex-1">
                   <label className="text-gray-900 dark:text-white" style={{ fontSize: '0.85rem', fontWeight: 500 }}>
-                    How much do you want to increase per cycle?
+                    {t('enrollment.auto_increase_setup.increase_label')}
                   </label>
                   <div className="mt-2">
                     <div className="mb-1 flex items-center justify-between">
@@ -257,7 +264,7 @@ export default function AutoIncreaseSetup() {
                         0%
                       </span>
                       <span className="tabular-nums text-blue-600 dark:text-blue-400" style={{ fontSize: '0.9rem', fontWeight: 700 }}>
-                        {increaseAmount}% per cycle
+                        {t('enrollment.auto_increase_setup.per_cycle', { v: increaseAmount })}
                       </span>
                       <span className="text-gray-400 dark:text-gray-600" style={{ fontSize: '0.65rem' }}>
                         3%
@@ -305,10 +312,10 @@ export default function AutoIncreaseSetup() {
                 </div>
                 <div className="flex-1">
                   <label className="text-gray-900 dark:text-white" style={{ fontSize: '0.9rem', fontWeight: 500 }}>
-                    Stop increasing when contributions reach
+                    {t('enrollment.auto_increase_setup.stop_at')}
                   </label>
                   <p className="mt-0.5 text-gray-400 dark:text-gray-500" style={{ fontSize: '0.78rem' }}>
-                    Your contribution rate will not exceed this percentage.
+                    {t('enrollment.auto_increase_setup.stop_hint')}
                   </p>
                   <div className="mt-4">
                     <div className="mb-1.5 flex items-center justify-between">
@@ -342,10 +349,9 @@ export default function AutoIncreaseSetup() {
             <div className="flex items-start gap-2.5 px-1">
               <Info className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
               <p className="text-gray-400 dark:text-gray-500" style={{ fontSize: '0.78rem' }}>
-                Automatic increases apply once per year on your enrolment anniversary. You can change or disable automatic increases at any time.
+                {t('enrollment.auto_increase_setup.footnote')}
               </p>
             </div>
-
           </div>
 
           {/* Right — Projection (2/5) — above controls on mobile */}
@@ -387,27 +393,16 @@ export default function AutoIncreaseSetup() {
 
               <div className="px-5 py-3.5">
                 <p className="text-gray-700 dark:text-gray-300" style={{ fontSize: '0.82rem' }}>
-                  {currentPercent >= maxContribution ? (
-                    <>Your contribution rate is already at or above your selected maximum.</>
-                  ) : increaseAmount === 0 ? (
-                    <>Select an increase amount to see your contribution growth path.</>
-                  ) : (
-                    <>
-                      Your contribution will grow from{' '}
-                      <span className="text-gray-900 dark:text-white" style={{ fontWeight: 600 }}>
-                        {currentPercent}%
-                      </span>{' '}
-                      to{' '}
-                      <span className="text-gray-900 dark:text-white" style={{ fontWeight: 600 }}>
-                        {maxContribution}%
-                      </span>{' '}
-                      over approximately{' '}
-                      <span className="text-gray-900 dark:text-white" style={{ fontWeight: 600 }}>
-                        {yearsToMax} {yearsToMax === 1 ? 'year' : 'years'}
-                      </span>
-                      .
-                    </>
-                  )}
+                  {currentPercent >= maxContribution
+                    ? t('enrollment.auto_increase_setup.summary_at_max')
+                    : increaseAmount === 0
+                      ? t('enrollment.auto_increase_setup.summary_pick')
+                      : t('enrollment.auto_increase_setup.summary_grow', {
+                          fromPct: currentPercent,
+                          toPct: maxContribution,
+                          years: yearsToMax,
+                          yearsUnit,
+                        })}
                 </p>
               </div>
 
@@ -416,7 +411,7 @@ export default function AutoIncreaseSetup() {
                   <div className="border-t border-gray-100 dark:border-gray-800" />
                   <div className="space-y-3 px-5 py-4">
                     <p className="text-gray-900 dark:text-white" style={{ fontSize: '0.82rem', fontWeight: 600 }}>
-                      Savings Impact
+                      {t('enrollment.auto_increase_setup.savings_impact')}
                     </p>
                     <div className="grid grid-cols-2 gap-2.5">
                       <div className="rounded-xl bg-gray-50 px-3 py-3 text-center dark:bg-gray-800">
@@ -424,7 +419,7 @@ export default function AutoIncreaseSetup() {
                           className="mb-0.5 text-gray-400 dark:text-gray-500"
                           style={{ fontSize: '0.6rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}
                         >
-                          Without
+                          {t('enrollment.auto_increase_setup.without')}
                         </p>
                         <p className="tabular-nums text-gray-600 dark:text-gray-400" style={{ fontSize: '1.1rem', fontWeight: 700 }}>
                           {formatCurrency(financialImpact.withoutIncrease)}
@@ -435,7 +430,7 @@ export default function AutoIncreaseSetup() {
                           className="mb-0.5 text-green-700 dark:text-green-400"
                           style={{ fontSize: '0.6rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}
                         >
-                          With increases
+                          {t('enrollment.auto_increase_setup.with_increases')}
                         </p>
                         <p className="tabular-nums text-green-700 dark:text-green-400" style={{ fontSize: '1.1rem', fontWeight: 700 }}>
                           {formatCurrency(financialImpact.withIncrease)}
@@ -445,7 +440,7 @@ export default function AutoIncreaseSetup() {
                     <div className="flex items-start gap-2 rounded-xl border border-green-100 bg-green-50 px-3.5 py-2.5 dark:border-green-900/40 dark:bg-green-950/30">
                       <DollarSign className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
                       <p className="text-green-800 dark:text-green-400" style={{ fontSize: '0.78rem' }}>
-                        Could add approximately <span style={{ fontWeight: 700 }}>{formatCurrency(financialImpact.difference)}</span> more to your retirement savings.
+                        {t('enrollment.auto_increase_setup.could_add', { amount: formatCurrency(financialImpact.difference) })}
                       </p>
                     </div>
                   </div>
@@ -457,19 +452,19 @@ export default function AutoIncreaseSetup() {
                   <div className="border-t border-gray-100 dark:border-gray-800" />
                   <div className="px-4 py-3">
                     <h3 className="mb-3 text-gray-900 dark:text-white" style={{ fontSize: '0.85rem', fontWeight: 700 }}>
-                      Growth Timeline
+                      {t('enrollment.auto_increase_setup.growth_timeline')}
                     </h3>
                     <div className="-mx-4 overflow-x-auto">
                       <table className="w-full">
                         <thead className="border-b border-gray-200 dark:border-gray-700">
                           <tr>
-                            {['Year', 'Date', '%', 'Annual'].map((h, i) => (
+                            {(['col_year', 'col_date', 'col_pct', 'col_annual'] as const).map((h, i) => (
                               <th
                                 key={h}
                                 className={`px-3 py-1.5 text-gray-600 dark:text-gray-400 ${i === 3 ? 'text-right' : 'text-left'}`}
                                 style={{ fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}
                               >
-                                {h}
+                                {t(`enrollment.auto_increase_setup.${h}`)}
                               </th>
                             ))}
                           </tr>
@@ -481,7 +476,9 @@ export default function AutoIncreaseSetup() {
                               className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${row.percent === maxContribution ? 'bg-purple-50 dark:bg-purple-950/20' : ''}`}
                             >
                               <td className="px-3 py-1.5 text-gray-900 dark:text-white" style={{ fontSize: '0.75rem', fontWeight: 500 }}>
-                                {row.year === 0 ? 'Now' : `Y${row.year}`}
+                                {row.year === 0
+                                  ? t('enrollment.auto_increase_setup.now')
+                                  : t('enrollment.auto_increase_setup.y_prefix', { n: row.year })}
                               </td>
                               <td className="px-3 py-1.5 text-gray-600 dark:text-gray-400" style={{ fontSize: '0.7rem' }}>
                                 {row.date}
@@ -496,13 +493,13 @@ export default function AutoIncreaseSetup() {
                                       className="rounded bg-purple-100 px-1 py-0.5 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400"
                                       style={{ fontSize: '0.55rem', fontWeight: 600 }}
                                     >
-                                      MAX
+                                      {t('enrollment.auto_increase_setup.max_badge')}
                                     </span>
                                   )}
                                 </div>
                               </td>
                               <td className="px-3 py-1.5 text-right tabular-nums text-gray-900 dark:text-white" style={{ fontSize: '0.75rem', fontWeight: 600 }}>
-                                ${(row.annual / 1000).toFixed(0)}K
+                                ${(row.annual / 1000).toLocaleString(locale)}K
                               </td>
                             </tr>
                           ))}
@@ -511,8 +508,14 @@ export default function AutoIncreaseSetup() {
                     </div>
                     <div className="mt-3 border-t border-gray-200 pt-3 dark:border-gray-700">
                       <p className="text-gray-700 dark:text-gray-300" style={{ fontSize: '0.7rem' }}>
-                        <span className="font-semibold text-gray-900 dark:text-white">Timeline:</span> {currentPercent}% → {maxContribution}% over {yearsToMax}{' '}
-                        {yearsToMax === 1 ? 'yr' : 'yrs'}
+                        <span className="font-semibold text-gray-900 dark:text-white">
+                          {t('enrollment.auto_increase_setup.timeline_line', {
+                            from: currentPercent,
+                            to: maxContribution,
+                            n: yearsToMax,
+                            unit: yearsToMax === 1 ? t('enrollment.auto_increase_setup.yr_one') : t('enrollment.auto_increase_setup.yr_other'),
+                          })}
+                        </span>
                       </p>
                     </div>
                   </div>

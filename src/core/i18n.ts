@@ -28,18 +28,23 @@ function migrateLanguageStorage() {
 
 migrateLanguageStorage()
 
-/** Languages shown in the header dropdown (English + Español). */
-export const LANGUAGE_MENU_LANGS = ['en', 'es'] as const
+/** Languages shown in the header language menu. */
+export const LANGUAGE_MENU_LANGS = ['en', 'es', 'fr'] as const
 export type LanguageMenuLang = (typeof LANGUAGE_MENU_LANGS)[number]
 
 export const SUPPORTED_LANGS = ['en', 'es', 'fr'] as const
 export type SupportedLang = (typeof SUPPORTED_LANGS)[number]
 
+function normalizeLangCode(lng?: string): string {
+  return ((lng ?? i18n.language) || 'en').split('-')[0]?.toLowerCase() || 'en'
+}
+
 /** Keep `<html lang>` aligned with i18n for accessibility and correct date/number hints. */
 export function syncDocumentLang(lng?: string) {
   if (typeof document === 'undefined') return
-  const code = ((lng ?? i18n.language) || 'en').split('-')[0]?.toLowerCase() || 'en'
-  document.documentElement.lang = code === 'es' ? 'es' : 'en'
+  const code = normalizeLangCode(lng)
+  const allowed = SUPPORTED_LANGS as readonly string[]
+  document.documentElement.lang = allowed.includes(code) ? code : 'en'
 }
 
 void i18n

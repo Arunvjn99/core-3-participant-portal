@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export type EnrollmentPrimaryLabel = 'Continue' | 'Next' | 'Submit'
 
@@ -54,11 +55,17 @@ export function useEnrollmentStepNav() {
 }
 
 function EnrollmentStepFooterBar({ config }: { config: EnrollmentNavConfig | null }) {
+  const { t } = useTranslation()
   if (!config) return null
 
   const showBack = config.showBack !== false && Boolean(config.onBack)
   const showNext = config.showNext !== false && Boolean(config.onNext)
-  const label = config.primaryLabel ?? 'Next'
+  const label =
+    config.primaryLabel === 'Continue'
+      ? t('common.continue')
+      : config.primaryLabel === 'Submit'
+        ? t('enrollment.submit')
+        : t('enrollment.next')
   const nextDisabled = config.nextDisabled ?? false
 
   if (!showBack && !showNext) return null
@@ -76,7 +83,7 @@ function EnrollmentStepFooterBar({ config }: { config: EnrollmentNavConfig | nul
             <span aria-hidden className="text-base leading-none">
               ←
             </span>
-            Back
+            {t('enrollment.back')}
           </button>
         )}
         {showNext && config.onNext && (
