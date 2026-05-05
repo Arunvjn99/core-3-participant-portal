@@ -24,13 +24,13 @@ export default function AppFooter() {
               className="h-6 opacity-70 transition-opacity hover:opacity-100"
               onError={(e) => { e.currentTarget.style.display = 'none' }}
             />
-            <span className="text-xs text-gray-400 dark:text-gray-600">
+            <span className="text-xs text-gray-600 dark:text-gray-400">
               {t('footer.copyright', { year })}
             </span>
           </div>
 
           {/* Links */}
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-medium text-gray-400 dark:text-gray-600">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-medium text-gray-600 dark:text-gray-400">
             <LegalHrefLink
               href={LEGAL.privacyPolicyHref}
               className="uppercase tracking-wide transition-colors hover:text-gray-700 dark:hover:text-gray-300"

@@ -7,10 +7,8 @@ import {
   ChevronLeft,
   Save,
   Sparkles,
-  TrendingUp,
   Minus,
   Plus,
-  Calendar,
   Check,
   X,
   MapPin,
@@ -136,10 +134,16 @@ function getAgeInsight(retirementAge: number, _currentAge: number, yearsUntilRet
       message: `Retiring at ${retirementAge} gives you ${yearsUntilRetirement} years to build your nest egg. At a 7% average return, investing $500/month today could grow to $${Math.round((500 * (Math.pow(1.07 / 12 + 1, yearsUntilRetirement * 12) - 1)) / (0.07 / 12) / 1000)}K by retirement.`,
     }
   }
-  if (retirementAge <= 65) {
+  if (retirementAge === 62) {
     return {
       title: 'Most people retire at 62 📊',
-      message: `At ${retirementAge}, you align with the most common retirement age. You'll have full access to 401(k) funds penalty-free at 59½, and Medicare eligibility at 65. With ${yearsUntilRetirement} years, consistent contributions will compound significantly.`,
+      message: `At 62, you align with the most common retirement age. You'll have full access to 401(k) funds penalty-free at 59½, and Medicare eligibility at 65. With ${yearsUntilRetirement} years, consistent contributions will compound significantly.`,
+    }
+  }
+  if (retirementAge <= 65) {
+    return {
+      title: 'Traditional Retirement 🎯',
+      message: `Retiring at ${retirementAge} is a solid traditional choice. You'll have full access to 401(k) funds penalty-free and be close to or eligible for Medicare. With ${yearsUntilRetirement} years to go, your contributions have time to grow.`,
     }
   }
   return {
@@ -266,8 +270,8 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
     currentAge--
   }
 
-  const yearsUntilRetirement = Math.max(1, retirementAge - currentAge)
-  const retirementYear = currentYear + yearsUntilRetirement
+  const retirementYear = birthYear + retirementAge
+  const yearsUntilRetirement = Math.max(1, retirementYear - currentYear)
 
   const filteredStates = ALL_US_STATES.filter((s) => s.toLowerCase().includes(locationSearch.toLowerCase()))
 
@@ -308,7 +312,10 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
     onClose()
   }
 
-  const displayInitials = (userName?.trim()?.slice(0, 2) || 'U').toUpperCase()
+  const displayInitials =
+    userName?.trim() && userName !== 'there'
+      ? (userName.trim().slice(0, 2) || 'U').toUpperCase()
+      : 'U'
 
   return (
     <AnimatePresence>
@@ -336,12 +343,6 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative flex-shrink-0 bg-gradient-to-br from-blue-600 to-indigo-600 px-4 pb-4 pt-4 sm:px-6 sm:pb-5 sm:pt-6">
-              <div className="absolute right-2 top-2 opacity-20">
-                <Sparkles className="h-16 w-16 text-white" />
-              </div>
-              <div className="absolute bottom-0 right-0 opacity-10">
-                <TrendingUp className="h-24 w-24 text-white" />
-              </div>
               <div className="absolute -left-4 -top-4 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
 
               <div className="relative z-10 flex items-start justify-between">
@@ -362,18 +363,18 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                 </button>
               </div>
 
-              <div className="relative z-10 mt-4 flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
-                  <span>⏱</span>
-                  <span>Takes ~3 minutes</span>
+              <div className="relative z-10 mt-4 flex flex-nowrap items-stretch gap-2">
+                <div className="flex items-center gap-1 rounded-full border border-white/20 bg-white/15 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                  <span className="shrink-0">⏱</span>
+                  <span className="line-clamp-2 leading-tight">Takes ~3 minutes</span>
                 </div>
-                <div className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
-                  <span>🔒</span>
-                  <span>Secure &amp; private</span>
+                <div className="flex items-center gap-1 rounded-full border border-white/20 bg-white/15 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                  <span className="shrink-0">🔒</span>
+                  <span className="line-clamp-2 leading-tight">Secure &amp; private</span>
                 </div>
-                <div className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
-                  <span>✨</span>
-                  <span>AI-powered insights</span>
+                <div className="flex items-center gap-1 rounded-full border border-white/20 bg-white/15 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                  <span className="shrink-0">✨</span>
+                  <span className="line-clamp-2 leading-tight">AI-powered insights</span>
                 </div>
               </div>
             </div>
@@ -404,7 +405,7 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
               </span>
             </div>
 
-            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-white px-4 py-4 [scrollbar-color:rgb(229_231_235)_transparent] [scrollbar-width:thin] dark:bg-gray-900 dark:[scrollbar-color:rgb(55_65_81)_transparent] sm:space-y-5 sm:px-6 sm:py-5">
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-white px-4 py-3 [scrollbar-color:rgb(229_231_235)_transparent] [scrollbar-width:thin] dark:bg-gray-900 dark:[scrollbar-color:rgb(55_65_81)_transparent] sm:space-y-4 sm:px-6 sm:py-4">
               <AnimatePresence>
                 {currentStep === 1 && (
                   <motion.div
@@ -413,13 +414,9 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.2 }}
-                    className="space-y-5"
+                    className="space-y-3"
                   >
-                    <div className="relative overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50 p-4 dark:border-blue-900/40 dark:from-blue-950/30 dark:to-indigo-950/30">
-                      <div className="absolute right-2 top-2 opacity-10">
-                        <Calendar className="h-12 w-12 text-indigo-600" />
-                      </div>
-
+                    <div className="relative overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50 p-3 dark:border-blue-900/40 dark:from-blue-950/30 dark:to-indigo-950/30 sm:p-4">
                       {!isEditingBirthDate ? (
                         <div className="flex items-center gap-3">
                           <div className="brand-bg flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full">
@@ -443,7 +440,7 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                                 }}
                                 className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline"
                               >
-                                <Calendar className="h-3 w-3" /> Edit
+                                Edit
                               </button>
                             </div>
                           </div>
@@ -509,83 +506,83 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                       )}
                     </div>
 
-                    <div className="space-y-4">
-                      <h2 className="text-center text-lg font-bold text-gray-900 dark:text-white sm:text-xl">
+                    <div className="space-y-2">
+                      <h2 className="text-center text-base font-bold text-gray-900 dark:text-white sm:text-lg">
                         At what age would you like to retire?
                       </h2>
 
-                      <div className="flex items-center justify-center gap-6 py-2">
+                      <div className="flex items-center justify-center gap-4 py-0">
                         <button
                           type="button"
                           onClick={() => setRetirementAge((a) => Math.max(currentAge + 1, a - 1))}
                           disabled={retirementAge <= currentAge + 1}
-                          className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-40 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                          className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-40 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                         >
-                          <Minus className="h-5 w-5" />
+                          <Minus className="h-4 w-4" />
                         </button>
 
                         <div className="min-w-[100px] text-center">
-                          <div className="mb-1 text-xs text-gray-500 dark:text-gray-400">I plan to retire at</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">I plan to retire at</div>
                           <motion.div
                             key={retirementAge}
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            className="text-5xl font-black text-blue-600 sm:text-6xl"
+                            className="text-4xl font-black text-blue-600 sm:text-5xl leading-none my-0.5"
                           >
                             {retirementAge}
                           </motion.div>
-                          <div className="mt-1 text-xs text-gray-400">years old</div>
+                          <div className="text-xs text-gray-400">years old</div>
                         </div>
 
                         <button
                           type="button"
                           onClick={() => setRetirementAge((a) => Math.min(75, a + 1))}
                           disabled={retirementAge >= 75}
-                          className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-40 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                          className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-40 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                         >
-                          <Plus className="h-5 w-5" />
+                          <Plus className="h-4 w-4" />
                         </button>
                       </div>
 
                       <div className="px-2">
                         <SliderPrimitive.Root
-                          className="relative flex h-6 w-full touch-none select-none items-center"
+                          className="relative flex h-5 w-full touch-none select-none items-center"
                           value={[retirementAge]}
                           onValueChange={([v]) => setRetirementAge(v)}
                           min={currentAge + 1}
                           max={75}
                           step={1}
                         >
-                          <SliderPrimitive.Track className="relative h-2 grow rounded-full bg-gray-200 dark:bg-gray-700">
+                          <SliderPrimitive.Track className="relative h-1.5 grow rounded-full bg-gray-200 dark:bg-gray-700">
                             <SliderPrimitive.Range className="absolute h-full rounded-full bg-gradient-to-r from-blue-600 to-indigo-600" />
                           </SliderPrimitive.Track>
-                          <SliderPrimitive.Thumb className="block h-7 w-7 cursor-grab rounded-full border-2 border-blue-600 bg-white shadow-lg transition-transform hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-200 active:cursor-grabbing active:scale-110 dark:bg-gray-900" />
+                          <SliderPrimitive.Thumb className="block h-6 w-6 cursor-grab rounded-full border-2 border-blue-600 bg-white shadow-lg transition-transform hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-200 active:cursor-grabbing active:scale-110 dark:bg-gray-900" />
                         </SliderPrimitive.Root>
-                        <div className="mt-1 flex justify-between text-xs text-gray-400">
+                        <div className="mt-0.5 flex justify-between text-[10px] text-gray-400">
                           <span>{currentAge + 1}</span>
                           <span>75</span>
                         </div>
                       </div>
 
-                      <div className="rounded-xl border border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50 p-3 shadow-sm dark:border-purple-800/50 dark:from-purple-950/30 dark:to-blue-950/30">
-                        <div className="flex items-start gap-3">
-                          <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-blue-500">
-                            <Sparkles className="h-4 w-4 text-white" />
+                      <div className="rounded-xl border border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50 p-2 sm:p-3 shadow-sm dark:border-purple-800/50 dark:from-purple-950/30 dark:to-blue-950/30">
+                        <div className="flex items-start gap-2 sm:gap-3">
+                          <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-blue-500">
+                            <Sparkles className="h-3.5 w-3.5 text-white" />
                           </div>
                           <div className="flex-1">
-                            <div className="mb-1 flex items-center gap-2">
+                            <div className="mb-0.5 flex items-center gap-2">
                               <span className="text-sm font-semibold text-gray-900 dark:text-white">
                                 {ageInsight.title}
                               </span>
                             </div>
-                            <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+                            <p className="line-clamp-2 text-xs leading-snug text-gray-600 dark:text-gray-400">
                               {ageInsight.message}
                             </p>
                             {retirementAge !== 62 && (
                               <button
                                 type="button"
                                 onClick={() => setRetirementAge(62)}
-                                className="mt-2 text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline"
+                                className="mt-1 text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline"
                               >
                                 Apply most popular age (62) →
                               </button>
@@ -594,31 +591,38 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                         </div>
                       </div>
 
-                      <div className="space-y-3 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
-                        <p className="text-center text-sm text-gray-800 dark:text-gray-200 sm:text-base">
+                      <div className="rounded-xl border border-gray-200 bg-gray-50 p-2 sm:p-3 dark:border-gray-700 dark:bg-gray-800/50">
+                        <p className="mb-1.5 text-center text-xs text-gray-800 dark:text-gray-200">
                           Retiring at <span className="font-bold">{retirementAge}</span> means{' '}
-                          <span className="font-bold text-blue-600">{yearsUntilRetirement} years</span> until
-                          retirement.
+                          <span className="font-bold text-blue-600">{yearsUntilRetirement} years</span> until retirement.
                         </p>
-                        <p className="text-center text-xs text-gray-600 dark:text-gray-400">
-                          Estimated retirement year:{' '}
-                          <span className="text-base font-black text-blue-600">{retirementYear}</span>
-                        </p>
-                        <div className="flex items-center gap-3 pt-1">
-                          <div className="flex flex-col items-center gap-1">
-                            <div className="brand-bg h-2.5 w-2.5 rounded-full" />
-                            <span className="text-[10px] font-medium text-gray-500">Now</span>
-                            <span className="text-[10px] text-gray-400">{currentYear}</span>
+                        {/* Top labels */}
+                        <div className="mb-1.5 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+                          <span>Now — <span className="font-semibold text-gray-700 dark:text-gray-200">{currentYear}</span></span>
+                          <span>Retire — <span className="font-semibold text-gray-700 dark:text-gray-200">{retirementYear}</span></span>
+                        </div>
+
+                        {/* Progress bar */}
+                        <div className="relative h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                          <div className="absolute inset-y-0 left-0 w-1/3 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500" />
+                          <div className="absolute inset-y-0 left-1/3 flex -translate-x-1/2 items-center">
+                            <span className="whitespace-nowrap rounded-full bg-indigo-600 px-2 py-0.5 text-[10px] font-bold text-white shadow">
+                              {yearsUntilRetirement} yrs
+                            </span>
                           </div>
-                          <div className="relative h-0.5 flex-1 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600">
-                            <div className="absolute left-1/2 top-1/2 whitespace-nowrap rounded border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-600 -translate-x-1/2 -translate-y-1/2 dark:border-blue-800 dark:bg-blue-950">
-                              {yearsUntilRetirement} years
-                            </div>
+                        </div>
+
+                        {/* Bottom labels */}
+                        <div className="mt-1.5 flex items-start justify-between">
+                          <div className="flex flex-col items-start">
+                            <div className="brand-bg h-2 w-2 rounded-full" />
+                            <span className="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">Now</span>
+                            <span className="text-xs font-bold text-gray-800 dark:text-gray-100">{currentYear}</span>
                           </div>
-                          <div className="flex flex-col items-center gap-1">
-                            <div className="brand-bg h-2.5 w-2.5 rounded-full opacity-80" />
-                            <span className="text-[10px] font-medium text-gray-500">Retire</span>
-                            <span className="text-[10px] text-gray-400">{retirementYear}</span>
+                          <div className="flex flex-col items-end">
+                            <div className="ml-auto brand-bg h-2 w-2 rounded-full opacity-70" />
+                            <span className="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">Retire</span>
+                            <span className="text-xs font-bold text-gray-800 dark:text-gray-100">{retirementYear}</span>
                           </div>
                         </div>
                       </div>

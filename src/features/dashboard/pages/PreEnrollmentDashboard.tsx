@@ -66,7 +66,7 @@ export function PreEnrollmentDashboard() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onComplete={() => navigate('/enrollment/plan')}
-        userName={authLoading ? 'there' : displayFirstName}
+        userName={authLoading ? 'there' : heroPillName}
       />
 
       <div className="relative min-h-screen overflow-hidden bg-white font-sans transition-colors dark:bg-gray-950">
@@ -80,7 +80,7 @@ export function PreEnrollmentDashboard() {
           className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#f1f5f9_1px,transparent_1px),linear-gradient(to_bottom,#f1f5f9_1px,transparent_1px)] bg-[length:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_20%,transparent_100%)] opacity-20 dark:bg-[linear-gradient(to_right,rgba(148,163,184,0.15)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.15)_1px,transparent_1px)]"
         />
 
-        <main className="mx-auto flex max-w-6xl flex-col gap-32 px-6 pb-20 pt-8">
+        <div className="mx-auto flex max-w-6xl flex-col gap-32 px-6 pb-20 pt-8">
           {/* Hero */}
           <section className="grid items-center gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
             <motion.div
@@ -119,10 +119,7 @@ export function PreEnrollmentDashboard() {
                   <span className="text-center text-[15px] font-semibold leading-tight text-white">
                     {t('hero.start_enrollment')}
                   </span>
-                  <span
-                    className="mt-[2px] text-center text-[11px] font-normal leading-tight tracking-[0.01em]"
-                    style={{ color: 'rgba(255, 255, 255, 0.7)' }}
-                  >
+                  <span className="mt-[2px] text-center text-[11px] font-normal leading-tight tracking-[0.01em] text-white">
                     {t('hero.time_note')}
                   </span>
                 </button>
@@ -238,14 +235,6 @@ export function PreEnrollmentDashboard() {
               className="relative cursor-pointer overflow-hidden rounded-[32px] border border-slate-200/80 bg-gradient-to-br from-white to-slate-50 shadow-xl shadow-slate-200/60 transition-all hover:border-slate-300 hover:shadow-2xl dark:border-slate-700 dark:from-slate-900 dark:to-slate-950 dark:shadow-none dark:hover:border-slate-600"
               onClick={() => setAdvisorModalOpen(true)}
             >
-              <div
-                className="absolute inset-0 opacity-[0.35] dark:hidden"
-                style={{ backgroundImage: 'radial-gradient(circle, #94a3b8 1px, transparent 1px)', backgroundSize: '20px 20px' }}
-              />
-              <div
-                className="absolute inset-0 hidden opacity-25 dark:block"
-                style={{ backgroundImage: 'radial-gradient(circle, #64748b 1px, transparent 1px)', backgroundSize: '20px 20px' }}
-              />
               <div className="relative flex min-h-[280px] flex-col justify-between p-8">
                 <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#2b59c3]/10 dark:bg-blue-500/15">
                   <UserCheck className="h-6 w-6 text-[#2b59c3] dark:text-blue-400" />
@@ -315,7 +304,7 @@ export function PreEnrollmentDashboard() {
               </div>
             </motion.div>
           </section>
-        </main>
+        </div>
       </div>
 
       {advisorModalOpen && (

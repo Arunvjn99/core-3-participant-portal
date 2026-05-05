@@ -102,7 +102,7 @@ export default function PostEnrollmentDashboard() {
   return (
     <AnimatedPage className="min-h-full">
       <div className="min-h-screen bg-surface-page font-sans text-text-primary">
-        <main className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <div className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           {/* Page header */}
           <header className="pb-6">
             <h1 className="text-[28px] font-bold leading-tight text-text-primary">{t('dashboard.overview')}</h1>
@@ -592,7 +592,7 @@ export default function PostEnrollmentDashboard() {
               </div>
             </aside>
           </div>
-        </main>
+        </div>
       </div>
     </AnimatedPage>
   )
