@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
@@ -27,8 +27,6 @@ export default function ContributionSource() {
   const { data, updateData, advanceStep } = useEnrollment()
   const [showAdvanced, setShowAdvanced] = useState(data.contributionSources.afterTax > 0)
   const [canEditTaxAllocation, setCanEditTaxAllocation] = useState(false)
-  const customizePortfolioActivatedRef = useRef(false)
-  const [customizePortfolioPressed, setCustomizePortfolioPressed] = useState(false)
 
   const sources = data.contributionSources
   const salary = data.salary
@@ -439,22 +437,27 @@ export default function ContributionSource() {
                 </div>
               </div>
 
-              {!canEditTaxAllocation && (
-                <button
-                  type="button"
-                  disabled={customizePortfolioPressed}
-                  onClick={() => {
-                    if (customizePortfolioActivatedRef.current) return
-                    customizePortfolioActivatedRef.current = true
-                    setCustomizePortfolioPressed(true)
-                    setCanEditTaxAllocation(true)
-                  }}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[color:var(--brand-primary)] bg-white py-2.5 text-sm font-semibold text-[color:var(--brand-primary)] shadow-sm transition-all hover:bg-[color:var(--brand-primary-light)] active:scale-[0.99] disabled:pointer-events-none disabled:opacity-60 dark:bg-gray-900 dark:hover:bg-[color:var(--brand-primary-light)]"
-                >
+              <button
+                type="button"
+                aria-pressed={canEditTaxAllocation}
+                onClick={() => {
+                  if (canEditTaxAllocation) return
+                  setCanEditTaxAllocation(true)
+                }}
+                className={cn(
+                  'inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 py-2.5 text-sm font-semibold shadow-sm transition-all active:scale-[0.99]',
+                  canEditTaxAllocation
+                    ? 'cursor-default border-blue-600 bg-blue-600 text-white dark:border-blue-500 dark:bg-blue-600 dark:text-white'
+                    : 'border-[color:var(--brand-primary)] bg-white text-[color:var(--brand-primary)] hover:bg-[color:var(--brand-primary-light)] dark:bg-gray-900 dark:hover:bg-[color:var(--brand-primary-light)]',
+                )}
+              >
+                {canEditTaxAllocation ? (
+                  <Check className="h-4 w-4 shrink-0 text-white" aria-hidden />
+                ) : (
                   <PieChart className="h-4 w-4 shrink-0" aria-hidden />
-                  {t('enrollment.source_page.customize_portfolio')}
-                </button>
-              )}
+                )}
+                {t('enrollment.source_page.customize_portfolio')}
+              </button>
             </div>
 
             <div className="flex w-full flex-col justify-between space-y-4 border-t border-gray-100 pt-5 dark:border-gray-800 sm:w-[38%] sm:border-l sm:border-t-0 sm:pl-5 sm:pt-0 lg:w-[30%]">
