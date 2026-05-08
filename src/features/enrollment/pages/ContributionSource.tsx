@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
@@ -27,6 +27,8 @@ export default function ContributionSource() {
   const { data, updateData, advanceStep } = useEnrollment()
   const [showAdvanced, setShowAdvanced] = useState(data.contributionSources.afterTax > 0)
   const [canEditTaxAllocation, setCanEditTaxAllocation] = useState(false)
+  const customizePortfolioActivatedRef = useRef(false)
+  const [customizePortfolioPressed, setCustomizePortfolioPressed] = useState(false)
 
   const sources = data.contributionSources
   const salary = data.salary
@@ -437,26 +439,20 @@ export default function ContributionSource() {
                 </div>
               </div>
 
-              {!canEditTaxAllocation ? (
+              {!canEditTaxAllocation && (
                 <button
                   type="button"
-                  onClick={() => setCanEditTaxAllocation(true)}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[color:var(--brand-primary)] bg-white py-2.5 text-sm font-semibold text-[color:var(--brand-primary)] shadow-sm transition-all hover:bg-[color:var(--brand-primary-light)] active:scale-[0.99] dark:bg-gray-900 dark:hover:bg-[color:var(--brand-primary-light)]"
+                  disabled={customizePortfolioPressed}
+                  onClick={() => {
+                    if (customizePortfolioActivatedRef.current) return
+                    customizePortfolioActivatedRef.current = true
+                    setCustomizePortfolioPressed(true)
+                    setCanEditTaxAllocation(true)
+                  }}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[color:var(--brand-primary)] bg-white py-2.5 text-sm font-semibold text-[color:var(--brand-primary)] shadow-sm transition-all hover:bg-[color:var(--brand-primary-light)] active:scale-[0.99] disabled:pointer-events-none disabled:opacity-60 dark:bg-gray-900 dark:hover:bg-[color:var(--brand-primary-light)]"
                 >
                   <PieChart className="h-4 w-4 shrink-0" aria-hidden />
                   {t('enrollment.source_page.customize_portfolio')}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => navigate('/enrollment/investment')}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[color:var(--brand-primary)] bg-white py-2.5 text-sm font-semibold text-[color:var(--brand-primary)] shadow-sm transition-all hover:bg-[color:var(--brand-primary-light)] active:scale-[0.99] dark:bg-gray-900 dark:hover:bg-[color:var(--brand-primary-light)]"
-                >
-                  <PieChart className="h-4 w-4 shrink-0" aria-hidden />
-                  {t('enrollment.source_page.choose_investments')}
-                  <span aria-hidden className="text-base leading-none">
-                    →
-                  </span>
                 </button>
               )}
             </div>

@@ -102,9 +102,6 @@ function EnrollmentStepFooterBar({ config }: { config: EnrollmentNavConfig | nul
               style={{ backgroundColor: 'var(--brand-primary, #2563eb)' }}
             >
               {label}
-              <span aria-hidden className="text-base leading-none">
-                →
-              </span>
             </button>
           </div>
         )}

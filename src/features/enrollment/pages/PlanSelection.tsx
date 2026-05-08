@@ -59,9 +59,9 @@ export default function PlanSelection() {
   /** CTA before this plan is the active selection — neutral, no primary stroke */
   const neutralCtaClass =
     'border border-gray-300 bg-white text-gray-800 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800'
-  /** Outline CTA once this plan card is selected — subtle primary stroke */
-  const secondaryCtaClass =
-    'border border-[color:var(--brand-primary)] bg-white text-[color:var(--brand-primary)] hover:bg-[color:var(--brand-primary-light)] dark:border-[color:var(--brand-primary)] dark:bg-gray-900 dark:hover:bg-[color:var(--brand-primary-light)]'
+  /** CTA once selected — solid blue */
+  const selectedCtaClass =
+    'border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700'
   /** Selected card — subtle blue stroke + light wash */
   const selectedPlanCardClass =
     'border border-blue-300 bg-blue-50/70 shadow-sm ring-1 ring-blue-200/60 hover:shadow-md dark:border-blue-500/55 dark:bg-blue-950/30 dark:ring-blue-400/25'
@@ -164,22 +164,13 @@ export default function PlanSelection() {
 
             <button
               type="button"
-              disabled={confirmedPlan === 'traditional'}
               onClick={() => {
-                if (selectedPlan !== 'traditional') {
-                  clearPendingConfirm()
-                  setSelectedPlan('traditional')
-                  return
-                }
+                setSelectedPlan('traditional')
                 setConfirmedPlan('traditional')
               }}
               className={cn(
-                'mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold shadow-sm transition-all active:scale-[0.98] disabled:pointer-events-none disabled:opacity-90 sm:text-base',
-                confirmedPlan === 'traditional'
-                  ? 'btn-brand'
-                  : selectedPlan === 'traditional'
-                    ? secondaryCtaClass
-                    : neutralCtaClass,
+                'mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold shadow-sm transition-all active:scale-[0.98] sm:text-base',
+                confirmedPlan === 'traditional' ? selectedCtaClass : neutralCtaClass,
               )}
             >
               {confirmedPlan === 'traditional' ? (
@@ -215,22 +206,13 @@ export default function PlanSelection() {
 
             <button
               type="button"
-              disabled={confirmedPlan === 'roth'}
               onClick={() => {
-                if (selectedPlan !== 'roth') {
-                  clearPendingConfirm()
-                  setSelectedPlan('roth')
-                  return
-                }
+                setSelectedPlan('roth')
                 setConfirmedPlan('roth')
               }}
               className={cn(
-                'mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold shadow-sm transition-all active:scale-[0.98] disabled:pointer-events-none disabled:opacity-90 sm:text-base',
-                confirmedPlan === 'roth'
-                  ? 'btn-brand'
-                  : selectedPlan === 'roth'
-                    ? secondaryCtaClass
-                    : neutralCtaClass,
+                'mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold shadow-sm transition-all active:scale-[0.98] sm:text-base',
+                confirmedPlan === 'roth' ? selectedCtaClass : neutralCtaClass,
               )}
             >
               {confirmedPlan === 'roth' ? (

@@ -347,7 +347,29 @@ export default function PostEnrollmentDashboard() {
                 </div>
               </SpecCard>
 
-              {/* Card 5: Recent Activity */}
+            </div>
+
+            {/* RIGHT ~35% */}
+            <aside className="flex flex-col gap-5 lg:col-span-4">
+              {/* Hardship */}
+              <SpecCard className="border-l-4 border-l-status-warning pl-4">
+                <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 shrink-0 text-status-warning" aria-hidden />
+                    <span className="text-[14px] font-bold text-text-primary">{t('postDashboard.hardship_title')}</span>
+                  </div>
+                  <span className="rounded-full bg-status-warning-bg px-2.5 py-0.5 text-[11px] font-bold text-status-warning">
+                    {t('common.pending').toUpperCase()}
+                  </span>
+                </div>
+                <p className="text-[12px] text-text-secondary">{t('postDashboard.request_line')}</p>
+                <div className="mt-3 h-1 w-full overflow-hidden rounded-sm bg-surface-elevated">
+                  <div className="h-full w-[60%] rounded-sm bg-gradient-to-r from-amber-400 to-amber-500" />
+                </div>
+                <p className="mt-1 text-right text-[11px] text-text-secondary">{t('postDashboard.under_review')}</p>
+              </SpecCard>
+
+              {/* Recent Activity */}
               <SpecCard>
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-[15px] font-bold text-text-primary">{t('dashboard.recentActivity')}</h3>
@@ -396,27 +418,6 @@ export default function PostEnrollmentDashboard() {
                     </div>
                   </li>
                 </ul>
-              </SpecCard>
-            </div>
-
-            {/* RIGHT ~35% */}
-            <aside className="flex flex-col gap-5 lg:col-span-4">
-              {/* Hardship */}
-              <SpecCard className="border-l-4 border-l-status-warning pl-4">
-                <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 shrink-0 text-status-warning" aria-hidden />
-                    <span className="text-[14px] font-bold text-text-primary">{t('postDashboard.hardship_title')}</span>
-                  </div>
-                  <span className="rounded-full bg-status-warning-bg px-2.5 py-0.5 text-[11px] font-bold text-status-warning">
-                    {t('common.pending').toUpperCase()}
-                  </span>
-                </div>
-                <p className="text-[12px] text-text-secondary">{t('postDashboard.request_line')}</p>
-                <div className="mt-3 h-1 w-full overflow-hidden rounded-sm bg-surface-elevated">
-                  <div className="h-full w-[60%] rounded-sm bg-gradient-to-r from-amber-400 to-amber-500" />
-                </div>
-                <p className="mt-1 text-right text-[11px] text-text-secondary">{t('postDashboard.under_review')}</p>
               </SpecCard>
 
               {/* Readiness */}
