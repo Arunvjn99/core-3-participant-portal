@@ -1,0 +1,29 @@
+# Netlify static hosting for Vite / React SPA
+# https://docs.netlify.com/build/configure-builds/file-based-configuration/
+
+[build]
+  command = "npm ci && npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # Ensures install matches lockfile; avoids stale global npm cache surprises in CI
+  NPM_FLAGS = "--no-audit --no-fund"
+
+# Single-page app: serve index.html for client-side routes (React Router).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Avoid stale UI after deploy: HTML must not be cached long-term (it references hashed JS/CSS).
+# Vite emits fingerprinted files under /assets/* — safe to cache aggressively.
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

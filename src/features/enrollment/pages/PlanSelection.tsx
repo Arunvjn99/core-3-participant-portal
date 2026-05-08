@@ -20,10 +20,6 @@ export default function PlanSelection() {
   /** After second "Select this Plan" tap — shows "Selected"; use header Next to continue. */
   const [confirmedPlan, setConfirmedPlan] = useState<'traditional' | 'roth' | null>(() => data.plan ?? null)
 
-  const clearPendingConfirm = () => {
-    setConfirmedPlan(null)
-  }
-
   const confirmPlan = (plan: 'traditional' | 'roth') => {
     if (import.meta.env.DEV) {
       // eslint-disable-next-line no-console -- confirm navigation debugging

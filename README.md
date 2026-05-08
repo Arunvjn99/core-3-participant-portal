@@ -83,6 +83,39 @@ The app runs in **demo mode** when Supabase env vars are absent — auth guards 
 | `VITE_SUPABASE_ANON_KEY` | No | Supabase anon/public key |
 | `VITE_DEBUG_BYPASS_AUTH` | No | Set `true` to skip auth in development |
 
+`VITE_*` variables are inlined at **build** time. After changing them in Netlify (or another host), trigger a **new deploy**.
+
+## Deployment (production matches localhost)
+
+This project ships as a **static Vite build** (`npm run build` → `dist/`). Dev (`npm run dev`) uses instant HMR; production is **pre-bundled** — you must **build and deploy** for hosted sites to update.
+
+### Netlify (`netlify.toml`)
+
+- **Publish directory:** `dist`
+- **Build command:** `npm ci && npm run build` (also set in `netlify.toml`)
+- **SPA routing:** all routes rewrite to `index.html` (React Router).
+- **Caching:** `index.html` is sent with `no-cache` so browsers pick up new hashed JS/CSS after each deploy. `/assets/*` uses long cache + `immutable` (safe because filenames include content hashes).
+
+### Branch & repository
+
+Point Netlify (or your CI) at the **same GitHub repo and branch you push to**. If production tracks **`main`** but commits only land on another branch (for example `testing`), the live site will **not** change until that branch is merged or the deploy branch setting is updated.
+
+### When the live site looks stale
+
+1. Confirm the latest commit appears on the deployed branch on GitHub.
+2. In Netlify: **Deploys → Trigger deploy → Clear cache and deploy site** (clears build cache, not just CDN edge cache).
+3. Hard-refresh the browser or try an incognito window after deploy completes.
+
+### Verify locally before pushing
+
+```bash
+npm ci
+npm run build
+npm run preview   # serves ./dist — same output as production hosting
+```
+
+GitHub Actions runs `npm ci` + `npm run build` on pushes and PRs to `main` so broken production builds are caught early.
+
 ## How to Add a New Feature
 
 1. Create `src/features/<feature-name>/`
