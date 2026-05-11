@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const BG_IMAGE = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/background%20auth.png'
@@ -14,7 +13,6 @@ const CAROUSEL_IMAGES = [
 function AuthCarousel() {
   const { t } = useTranslation()
   const [current, setCurrent] = useState(0)
-  const [paused, setPaused] = useState(false)
   const slideCount = CAROUSEL_IMAGES.length
 
   const slides = CAROUSEL_IMAGES.map((image, i) => ({
@@ -23,23 +21,10 @@ function AuthCarousel() {
     subtitle: t(`carousel.slide${i + 1}_subtitle`),
   }))
 
-  const next = useCallback(() => {
-    setCurrent((c) => (c + 1) % slideCount)
-    setPaused(true)
-    setTimeout(() => setPaused(false), 6000)
-  }, [slideCount])
-
-  const prev = useCallback(() => {
-    setCurrent((c) => (c - 1 + slideCount) % slideCount)
-    setPaused(true)
-    setTimeout(() => setPaused(false), 6000)
-  }, [slideCount])
-
   useEffect(() => {
-    if (paused) return
     const timer = setInterval(() => setCurrent((c) => (c + 1) % slideCount), 5000)
     return () => clearInterval(timer)
-  }, [paused, slideCount])
+  }, [slideCount])
 
   const slide = slides[current]
 
