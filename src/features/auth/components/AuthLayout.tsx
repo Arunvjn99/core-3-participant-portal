@@ -53,55 +53,10 @@ function AuthCarousel() {
               src={slide.image}
               alt={slide.title}
               className="w-full h-full object-cover object-top"
-              style={{ transition: 'opacity 0.5s ease' }}
+              style={{ transition: 'opacity 0.5s ease-in-out' }}
             />
-            <div className="absolute bottom-3 right-3 bg-white rounded-xl px-3 py-2 shadow-lg">
-              <p className="text-xs text-gray-500 font-medium">{t('carousel.projected_balance')}</p>
-              <p className="text-sm font-bold text-blue-600">$15,123.00</p>
-            </div>
           </div>
         </div>
-      </div>
-
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-white mb-2">{slide.title}</h2>
-        <p className="text-white/60 text-sm leading-relaxed max-w-xs mx-auto">{slide.subtitle}</p>
-      </div>
-
-      <div className="flex items-center justify-center gap-4">
-        <button
-          type="button"
-          onClick={prev}
-          className="w-8 h-8 rounded-full border border-white/30 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-          aria-label={t('carousel.prev_slide')}
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-        <div className="flex gap-2">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => {
-                setCurrent(i)
-                setPaused(true)
-                setTimeout(() => setPaused(false), 6000)
-              }}
-              aria-label={t('carousel.go_to_slide', { n: i + 1 })}
-              className={`rounded-full transition-all duration-300 ${
-                i === current ? 'w-7 h-2.5 bg-white' : 'w-2.5 h-2.5 bg-white/30 hover:bg-white/50'
-              }`}
-            />
-          ))}
-        </div>
-        <button
-          type="button"
-          onClick={next}
-          className="w-8 h-8 rounded-full border border-white/30 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-          aria-label={t('carousel.next_slide')}
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
       </div>
     </div>
   )
@@ -137,12 +92,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       </div>
 
       {/* ── RIGHT PANEL — form ── */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-gray-950 overflow-y-auto">
-        <div className="flex-1 flex items-center justify-center px-6 py-12">
-          <div className="w-full max-w-md">
-            {children}
-          </div>
-        </div>
+      <div className="flex-1 flex flex-col bg-gray-50 dark:bg-gray-950 overflow-y-auto min-h-screen">
+        {children}
       </div>
     </div>
   )

@@ -40,6 +40,8 @@ export default function ForgotPasswordPage() {
 
   return (
     <AuthLayout>
+      <div className="flex-1 flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-md">
       <img
         src={CORE_LOGO}
         alt="CORE"
@@ -106,6 +108,8 @@ export default function ForgotPasswordPage() {
         <ArrowLeft className="w-4 h-4" />
         {t('auth.back_to_login')}
       </Link>
+        </div>
+      </div>
     </AuthLayout>
   )
 }

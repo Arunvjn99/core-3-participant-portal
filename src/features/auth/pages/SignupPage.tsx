@@ -156,6 +156,8 @@ export default function SignupPage() {
   if (step === 'company') {
     return (
       <AuthLayout>
+        <div className="flex-1 flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-md">
         <div className="flex justify-start mb-8">
           <img src={CORE_LOGO} alt="CORE" className="h-8 w-auto object-contain"
             onError={(e) => { e.currentTarget.style.display = 'none' }} />
@@ -200,6 +202,8 @@ export default function SignupPage() {
             {t('auth.login')}
           </Link>
         </p>
+        </div>
+        </div>
       </AuthLayout>
     )
   }
@@ -207,6 +211,8 @@ export default function SignupPage() {
   // ── STEP 2: Signup form ────────────────────────────────────────────────────
   return (
     <AuthLayout>
+      <div className="flex-1 flex items-center justify-center px-6 py-12">
+      <div className="w-full max-w-md">
       {/* Company header */}
       <div className="flex items-center justify-between mb-6">
         {selectedCompany?.logo_url ? (
@@ -466,6 +472,8 @@ export default function SignupPage() {
           {t('auth.login')}
         </Link>
       </p>
+      </div>
+      </div>
     </AuthLayout>
   )
 }
