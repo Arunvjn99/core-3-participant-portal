@@ -132,6 +132,8 @@ export function VerifyOTP() {
 
   return (
     <AuthLayout>
+      <div className="flex-1 flex items-center justify-center px-6 py-12">
+      <div className="w-full max-w-md">
       <div className="relative w-full">
         <div className="absolute -top-2 right-0 z-10">
           <button
@@ -268,6 +270,8 @@ export function VerifyOTP() {
             />
           </div>
         </div>
+      </div>
+      </div>
       </div>
     </AuthLayout>
   )
