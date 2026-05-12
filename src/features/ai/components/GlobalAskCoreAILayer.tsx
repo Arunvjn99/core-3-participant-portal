@@ -27,8 +27,11 @@ export function GlobalAskCoreAILayer() {
   const enrollmentStepFlow =
     location.pathname.startsWith('/enrollment/') && !location.pathname.includes('/enrollment/success')
 
+  // Hide floating pill on all auth pages (login, signup, forgot-password, verify, reset-password)
+  const isAuthPage = /^\/(v1\/)?(login|signup|forgot-password|verify|reset-password)/.test(location.pathname)
+
   const hideFloating =
-    isChatOpen || isSearchOpen || feedbackModalOpen || appBlockingModal
+    isChatOpen || isSearchOpen || feedbackModalOpen || appBlockingModal || isAuthPage
 
   const pill = !hideFloating && portalReady && (
     <button
