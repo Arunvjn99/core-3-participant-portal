@@ -5,10 +5,9 @@ const BG_IMAGE = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/pub
 const CORE_LOGO = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/CORE%20logo.png'
 
 const CAROUSEL_IMAGES = [
-  'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/image%201.png',
   'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/Ai%20carosel.png',
-  'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/image%203.png',
-  '/boost-savings-carousel.png',
+  'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/Image%201.png',
+  'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/Image%203.png',
 ]
 
 function AuthCarousel() {
