@@ -9,9 +9,12 @@ import { CoreAIPanel } from '@/features/ai/components/CoreAIPanel'
 import { AISearchPalette } from '@/features/ai/components/AISearchPalette'
 import { useAppBlockingOverlay } from '@/features/ai/hooks/useAppBlockingOverlay'
 
+const AUTH_PATHS = /^\/(v1\/)?(login|signup|forgot-password|verify|reset-password)(\/|$)/
+
 /**
  * Site-wide Core AI entry: chat panel, search palette, and floating CTA.
  * Rendered once from RootLayout so it appears on auth, enrollment, and app routes.
+ * Nothing is rendered on auth pages (login, signup, forgot-password, verify, reset-password).
  */
 export function GlobalAskCoreAILayer() {
   const location = useLocation()
@@ -24,14 +27,13 @@ export function GlobalAskCoreAILayer() {
   const [portalReady, setPortalReady] = useState(false)
   useEffect(() => setPortalReady(true), [])
 
+  // Do not mount any AI UI on auth pages
+  if (AUTH_PATHS.test(location.pathname)) return null
+
   const enrollmentStepFlow =
     location.pathname.startsWith('/enrollment/') && !location.pathname.includes('/enrollment/success')
 
-  // Hide floating pill on all auth pages (login, signup, forgot-password, verify, reset-password)
-  const isAuthPage = /^\/(v1\/)?(login|signup|forgot-password|verify|reset-password)/.test(location.pathname)
-
-  const hideFloating =
-    isChatOpen || isSearchOpen || feedbackModalOpen || appBlockingModal || isAuthPage
+  const hideFloating = isChatOpen || isSearchOpen || feedbackModalOpen || appBlockingModal
 
   const pill = !hideFloating && portalReady && (
     <button
