@@ -34,9 +34,11 @@ export default function EnrollmentSuccess() {
         }
 
         if (existing?.id) {
-          await supabase.from('enrollments').update(row).eq('id', existing.id)
+          const { error: upErr } = await supabase.from('enrollments').update(row).eq('id', existing.id)
+          if (upErr) console.error('[EnrollmentSuccess] enrollments update failed:', upErr.message, upErr)
         } else {
-          await supabase.from('enrollments').insert(row)
+          const { error: insErr } = await supabase.from('enrollments').insert(row)
+          if (insErr) console.error('[EnrollmentSuccess] enrollments insert failed:', insErr.message, insErr)
         }
       }
     }

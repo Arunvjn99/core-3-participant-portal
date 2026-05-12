@@ -97,6 +97,12 @@ export default function SignupPage() {
     setError('')
     setLoading(true)
 
+    if (!selectedCompany) {
+      setError(t('auth.select_company_first'))
+      setLoading(false)
+      return
+    }
+
     if (!supabase) {
       // Demo mode
       navigate(ROUTES.DASHBOARD)
@@ -111,6 +117,8 @@ export default function SignupPage() {
           full_name: `${form.firstName} ${form.lastName}`,
           first_name: form.firstName,
           last_name: form.lastName,
+          /** Used by DB trigger `handle_new_user` to insert `user_companies` (works without a session). */
+          company_slug: selectedCompany.slug,
         },
       },
     })
@@ -121,31 +129,34 @@ export default function SignupPage() {
       return
     }
 
-    if (authData.user && selectedCompany) {
-      const { error: userCompanyError } = await supabase.from('user_companies').insert({
-        user_id: authData.user.id,
-        company_id: selectedCompany.id,
-        role: 'participant',
-      })
-      if (userCompanyError) {
-        console.error('[SignupPage] user_companies insert failed:', userCompanyError.message, userCompanyError)
-        setError(
-          `Account created, but we could not link your company (${selectedCompany.name}). You can contact support or try again from profile settings.`,
-        )
-        setLoading(false)
-        return
-      }
+    const user = authData.user ?? authData.session?.user ?? null
+    const hasSession = Boolean(authData.session)
 
+    // Auth user is created by Supabase before this point. `user` can be null when the project
+    // hides the user object for email-confirmation flows — still treat as success if no error.
+    if (!user) {
+      setLoading(false)
+      navigate('/login', {
+        replace: true,
+        state: { signupNotice: t('auth.signup_check_email') },
+      })
+      return
+    }
+
+    // `profiles` + optional `user_companies` are created by `handle_new_user` trigger (migration 003)
+    // using `company_slug` in user metadata — avoids RLS issues when email confirmation returns no session.
+    if (hasSession && user) {
       const { error: profileError } = await supabase.from('profiles').upsert({
-        id: authData.user.id,
+        id: user.id,
         full_name: `${form.firstName} ${form.lastName}`,
         email: form.email,
       })
       if (profileError) {
-        console.error('[SignupPage] profiles upsert failed:', profileError.message, profileError)
+        console.warn('[SignupPage] profiles upsert (post-trigger):', profileError.message)
       }
     }
 
+    setLoading(false)
     navigate(ROUTES.DASHBOARD)
   }
 

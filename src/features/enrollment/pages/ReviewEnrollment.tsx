@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
@@ -19,6 +19,8 @@ export default function ReviewEnrollment() {
   const { data, updateData, personalization } = useEnrollment()
   const { advanceStep } = useEnrollmentDraftStore()
   const { saveCompleteEnrollment } = useEnrollmentSave()
+
+  const [persistError, setPersistError] = useState<string | null>(null)
 
   const yearsToRetirement = personalization.retirementAge - personalization.currentAge
   const matchPercent = Math.min(data.contributionPercent, 6)
@@ -100,10 +102,19 @@ export default function ReviewEnrollment() {
   ]
 
   const handleConfirm = useCallback(async () => {
+    setPersistError(null)
     advanceStep({ confirmedAt: Date.now(), agreed: true }, 'review')
-    await saveCompleteEnrollment()
+    const result = await saveCompleteEnrollment()
+    if (!result.ok) {
+      const msg =
+        result.error === 'no_user'
+          ? t('enrollment.review_page.persist_no_user')
+          : t('enrollment.review_page.persist_failed')
+      setPersistError(msg)
+      return
+    }
     navigate('/enrollment/success')
-  }, [advanceStep, saveCompleteEnrollment, navigate])
+  }, [advanceStep, saveCompleteEnrollment, navigate, t])
 
   useEffect(() => {
     setStepNav({
@@ -131,6 +142,15 @@ export default function ReviewEnrollment() {
             {t('enrollment.review_page.subtitle')}
           </p>
         </div>
+
+        {persistError && (
+          <div
+            role="alert"
+            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-200"
+          >
+            {persistError}
+          </div>
+        )}
 
         {/* Hero — blue gradient */}
         <div className="rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 p-6 text-white">

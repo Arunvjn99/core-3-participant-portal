@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/core/supabase'
@@ -12,6 +12,8 @@ const CORE_LOGO = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/pu
 export default function LoginPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const location = useLocation()
+  const signupNotice = (location.state as { signupNotice?: string } | null)?.signupNotice
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -64,6 +66,15 @@ export default function LoginPage() {
             </div>
 
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('auth.login')}</h1>
+
+            {signupNotice ? (
+              <div
+                role="status"
+                className="mb-4 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900 dark:border-blue-800/50 dark:bg-blue-950/40 dark:text-blue-100"
+              >
+                {signupNotice}
+              </div>
+            ) : null}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email */}

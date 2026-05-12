@@ -77,7 +77,9 @@
     "platform_name": "Retirement Intelligence Platform",
     "platform_by": "by Congruent Solutions",
     "copyright": "© Congruent Solutions, Inc. All Rights Reserved",
-    "privacy_policy": "Privacy Policy"
+    "privacy_policy": "Privacy Policy",
+    "signup_check_email": "Check your email to confirm your account before you sign in. After you confirm, your user will appear in the Supabase dashboard.",
+    "select_company_first": "Please select your employer first."
   },
   "carousel": {
     "slide1_title": "Monitor Plan Performance",
@@ -490,6 +492,8 @@
       "confidence_high": "Your employer contributes ${{amount}} per year to your retirement savings.",
       "confidence_default": "You are on track for retirement at age {{age}} with your current plan setup.",
       "terms": "I confirm my retirement plan enrolment and understand my contributions will begin next pay period.",
+      "persist_no_user": "Sign in to save your enrollment to your account. Your progress is stored on this device until you sign in.",
+      "persist_failed": "We could not save your enrollment to the server. Check your connection and try again, or contact support if this continues.",
       "view_terms": "View full plan terms",
       "risk_conservative": "conservative",
       "risk_balanced": "balanced",

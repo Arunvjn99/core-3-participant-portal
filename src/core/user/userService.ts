@@ -8,6 +8,21 @@ function logUnlessNoRows(context: string, error: PostgrestError) {
   }
 }
 
+/** Prefer React auth context id; fall back to Supabase session (fixes race after sign-in). */
+export async function resolveAuthUserId(preferred?: string | null): Promise<string | null> {
+  if (preferred) return preferred
+  if (!supabase) return null
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
+  if (error) {
+    console.warn('[userService] resolveAuthUserId:', error.message)
+    return null
+  }
+  return user?.id ?? null
+}
+
 export async function fetchProfile(userId: string): Promise<UserProfile | null> {
   if (!supabase) return null
   const { data, error } = await supabase
