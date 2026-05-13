@@ -70,12 +70,6 @@ function AuthCarousel() {
       </div>
 
       {/* Title + subtitle */}
-      <div
-        className="text-center transition-opacity duration-200"
-        style={{ opacity: fading ? 0 : 1 }}
-      >
-        <h2 className="text-white text-xl font-bold mb-1.5 leading-snug">{slide.title}</h2>
-      </div>
 
     </div>
   )
