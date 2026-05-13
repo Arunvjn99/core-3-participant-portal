@@ -48,29 +48,26 @@ function AuthCarousel() {
   const imgFailed = imgErrors[current]
 
   return (
-    <div className="flex flex-col items-center justify-center h-full px-6 py-6 gap-5">
-      {/* Image card */}
+    <div className="flex flex-col items-center justify-center px-6 pb-10 gap-5 h-full">
+      {/* Image card — fixed aspect ratio, no letterboxing */}
       <div
-        className="w-full max-w-[400px] transition-opacity duration-200"
+        className="w-full max-w-[380px] rounded-2xl overflow-hidden border border-white/20 shadow-2xl transition-opacity duration-200"
         style={{ opacity: fading ? 0 : 1 }}
       >
-        <div className="rounded-2xl overflow-hidden border border-white/20 shadow-2xl bg-white/10 backdrop-blur-sm">
-          {imgFailed ? (
-            /* Fallback placeholder when image can't load */
-            <div className="w-full h-[320px] flex flex-col items-center justify-center gap-3 bg-white/5">
-              <span className="text-6xl">{slide.fallbackIcon}</span>
-              <span className="text-white/50 text-sm">Image unavailable</span>
-            </div>
-          ) : (
-            <img
-              key={current}
-              src={slide.image}
-              alt={slide.title}
-              className="w-full h-auto max-h-[420px] object-contain"
-              onError={() => setImgErrors((prev) => ({ ...prev, [current]: true }))}
-            />
-          )}
-        </div>
+        {imgFailed ? (
+          <div className="w-full h-[300px] flex flex-col items-center justify-center gap-3 bg-white/10">
+            <span className="text-6xl">{slide.fallbackIcon}</span>
+            <span className="text-white/50 text-sm">Image unavailable</span>
+          </div>
+        ) : (
+          <img
+            key={current}
+            src={slide.image}
+            alt={slide.title}
+            className="w-full h-[300px] object-cover object-top"
+            onError={() => setImgErrors((prev) => ({ ...prev, [current]: true }))}
+          />
+        )}
       </div>
 
       {/* Title + subtitle */}
@@ -78,8 +75,8 @@ function AuthCarousel() {
         className="text-center transition-opacity duration-200"
         style={{ opacity: fading ? 0 : 1 }}
       >
-        <h2 className="text-white text-[1.4rem] font-bold mb-2 leading-snug">{slide.title}</h2>
-        <p className="text-white/65 text-sm leading-relaxed max-w-[340px] mx-auto">{slide.subtitle}</p>
+        <h2 className="text-white text-xl font-bold mb-1.5 leading-snug">{slide.title}</h2>
+        <p className="text-white/65 text-sm leading-relaxed max-w-[320px] mx-auto">{slide.subtitle}</p>
       </div>
 
       {/* Navigation: prev · dots · next */}
@@ -124,13 +121,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="min-h-screen flex">
       {/* ── LEFT PANEL — background image + carousel (desktop only) ── */}
-      <div className="hidden md:flex md:w-[45%] lg:w-[50%] relative flex-col overflow-hidden">
+      <div className="hidden md:flex md:w-[45%] lg:w-[50%] relative flex-col min-h-screen overflow-hidden">
         {/* Background */}
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${BG_IMAGE})` }} />
         <div className="absolute inset-0 bg-gray-900/60" />
 
         {/* CORE logo */}
-        <div className="relative z-10 p-8 flex-shrink-0">
+        <div className="relative z-10 p-8 shrink-0">
           <img
             src={CORE_LOGO}
             alt="CORE"
@@ -139,8 +136,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           />
         </div>
 
-        {/* Carousel — fills remaining height */}
-        <div className="relative z-10 flex-1 min-h-0">
+        {/* Carousel — fills remaining height, never overflows */}
+        <div className="relative z-10 flex-1 overflow-hidden">
           <AuthCarousel />
         </div>
       </div>
