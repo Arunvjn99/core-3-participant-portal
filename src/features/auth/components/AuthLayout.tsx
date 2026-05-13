@@ -48,16 +48,16 @@ function AuthCarousel() {
   const imgFailed = imgErrors[current]
 
   return (
-    <div className="flex flex-col items-center justify-center h-full px-8 py-6 gap-6">
+    <div className="flex flex-col items-center justify-center h-full px-6 py-6 gap-5">
       {/* Image card */}
       <div
-        className="w-full max-w-[420px] transition-opacity duration-200"
+        className="w-full max-w-[400px] transition-opacity duration-200"
         style={{ opacity: fading ? 0 : 1 }}
       >
         <div className="rounded-2xl overflow-hidden border border-white/20 shadow-2xl bg-white/10 backdrop-blur-sm">
           {imgFailed ? (
             /* Fallback placeholder when image can't load */
-            <div className="w-full h-[280px] flex flex-col items-center justify-center gap-3 bg-white/5">
+            <div className="w-full h-[320px] flex flex-col items-center justify-center gap-3 bg-white/5">
               <span className="text-6xl">{slide.fallbackIcon}</span>
               <span className="text-white/50 text-sm">Image unavailable</span>
             </div>
@@ -66,7 +66,7 @@ function AuthCarousel() {
               key={current}
               src={slide.image}
               alt={slide.title}
-              className="w-full h-[280px] object-cover object-top"
+              className="w-full h-auto max-h-[420px] object-contain"
               onError={() => setImgErrors((prev) => ({ ...prev, [current]: true }))}
             />
           )}
