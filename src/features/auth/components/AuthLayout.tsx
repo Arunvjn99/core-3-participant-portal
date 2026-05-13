@@ -1,47 +1,112 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 const BG_IMAGE = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/background%20auth.png'
 const CORE_LOGO = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/CORE%20logo.png'
 
-const CAROUSEL_IMAGES = [
-  'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/Ai%20carosel.png',
-  'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/Image%201.png',
-  'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/Image%203.png',
+const CAROUSEL_SLIDES = [
+  {
+    image: 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/image%201.png',
+    title: 'Monitor Plan Performance',
+    subtitle: 'Sign in to explore smarter tools for planning your financial future.',
+  },
+  {
+    image: 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/Ai%20carosel.png',
+    title: 'AI-Powered Support',
+    subtitle: 'Sign in to explore smarter tools for planning your financial future.',
+  },
+  {
+    image: 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/image%203.png',
+    title: 'Enabling Auto-Increment',
+    subtitle: 'Sign in to explore smarter tools for planning your financial future.',
+  },
 ]
 
 function AuthCarousel() {
-  const { t } = useTranslation()
+  const { t: _t } = useTranslation()
   const [current, setCurrent] = useState(0)
-  const slideCount = CAROUSEL_IMAGES.length
+  const [fading, setFading] = useState(false)
+  const count = CAROUSEL_SLIDES.length
 
-  const slides = CAROUSEL_IMAGES.map((image, i) => ({
-    image,
-    title: t(`carousel.slide${i + 1}_title`),
-    subtitle: t(`carousel.slide${i + 1}_subtitle`),
-  }))
+  const goTo = useCallback((idx: number) => {
+    setFading(true)
+    setTimeout(() => {
+      setCurrent((idx + count) % count)
+      setFading(false)
+    }, 200)
+  }, [count])
 
   useEffect(() => {
-    const timer = setInterval(() => setCurrent((c) => (c + 1) % slideCount), 5000)
+    const timer = setInterval(() => goTo(current + 1), 5000)
     return () => clearInterval(timer)
-  }, [slideCount])
+  }, [current, goTo])
 
-  const slide = slides[current]
+  const slide = CAROUSEL_SLIDES[current]
 
   return (
-    <div className="flex flex-col h-full justify-end pb-12 px-8">
-      <div className="w-full max-w-[500px] mx-auto mb-6">
+    <div className="flex flex-col h-full justify-end pb-10 px-8">
+      {/* Image card */}
+      <div className="w-full max-w-[460px] mx-auto mb-5">
         <div className="bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 shadow-2xl">
-          <div className="relative overflow-hidden w-full max-w-[500px] h-[700px] mx-auto">
+          <div
+            className="relative w-full h-[340px] transition-opacity duration-200"
+            style={{ opacity: fading ? 0 : 1 }}
+          >
             <img
               key={current}
               src={slide.image}
               alt={slide.title}
               className="w-full h-full object-cover object-top"
-              style={{ transition: 'opacity 0.5s ease-in-out' }}
             />
           </div>
         </div>
+      </div>
+
+      {/* Title + subtitle */}
+      <div
+        className="text-center mb-5 transition-opacity duration-200"
+        style={{ opacity: fading ? 0 : 1 }}
+      >
+        <h2 className="text-white text-2xl font-bold mb-2 leading-tight">{slide.title}</h2>
+        <p className="text-white/70 text-sm leading-relaxed max-w-[360px] mx-auto">{slide.subtitle}</p>
+      </div>
+
+      {/* Navigation: prev · dots · next */}
+      <div className="flex items-center justify-center gap-5">
+        <button
+          type="button"
+          onClick={() => goTo(current - 1)}
+          aria-label="Previous slide"
+          className="text-white/60 hover:text-white transition-colors"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+
+        <div className="flex items-center gap-2">
+          {CAROUSEL_SLIDES.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => goTo(i)}
+              aria-label={`Go to slide ${i + 1}`}
+              className={`rounded-full transition-all duration-300 ${
+                i === current
+                  ? 'w-5 h-2 bg-white'
+                  : 'w-2 h-2 bg-white/40 hover:bg-white/60'
+              }`}
+            />
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => goTo(current + 1)}
+          aria-label="Next slide"
+          className="text-white/60 hover:text-white transition-colors"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
       </div>
     </div>
   )
