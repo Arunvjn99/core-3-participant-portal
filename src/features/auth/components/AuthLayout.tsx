@@ -6,7 +6,7 @@ const CORE_LOGO = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/pu
 
 const CAROUSEL_SLIDES = [
   {
-    image: 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/image%201.png',
+    image: 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/Image%201.png',
     title: 'Monitor Plan Performance',
     subtitle: 'Sign in to explore smarter tools for planning your financial future.',
     fallbackIcon: '📊',
@@ -18,7 +18,7 @@ const CAROUSEL_SLIDES = [
     fallbackIcon: '🤖',
   },
   {
-    image: 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/image%203.png',
+    image: 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/Image%203.png',
     title: 'Enabling Auto-Increment',
     subtitle: 'Sign in to explore smarter tools for planning your financial future.',
     fallbackIcon: '💰',
