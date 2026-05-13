@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 const BG_IMAGE = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/background%20auth.png'
 const CORE_LOGO = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/CORE%20logo.png'
@@ -79,40 +78,6 @@ function AuthCarousel() {
         <p className="text-white/65 text-sm leading-relaxed max-w-[320px] mx-auto">{slide.subtitle}</p>
       </div>
 
-      {/* Navigation: prev · dots · next */}
-      <div className="flex items-center gap-5">
-        <button
-          type="button"
-          onClick={() => goTo(current - 1)}
-          aria-label="Previous slide"
-          className="text-white/50 hover:text-white transition-colors p-1"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-
-        <div className="flex items-center gap-2">
-          {CAROUSEL_SLIDES.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => goTo(i)}
-              aria-label={`Go to slide ${i + 1}`}
-              className={`rounded-full transition-all duration-300 ${
-                i === current ? 'w-6 h-2 bg-white' : 'w-2 h-2 bg-white/35 hover:bg-white/55'
-              }`}
-            />
-          ))}
-        </div>
-
-        <button
-          type="button"
-          onClick={() => goTo(current + 1)}
-          aria-label="Next slide"
-          className="text-white/50 hover:text-white transition-colors p-1"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-      </div>
     </div>
   )
 }
