@@ -75,7 +75,13 @@ function AuthCarousel() {
   )
 }
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default function AuthLayout({
+  children,
+  showLeftPanelLogo = true,
+}: {
+  children: React.ReactNode
+  showLeftPanelLogo?: boolean
+}) {
   return (
     <div className="min-h-screen flex">
       {/* ── LEFT PANEL — background image + carousel (desktop only) ── */}
@@ -84,15 +90,16 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${BG_IMAGE})` }} />
         <div className="absolute inset-0 bg-gray-900/60" />
 
-        {/* CORE logo */}
-        <div className="relative z-10 p-8 shrink-0">
-          <img
-            src={CORE_LOGO}
-            alt="CORE"
-            className="h-8 w-auto object-contain"
-            onError={(e) => { e.currentTarget.style.display = 'none' }}
-          />
-        </div>
+        {showLeftPanelLogo ? (
+          <div className="relative z-10 p-8 shrink-0">
+            <img
+              src={CORE_LOGO}
+              alt="CORE"
+              className="h-8 w-auto object-contain"
+              onError={(e) => { e.currentTarget.style.display = 'none' }}
+            />
+          </div>
+        ) : null}
 
         {/* Carousel — fills remaining height, never overflows */}
         <div className="relative z-10 flex-1 overflow-hidden">

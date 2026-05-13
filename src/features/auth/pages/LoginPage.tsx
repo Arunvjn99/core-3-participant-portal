@@ -42,7 +42,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthLayout>
+    <AuthLayout showLeftPanelLogo={false}>
       {/* ── Centered form area ── */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
