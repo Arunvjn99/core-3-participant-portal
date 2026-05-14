@@ -109,20 +109,6 @@ function AuthCarousel() {
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/40" />
 
-      {/* CORE logo top-left */}
-      <div className="relative z-10 p-6">
-        <img src={CORE_LOGO} alt="CORE" className="h-10 w-auto object-contain" onError={(e) => {
-          const t = e.currentTarget; t.style.display = 'none';
-          const fallback = t.nextElementSibling as HTMLElement | null;
-          if (fallback) fallback.style.display = 'flex';
-        }} />
-        <div className="hidden items-center gap-2">
-          <div className="brand-bg flex h-8 w-8 items-center justify-center rounded-lg">
-            <span className="text-white font-black text-sm">C</span>
-          </div>
-          <span className="text-white font-bold text-xl tracking-tight">CORE</span>
-        </div>
-      </div>
 
       {/* Carousel images */}
       <div className="relative z-10 flex-1 flex items-center justify-center px-10">
