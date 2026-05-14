@@ -14,7 +14,6 @@ import {
   RefreshCcw,
   Calendar,
   PieChart,
-  AlertTriangle,
   Target,
   CreditCard,
   CheckSquare,
