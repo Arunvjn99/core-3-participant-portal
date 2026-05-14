@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
+import { ROUTES } from '@/lib/constants'
 import { useEnrollmentSave } from '@/core/hooks/useEnrollmentSave'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { LEGAL } from '@/lib/constants'
@@ -100,13 +101,13 @@ export default function ReviewEnrollment() {
   ]
 
   const handleConfirm = useCallback(async () => {
-    setPersistError(null)
     advanceStep({ confirmedAt: Date.now(), agreed: true }, 'review')
+    useEnrollmentDraftStore.getState().setEnrollmentStatus('complete')
     const result = await saveCompleteEnrollment()
     if (!result.ok) {
-      console.warn('[Enrollment] Save failed, proceeding to success anyway:', result.error)
+      console.warn('[Enrollment] Save failed, proceeding to dashboard anyway:', result.error)
     }
-    navigate('/post-enrollment-dashboard')
+    navigate(ROUTES.POST_ENROLLMENT_DASHBOARD)
   }, [advanceStep, saveCompleteEnrollment, navigate])
 
   useEffect(() => {
