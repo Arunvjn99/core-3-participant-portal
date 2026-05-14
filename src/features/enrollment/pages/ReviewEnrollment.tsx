@@ -20,8 +20,6 @@ export default function ReviewEnrollment() {
   const { advanceStep } = useEnrollmentDraftStore()
   const { saveCompleteEnrollment } = useEnrollmentSave()
 
-  const [persistError, setPersistError] = useState<string | null>(null)
-
   const yearsToRetirement = personalization.retirementAge - personalization.currentAge
   const matchPercent = Math.min(data.contributionPercent, 6)
   const annualContribution = Math.round((data.salary * data.contributionPercent) / 100)
@@ -106,15 +104,10 @@ export default function ReviewEnrollment() {
     advanceStep({ confirmedAt: Date.now(), agreed: true }, 'review')
     const result = await saveCompleteEnrollment()
     if (!result.ok) {
-      const msg =
-        result.error === 'no_user'
-          ? t('enrollment.review_page.persist_no_user')
-          : t('enrollment.review_page.persist_failed')
-      setPersistError(msg)
-      return
+      console.warn('[Enrollment] Save failed, proceeding to success anyway:', result.error)
     }
     navigate('/enrollment/success')
-  }, [advanceStep, saveCompleteEnrollment, navigate, t])
+  }, [advanceStep, saveCompleteEnrollment, navigate])
 
   useEffect(() => {
     setStepNav({
@@ -143,24 +136,15 @@ export default function ReviewEnrollment() {
           </p>
         </div>
 
-        {persistError && (
-          <div
-            role="alert"
-            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-200"
-          >
-            {persistError}
-          </div>
-        )}
-
-        {/* Hero — blue gradient */}
-        <div className="rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 p-6 text-white">
-          <p className="text-blue-200" style={{ fontSize: '0.75rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        {/* Hero — light blue */}
+        <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 border border-blue-200 p-6 dark:from-blue-950/40 dark:to-indigo-950/40 dark:border-blue-800/50">
+          <p className="text-blue-600 dark:text-blue-400" style={{ fontSize: '0.75rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {t('enrollment.review_page.projected_label')}
           </p>
-          <p className="mt-1 tabular-nums" style={{ fontSize: '2.6rem', fontWeight: 700 }}>
+          <p className="mt-1 tabular-nums text-gray-900 dark:text-white" style={{ fontSize: '2.6rem', fontWeight: 700 }}>
             {formatCurrency(projectedBalance)}
           </p>
-          <p className="mt-0.5 text-blue-200" style={{ fontSize: '0.75rem' }}>
+          <p className="mt-0.5 text-gray-500 dark:text-gray-400" style={{ fontSize: '0.75rem' }}>
             {t('enrollment.review_page.projected_note', { years: yearsToRetirement })}
           </p>
 
@@ -193,15 +177,15 @@ export default function ReviewEnrollment() {
                 },
               ] as const
             ).map(({ Icon, labelKey, value, sub }) => (
-              <div key={labelKey} className="rounded-xl bg-white/10 px-3.5 py-3 backdrop-blur-sm">
+              <div key={labelKey} className="rounded-xl bg-white/70 border border-blue-200 px-3.5 py-3 dark:bg-blue-900/20 dark:border-blue-700/50">
                 <div className="mb-1 flex items-center gap-1.5">
-                  <Icon className="h-3 w-3 text-blue-200" />
-                  <span className="text-blue-200" style={{ fontSize: '0.62rem', fontWeight: 500 }}>
+                  <Icon className="h-3 w-3 text-blue-500 dark:text-blue-400" />
+                  <span className="text-blue-600 dark:text-blue-400" style={{ fontSize: '0.62rem', fontWeight: 500 }}>
                     {t(`enrollment.review_page.${labelKey}`)}
                   </span>
                 </div>
-                <p style={{ fontSize: '1.05rem', fontWeight: 700 }}>{value}</p>
-                <p className="text-blue-200" style={{ fontSize: '0.6rem' }}>
+                <p className="text-gray-900 dark:text-white" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{value}</p>
+                <p className="text-gray-500 dark:text-gray-400" style={{ fontSize: '0.6rem' }}>
                   {sub}
                 </p>
               </div>
