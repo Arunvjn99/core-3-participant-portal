@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'

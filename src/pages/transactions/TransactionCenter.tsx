@@ -10,7 +10,6 @@ import {
   RefreshCcw,
   Sparkles,
   FilePen,
-  AlertTriangle,
   ChartBar,
   ChevronRight,
   TrendingUp,
@@ -33,7 +32,6 @@ const DEMO_PLAN = {
   vestedBalance: 25_000,
 }
 
-const ATTENTION_COUNT = 2
 const DRAFT_COUNT = 2
 
 function ShieldIcon({ className }: { className?: string }) {
@@ -259,9 +257,6 @@ export default function TransactionCenter() {
   const planBalanceLabel = useMemo(() => formatUsd(planBalance), [planBalance])
   const vestedBalanceLabel = useMemo(() => formatUsd(vestedBalance), [vestedBalance])
 
-  const handleResolveIssue = () => {
-    navigate('/transactions/loan/documents')
-  }
 
   const badgeLabel = (b: QuickBadge) =>
     b === 'recommended' ? t(`${CP}badge_recommended`) : t(`${CP}badge_most_used`)
