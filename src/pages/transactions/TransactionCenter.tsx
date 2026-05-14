@@ -19,7 +19,6 @@ import { cn } from '@/lib/cn'
 import { Card } from '@/design-system/components/Card'
 import { Badge } from '@/design-system/components/Badge'
 import svgPaths from '@/features/transactions/svgPaths'
-import AttentionRequiredTimeline from '@/features/transactions/components/AttentionRequiredTimeline'
 import DraftTransactions from '@/features/transactions/components/DraftTransactions'
 import RecentTransactionsCompact from '@/features/transactions/components/RecentTransactionsCompact'
 import FinancialGuidanceCompact from '@/features/transactions/components/FinancialGuidanceCompact'
@@ -364,25 +363,6 @@ export default function TransactionCenter() {
             {/* LEFT — Attention Required + Recent Transactions */}
             <div className="flex flex-col gap-6 sm:gap-8">
 
-              <motion.section
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
-              >
-                <SectionHeader
-                  icon={<AlertTriangle className="h-4 w-4" />}
-                  title={t('transactions.attention_required')}
-                  badge={{
-                    text: t('transactions.items_badge', { count: ATTENTION_COUNT }),
-                    color: 'bg-amber-500/15 text-amber-900 dark:bg-amber-950/50 dark:text-amber-100',
-                  }}
-                />
-                <Card padding="none" className="overflow-hidden rounded-2xl border border-border-default">
-                  <div className="p-4 sm:p-5">
-                    <AttentionRequiredTimeline onResolve={handleResolveIssue} />
-                  </div>
-                </Card>
-              </motion.section>
 
               <motion.section
                 initial={{ opacity: 0, y: 12 }}
