@@ -61,7 +61,7 @@ function AuthCarousel() {
         ) : (
           <img
             key={current}
-            src={slide.image}
+            src={`${slide.image}?v=2`}
             alt={slide.title}
             className="w-full h-auto block"
             onError={() => setImgErrors((prev) => ({ ...prev, [current]: true }))}
