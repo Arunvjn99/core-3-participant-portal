@@ -129,7 +129,7 @@ function RebalanceAdjustAllocation() {
             Investment Funds
           </h3>
 
-          <div className="space-y-7">
+          <div className="space-y-6">
             {funds.map((fund, index) => {
               const change =
                 fund.targetAllocation - fund.currentAllocation;
@@ -183,18 +183,8 @@ function RebalanceAdjustAllocation() {
                     min={0}
                     max={100}
                     step={1}
-                    className="mb-2"
+                    className="mb-0"
                   />
-
-                  <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-300"
-                      style={{
-                        width: `${fund.targetAllocation}%`,
-                        backgroundColor: COLORS[index],
-                      }}
-                    />
-                  </div>
                 </motion.div>
               );
             })}
