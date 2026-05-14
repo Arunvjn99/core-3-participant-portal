@@ -48,13 +48,13 @@ function AuthCarousel() {
 
   return (
     <div className="flex flex-col items-center justify-center px-6 pb-10 gap-5 h-full">
-      {/* Image card — natural height, no crop */}
+      {/* Image card — fixed 520×693.33px */}
       <div
-        className="w-full max-w-[340px] rounded-2xl overflow-hidden border border-white/20 shadow-xl transition-opacity duration-200"
-        style={{ opacity: fading ? 0 : 1 }}
+        className="overflow-hidden rounded-2xl border border-white/20 shadow-xl transition-opacity duration-200"
+        style={{ width: 520, height: 693.33, opacity: fading ? 0 : 1 }}
       >
         {imgFailed ? (
-          <div className="w-full h-[260px] flex flex-col items-center justify-center gap-3 bg-white/10">
+          <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-white/10">
             <span className="text-6xl">{slide.fallbackIcon}</span>
             <span className="text-white/50 text-sm">Image unavailable</span>
           </div>
@@ -63,7 +63,7 @@ function AuthCarousel() {
             key={current}
             src={`${slide.image}?v=2`}
             alt={slide.title}
-            className="w-full h-auto block"
+            className="h-full w-full object-cover"
             onError={() => setImgErrors((prev) => ({ ...prev, [current]: true }))}
           />
         )}
