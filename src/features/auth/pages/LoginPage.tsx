@@ -26,8 +26,8 @@ export default function LoginPage() {
     setLoading(true)
 
     if (!supabase) {
-      // Demo mode — navigate directly
-      navigate(ROUTES.DASHBOARD)
+      // Demo mode — go to verify step
+      navigate(ROUTES.VERIFY_OTP, { state: { email } })
       return
     }
 
@@ -37,7 +37,7 @@ export default function LoginPage() {
       setError(signInError.message)
       setLoading(false)
     } else {
-      navigate(ROUTES.DASHBOARD)
+      navigate(ROUTES.VERIFY_OTP, { state: { email } })
     }
   }
 
