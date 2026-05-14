@@ -120,7 +120,7 @@ function DraftTransactions() {
             </div>
           </div>
 
-          <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex-shrink-0">
+          <div className="flex items-center gap-1 flex-shrink-0">
             <button
               onClick={() => navigate(draft.resumePath)}
               className="flex items-center justify-center transition-all duration-200 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600"
