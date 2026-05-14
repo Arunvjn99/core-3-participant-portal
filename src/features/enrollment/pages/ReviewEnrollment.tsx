@@ -106,7 +106,7 @@ export default function ReviewEnrollment() {
     if (!result.ok) {
       console.warn('[Enrollment] Save failed, proceeding to success anyway:', result.error)
     }
-    navigate('/enrollment/success')
+    navigate('/post-enrollment-dashboard')
   }, [advanceStep, saveCompleteEnrollment, navigate])
 
   useEffect(() => {
