@@ -77,7 +77,7 @@ function AuthCarousel() {
 
 export default function AuthLayout({
   children,
-  showLeftPanelLogo = true,
+  showLeftPanelLogo = false,
 }: {
   children: React.ReactNode
   showLeftPanelLogo?: boolean
