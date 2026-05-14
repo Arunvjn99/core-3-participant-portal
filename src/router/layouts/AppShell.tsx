@@ -29,8 +29,6 @@ import { useBrandTheme } from '@/core/theme/BrandThemeContext'
 import AppFooter from '@/features/dashboard/components/AppFooter'
 import { supabase } from '@/core/supabase'
 import { ROUTES } from '@/lib/constants'
-import { CustomCursorViewport } from '@/design-system/components/CustomCursorViewport'
-
 function getNavItems(isEnrolled: boolean) {
   return [
     {
@@ -540,7 +538,6 @@ export function AppShell() {
       </header>
 
       <div className="flex min-h-0 flex-1 flex-col overflow-auto bg-surface-page">
-        <CustomCursorViewport>
           <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col px-4 pb-6 pt-4 sm:px-6 lg:px-8">
             <AnimatePresence>
               <main id="main-content" className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -548,7 +545,6 @@ export function AppShell() {
               </main>
             </AnimatePresence>
           </div>
-        </CustomCursorViewport>
       </div>
 
       <AppFooter />
