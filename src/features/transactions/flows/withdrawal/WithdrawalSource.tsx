@@ -40,8 +40,6 @@ function WithdrawalSource() {
       value: pretax,
       setValue: setPretax,
       max: maxPretax,
-      color: "brand-bg",
-      bgColor: "bg-blue-200 dark:bg-blue-800",
       taxNote: "Subject to ordinary income tax" },
     {
       label: "Roth Contributions",
@@ -49,8 +47,6 @@ function WithdrawalSource() {
       value: roth,
       setValue: setRoth,
       max: maxRoth,
-      color: "bg-violet-600",
-      bgColor: "bg-violet-200 dark:bg-violet-800",
       taxNote: "Tax-free if qualified distribution" },
     {
       label: "Employer Contributions",
@@ -58,8 +54,6 @@ function WithdrawalSource() {
       value: employer,
       setValue: setEmployer,
       max: maxEmployer,
-      color: "bg-emerald-600",
-      bgColor: "bg-emerald-200",
       taxNote: "Subject to ordinary income tax" },
     {
       label: "After-Tax Contributions",
@@ -67,8 +61,6 @@ function WithdrawalSource() {
       value: aftertax,
       setValue: setAftertax,
       max: maxAftertax,
-      color: "bg-amber-600",
-      bgColor: "bg-amber-200",
       taxNote: "Only earnings portion is taxable" },
   ];
 
@@ -133,7 +125,7 @@ function WithdrawalSource() {
             Contribution Sources
           </h3>
 
-          <div className="space-y-7">
+          <div className="space-y-6">
             {sources.map((source, idx) => (
               <motion.div
                 key={source.label}
@@ -141,12 +133,12 @@ function WithdrawalSource() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.12 + idx * 0.05, duration: 0.3 }}
               >
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-3">
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white text-sm">
                       {source.label}
                     </p>
-                    <p className="text-[10px] text-gray-400 dark:text-gray-500">
+                    <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
                       {source.sublabel}
                     </p>
                   </div>
@@ -165,19 +157,10 @@ function WithdrawalSource() {
                   min={0}
                   max={source.max}
                   step={100}
-                  className="mb-2"
+                  className="mb-2.5"
                 />
-                <div
-                  className={`h-1.5 ${source.bgColor} rounded-full overflow-hidden`}
-                >
-                  <div
-                    className={`h-full ${source.color} transition-all`}
-                    style={{
-                      width: `${(source.value / source.max) * 100}%` }}
-                  />
-                </div>
-                <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1 flex items-center gap-1">
-                  <Info className="w-2.5 h-2.5" />
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-1">
+                  <Info className="w-3 h-3" />
                   {source.taxNote}
                 </p>
               </motion.div>
