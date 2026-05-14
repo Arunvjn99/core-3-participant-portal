@@ -358,13 +358,13 @@ export default function TransactionCenter() {
           </motion.section>
 
           {/* ── Main 2-col grid ── */}
-          <div className="grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-[1fr_400px]">
+          <div className="grid grid-cols-1 items-stretch gap-6 sm:gap-8 lg:grid-cols-[1fr_400px]">
 
-            {/* LEFT — Attention Required + Recent Transactions */}
-            <div className="flex flex-col gap-6 sm:gap-8">
-
+            {/* LEFT — Recent Transactions */}
+            <div className="flex flex-col">
 
               <motion.section
+                className="flex flex-1 flex-col"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, ease: 'easeOut', delay: 0.16 }}
@@ -374,7 +374,7 @@ export default function TransactionCenter() {
                   title={t('transactions.recent_transactions')}
                   subtitle={t('transactions.last_90_days')}
                 />
-                <Card padding="md" className="rounded-2xl border border-border-default">
+                <Card padding="md" className="flex-1 rounded-2xl border border-border-default">
                   <RecentTransactionsCompact />
                 </Card>
               </motion.section>
