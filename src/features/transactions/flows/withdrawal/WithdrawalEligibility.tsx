@@ -20,9 +20,9 @@ function WithdrawalEligibility() {
   ];
 
   const metrics = [
-    { icon: <DollarSign className="w-5 h-5" />, label: "Available to Withdraw", value: "$5,000", bg: "var(--c-blue-tint)", color: "var(--brand-primary)" },
-    { icon: <Percent className="w-5 h-5" />, label: "Estimated Tax Withholding", value: "20–35%", bg: "rgba(245,158,11,0.1)", color: "#F59E0B" },
-    { icon: <Shield className="w-5 h-5" />, label: "Vested Balance", value: "$25,000", bg: "var(--c-blue-tint)", color: "var(--brand-purple-light)" },
+    { icon: <DollarSign className="w-5 h-5" />, label: "Available to Withdraw", value: "$5,000", bg: "var(--color-primary-light)", color: "var(--color-primary)" },
+    { icon: <Percent className="w-5 h-5" />, label: "Estimated Tax Withholding", value: "20–35%", bg: "var(--status-warning-tint)", color: "var(--status-warning)" },
+    { icon: <Shield className="w-5 h-5" />, label: "Vested Balance", value: "$25,000", bg: "var(--color-primary-light)", color: "var(--color-primary)" },
   ];
 
   return (
@@ -60,17 +60,17 @@ function WithdrawalEligibility() {
               className="flex items-center justify-between transition-all duration-200"
               style={{
                 padding: "14px 16px", borderRadius: 12,
-                border: check.eligible ? "1px solid #BBF7D0" : "1px solid var(--c-subtle)",
-                background: check.eligible ? "rgba(16,185,129,0.1)" : "var(--c-page)" }}
+                border: check.eligible ? "1px solid var(--border-green)" : "1px solid var(--border-light)",
+                background: check.eligible ? "var(--status-success-tint)" : "var(--input-bg)" }}
             >
               <div className="flex items-center gap-3">
                 {check.eligible ? (
-                  <CheckCircle2 className="flex-shrink-0" style={{ width: 18, height: 18, color: "#10B981" }} />
+                  <CheckCircle2 className="flex-shrink-0" style={{ width: 18, height: 18, color: "var(--status-success)" }} />
                 ) : (
-                  <XCircle className="flex-shrink-0" style={{ width: 18, height: 18, color: "var(--c-text-faint)" }} />
+                  <XCircle className="flex-shrink-0" style={{ width: 18, height: 18, color: "var(--text-muted)" }} />
                 )}
                 <div>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: check.eligible ? "var(--c-text-primary)" : "var(--c-text-faint)" }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: check.eligible ? "var(--text-primary)" : "var(--text-muted)" }}>
                     {check.label}
                   </p>
                   <p style={{ fontSize: 11, fontWeight: 500, color: "inherit" }}>{check.note}</p>
@@ -78,8 +78,8 @@ function WithdrawalEligibility() {
               </div>
               <span style={{
                 fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 6,
-                background: check.eligible ? "rgba(16,185,129,0.1)" : "var(--c-subtle)",
-                color: check.eligible ? "#059669" : "#94A3B8" }}>
+                background: check.eligible ? "var(--status-success-tint)" : "var(--input-bg)",
+                color: check.eligible ? "var(--status-success-text)" : "var(--text-muted)" }}>
                 {check.eligible ? "Eligible" : "Not Eligible"}
               </span>
             </motion.div>
@@ -91,7 +91,7 @@ function WithdrawalEligibility() {
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut", delay: 0.15 }}>
         <FlowInfoBanner variant="warning">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="flex-shrink-0 mt-0.5" style={{ width: 20, height: 20, color: "#F59E0B" }} />
+            <AlertTriangle className="flex-shrink-0 mt-0.5" style={{ width: 20, height: 20, color: "var(--status-warning)" }} />
             <div>
               <h4 style={{ fontSize: 14, fontWeight: 700, color: "inherit", letterSpacing: "-0.3px", marginBottom: 8 }}>
                 Important Restrictions
@@ -104,7 +104,7 @@ function WithdrawalEligibility() {
                   "Employer match contributions may have vesting restrictions",
                 ].map((text, i) => (
                   <li key={i} className="flex items-start gap-2.5">
-                    <span className="rounded-full mt-1.5 flex-shrink-0" style={{ width: 6, height: 6, background: "var(--c-amber)" }} />
+                    <span className="rounded-full mt-1.5 flex-shrink-0" style={{ width: 6, height: 6, background: "var(--status-warning)" }} />
                     <span style={{ fontSize: 13, fontWeight: 500, color: "inherit", lineHeight: "20px" }}>{text}</span>
                   </li>
                 ))}

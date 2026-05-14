@@ -28,7 +28,7 @@ interface FundOption {
   percentage: number;
 }
 
-const COLORS = ["#3b82f6", "#8b5cf6", "#10b981", "#f59e0b", "#ec4899"];
+const COLORS = ["var(--chart-blue)", "var(--chart-teal)", "var(--chart-green)", "var(--status-warning)", "var(--color-primary)"];
 
 function RolloverAllocation() {
   const navigate = useNavigate();
@@ -130,9 +130,8 @@ function RolloverAllocation() {
         >
           <Card
             className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
-            style={{
-              boxShadow:
-                "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
+          style={{
+            boxShadow: "var(--shadow-elevated)" }}
           >
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -235,9 +234,8 @@ function RolloverAllocation() {
         >
           <Card
             className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80 sticky top-24"
-            style={{
-              boxShadow:
-                "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
+          style={{
+            boxShadow: "var(--shadow-elevated)" }}
           >
             <div className="flex items-center gap-2 mb-4">
               <ChartBar className="w-4 h-4 text-gray-400 dark:text-gray-500" />
@@ -267,8 +265,8 @@ function RolloverAllocation() {
                   formatter={(v) => [String(v), ""] as [string, string]}
                   contentStyle={{
                     borderRadius: "12px",
-                    border: "1px solid var(--c-border-color)",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    border: "1px solid var(--border-default)",
+                    boxShadow: "var(--shadow-elevated)",
                     fontSize: "12px" }}
                 />
               </PieChart>

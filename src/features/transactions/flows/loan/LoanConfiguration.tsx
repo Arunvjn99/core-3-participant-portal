@@ -89,7 +89,7 @@ function LoanConfiguration() {
           >
             Set up disbursement and repayment for your loan request.
           </p>
-          <span className="text-[12px] italic text-[#64748B] dark:text-gray-400">
+          <span className="text-[12px] italic dark:text-gray-400" style={{ color: "var(--text-secondary)" }}>
             ⓘ Processing time: ~10 business days
           </span>
         </div>
@@ -102,8 +102,8 @@ function LoanConfiguration() {
         transition={{ duration: 0.5, ease: "easeOut", delay: 0.03 }}
       >
         <div
-          className="flex flex-wrap items-stretch gap-0 overflow-hidden rounded-[10px] border border-[#BFDBFE]/50"
-          style={{ background: "#F0F7FF", padding: "10px 16px" }}
+          className="flex flex-wrap items-stretch gap-0 overflow-hidden rounded-[10px] border"
+          style={{ background: "var(--color-primary-light)", padding: "10px 16px", borderColor: "var(--border-blue)" }}
         >
           {(
             [
@@ -122,15 +122,16 @@ function LoanConfiguration() {
           ).map((cell, i) => (
             <div
               key={cell.label}
-              className="flex min-w-[120px] flex-1 flex-col justify-center border-[#E5E7EB] py-1 pl-4 pr-2 first:pl-0 dark:border-white/10"
-              style={i > 0 ? { borderLeftWidth: 1 } : undefined}
+              className="flex min-w-[120px] flex-1 flex-col justify-center py-1 pl-4 pr-2 first:pl-0 dark:border-white/10"
+              style={i > 0 ? { borderLeftWidth: 1, borderLeftColor: "var(--border-default)" } : undefined}
             >
               <span
-                className="text-[10px] font-semibold uppercase tracking-[0.05em] text-[#64748B]"
+                className="text-[10px] font-semibold uppercase tracking-[0.05em]"
+                style={{ color: "var(--text-secondary)" }}
               >
                 {cell.label}
               </span>
-              <span className="mt-0.5 text-[13px] font-bold text-[#111827] dark:text-gray-100">
+              <span className="mt-0.5 text-[13px] font-bold dark:text-gray-100" style={{ color: "var(--text-primary)" }}>
                 {cell.value}
               </span>
             </div>
@@ -139,7 +140,8 @@ function LoanConfiguration() {
             <button
               type="button"
               onClick={() => navigate("/transactions/loan/simulator")}
-              className="text-[12px] font-semibold text-[#2563EB] hover:underline"
+              className="text-[12px] font-semibold hover:underline"
+              style={{ color: "var(--color-primary)" }}
             >
               ✏ Edit
             </button>
@@ -171,7 +173,7 @@ function LoanConfiguration() {
                 style={{
                   fontSize: 11,
                   fontWeight: 700,
-                  color: "#64748B",
+                  color: "var(--text-secondary)",
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
                   marginBottom: 12,
@@ -189,17 +191,17 @@ function LoanConfiguration() {
                       borderRadius: 8,
                       border:
                         disbursementMethod === "eft"
-                          ? "1px solid #BFDBFE"
-                          : "1px solid #E5E7EB",
-                      background: disbursementMethod === "eft" ? "#EFF6FF" : "#fff",
+                          ? "1px solid var(--border-blue)"
+                          : "1px solid var(--border-default)",
+                      background: disbursementMethod === "eft" ? "var(--color-primary-light)" : "var(--surface-card)",
                     }}
                   >
-                    <RadioGroupItem value="eft" id="eft" className="border-[#CBD5E1] text-[#2563EB]" />
+                    <RadioGroupItem value="eft" id="eft" style={{ borderColor: "var(--border-strong)", color: "var(--color-primary)" }} />
                     <div className="flex-1">
                       <span className="block text-[14px] font-bold text-inherit">
                         Electronic Funds Transfer (EFT)
                       </span>
-                      <span className="mt-0.5 block text-[12px] text-[#64748B]">
+                      <span className="mt-0.5 block text-[12px]" style={{ color: "var(--text-secondary)" }}>
                         Direct deposit to your bank account
                       </span>
                     </div>
@@ -213,15 +215,15 @@ function LoanConfiguration() {
                       borderRadius: 8,
                       border:
                         disbursementMethod === "check"
-                          ? "1px solid #BFDBFE"
-                          : "1px solid #E5E7EB",
-                      background: disbursementMethod === "check" ? "#EFF6FF" : "#fff",
+                          ? "1px solid var(--border-blue)"
+                          : "1px solid var(--border-default)",
+                      background: disbursementMethod === "check" ? "var(--color-primary-light)" : "var(--surface-card)",
                     }}
                   >
                     <RadioGroupItem value="check" id="check" />
                     <div className="flex-1">
                       <span className="block text-[14px] font-bold text-inherit">Mail check to address</span>
-                      <span className="mt-0.5 block text-[12px] text-[#64748B]">
+                      <span className="mt-0.5 block text-[12px]" style={{ color: "var(--text-secondary)" }}>
                         Physical check mailed to your address
                       </span>
                     </div>
@@ -231,8 +233,8 @@ function LoanConfiguration() {
 
               {disbursementMethod === "eft" && (
                 <div
-                  className="mt-2 flex items-center gap-2 rounded-md border border-violet-200 bg-[#F5F3FF] px-2.5 py-1.5 text-[12px] font-medium text-violet-700 dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-300"
-                  style={{ marginTop: 8 }}
+                  className="mt-2 flex items-center gap-2 rounded-md border border-violet-200 px-2.5 py-1.5 text-[12px] font-medium text-violet-700 dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-300"
+                  style={{ marginTop: 8, background: "var(--accent-purple-tint)" }}
                 >
                   <span aria-hidden>⚡</span>
                   <span>EFT recommended — funds arrive in 2–3 days</span>
@@ -273,7 +275,7 @@ function LoanConfiguration() {
                 style={{
                   fontSize: 11,
                   fontWeight: 700,
-                  color: "#64748B",
+                  color: "var(--text-secondary)",
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
                   marginBottom: 12,
@@ -292,25 +294,25 @@ function LoanConfiguration() {
                   <label
                     key={opt.id}
                     htmlFor={`repay-${opt.id}`}
-                    className="relative flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-[#E5E7EB] bg-white p-2 text-center transition-all dark:border-gray-600 dark:bg-gray-900/40"
+                    className="relative flex cursor-pointer flex-col items-center gap-1 rounded-lg border bg-white p-2 text-center transition-all dark:border-gray-600 dark:bg-gray-900/40"
                     style={{
                       borderWidth: repaymentMethod === opt.id ? 2 : 1,
-                      borderColor: repaymentMethod === opt.id ? "#2563EB" : undefined,
-                      background: repaymentMethod === opt.id ? "#EFF6FF" : undefined,
+                      borderColor: repaymentMethod === opt.id ? "var(--color-primary)" : "var(--border-default)",
+                      background: repaymentMethod === opt.id ? "var(--color-primary-light)" : undefined,
                       padding: "10px 8px",
                     }}
                   >
                     {repaymentMethod === opt.id && (
                       <div
-                        className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#2563EB] text-white"
-                        style={{ fontSize: 10 }}
+                        className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-white"
+                        style={{ fontSize: 10, background: "var(--color-primary)" }}
                       >
                         <Check className="h-3 w-3" strokeWidth={3} />
                       </div>
                     )}
                     <span className="text-lg leading-none">{opt.emoji}</span>
                     <span className="text-[11px] font-bold leading-tight text-inherit">{opt.title}</span>
-                    <span className="text-[9px] leading-tight text-[#64748B]">{opt.sub}</span>
+                    <span className="text-[9px] leading-tight" style={{ color: "var(--text-secondary)" }}>{opt.sub}</span>
                     <RadioGroupItem value={opt.id} id={`repay-${opt.id}`} className="sr-only" />
                   </label>
                 ))}
@@ -449,8 +451,8 @@ function LoanConfiguration() {
                       style={{
                         width: 36,
                         height: 36,
-                        background: "rgba(16,185,129,0.1)",
-                        color: "#10B981",
+                        background: "var(--status-success-tint)",
+                        color: "var(--status-success)",
                       }}
                     >
                       <Landmark className="h-[18px] w-[18px]" />

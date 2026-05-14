@@ -258,7 +258,7 @@ export default function Contribution() {
                 }}
                 className="h-2.5 w-full cursor-pointer appearance-none rounded-full"
                 style={{
-                  background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${((percent - 1) / 24) * 100}%, #e5e7eb ${((percent - 1) / 24) * 100}%, #e5e7eb 100%)`,
+                  background: `linear-gradient(to right, var(--chart-blue) 0%, var(--chart-blue) ${((percent - 1) / 24) * 100}%, var(--slider-track) ${((percent - 1) / 24) * 100}%, var(--slider-track) 100%)`,
                 }}
               />
               <div className="mt-2 flex justify-between text-xs text-gray-400 dark:text-gray-600">
@@ -348,18 +348,18 @@ export default function Contribution() {
                 <AreaChart data={projectionData}>
                   <defs>
                     <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05} />
+                      <stop offset="5%" stopColor="var(--chart-blue)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="var(--chart-blue)" stopOpacity={0.05} />
                     </linearGradient>
                     <linearGradient id={`${gradientId}-market`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
+                      <stop offset="5%" stopColor="var(--chart-green)" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="var(--chart-green)" stopOpacity={0.05} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" opacity={0.3} vertical={false} />
-                  <XAxis dataKey="year" tick={{ fontSize: 10, fill: '#64748b' }} tickLine={false} axisLine={{ stroke: '#cbd5e1' }} interval={4} dy={5} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" opacity={0.3} vertical={false} />
+                  <XAxis dataKey="year" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} tickLine={false} axisLine={{ stroke: 'var(--chart-grid)' }} interval={4} dy={5} />
                   <YAxis
-                    tick={{ fontSize: 10, fill: '#64748b' }}
+                    tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
                     tickLine={false}
                     axisLine={false}
                     tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`}
@@ -376,24 +376,24 @@ export default function Contribution() {
                         return [`$${v.toLocaleString(locale)}`, t('enrollment.contribution_page.chart_gains')]
                       return [value, name]
                     }}
-                    contentStyle={{ borderRadius: 12, fontSize: 11, border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
+                    contentStyle={{ borderRadius: 12, fontSize: 11, border: '1px solid var(--border-default)', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
                   />
                   <ReferenceLine
                     y={projectedTotal * 0.75}
-                    stroke="#10b981"
+                    stroke="var(--chart-green)"
                     strokeDasharray="5 5"
                     strokeWidth={2}
                     label={{
                       value: t('enrollment.contribution_page.chart_target'),
                       position: 'insideTopRight',
-                      fill: '#059669',
+                      fill: 'var(--chart-green)',
                       fontSize: 10,
                       fontWeight: 600,
                     }}
                   />
-                  <Area type="monotone" dataKey="contributions" stroke="#64748b" fill="transparent" strokeWidth={2} strokeDasharray="5 5" />
-                  <Area type="monotone" dataKey="marketGain" stroke="#10b981" fill={`url(#${gradientId}-market)`} strokeWidth={2} stackId="1" />
-                  <Area type="monotone" dataKey="value" stroke="#3b82f6" fill={`url(#${gradientId})`} strokeWidth={3} />
+                  <Area type="monotone" dataKey="contributions" stroke="var(--text-muted)" fill="transparent" strokeWidth={2} strokeDasharray="5 5" />
+                  <Area type="monotone" dataKey="marketGain" stroke="var(--chart-green)" fill={`url(#${gradientId}-market)`} strokeWidth={2} stackId="1" />
+                  <Area type="monotone" dataKey="value" stroke="var(--chart-blue)" fill={`url(#${gradientId})`} strokeWidth={3} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>

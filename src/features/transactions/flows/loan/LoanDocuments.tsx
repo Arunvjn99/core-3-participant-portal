@@ -91,8 +91,8 @@ function LoanDocuments() {
               </p>
               {useDocuSign && (
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 style={{ width: 20, height: 20, color: "#10B981" }} />
-                  <span style={{ fontSize: 13, fontWeight: 600, color: "var(--c-green, #10B981)" }}>DocuSign completed successfully</span>
+                  <CheckCircle2 style={{ width: 20, height: 20, color: "var(--status-success)" }} />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: "var(--status-success)" }}>DocuSign completed successfully</span>
                 </div>
               )}
             </div>
@@ -137,7 +137,7 @@ function LoanDocuments() {
                     <div className="flex items-center gap-2.5 mb-1">
                       <h3 style={{ fontSize: 14, fontWeight: 700, color: "inherit" }}>{doc.name}</h3>
                       {doc.required && (
-                        <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 6, background: "rgba(220,38,38,0.1)", color: "var(--c-red, #EF4444)" }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 6, background: "var(--status-danger-tint)", color: "var(--status-danger)" }}>
                           Required
                         </span>
                       )}
@@ -146,7 +146,7 @@ function LoanDocuments() {
                   </div>
 
                   {isUploaded ? (
-                    <CheckCircle2 className="flex-shrink-0" style={{ width: 24, height: 24, color: "#10B981" }} />
+                    <CheckCircle2 className="flex-shrink-0" style={{ width: 24, height: 24, color: "var(--status-success)" }} />
                   ) : (
                     <button
                       onClick={() => handleFileUpload(doc.name)}

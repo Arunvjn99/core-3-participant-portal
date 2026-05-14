@@ -20,7 +20,7 @@ function getPasswordStrength(password: string) {
   const score = Object.values(checks).filter(Boolean).length
   const labels = ['', 'Weak', 'Fair', 'Good', 'Strong']
   const tailwindColors = ['', 'bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500']
-  const textColors = ['', '#dc2626', '#ca8a04', '#ca8a04', '#16a34a']
+  const textColors = ['', 'var(--strength-weak)', 'var(--strength-fair)', 'var(--strength-good)', 'var(--strength-strong)']
   return {
     checks,
     score,
@@ -80,7 +80,7 @@ export default function SignupPage() {
 
   const displayCompanies = companies.length > 0 ? companies : FALLBACK_COMPANIES
   const strength = getPasswordStrength(form.password)
-  const primaryColor = selectedCompany?.primary_color || '#2563EB'
+  const primaryColor = selectedCompany?.primary_color || 'var(--color-primary)'
 
   const handleCompanySelect = (company: Company) => {
     setSelectedCompany(company)
@@ -192,7 +192,7 @@ export default function SignupPage() {
               ) : (
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 text-white font-bold text-sm shrink-0"
-                  style={{ background: company.primary_color || '#2563EB' }}
+                  style={{ background: company.primary_color || 'var(--color-primary)' }}
                 >
                   {company.name.charAt(0)}
                 </div>

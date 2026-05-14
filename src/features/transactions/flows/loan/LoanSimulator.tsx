@@ -22,7 +22,7 @@ const LOAN_TYPE_PILLS: { id: LoanTypeId; label: string }[] = [
 const capLabelStyle: CSSProperties = {
   fontSize: 11,
   fontWeight: 600,
-  color: "#6B7280",
+  color: "var(--text-secondary)",
   letterSpacing: "0.08em",
   textTransform: "uppercase",
 };
@@ -196,7 +196,7 @@ function LoanSimulator() {
                 left: 0,
                 right: 0,
                 height: 3,
-                background: "linear-gradient(90deg, #2563EB, #0EA5E9)",
+                background: "linear-gradient(90deg, var(--chart-blue), var(--chart-sky))",
                 borderRadius: "16px 16px 0 0",
               }}
             />
@@ -204,7 +204,7 @@ function LoanSimulator() {
             <div className="flex flex-col">
               <div
                 style={{
-                  borderBottom: "1px solid #F3F4F6",
+                  borderBottom: "1px solid var(--border-light)",
                   paddingBottom: 10,
                   marginBottom: 14,
                 }}
@@ -219,7 +219,7 @@ function LoanSimulator() {
                 <div
                   className="flex w-full"
                   style={{
-                    background: "#F3F4F6",
+                    background: "var(--surface-elevated)",
                     borderRadius: 10,
                     padding: 4,
                   }}
@@ -239,9 +239,9 @@ function LoanSimulator() {
                           fontWeight: selected ? 600 : 500,
                           cursor: "pointer",
                           border: "none",
-                          background: selected ? "#FFFFFF" : "transparent",
-                          color: selected ? "#2563EB" : "#6B7280",
-                          boxShadow: selected ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
+                          background: selected ? "var(--surface-card)" : "transparent",
+                          color: selected ? "var(--color-primary)" : "var(--text-secondary)",
+                          boxShadow: selected ? "var(--shadow-subtle)" : "none",
                         }}
                       >
                         {label}
@@ -261,11 +261,11 @@ function LoanSimulator() {
                     className="w-full appearance-none bg-white"
                     style={{
                       height: 36,
-                      border: "1px solid #E5E7EB",
+                      border: "1px solid var(--input-border)",
                       borderRadius: 8,
                       padding: "6px 32px 6px 10px",
                       fontSize: 13,
-                      color: "#111827",
+                      color: "var(--text-primary)",
                       outline: "none",
                     }}
                   >
@@ -277,7 +277,8 @@ function LoanSimulator() {
                     ))}
                   </select>
                   <ChevronDown
-                    className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#9CA3AF]"
+                    className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2"
+                    style={{ color: "var(--input-placeholder)" }}
                     aria-hidden
                   />
                 </div>
@@ -287,7 +288,7 @@ function LoanSimulator() {
               <div>
                 <div className="mb-1.5 flex items-center justify-between">
                   <span style={capLabelStyle}>Loan amount</span>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: "#2563EB" }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: "var(--color-primary)" }}>
                     ${formatAmount(amortPrincipal)}
                   </span>
                 </div>
@@ -295,12 +296,12 @@ function LoanSimulator() {
                   className="flex items-center bg-white"
                   style={{
                     height: 38,
-                    border: "1px solid #E5E7EB",
+                    border: "1px solid var(--input-border)",
                     borderRadius: 8,
                     padding: "6px 10px",
                   }}
                 >
-                  <span className="mr-0.5 shrink-0 text-[15px] font-bold text-[#9CA3AF]">$</span>
+                  <span className="mr-0.5 shrink-0 text-[15px] font-bold" style={{ color: "var(--input-placeholder)" }}>$</span>
                   <input
                     type="text"
                     inputMode="numeric"
@@ -308,7 +309,7 @@ function LoanSimulator() {
                     onChange={handleAmountInputChange}
                     onBlur={handleAmountBlur}
                     className="min-w-0 flex-1 border-0 bg-transparent p-0 outline-none"
-                    style={{ fontSize: 15, fontWeight: 700, color: "#111827" }}
+                    style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)" }}
                   />
                 </div>
                 {showAmountError && (
@@ -329,8 +330,8 @@ function LoanSimulator() {
                   className="mt-1.5"
                 />
                 <div className="mt-1 flex justify-between">
-                  <span className="text-[11px] font-medium text-[#6B7280]">$1,000</span>
-                  <span className="text-[11px] font-medium text-[#6B7280]">$10,000 max</span>
+                  <span className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>$1,000</span>
+                  <span className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>$10,000 max</span>
                 </div>
               </div>
 
@@ -338,7 +339,7 @@ function LoanSimulator() {
               <div>
                 <div className="mb-1.5 flex items-center justify-between">
                   <span style={capLabelStyle}>Loan tenure</span>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: "#2563EB" }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: "var(--color-primary)" }}>
                     {tenure} {tenure === 1 ? "year" : "years"}
                   </span>
                 </div>
@@ -351,8 +352,8 @@ function LoanSimulator() {
                   className="mt-0"
                 />
                 <div className="mt-1 flex justify-between">
-                  <span className="text-[11px] font-medium text-[#6B7280]">1 year</span>
-                  <span className="text-[11px] font-medium text-[#6B7280]">5 years max</span>
+                  <span className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>1 year</span>
+                  <span className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>5 years max</span>
                 </div>
               </div>
               </div>
@@ -384,7 +385,7 @@ function LoanSimulator() {
                   left: 0,
                   right: 0,
                   height: 3,
-                  background: "linear-gradient(90deg, #2563EB, #0EA5E9)",
+                  background: "linear-gradient(90deg, var(--chart-blue), var(--chart-sky))",
                   borderRadius: "16px 16px 0 0",
                 }}
               />
@@ -406,7 +407,7 @@ function LoanSimulator() {
                 <div className="mb-1.5 flex items-center gap-2">
                   <div
                     className="flex items-center justify-center"
-                    style={{ width: 28, height: 28, borderRadius: 8, background: "var(--brand-primary)", color: "#fff" }}
+                    style={{ width: 28, height: 28, borderRadius: 8, background: "var(--brand-primary)", color: "var(--text-inverse)" }}
                   >
                     <DollarSign className="h-3.5 w-3.5" />
                   </div>
@@ -432,9 +433,9 @@ function LoanSimulator() {
                   {
                     label: "Total Payback",
                     value: `$${Math.round(totalPayback).toLocaleString()}`,
-                    bg: "rgba(16,185,129,0.1)",
-                    color: "#10B981",
-                    dotColor: "#10B981",
+                    bg: "var(--status-success-tint)",
+                    color: "var(--status-success)",
+                    dotColor: "var(--status-success)",
                   },
                 ].map((item, i) => (
                   <div key={i} style={{ background: item.bg, borderRadius: 10, padding: "10px 14px" }}>

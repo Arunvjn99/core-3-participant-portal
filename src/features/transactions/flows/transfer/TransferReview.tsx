@@ -5,7 +5,7 @@ import { useTransferFlow } from "./TransferFlowLayout";
 import { ArrowRight } from "lucide-react";
 import { FlowPageHeader, FlowCard, FlowCardTitle, FlowInfoBanner, FlowNavButtons, FlowSuccessState } from "../../components/FlowUI";
 
-const COLORS = ["#3b82f6", "#8b5cf6", "#10b981"];
+const COLORS = ["var(--chart-blue)", "var(--chart-purple, #8b5cf6)", "var(--chart-green)"];
 
 function TransferReview() {
   const navigate = useNavigate();
@@ -48,7 +48,7 @@ function TransferReview() {
                 <div className="flex items-center gap-4 mb-2">
                   <div className="flex-1 flex items-center gap-2">
                     <span style={{ fontSize: 12, fontWeight: 500, color: "inherit" }}>Current</span>
-                    <div className="flex-1 overflow-hidden" style={{ height: 6, borderRadius: 3, background: "var(--tx-track, #E2E8F0)" }}>
+                    <div className="flex-1 overflow-hidden" style={{ height: 6, borderRadius: 3, background: "var(--slider-track)" }}>
                       <div className="h-full" style={{ width: `${fund.currentAllocation}%`, backgroundColor: COLORS[index], opacity: 0.5, borderRadius: 3 }} />
                     </div>
                     <span style={{ fontSize: 13, fontWeight: 600, color: "inherit", minWidth: 40 }}>{fund.currentAllocation}%</span>
@@ -56,16 +56,16 @@ function TransferReview() {
                   <ArrowRight style={{ width: 16, height: 16, color: "inherit" }} />
                   <div className="flex-1 flex items-center gap-2">
                     <span style={{ fontSize: 12, fontWeight: 500, color: "inherit" }}>New</span>
-                    <div className="flex-1 overflow-hidden" style={{ height: 6, borderRadius: 3, background: "var(--tx-track, #E2E8F0)" }}>
+                    <div className="flex-1 overflow-hidden" style={{ height: 6, borderRadius: 3, background: "var(--slider-track)" }}>
                       <div className="h-full" style={{ width: `${fund.newAllocation}%`, backgroundColor: COLORS[index], borderRadius: 3 }} />
                     </div>
-                    <span style={{ fontSize: 13, fontWeight: hasChanged ? 700 : 600, color: hasChanged ? "var(--brand-primary)" : "var(--c-text-primary)", minWidth: 40 }}>
+                    <span style={{ fontSize: 13, fontWeight: hasChanged ? 700 : 600, color: hasChanged ? "var(--color-primary)" : "var(--text-primary)", minWidth: 40 }}>
                       {fund.newAllocation}%
                     </span>
                   </div>
                 </div>
                 {hasChanged && (
-                  <p style={{ fontSize: 12, fontWeight: 700, color: change > 0 ? "var(--c-green, #10B981)" : "var(--c-red, #EF4444)" }}>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: change > 0 ? "var(--status-success)" : "var(--status-danger)" }}>
                     {change > 0 ? "+" : ""}{change}% change
                   </p>
                 )}
@@ -85,8 +85,8 @@ function TransferReview() {
             "This change applies to future contributions and existing balance",
           ].map((text, i) => (
             <li key={i} className="flex items-start gap-2.5">
-              <span className="rounded-full mt-1.5 flex-shrink-0" style={{ width: 6, height: 6, background: "var(--brand-primary)" }} />
-              <span style={{ fontSize: 13, fontWeight: 500, color: "var(--brand-primary)" }}>{text}</span>
+              <span className="rounded-full mt-1.5 flex-shrink-0" style={{ width: 6, height: 6, background: "var(--color-primary)" }} />
+              <span style={{ fontSize: 13, fontWeight: 500, color: "var(--color-primary)" }}>{text}</span>
             </li>
           ))}
         </ul>

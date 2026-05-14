@@ -28,7 +28,7 @@ export function EnrollmentShell() {
   const showStepper = !location.pathname.includes('/enrollment/success')
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f5f7fa] dark:bg-gray-950">
+    <div className="flex min-h-screen flex-col bg-[var(--surface-shell)] dark:bg-gray-950">
       <div className="flex h-12 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 dark:border-gray-700 dark:bg-gray-900 sm:px-6">
         <div className="flex items-center gap-3">
           {activeStep > 1 && (

@@ -18,7 +18,7 @@ const scenarios: Record<
   Base: {
     projected: '$1,420,000',
     monthlyIncome: '$4,820',
-    color: '#3b82f6',
+    color: 'var(--chart-blue)', // #3b82f6
     score: 74,
     data: [
       { age: 35, projected: 287 },
@@ -33,7 +33,7 @@ const scenarios: Record<
   'Market -10%': {
     projected: '$1,120,000',
     monthlyIncome: '$3,800',
-    color: '#ef4444',
+    color: 'var(--chart-red)', // #ef4444
     score: 58,
     data: [
       { age: 35, projected: 287 },
@@ -48,7 +48,7 @@ const scenarios: Record<
   'Market +10%': {
     projected: '$1,780,000',
     monthlyIncome: '$6,040',
-    color: '#10b981',
+    color: 'var(--chart-green)', // #10b981
     score: 92,
     data: [
       { age: 35, projected: 287 },
@@ -102,7 +102,7 @@ function ReadinessRing({ score, color }: { score: number; color: string }) {
   return (
     <div className="relative">
       <svg width="96" height="96" viewBox="0 0 96 96">
-        <circle cx="48" cy="48" r="40" fill="none" stroke="#f3f4f6" strokeWidth="7" />
+        <circle cx="48" cy="48" r="40" fill="none" stroke="var(--border-light)" strokeWidth="7" />
         <circle
           cx="48"
           cy="48"
@@ -226,25 +226,25 @@ function RetirementPlanning() {
               </defs>
               <XAxis
                 dataKey="age"
-                tick={{ fontSize: 11, fill: '#9ca3af' }}
+                tick={{ fontSize: 11, fill: '#9ca3af' }} // --text-muted (Recharts requires literal)
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v) => `${v}`}
               />
               <YAxis
-                tick={{ fontSize: 11, fill: '#9ca3af' }}
+                tick={{ fontSize: 11, fill: '#9ca3af' }} // --text-muted (Recharts requires literal)
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v) => `$${v}k`}
               />
               <ReferenceLine
                 y={goalValue}
-                stroke="#d1d5db"
+                stroke="#d1d5db" // --chart-grid light variant (Recharts requires literal)
                 strokeDasharray="6 4"
                 label={{
                   value: t('investments.retirement_chart_goal'),
                   position: 'insideTopRight',
-                  fill: '#9ca3af',
+                  fill: '#9ca3af', // --text-muted (Recharts requires literal)
                   fontSize: 10,
                 }}
               />

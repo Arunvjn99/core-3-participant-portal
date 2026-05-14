@@ -56,7 +56,7 @@ function RolloverFlowLayout() {
   return (
     <RolloverFlowContext.Provider value={{ rolloverData, updateRolloverData }}>
       <div className="min-h-screen bg-white dark:bg-gray-950">
-        <div className="dark:border-gray-800" style={{ background: 'transparent', borderBottom: '1px solid var(--tx-border-light, #F1F5F9)' }}>
+        <div className="dark:border-gray-800" style={{ background: 'transparent', borderBottom: '1px solid var(--border-light)' }}>
           <div className="mx-auto max-w-[1200px] px-4 sm:px-12">
             <FlowProgress steps={progressSteps} currentStep={currentStep} />
           </div>

@@ -146,7 +146,7 @@ function QuickActionCard({
             </Badge>
           ) : null}
         </div>
-        <p className="mt-1 text-xs font-semibold leading-snug text-primary">{item.keyLine}</p>
+        <p className="mt-1 text-xs font-bold leading-snug text-primary">{item.keyLine}</p>
         <p className="mt-0.5 line-clamp-1 text-[11px] leading-normal text-text-secondary">{item.supporting}</p>
       </div>
       {/* Bottom blue accent bar */}
@@ -355,48 +355,8 @@ export default function TransactionCenter() {
           {/* ── Main 2-col grid ── */}
           <div className="grid grid-cols-1 items-stretch gap-6 sm:gap-8 lg:grid-cols-[1fr_400px]">
 
-            {/* LEFT — Recent Transactions */}
-            <div className="flex flex-col">
-
-              <motion.section
-                className="flex flex-1 flex-col"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: 'easeOut', delay: 0.16 }}
-              >
-                <SectionHeader
-                  icon={<ChartBar className="h-4 w-4" />}
-                  title={t('transactions.recent_transactions')}
-                  subtitle={t('transactions.last_90_days')}
-                />
-                <Card padding="md" className="flex-1 rounded-2xl border border-border-default">
-                  <RecentTransactionsCompact />
-                </Card>
-              </motion.section>
-
-            </div>
-
-            {/* RIGHT — Draft Transactions + Retirement Outlook */}
+            {/* LEFT — Retirement Outlook + Recent Transactions */}
             <div className="flex flex-col gap-6 sm:gap-8">
-
-              <motion.section
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: 'easeOut', delay: 0.12 }}
-              >
-                <SectionHeader
-                  icon={<FilePen className="h-4 w-4" />}
-                  title={t('transactions.draft_transactions')}
-                  badge={{
-                    text: t('transactions.drafts_badge', { count: DRAFT_COUNT }),
-                    color: 'bg-primary/10 text-primary',
-                  }}
-                  subtitle={t('transactions.resume_subtitle')}
-                />
-                <Card padding="md" className="rounded-2xl border border-border-default">
-                  <DraftTransactions />
-                </Card>
-              </motion.section>
 
               <motion.section
                 initial={{ opacity: 0, y: 12 }}
@@ -419,6 +379,46 @@ export default function TransactionCenter() {
                   onTrack
                   delay={0.2}
                 />
+              </motion.section>
+
+              <motion.section
+                className="flex flex-1 flex-col"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: 'easeOut', delay: 0.16 }}
+              >
+                <SectionHeader
+                  icon={<ChartBar className="h-4 w-4" />}
+                  title={t('transactions.recent_transactions')}
+                  subtitle={t('transactions.last_90_days')}
+                />
+                <Card padding="md" className="flex-1 rounded-2xl border border-border-default">
+                  <RecentTransactionsCompact />
+                </Card>
+              </motion.section>
+
+            </div>
+
+            {/* RIGHT — Draft Transactions only */}
+            <div className="flex flex-col gap-6 sm:gap-8">
+
+              <motion.section
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: 'easeOut', delay: 0.12 }}
+              >
+                <SectionHeader
+                  icon={<FilePen className="h-4 w-4" />}
+                  title={t('transactions.draft_transactions')}
+                  badge={{
+                    text: t('transactions.drafts_badge', { count: DRAFT_COUNT }),
+                    color: 'bg-primary/10 text-primary',
+                  }}
+                  subtitle={t('transactions.resume_subtitle')}
+                />
+                <Card padding="md" className="rounded-2xl border border-border-default">
+                  <DraftTransactions />
+                </Card>
               </motion.section>
 
             </div>

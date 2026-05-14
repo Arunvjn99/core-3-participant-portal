@@ -280,6 +280,14 @@ export function AppShell() {
               >
                 <Search className="h-4 w-4" />
               </button>
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="hidden h-9 w-9 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-elevated sm:flex"
+                aria-label={t('nav.toggle_theme')}
+              >
+                {resolvedMode === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </button>
               <div className="relative" ref={notificationsRef}>
                 <button
                   type="button"
@@ -363,7 +371,7 @@ export function AppShell() {
                   <div
                     role="listbox"
                     aria-label={t('language')}
-                    className="absolute right-0 top-full z-[60] mt-1 min-w-[140px] overflow-hidden rounded-[10px] border border-[#E5E7EB] bg-white p-1.5 shadow-[0_4px_16px_rgba(0,0,0,0.1)] dark:border-slate-600 dark:bg-[#1E293B]"
+                    className="absolute right-0 top-full z-[60] mt-1 min-w-[140px] overflow-hidden rounded-[10px] border border-border-default bg-surface-card p-1.5 shadow-[0_4px_16px_rgba(0,0,0,0.1)]"
                   >
                     {LANGUAGE_MENU_LANGS.map((lng) => {
                       const active = menuLang === lng
@@ -378,7 +386,7 @@ export function AppShell() {
                           className={`flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-[13px] transition-colors ${
                             active
                               ? 'font-medium text-text-primary'
-                              : 'text-text-primary hover:bg-[#F3F4F6] dark:hover:bg-[#334155]'
+                              : 'text-text-primary hover:bg-surface-elevated'
                           }`}
                         >
                           <span aria-hidden className="shrink-0 text-base leading-none">
@@ -407,7 +415,7 @@ export function AppShell() {
                     setLangMenuOpen(false)
                     setNotificationsOpen(false)
                   }}
-                  className="flex items-center gap-1 rounded-lg border-2 border-transparent bg-white py-1 pl-1 pr-1.5 transition-[border-color,background-color] duration-150 hover:bg-slate-50 active:border-[color:var(--brand-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--brand-primary)]/35 focus-visible:ring-offset-2 dark:bg-transparent dark:hover:bg-white/5 dark:focus-visible:ring-offset-gray-950"
+                  className="flex items-center gap-1 rounded-lg border-2 border-transparent bg-surface-card py-1 pl-1 pr-1.5 transition-[border-color,background-color] duration-150 hover:bg-surface-elevated active:border-[color:var(--brand-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--brand-primary)]/35 focus-visible:ring-offset-2"
                   aria-expanded={userMenuOpen}
                   aria-haspopup="menu"
                   aria-label={t('nav.user_menu')}
@@ -426,7 +434,7 @@ export function AppShell() {
                 {userMenuOpen && (
                   <div
                     role="menu"
-                    className="absolute right-0 top-full z-[60] mt-2 w-[min(100vw-2rem,17.5rem)] overflow-hidden rounded-xl border border-slate-200/90 bg-[#F8F9FB] shadow-lg dark:border-gray-700 dark:bg-gray-900"
+                    className="absolute right-0 top-full z-[60] mt-2 w-[min(100vw-2rem,17.5rem)] overflow-hidden rounded-xl border border-border-default bg-surface-elevated shadow-lg"
                   >
                     <div className="py-1.5">
                       <button
@@ -456,20 +464,6 @@ export function AppShell() {
                       >
                         {t('nav.settings')}
                       </Link>
-                    </div>
-                    <div className="border-t border-slate-200 dark:border-gray-700" />
-                    <div className="flex items-center justify-between gap-3 px-4 py-3">
-                      <span className="text-sm font-medium text-slate-900 dark:text-white">
-                        {t('nav.theme_label')}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={toggleTheme}
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-amber-500 transition-colors hover:bg-slate-200/80 dark:text-amber-300 dark:hover:bg-white/10"
-                        aria-label={t('nav.toggle_theme')}
-                      >
-                        {resolvedMode === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                      </button>
                     </div>
                     <div className="border-t border-slate-200 dark:border-gray-700" />
                     <button

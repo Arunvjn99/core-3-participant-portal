@@ -211,7 +211,7 @@ function BookingForm({
                 className="rounded-xl px-3 py-2 text-xs font-semibold transition-all"
                 style={
                   active
-                    ? { backgroundColor: 'var(--brand-primary)', color: '#fff' }
+                    ? { backgroundColor: 'var(--brand-primary)', color: 'var(--text-inverse)' }
                     : undefined
                 }
                 {...(!active && {
@@ -242,7 +242,7 @@ function BookingForm({
                 className="rounded-xl py-2 text-xs font-semibold transition-all"
                 style={
                   active
-                    ? { backgroundColor: 'var(--brand-primary)', color: '#fff' }
+                    ? { backgroundColor: 'var(--brand-primary)', color: 'var(--text-inverse)' }
                     : undefined
                 }
                 {...(!active && {
@@ -271,7 +271,7 @@ function BookingForm({
               className="flex-1 rounded-xl py-2 text-xs font-semibold capitalize transition-all"
               style={
                 meetingType === type
-                  ? { backgroundColor: 'var(--brand-primary)', color: '#fff' }
+                  ? { backgroundColor: 'var(--brand-primary)', color: 'var(--text-inverse)' }
                   : undefined
               }
               {...(meetingType !== type && {

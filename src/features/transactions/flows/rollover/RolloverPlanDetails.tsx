@@ -93,8 +93,8 @@ function RolloverPlanDetails() {
                 className="relative text-left transition-all duration-200 cursor-pointer"
                 style={{
                   padding: "16px 20px", borderRadius: 14,
-                  border: rolloverType === type.id ? "1.5px solid #2563EB" : "1.5px solid var(--c-border-color)",
-                  background: rolloverType === type.id ? "var(--c-blue-tint)" : "var(--c-card)" }}
+                  border: rolloverType === type.id ? "1.5px solid var(--border-blue)" : "1.5px solid var(--border-default)",
+                  background: rolloverType === type.id ? "var(--status-success-tint)" : "var(--c-card)" }}
               >
                 {rolloverType === type.id && (
                   <CheckCircle2 className="absolute top-3 right-3" style={{ width: 16, height: 16, color: "var(--brand-primary)" }} />
@@ -129,8 +129,7 @@ function RolloverPlanDetails() {
         <Card
           className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
-            boxShadow:
-              "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
+            boxShadow: "var(--shadow-elevated)" }}
         >
           <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
             Plan Information
@@ -220,7 +219,7 @@ function RolloverPlanDetails() {
         <div
           className="p-5 rounded-2xl bg-gradient-to-br from-blue-50/70 dark:from-blue-950/30 to-indigo-50/50 dark:to-indigo-950/20 border border-blue-100/60 dark:border-blue-800/60"
           style={{
-            boxShadow: "0 1px 3px rgba(59,130,246,0.04)" }}
+            boxShadow: "var(--shadow-subtle)" }}
         >
           <div className="flex items-start gap-3">
             <div className="p-2 rounded-lg bg-blue-100/70 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex-shrink-0">

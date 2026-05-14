@@ -2,11 +2,11 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import { Card, CardHeader, CardTitle } from '../../../design-system/components/Card'
 
 const FUNDS = [
-  { name: 'Target Date 2050', pct: 30, color: '#0052CC' },
-  { name: 'US Equity Index', pct: 25, color: '#4C9AFF' },
-  { name: 'International Equity', pct: 20, color: '#0747A6' },
-  { name: 'Bond Index', pct: 15, color: '#DEEBFF' },
-  { name: 'Stable Value', pct: 10, color: '#6B778C' },
+  { name: 'Target Date 2050', pct: 30, color: '#0052CC' }, // closest: --chart-blue
+  { name: 'US Equity Index', pct: 25, color: '#4C9AFF' }, // closest: --chart-blue variant
+  { name: 'International Equity', pct: 20, color: '#0747A6' }, // closest: --chart-blue dark
+  { name: 'Bond Index', pct: 15, color: '#DEEBFF' }, // closest: --chart-blue lightest
+  { name: 'Stable Value', pct: 10, color: '#6B778C' }, // closest: --chart-gray
 ]
 
 const chartData = FUNDS.map((f) => ({ name: f.name, value: f.pct }))

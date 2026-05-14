@@ -30,8 +30,8 @@ function LoanEligibility() {
         icon: <Wallet className="h-5 w-5" />,
         labelKey: 'loan.eligibility_outstanding' as const,
         value: '$0',
-        bg: 'rgba(16,185,129,0.1)',
-        color: '#10B981',
+        bg: 'var(--status-success-tint)',
+        color: 'var(--status-success)',
       },
       {
         icon: <DollarSign className="h-5 w-5" />,
@@ -52,14 +52,14 @@ function LoanEligibility() {
         labelKey: 'loan.eligibility_max_term' as const,
         value: t('loan.eligibility_max_term_value'),
         bg: 'var(--c-blue-tint)',
-        color: '#0EA5E9',
+        color: 'var(--chart-sky)',
       },
       {
         icon: <TrendingDown className="h-5 w-5" />,
         labelKey: 'loan.eligibility_payment_range' as const,
         value: '$96 - $203',
-        bg: 'rgba(245,158,11,0.1)',
-        color: '#F59E0B',
+        bg: 'var(--status-warning-tint)',
+        color: 'var(--status-warning)',
       },
     ],
     [t],
@@ -137,7 +137,7 @@ function LoanEligibility() {
       >
         <div
           style={{
-            background: 'rgba(245,158,11,0.1)',
+            background: 'var(--status-warning-tint)',
             border: '1px solid var(--c-border-amber)',
             borderRadius: 16,
             padding: '20px 24px',

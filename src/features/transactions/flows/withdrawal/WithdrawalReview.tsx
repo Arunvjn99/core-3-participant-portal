@@ -1,10 +1,9 @@
-import { Card } from "../../components/ui/card";
 import { Checkbox } from "../../components/ui/checkbox";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useWithdrawalFlow } from "./WithdrawalFlowLayout";
-import { Separator } from "../../components/ui/separator";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, ArrowLeft, DollarSign, AlertTriangle, Shield, Banknote } from "lucide-react";
+import { motion } from "framer-motion";
 
 function WithdrawalReview() {
   const navigate = useNavigate();
@@ -33,137 +32,182 @@ function WithdrawalReview() {
 
   if (submitted) {
     return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-950/30 flex items-center justify-center mb-4">
-          <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="flex flex-col items-center justify-center py-16"
+      >
+        <div className="flex h-16 w-16 items-center justify-center rounded-full border border-status-success/30 bg-status-success-bg mb-5">
+          <CheckCircle2 className="h-8 w-8 text-status-success" />
         </div>
-        <h2 style={{ fontSize: 26, fontWeight: 800, color: "inherit", letterSpacing: "-0.5px", lineHeight: "34px", marginBottom: 8 }}>
+        <h2 className="text-[26px] font-extrabold text-text-primary tracking-tight mb-2">
           Withdrawal Submitted
         </h2>
-        <p className="text-gray-600 dark:text-gray-300 text-center max-w-md mb-6">
+        <p className="text-[14px] text-text-secondary text-center max-w-md mb-6 leading-relaxed">
           Your withdrawal request has been submitted successfully. You'll receive confirmation shortly.
         </p>
-        <p className="text-sm text-gray-500 dark:text-gray-400">Redirecting to dashboard...</p>
-      </div>
+        <p className="text-[12px] text-text-muted">Redirecting to dashboard...</p>
+      </motion.div>
     );
   }
 
+  const deductions = [
+    { label: "Federal Tax Withholding (20%)", value: federalTax, isDeduction: true },
+    { label: "State Tax Withholding (5%)", value: stateTax, isDeduction: true },
+    { label: "Early Withdrawal Penalty (10%)", value: earlyPenalty, isDeduction: true },
+    { label: "Processing Fee", value: fees, isDeduction: true },
+  ];
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 style={{ fontSize: 26, fontWeight: 800, color: "inherit", letterSpacing: "-0.5px", lineHeight: "34px", marginBottom: 8 }}>
+    <div className="space-y-5">
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <h2 className="text-[26px] font-extrabold text-text-primary tracking-tight leading-tight mb-2">
           Review and Submit
         </h2>
-        <p style={{ fontSize: 14, fontWeight: 500, color: "inherit", lineHeight: "22px" }}>
-          Review your withdrawal details before submitting.
+        <p className="text-[14px] text-text-secondary leading-relaxed">
+          Review your withdrawal details carefully before submitting.
         </p>
-      </div>
+      </motion.div>
 
-      <Card className="p-6">
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-6">Withdrawal Summary</h3>
-
-        <div className="space-y-4">
-          <div>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Withdrawal Type</p>
-            <p className="font-medium text-gray-900 dark:text-white capitalize">
+      {/* Withdrawal Type & Source */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut", delay: 0.05 }}
+        className="rounded-[16px] border border-border-default bg-surface-card p-6"
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <DollarSign className="h-4 w-4 text-primary" />
+          <h3 className="text-[15px] font-bold text-text-primary tracking-tight">Withdrawal Details</h3>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="rounded-[10px] border border-border-default bg-surface-elevated p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary mb-1">Withdrawal Type</p>
+            <p className="text-[14px] font-bold text-text-primary capitalize">
               {withdrawalData.type?.replace("-", " ") || "Hardship Withdrawal"}
             </p>
           </div>
-
-          <Separator />
-
-          <div>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">Source Allocation</p>
-            {withdrawalData.sources?.map((source, index) => (
-              <div key={index} className="flex items-center justify-between py-1">
-                <p className="text-gray-900 dark:text-white">{source.name}</p>
-                <p className="font-medium text-gray-900 dark:text-white">${source.amount.toLocaleString()}</p>
-              </div>
-            ))}
-          </div>
-
-          <Separator />
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <p className="text-gray-900 dark:text-white">Withdrawal Amount</p>
-              <p className="font-semibold text-gray-900 dark:text-white">${amount.toLocaleString()}</p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-gray-900 dark:text-white">Federal Tax Withholding (20%)</p>
-              <p className="font-semibold text-red-600 dark:text-red-400">-${federalTax.toLocaleString()}</p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-gray-900 dark:text-white">State Tax Withholding (5%)</p>
-              <p className="font-semibold text-red-600 dark:text-red-400">-${stateTax.toLocaleString()}</p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-gray-900 dark:text-white">Early Withdrawal Penalty (10%)</p>
-              <p className="font-semibold text-red-600 dark:text-red-400">-${earlyPenalty.toLocaleString()}</p>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-gray-900 dark:text-white">Fees</p>
-              <p className="font-semibold text-red-600 dark:text-red-400">-${fees}</p>
-            </div>
-          </div>
-
-          <Separator className="border-gray-300 dark:border-gray-600" />
-
-          <div className="flex items-center justify-between py-2">
-            <p className="font-semibold text-gray-900 dark:text-white text-lg">Final Payout</p>
-            <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-              ${finalPayout.toLocaleString()}
+          <div className="rounded-[10px] border border-border-default bg-surface-elevated p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary mb-1">Payment Method</p>
+            <p className="text-[14px] font-bold text-text-primary">
+              {withdrawalData.paymentMethod === "eft" ? "Electronic Funds Transfer" : "Mail Check"}
             </p>
-          </div>
-
-          <Separator />
-
-          <div>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Payment Method</p>
-            <p className="font-medium text-gray-900 dark:text-white">
-              {withdrawalData.paymentMethod === "eft" 
-                ? "Electronic Funds Transfer" 
-                : "Mail Check"}
-            </p>
-            {withdrawalData.paymentMethod === "check" && (
-              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{withdrawalData.address}</p>
-            )}
           </div>
         </div>
-      </Card>
+        {withdrawalData.sources && withdrawalData.sources.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-border-default">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary mb-3">Source Allocation</p>
+            <div className="space-y-2">
+              {withdrawalData.sources.map((source, index) => (
+                <div key={index} className="flex items-center justify-between rounded-[8px] bg-surface-elevated px-3 py-2">
+                  <p className="text-[13px] text-text-primary">{source.name}</p>
+                  <p className="text-[13px] font-semibold text-text-primary">${source.amount.toLocaleString()}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </motion.div>
 
-      <Card className="p-6">
+      {/* Breakdown */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+        className="rounded-[16px] border border-border-default bg-surface-card p-6"
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <Banknote className="h-4 w-4 text-primary" />
+          <h3 className="text-[15px] font-bold text-text-primary tracking-tight">Payout Breakdown</h3>
+        </div>
+
+        {/* Gross amount */}
+        <div className="rounded-[10px] border border-primary/20 bg-primary/5 px-4 py-3 mb-3">
+          <div className="flex items-center justify-between">
+            <p className="text-[13px] font-semibold text-text-secondary">Withdrawal Amount</p>
+            <p className="text-[18px] font-extrabold text-primary">${amount.toLocaleString()}</p>
+          </div>
+        </div>
+
+        {/* Deductions */}
+        <div className="space-y-2 mb-3">
+          {deductions.map((d) => (
+            <div key={d.label} className="flex items-center justify-between px-1 py-1">
+              <p className="text-[13px] text-text-secondary">{d.label}</p>
+              <p className="text-[13px] font-semibold text-status-danger">-${d.value.toLocaleString()}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Final payout */}
+        <div className="rounded-[10px] border border-status-success/20 bg-status-success-bg px-4 py-3 mt-3">
+          <div className="flex items-center justify-between">
+            <p className="text-[14px] font-bold text-text-primary">Final Payout</p>
+            <p className="text-[24px] font-extrabold text-status-success">${finalPayout.toLocaleString()}</p>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Warning */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut", delay: 0.15 }}
+        className="rounded-[16px] border border-status-warning/30 bg-status-warning-bg p-4 flex gap-3"
+      >
+        <AlertTriangle className="h-5 w-5 shrink-0 text-status-warning mt-0.5" />
+        <p className="text-[12px] text-text-secondary leading-relaxed">
+          This withdrawal will permanently reduce your retirement savings and cannot be reversed once processed. Additional taxes may apply at year-end.
+        </p>
+      </motion.div>
+
+      {/* Agreement */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+        className="rounded-[16px] border border-border-default bg-surface-card p-5"
+      >
         <div className="flex items-start gap-3">
-          <Checkbox
-            id="terms"
-            checked={agreed}
-            onCheckedChange={(checked) => setAgreed(checked === true)}
-          />
+          <Shield className="h-5 w-5 shrink-0 text-primary mt-0.5" />
           <div className="flex-1">
-            <label
-              htmlFor="terms"
-              className="text-sm text-gray-900 dark:text-white cursor-pointer leading-relaxed"
-            >
-              I understand that this withdrawal will permanently reduce my retirement savings, 
-              may be subject to taxes and penalties, and cannot be reversed once processed. 
-              I have consulted with a financial advisor or understand the consequences of this withdrawal.
-            </label>
+            <p className="text-[13px] font-bold text-text-primary mb-2">Withdrawal Agreement</p>
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="terms"
+                checked={agreed}
+                onCheckedChange={(checked) => setAgreed(checked === true)}
+              />
+              <label
+                htmlFor="terms"
+                className="cursor-pointer text-[13px] text-text-secondary leading-relaxed"
+              >
+                I understand that this withdrawal will permanently reduce my retirement savings,
+                may be subject to taxes and penalties, and cannot be reversed once processed.
+                I have consulted with a financial advisor or understand the consequences of this withdrawal.
+              </label>
+            </div>
           </div>
         </div>
-      </Card>
+      </motion.div>
 
-      <div className="flex justify-between items-center" style={{ paddingTop: 16 }}>
+      <div className="flex justify-between items-center pt-2">
         <button
           onClick={() => navigate("/transactions/withdrawal/payment")}
-          className="flex min-h-[2.75rem] items-center gap-2 transition-all duration-200 cursor-pointer"
-          style={{ background: "transparent", border: "var(--c-border)", color: "inherit", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
+          className="flex items-center gap-2 rounded-[10px] border border-border-default bg-transparent px-4 py-2.5 text-[13px] font-semibold text-text-primary transition-colors hover:bg-surface-elevated"
         >
+          <ArrowLeft className="h-4 w-4" />
           Back
         </button>
         <button
           onClick={handleSubmit}
           disabled={!agreed || isSubmitting}
-          className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn-brand flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "Submitting..." : "Submit Withdrawal Request"}
         </button>

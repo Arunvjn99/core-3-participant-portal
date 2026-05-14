@@ -8,19 +8,19 @@ function PortfolioAllocation() {
     {
       groupKey: 'investments.allocation_growth' as const,
       percentage: 55,
-      color: '#3b82f6',
+      color: 'var(--chart-blue)', // #3b82f6
       items: ['US Large Cap (35%)', "Int'l Stocks (12%)", 'Small Cap (8%)'],
     },
     {
       groupKey: 'investments.allocation_income' as const,
       percentage: 30,
-      color: 'var(--brand-purple-light)',
+      color: 'var(--chart-purple)', // #8b5cf6 (brand-purple-light)
       items: ['Investment Grade Bonds (18%)', 'TIPS (7%)', 'High Yield (5%)'],
     },
     {
       groupKey: 'investments.allocation_defensive' as const,
       percentage: 15,
-      color: '#06b6d4',
+      color: 'var(--chart-cyan)', // #06b6d4
       items: ['Money Market (8%)', 'Stable Value (5%)', 'Cash (2%)'],
     },
   ]

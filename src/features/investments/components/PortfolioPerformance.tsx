@@ -85,11 +85,11 @@ function PortfolioPerformance() {
       <div style={{ width: '100%', height: 240, minHeight: 240, minWidth: 0 }}>
         <ResponsiveContainer width="100%" height={240}>
           <LineChart data={currentData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-            <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} domain={['auto', 'auto']} />
-            <Line type="monotone" dataKey="portfolio" stroke="#3b82f6" strokeWidth={2} dot={false} name={t('investments.performance_portfolio')} />
-            <Line type="monotone" dataKey="sp500" stroke="#9ca3af" strokeWidth={2} strokeDasharray="4 4" dot={false} name={t('investments.performance_benchmark')} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} /> {/* --chart-grid (Recharts requires literal) */}
+            <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} /> {/* --text-muted */}
+            <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} domain={['auto', 'auto']} /> {/* --text-muted */}
+            <Line type="monotone" dataKey="portfolio" stroke="var(--chart-blue)" strokeWidth={2} dot={false} name={t('investments.performance_portfolio')} />
+            <Line type="monotone" dataKey="sp500" stroke="var(--chart-gray)" strokeWidth={2} strokeDasharray="4 4" dot={false} name={t('investments.performance_benchmark')} />
           </LineChart>
         </ResponsiveContainer>
       </div>

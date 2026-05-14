@@ -5,10 +5,10 @@ import { Badge } from '../../../design-system/components/Badge'
 import { formatCurrency } from '../../../lib/utils'
 
 const ALLOCATION = [
-  { name: 'US Equity', pct: 45, color: '#0052CC' },
-  { name: 'Intl Equity', pct: 20, color: '#4C9AFF' },
-  { name: 'Bonds', pct: 25, color: '#0747A6' },
-  { name: 'Stable Value', pct: 10, color: '#6B778C' },
+  { name: 'US Equity', pct: 45, color: '#0052CC' }, // closest: --chart-blue
+  { name: 'Intl Equity', pct: 20, color: '#4C9AFF' }, // closest: --chart-blue variant
+  { name: 'Bonds', pct: 25, color: '#0747A6' }, // closest: --chart-blue dark
+  { name: 'Stable Value', pct: 10, color: '#6B778C' }, // closest: --chart-gray
 ]
 
 const chartData = ALLOCATION.map((a) => ({ name: a.name, value: a.pct }))

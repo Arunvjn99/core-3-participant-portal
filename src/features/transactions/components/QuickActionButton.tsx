@@ -18,7 +18,7 @@ function QuickActionButton({
 }: QuickActionButtonProps) {
   return (
     <motion.div
-      whileHover={{ y: -2, boxShadow: "0 8px 24px rgba(37,99,235,0.18)" }}
+      whileHover={{ y: -2, boxShadow: "var(--shadow-elevated)" }}
       whileTap={{ scale: 0.985 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       onClick={onClick}

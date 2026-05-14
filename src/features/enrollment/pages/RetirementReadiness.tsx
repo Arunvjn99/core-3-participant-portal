@@ -314,7 +314,7 @@ function RetirementReadiness() {
   }
 
   const circumference = 2 * Math.PI * 70
-  const scoreColor = score >= 40 ? '#2563eb' : '#64748b'
+  const scoreColor = score >= 40 ? 'var(--color-primary)' : 'var(--text-secondary)'
 
   const getMessage = () => {
     if (score >= 80) return t('enrollment.readiness.score_message_80')

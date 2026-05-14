@@ -78,7 +78,7 @@ function TransferAmount() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.05 }}
       >
-        <div className="flex items-center gap-1 p-1 w-fit" style={{ background: "transparent", borderRadius: 12, border: "1px solid var(--tx-border-light, #F1F5F9)" }}>
+        <div className="flex items-center gap-1 p-1 w-fit" style={{ background: "transparent", borderRadius: 12, border: "1px solid var(--border-light)" }}>
           {([["dollar", "Dollar Amount", <DollarSign key="d" className="w-3.5 h-3.5" />], ["percent", "Percentage", <Percent key="p" className="w-3.5 h-3.5" />]] as const).map(([id, label, icon]) => (
             <button
               key={id}
@@ -87,9 +87,9 @@ function TransferAmount() {
               style={{
                 padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: method === id ? 700 : 500,
                 background: method === id ? "var(--c-card)" : "transparent",
-                color: method === id ? "var(--brand-primary)" : "var(--c-text-muted)",
-                boxShadow: method === id ? "0 1px 3px rgba(0,0,0,0.06)" : undefined,
-                border: method === id ? "1px solid var(--c-border-color)" : "1px solid transparent",
+                color: method === id ? "var(--color-primary)" : "var(--text-muted)",
+                boxShadow: method === id ? "var(--shadow-subtle)" : undefined,
+                border: method === id ? "1px solid var(--border-default)" : "1px solid transparent",
               }}
             >
               {icon}
@@ -105,7 +105,7 @@ function TransferAmount() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
       >
-        <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--tx-border-light, #F1F5F9)", padding: "24px 28px" }}>
+        <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--border-light)", padding: "24px 28px" }}>
           {method === "dollar" ? (
             <div>
               <label className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-3 block">
@@ -176,20 +176,20 @@ function TransferAmount() {
           )}
 
           {/* Balance Bar */}
-          <div className="mt-5 pt-5" style={{ borderTop: "1px solid var(--tx-border-light, #F1F5F9)" }}>
+          <div className="mt-5 pt-5" style={{ borderTop: "1px solid var(--border-light)" }}>
             <div className="flex items-center justify-between mb-2">
               <span style={{ fontSize: 12, fontWeight: 500, color: "inherit" }}>Source Balance</span>
               <span style={{ fontSize: 12, fontWeight: 700, color: "inherit" }}>
                 ${maxBalance.toLocaleString()}
               </span>
             </div>
-            <div className="overflow-hidden" style={{ height: 8, borderRadius: 4, background: "var(--tx-track, #E2E8F0)" }}>
+            <div className="overflow-hidden" style={{ height: 8, borderRadius: 4, background: "var(--slider-track)" }}>
               <div
                 className="h-full transition-all duration-200"
                 style={{
                   width: `${Math.min(100, effectivePercent)}%`,
                   borderRadius: 4,
-                  background: effectivePercent <= 100 ? "var(--brand-primary)" : "#EF4444",
+                  background: effectivePercent <= 100 ? "var(--color-primary)" : "var(--status-danger)",
                 }}
               />
             </div>
@@ -200,10 +200,10 @@ function TransferAmount() {
       {parsedAmount > maxBalance && (
         <div
           className="flex items-center gap-2"
-          style={{ background: "rgba(220,38,38,0.1)", border: "1px solid var(--c-border-red)", borderRadius: 14, padding: "14px 16px" }}
+          style={{ background: "var(--status-danger-tint)", border: "1px solid var(--border-red)", borderRadius: 14, padding: "14px 16px" }}
         >
-          <Info className="flex-shrink-0" style={{ width: 16, height: 16, color: "var(--c-red, #EF4444)" }} />
-          <p style={{ fontSize: 12, fontWeight: 500, color: "var(--c-red, #B91C1C)" }}>
+          <Info className="flex-shrink-0" style={{ width: 16, height: 16, color: "var(--status-danger)" }} />
+          <p style={{ fontSize: 12, fontWeight: 500, color: "var(--status-danger-text)" }}>
             Transfer amount exceeds available balance of $
             {maxBalance.toLocaleString()}.
           </p>

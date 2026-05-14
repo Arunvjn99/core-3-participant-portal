@@ -4,7 +4,7 @@ import { TrendingUp, Shield, AlertTriangle } from "lucide-react";
 import { FlowPageHeader, FlowCard, FlowCardTitle, FlowLabel, FlowValue, FlowInfoBanner, FlowNavButtons } from "../../components/FlowUI";
 import RetirementImpactWidget from "../../components/RetirementImpactWidget";
 
-const COLORS = ["#3b82f6", "#8b5cf6", "#10b981"];
+const COLORS = ["var(--chart-blue)", "var(--chart-purple, #8b5cf6)", "var(--chart-green)"];
 
 function TransferImpact() {
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ function TransferImpact() {
       {/* Risk Level Change */}
       <FlowCard delay={0.05}>
         <div className="flex items-start gap-4">
-          <div className="flex items-center justify-center flex-shrink-0" style={{ width: 44, height: 44, borderRadius: 12, background: "var(--c-blue-tint)", color: "var(--brand-primary)" }}>
+          <div className="flex items-center justify-center flex-shrink-0" style={{ width: 44, height: 44, borderRadius: 12, background: "var(--color-primary-light)", color: "var(--color-primary)" }}>
             <Shield className="w-5 h-5" />
           </div>
           <div className="flex-1">
@@ -32,14 +32,14 @@ function TransferImpact() {
               <div><FlowLabel>Current Risk Level</FlowLabel><FlowValue>{currentRiskLevel}</FlowValue></div>
               <div>
                 <FlowLabel>New Risk Level</FlowLabel>
-                <p style={{ fontSize: 20, fontWeight: 800, color: newRiskLevel === currentRiskLevel ? "var(--c-text-primary)" : "var(--brand-primary)", letterSpacing: "-0.3px" }}>
+                <p style={{ fontSize: 20, fontWeight: 800, color: newRiskLevel === currentRiskLevel ? "var(--text-primary)" : "var(--color-primary)", letterSpacing: "-0.3px" }}>
                   {newRiskLevel}
                 </p>
               </div>
             </div>
             {newRiskLevel !== currentRiskLevel && (
-              <div className="mt-4" style={{ padding: "12px 16px", background: "var(--c-blue-tint)", borderRadius: 10, border: "1px solid var(--c-border-blue)" }}>
-                <p style={{ fontSize: 13, fontWeight: 500, color: "var(--brand-primary)" }}>
+              <div className="mt-4" style={{ padding: "12px 16px", background: "var(--color-primary-light)", borderRadius: 10, border: "1px solid var(--border-blue)" }}>
+                <p style={{ fontSize: 13, fontWeight: 500, color: "var(--color-primary)" }}>
                   Your portfolio risk level will change from <span style={{ fontWeight: 700 }}>{currentRiskLevel}</span> to{" "}
                   <span style={{ fontWeight: 700 }}>{newRiskLevel}</span> based on your new allocation.
                 </p>
@@ -63,16 +63,16 @@ function TransferImpact() {
                 <div className="flex items-center gap-4">
                   <span style={{ fontSize: 13, fontWeight: 500, color: "inherit" }}>{fund.currentAllocation}%</span>
                   <span style={{ fontSize: 12, color: "inherit" }}>→</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: fund.newAllocation !== fund.currentAllocation ? "var(--brand-primary)" : "var(--c-text-primary)" }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: fund.newAllocation !== fund.currentAllocation ? "var(--color-primary)" : "var(--text-primary)" }}>
                     {fund.newAllocation}%
                   </span>
                 </div>
               </div>
               <div className="flex gap-2">
-                <div className="flex-1 overflow-hidden" style={{ height: 6, borderRadius: 3, background: "var(--tx-track, #E2E8F0)" }}>
+                <div className="flex-1 overflow-hidden" style={{ height: 6, borderRadius: 3, background: "var(--slider-track)" }}>
                   <div className="h-full" style={{ width: `${fund.currentAllocation}%`, backgroundColor: COLORS[index], opacity: 0.5, borderRadius: 3 }} />
                 </div>
-                <div className="flex-1 overflow-hidden" style={{ height: 6, borderRadius: 3, background: "var(--tx-track, #E2E8F0)" }}>
+                <div className="flex-1 overflow-hidden" style={{ height: 6, borderRadius: 3, background: "var(--slider-track)" }}>
                   <div className="h-full" style={{ width: `${fund.newAllocation}%`, backgroundColor: COLORS[index], borderRadius: 3 }} />
                 </div>
               </div>
@@ -84,7 +84,7 @@ function TransferImpact() {
       {/* Expected Returns */}
       <FlowCard delay={0.15}>
         <div className="flex items-start gap-4">
-          <div className="flex items-center justify-center flex-shrink-0" style={{ width: 44, height: 44, borderRadius: 12, background: "var(--c-green-tint, rgba(16,185,129,0.1))", color: "var(--c-green, #10B981)" }}>
+          <div className="flex items-center justify-center flex-shrink-0" style={{ width: 44, height: 44, borderRadius: 12, background: "var(--status-success-tint)", color: "var(--status-success)" }}>
             <TrendingUp className="w-5 h-5" />
           </div>
           <div className="flex-1">
@@ -106,8 +106,8 @@ function TransferImpact() {
       {newRiskLevel === "Moderate–High" && (
         <FlowInfoBanner variant="warning">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="flex-shrink-0 mt-0.5" style={{ width: 20, height: 20, color: "var(--c-amber, #F59E0B)" }} />
-            <p className="leading-relaxed" style={{ fontSize: 13, fontWeight: 500, color: "var(--c-amber-dark, #92400E)" }}>
+            <AlertTriangle className="flex-shrink-0 mt-0.5" style={{ width: 20, height: 20, color: "var(--status-warning)" }} />
+            <p className="leading-relaxed" style={{ fontSize: 13, fontWeight: 500, color: "var(--status-warning-text)" }}>
               <span style={{ fontWeight: 700 }}>Higher Risk Notice:</span> Your new allocation
               has a higher risk profile. While this may offer greater return potential, it
               also means increased volatility and potential for losses.

@@ -42,19 +42,19 @@ function SectionHeader({
         {icon}
       </div>
       <div className="flex items-center gap-2.5 flex-wrap">
-        <h2 className="text-[15px] sm:text-[16px] font-bold text-slate-900 dark:text-white tracking-[-0.3px]">
+        <h2 className="text-[17px] sm:text-[18px] font-bold text-slate-900 dark:text-white tracking-[-0.3px]">
           {title}
         </h2>
         {badge && (
           <span
-            className={`text-[11px] font-bold px-2.5 py-[3px] rounded-[6px] ${badge.color}`}
+            className={`text-[12px] font-bold px-2.5 py-[3px] rounded-[6px] ${badge.color}`}
           >
             {badge.text}
           </span>
         )}
       </div>
       {subtitle && (
-        <span className="text-[12px] text-slate-400 dark:text-gray-500 ml-auto hidden sm:block font-medium">
+        <span className="text-[13px] text-slate-400 dark:text-gray-500 ml-auto hidden sm:block font-medium">
           {subtitle}
         </span>
       )}
@@ -143,58 +143,58 @@ function TransactionsPage() {
           className="mb-5 sm:mb-6"
         >
           <div
-            className="w-full overflow-hidden rounded-[14px] border border-[#E0E7FF] bg-[#F8FAFF] px-6 py-5 shadow-[0_2px_12px_rgba(37,99,235,0.06)] dark:border-[#334155] dark:bg-[#1E293B] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
+            className="w-full overflow-hidden rounded-[14px] border border-[var(--border-blue)] bg-[var(--status-info-bg)] px-6 py-5 shadow-[var(--shadow-subtle)]"
           >
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-0">
               {/* Left: plan info */}
               <div className="min-w-0 flex-1 sm:pr-6">
-                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#6B7280] dark:text-[#94A3B8]">
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--text-secondary)] dark:text-[var(--text-muted)]">
                   {t("transactions.plan_name_label")}
                 </p>
                 <div className="flex items-center gap-2">
-                  <ShieldIcon className="h-4 w-4 shrink-0 text-[#2563EB] dark:text-[#60A5FA]" />
-                  <p className="text-[15px] font-bold leading-snug text-[#111827] dark:text-[#F1F5F9]">
+                  <ShieldIcon className="h-4 w-4 shrink-0 text-[var(--color-primary)]" />
+                  <p className="text-[16px] font-bold leading-snug text-[var(--text-primary)]">
                     {t("transactions.plan_default_name")}
                   </p>
                 </div>
-                <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#6B7280] dark:text-[#94A3B8]">
+                <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--text-secondary)] dark:text-[var(--text-muted)]">
                   {t("transactions.plan_balance_label")}
                 </p>
-                <p className="mt-0.5 text-[22px] font-bold leading-tight tracking-tight text-[#1D4ED8] dark:text-[#60A5FA]">
+                <p className="mt-0.5 text-[24px] font-bold leading-tight tracking-tight text-[var(--color-primary)]">
                   $30,000
                 </p>
               </div>
 
               <div
-                className="hidden w-px shrink-0 self-stretch bg-[#E0E7FF] dark:bg-[#334155] sm:mx-6 sm:block"
+                className="hidden w-px shrink-0 self-stretch bg-[var(--border-blue)] sm:mx-6 sm:block"
                 aria-hidden
               />
               <div
-                className="h-px w-full shrink-0 bg-[#E0E7FF] dark:bg-[#334155] sm:hidden"
+                className="h-px w-full shrink-0 bg-[var(--border-blue)] sm:hidden"
                 aria-hidden
               />
 
               {/* Right: vested */}
               <div className="min-w-0 flex-1 sm:pl-0">
-                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#6B7280] dark:text-[#94A3B8]">
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--text-secondary)] dark:text-[var(--text-muted)]">
                   {t("transactions.vested_balance_label")}
                 </p>
                 <div className="flex items-center gap-2">
-                  <ChartBarIcon className="h-4 w-4 shrink-0 text-[#2563EB] dark:text-[#60A5FA]" />
-                  <p className="text-[22px] font-bold leading-tight tracking-tight text-[#111827] dark:text-[#F1F5F9]">
+                  <ChartBarIcon className="h-4 w-4 shrink-0 text-[var(--color-primary)]" />
+                  <p className="text-[24px] font-bold leading-tight tracking-tight text-[var(--text-primary)]">
                     $25,000
                   </p>
                 </div>
                 <div
-                  className="mt-2 h-[5px] w-full overflow-hidden rounded-[3px] bg-[#E0E7FF] dark:bg-[#334155]"
+                  className="mt-2 h-[5px] w-full overflow-hidden rounded-[3px] bg-[var(--border-blue)]"
                   role="presentation"
                 >
                   <div
-                    className="h-full rounded-[3px] bg-[#2563EB] dark:bg-[#60A5FA]"
+                    className="h-full rounded-[3px] bg-[var(--color-primary)]"
                     style={{ width: "83.3%" }}
                   />
                 </div>
-                <p className="mt-[5px] text-[12px] font-medium leading-snug text-[#6B7280] dark:text-[#94A3B8]">
+                <p className="mt-[5px] text-[13px] font-medium leading-snug text-[var(--text-secondary)] dark:text-[var(--text-muted)]">
                   {t("transactions.vested_percent", { pct: "83.3" })}
                 </p>
               </div>
@@ -266,7 +266,7 @@ function TransactionsPage() {
               title={t("transactions.draft_transactions")}
               badge={{
                 text: t("transactions.drafts_badge", { count: 2 }),
-                color: "bg-[#EFF6FF] dark:bg-blue-950/30 brand-text" }}
+                color: "bg-[var(--status-info-bg)] dark:bg-blue-950/30 brand-text" }}
               subtitle={t("transactions.resume_subtitle")}
             />
             <div
@@ -335,7 +335,7 @@ function TransactionsPage() {
             variant="ai"
             badge={{
               text: t("transactions.ai_insights"),
-              color: "bg-[#F5F3FF] dark:bg-violet-950/30 text-purple-600 dark:text-purple-400" }}
+              color: "bg-[var(--color-primary-light)] dark:bg-violet-950/30 text-purple-600 dark:text-purple-400" }}
           />
           <FinancialGuidanceCompact />
         </motion.div>

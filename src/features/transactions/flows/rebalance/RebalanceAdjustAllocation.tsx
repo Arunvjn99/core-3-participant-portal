@@ -7,7 +7,7 @@ import { useRebalanceFlow } from "./RebalanceFlowLayout";
 import { motion } from "framer-motion";
 import { ArrowRight, RotateCcw, Info } from "lucide-react";
 
-const COLORS = ["#3b82f6", "#8b5cf6", "#10b981", "#f59e0b"];
+const COLORS = ["var(--chart-blue)", "var(--chart-teal)", "var(--chart-green)", "var(--status-warning)"];
 
 function RebalanceAdjustAllocation() {
   const navigate = useNavigate();
@@ -93,8 +93,8 @@ function RebalanceAdjustAllocation() {
           }`}
           style={{
             boxShadow: isValid
-              ? "0 1px 3px rgba(16,185,129,0.06)"
-              : "0 1px 3px rgba(245,158,11,0.06)",
+              ? "var(--shadow-success)"
+              : "var(--shadow-subtle)",
           }}
         >
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Allocation</p>
@@ -122,8 +122,7 @@ function RebalanceAdjustAllocation() {
         <Card
           className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
-            boxShadow:
-              "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)",
+            boxShadow: "var(--shadow-elevated)",
           }}
         >
           <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-6">

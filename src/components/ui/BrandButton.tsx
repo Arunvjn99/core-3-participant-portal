@@ -22,7 +22,7 @@ export const BrandButton = forwardRef<HTMLButtonElement, BrandButtonProps>(
     const variantStyles: Record<'primary' | 'outline' | 'ghost', CSSProperties> = {
       primary: {
         backgroundColor: 'var(--brand-primary)',
-        color: '#fff',
+        color: 'var(--text-inverse)',
       },
       outline: {
         backgroundColor: 'transparent',

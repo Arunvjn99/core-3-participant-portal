@@ -109,11 +109,11 @@ const typeIcons: Record<Transaction['type'], React.ReactNode> = {
 }
 
 const typeColors: Record<Transaction['type'], { bg: string; color: string }> = {
-  Loan: { bg: '#EFF6FF', color: 'var(--brand-primary)' },
-  Withdrawal: { bg: '#FEF2F2', color: '#DC2626' },
-  Transfer: { bg: '#EFF6FF', color: 'var(--brand-primary)' },
-  Rebalance: { bg: 'rgba(16,185,129,0.1)', color: '#10B981' },
-  Rollover: { bg: '#EFF6FF', color: 'var(--brand-primary)' },
+  Loan: { bg: 'var(--status-info-bg)', color: 'var(--brand-primary)' },
+  Withdrawal: { bg: 'var(--status-danger-tint)', color: 'var(--status-danger)' },
+  Transfer: { bg: 'var(--status-info-bg)', color: 'var(--brand-primary)' },
+  Rebalance: { bg: 'var(--status-success-tint)', color: 'var(--status-success)' },
+  Rollover: { bg: 'var(--status-info-bg)', color: 'var(--brand-primary)' },
 }
 
 function transactionMatchesFilter(transaction: Transaction, filter: FilterId): boolean {
@@ -160,7 +160,7 @@ function RecentTransactionsCompact({ maxItems }: { maxItems?: number } = {}) {
   const getStatusBadge = (status: Transaction['status']) => {
     switch (status) {
       case 'Completed':
-        return { bg: '#ECFDF5', color: '#059669', dot: '#10B981' }
+        return { bg: 'var(--status-success-tint)', color: 'var(--status-success-text)', dot: 'var(--status-success)' }
       case 'Processing':
         return { bg: 'var(--c-blue-tint)', color: 'var(--brand-primary)', dot: 'var(--brand-primary)' }
       case 'Cancelled':

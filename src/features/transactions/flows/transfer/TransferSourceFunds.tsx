@@ -5,7 +5,7 @@ import { useTransferFlow } from "./TransferFlowLayout";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowLeft, TrendingUp, TrendingDown, Minus } from "lucide-react";
 
-const COLORS = ["#3b82f6", "#8b5cf6", "#10b981", "#f59e0b"];
+const COLORS = ["var(--chart-blue)", "var(--chart-purple, #8b5cf6)", "var(--chart-green)", "var(--chart-amber, #f59e0b)"];
 
 interface SourceFund {
   id: string;
@@ -96,7 +96,7 @@ function TransferSourceFunds() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.05 }}
       >
-        <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--tx-border-light, #F1F5F9)", padding: "20px 24px" }}>
+        <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--border-light)", padding: "20px 24px" }}>
           <div className="flex items-center justify-between">
             <div>
               <p style={{ fontSize: 11, fontWeight: 600, color: "inherit", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 2 }}>Selected for Transfer</p>
@@ -120,7 +120,7 @@ function TransferSourceFunds() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
       >
-        <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--tx-border-light, #F1F5F9)", padding: "24px 28px" }}>
+        <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--border-light)", padding: "24px 28px" }}>
           <h3 style={{ fontSize: 15, fontWeight: 700, color: "inherit", letterSpacing: "-0.3px", marginBottom: 20 }}>
             Your Investment Funds
           </h3>
@@ -137,7 +137,7 @@ function TransferSourceFunds() {
                 style={{
                   padding: "14px 16px",
                   borderRadius: 12,
-                  border: fund.selected ? "1.5px solid var(--brand-primary)" : "1.5px solid var(--c-border-color)",
+                  border: fund.selected ? "1.5px solid var(--color-primary)" : "1.5px solid var(--border-default)",
                   background: fund.selected ? "var(--c-blue-tint)" : "var(--c-card)" }}
               >
                 <Checkbox
@@ -163,7 +163,7 @@ function TransferSourceFunds() {
                     <span style={{ fontSize: 11, fontWeight: 500, color: "inherit" }}>
                       {fund.allocation}% of portfolio
                     </span>
-                    <span className="flex items-center gap-0.5" style={{ fontSize: 11, fontWeight: 700, color: "var(--c-green, #10B981)" }}>
+                    <span className="flex items-center gap-0.5" style={{ fontSize: 11, fontWeight: 700, color: "var(--status-success)" }}>
                       {fund.ytdReturn > 0 ? (
                         <TrendingUp className="w-3 h-3" />
                       ) : fund.ytdReturn < 0 ? (

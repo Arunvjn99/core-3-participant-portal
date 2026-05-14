@@ -132,8 +132,7 @@ function RolloverValidation() {
         <Card
           className="p-5 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
-            boxShadow:
-              "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
+            boxShadow: "var(--shadow-elevated)" }}
         >
           <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
             Plan Summary
@@ -177,8 +176,7 @@ function RolloverValidation() {
         <Card
           className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
-            boxShadow:
-              "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
+            boxShadow: "var(--shadow-elevated)" }}
         >
           <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
             Compatibility Checks
@@ -269,7 +267,7 @@ function RolloverValidation() {
           <div
             className="p-5 rounded-2xl bg-gradient-to-br from-emerald-50/80 dark:from-emerald-950/30 to-teal-50/60 dark:to-teal-950/20 border border-emerald-100/80 dark:border-emerald-800/80"
             style={{
-              boxShadow: "0 1px 3px rgba(16,185,129,0.06)" }}
+              boxShadow: "var(--shadow-success)" }}
           >
             <div className="flex items-start gap-3">
               <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400">

@@ -5,7 +5,7 @@ import { motion, useMotionValue, useSpring, useMotionValueEvent } from 'framer-m
 export type BalancePoint = { value: number }
 
 const PAD = { top: 14, right: 16, bottom: 14, left: 16 }
-const STROKE = '#16A34A'
+const STROKE = 'var(--chart-green-dark)'
 const STROKE_W = 2.5
 
 function buildPoints(
@@ -81,13 +81,13 @@ export function PremiumBalanceChart({ data, className = '', isDark = false }: Pr
     [values, innerW, innerH, vmin, vmax]
   )
 
-  const gridStroke = isDark ? 'rgba(148, 163, 184, 0.2)' : 'rgba(17, 24, 39, 0.07)'
-  const gridStrokeMuted = isDark ? 'rgba(148, 163, 184, 0.12)' : 'rgba(17, 24, 39, 0.05)'
+  const gridStroke = 'var(--chart-grid)'
+  const gridStrokeMuted = 'var(--chart-grid-muted)'
   const areaGradientTop = isDark ? 'rgba(34, 197, 94, 0.42)' : 'rgba(34, 197, 94, 0.25)'
   const areaGradientMid = isDark ? 'rgba(34, 197, 94, 0.22)' : 'rgba(34, 197, 94, 0.12)'
   const hoverLineStroke = isDark ? 'rgba(34, 197, 94, 0.45)' : 'rgba(22, 163, 74, 0.22)'
   const dotFillOuter = isDark ? 'rgba(34, 197, 94, 0.22)' : 'rgba(34, 197, 94, 0.14)'
-  const dotFillCenter = isDark ? '#111118' : '#ffffff'
+  const dotFillCenter = isDark ? 'var(--surface-card)' : 'var(--surface-card)'
 
   const linePathD = useMemo(() => {
     if (points.length < 2) return ''

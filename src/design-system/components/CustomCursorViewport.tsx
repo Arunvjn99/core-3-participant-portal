@@ -6,6 +6,7 @@ const DOT_SIZE = 8
 const RING_DEFAULT = 28
 const RING_HOVER = 42
 const BORDER = 1.5
+/** Custom cursor color - matches --chart-violet for consistency */
 const CURSOR_COLOR = '#3B3BE8'
 /** 12px to the right of the dot: dot radius (4) + 12 gap from dot edge */
 const LABEL_OFFSET_X = DOT_SIZE / 2 + 12
@@ -242,7 +243,7 @@ export function CustomCursorViewport({ children }: Props) {
           top: 0,
           fontSize: 11,
           borderRadius: 20,
-          color: '#fff',
+          color: 'var(--text-inverse)',
           background: CURSOR_COLOR,
           padding: '4px 10px',
           whiteSpace: 'nowrap',

@@ -9,7 +9,7 @@ import {
   Tooltip } from "recharts";
 import { ArrowRight, ArrowLeft, Info } from "lucide-react";
 
-const COLORS = ["#3b82f6", "#8b5cf6", "#10b981", "#f59e0b", "#ec4899"];
+const COLORS = ["var(--chart-blue)", "var(--chart-teal)", "var(--chart-green)", "var(--status-warning)", "var(--color-primary)"];
 
 const defaultFunds = [
   {
@@ -106,8 +106,8 @@ function RebalanceCurrentAllocation() {
                   formatter={(v) => [String(v), ""] as [string, string]}
                   contentStyle={{
                     borderRadius: "12px",
-                    border: "1px solid var(--c-border-color)",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    border: "1px solid var(--border-default)",
+                    boxShadow: "var(--shadow-elevated)",
                     fontSize: "12px" }}
                 />
               </PieChart>
@@ -183,9 +183,9 @@ function RebalanceCurrentAllocation() {
       >
         <div
           className="flex items-start gap-3.5"
-          style={{ background: "rgba(245,158,11,0.1)", border: "1px solid var(--c-border-amber)", borderRadius: 14, padding: "16px 20px" }}
+          style={{ background: "var(--status-warning-tint)", border: "1px solid var(--border-amber)", borderRadius: 14, padding: "16px 20px" }}
         >
-          <div className="flex items-center justify-center flex-shrink-0" style={{ width: 30, height: 30, borderRadius: 8, background: "rgba(245,158,11,0.1)", color: "#F59E0B" }}>
+          <div className="flex items-center justify-center flex-shrink-0" style={{ width: 30, height: 30, borderRadius: 8, background: "var(--status-warning-tint)", color: "var(--status-warning)" }}>
             <Info className="w-[14px] h-[14px]" />
           </div>
           <div>

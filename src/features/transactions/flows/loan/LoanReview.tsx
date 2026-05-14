@@ -2,7 +2,7 @@ import { Checkbox } from "../../components/ui/checkbox";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useLoanFlow } from "./LoanFlowLayout";
-import { CheckCircle2, Clock, ArrowRight, ArrowLeft } from "lucide-react";
+import { CheckCircle2, Clock, ArrowRight, ArrowLeft, DollarSign, Calendar, Percent, CreditCard, Shield } from "lucide-react";
 import { motion } from "framer-motion";
 
 function LoanReview() {
@@ -44,43 +44,40 @@ function LoanReview() {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="flex flex-col items-center justify-center py-16"
       >
-        <div
-          className="flex items-center justify-center mb-5"
-          style={{ width: 64, height: 64, borderRadius: 32, background: "rgba(16,185,129,0.1)", border: "1px solid var(--c-border-green)" }}
-        >
-          <CheckCircle2 style={{ width: 32, height: 32, color: "#10B981" }} />
+        <div className="flex h-16 w-16 items-center justify-center rounded-full border border-status-success/30 bg-status-success-bg mb-5">
+          <CheckCircle2 className="h-8 w-8 text-status-success" />
         </div>
-        <h2 style={{ fontSize: 26, fontWeight: 800, color: "inherit", letterSpacing: "-0.5px", marginBottom: 8 }}>
+        <h2 className="text-[26px] font-extrabold text-text-primary tracking-tight mb-2">
           Loan Request Submitted
         </h2>
-        <p style={{ fontSize: 14, fontWeight: 500, color: "inherit", textAlign: "center", maxWidth: 400, marginBottom: 24, lineHeight: "22px" }}>
+        <p className="text-[14px] font-medium text-text-secondary text-center max-w-md mb-6 leading-relaxed">
           Your loan request has been submitted successfully. You'll receive an email confirmation shortly.
         </p>
-        <p style={{ fontSize: 12, fontWeight: 500, color: "inherit" }}>Redirecting to dashboard...</p>
+        <p className="text-[12px] text-text-muted">Redirecting to dashboard...</p>
       </motion.div>
     );
   }
 
-  const summaryItems = [
-    { label: "Loan Amount", value: `$${loanAmount.toLocaleString()}` },
-    { label: "Net Amount (after fees)", value: `$${netAmount.toLocaleString()}` },
-    { label: "Monthly Payment", value: `$${Math.round(monthlyPayment).toLocaleString()}` },
-    { label: "Interest Rate", value: `${interestRate}%` },
-    { label: "Loan Tenure", value: `${tenure} ${tenure === 1 ? "year" : "years"}` },
-    { label: "Total Fees", value: `$${totalFees}` },
+  const statItems = [
+    { icon: DollarSign, label: "Loan Amount", value: `$${loanAmount.toLocaleString()}`, highlight: true },
+    { icon: DollarSign, label: "Net Disbursement", value: `$${netAmount.toLocaleString()}`, highlight: false },
+    { icon: Calendar, label: "Monthly Payment", value: `$${Math.round(monthlyPayment).toLocaleString()}`, highlight: true },
+    { icon: Percent, label: "Interest Rate", value: `${interestRate}%`, highlight: false },
+    { icon: Clock, label: "Loan Tenure", value: `${tenure} ${tenure === 1 ? "year" : "years"}`, highlight: false },
+    { icon: CreditCard, label: "Total Fees", value: `$${totalFees}`, highlight: false },
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        <h2 style={{ fontSize: 26, fontWeight: 800, color: "inherit", letterSpacing: "-0.5px", lineHeight: "34px", marginBottom: 8 }}>
+        <h2 className="text-[26px] font-extrabold text-text-primary tracking-tight leading-tight mb-2">
           Review and Submit
         </h2>
-        <p style={{ fontSize: 14, fontWeight: 500, color: "inherit", lineHeight: "22px" }}>
+        <p className="text-[14px] text-text-secondary leading-relaxed">
           Please review all details carefully before submitting your loan request.
         </p>
       </motion.div>
@@ -90,27 +87,30 @@ function LoanReview() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.05 }}
+        className="rounded-[16px] border border-border-default bg-surface-card p-6"
       >
-        <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--tx-border-light, #F1F5F9)", padding: "24px 28px" }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: "inherit", letterSpacing: "-0.3px", marginBottom: 24 }}>
-            Loan Summary
-          </h3>
-
-          <div className="grid grid-cols-2 gap-6">
-            {summaryItems.map((item, i) => (
-              <div key={i}>
-                <p style={{ fontSize: 12, fontWeight: 500, color: "inherit", marginBottom: 4 }}>{item.label}</p>
-                <p style={{ fontSize: 20, fontWeight: 800, color: "inherit", letterSpacing: "-0.3px" }}>
-                  {item.value}
-                </p>
+        <h3 className="text-[15px] font-bold text-text-primary tracking-tight mb-5">
+          Loan Summary
+        </h3>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+          {statItems.map((item) => (
+            <div
+              key={item.label}
+              className={`rounded-[12px] border p-4 ${item.highlight ? 'border-primary/20 bg-primary/5' : 'border-border-default bg-surface-elevated'}`}
+            >
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <item.icon className={`h-3.5 w-3.5 ${item.highlight ? 'text-primary' : 'text-text-muted'}`} />
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">{item.label}</p>
               </div>
-            ))}
-          </div>
-
-          <div style={{ borderTop: "1px solid var(--tx-border-light, #F1F5F9)", marginTop: 24, paddingTop: 20 }}>
-            <p style={{ fontSize: 12, fontWeight: 500, color: "inherit", marginBottom: 4 }}>Repayment Frequency</p>
-            <p style={{ fontSize: 14, fontWeight: 600, color: "inherit" }}>Per Paycheck (Bi-weekly)</p>
-          </div>
+              <p className={`text-[20px] font-extrabold tracking-tight ${item.highlight ? 'text-primary' : 'text-text-primary'}`}>
+                {item.value}
+              </p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-5 border-t border-border-default pt-4 flex items-center justify-between">
+          <p className="text-[12px] font-semibold text-text-secondary">Repayment Frequency</p>
+          <p className="text-[14px] font-bold text-text-primary">Per Paycheck (Bi-weekly)</p>
         </div>
       </motion.div>
 
@@ -119,34 +119,29 @@ function LoanReview() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+        className="rounded-[16px] border border-border-default bg-surface-card p-6"
       >
-        <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--tx-border-light, #F1F5F9)", padding: "24px 28px" }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: "inherit", letterSpacing: "-0.3px", marginBottom: 16 }}>
-            Repayment Schedule Preview
-          </h3>
-
-          <div className="space-y-3">
-            {[
-              { label: "First Payment", sub: "April 2026", value: `$${Math.round(monthlyPayment).toLocaleString()}` },
-              { label: "Monthly Payment", sub: `${numPayments} payments`, value: `$${Math.round(monthlyPayment).toLocaleString()}` },
-              { label: "Repayment Frequency", sub: "Per Paycheck (Bi-weekly)", value: `$${Math.round(monthlyPayment / 2).toLocaleString()}/pay` },
-              { label: "Final Payment", sub: new Date(2026 + tenure, 2, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }), value: `$${Math.round(monthlyPayment).toLocaleString()}` },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-between"
-                style={{ padding: "12px 16px", background: "transparent", borderRadius: 10, border: "1px solid var(--tx-border-light, #F1F5F9)" }}
-              >
-                <div>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: "inherit" }}>{item.label}</p>
-                  <p style={{ fontSize: 11, fontWeight: 500, color: "inherit" }}>{item.sub}</p>
-                </div>
-                <p style={{ fontSize: 14, fontWeight: 700, color: "inherit" }}>
-                  {item.value}
-                </p>
+        <h3 className="text-[15px] font-bold text-text-primary tracking-tight mb-4">
+          Repayment Schedule
+        </h3>
+        <div className="space-y-2">
+          {[
+            { label: "First Payment", sub: "April 2026", value: `$${Math.round(monthlyPayment).toLocaleString()}` },
+            { label: "Monthly Payment", sub: `${numPayments} payments total`, value: `$${Math.round(monthlyPayment).toLocaleString()}` },
+            { label: "Per Paycheck (Bi-weekly)", sub: "Automatic deduction", value: `$${Math.round(monthlyPayment / 2).toLocaleString()}` },
+            { label: "Final Payment", sub: new Date(2026 + tenure, 2, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }), value: `$${Math.round(monthlyPayment).toLocaleString()}` },
+          ].map((item, i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between rounded-[10px] border border-border-default bg-surface-elevated px-4 py-3"
+            >
+              <div>
+                <p className="text-[13px] font-semibold text-text-primary">{item.label}</p>
+                <p className="text-[11px] text-text-muted mt-0.5">{item.sub}</p>
               </div>
-            ))}
-          </div>
+              <p className="text-[15px] font-bold text-text-primary">{item.value}</p>
+            </div>
+          ))}
         </div>
       </motion.div>
 
@@ -155,64 +150,51 @@ function LoanReview() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.15 }}
+        className="rounded-[16px] border border-primary/20 bg-primary/5 p-5"
       >
-        <div
-          style={{
-            background: "var(--c-blue-tint)",
-            border: "1px solid var(--c-border-blue)",
-            borderRadius: 16,
-            padding: "20px 24px",
-          }}
-        >
-          <div className="flex items-center gap-2 mb-4">
-            <Clock style={{ width: 16, height: 16, color: "var(--brand-primary)" }} />
-            <h4 style={{ fontSize: 14, fontWeight: 700, color: "inherit", letterSpacing: "-0.3px" }}>Processing Timeline</h4>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              { step: "Submitted", time: "Day 1", desc: "Request logged" },
-              { step: "Review", time: "Day 1-2", desc: "Documents verified" },
-              { step: "Approved", time: "Day 2-3", desc: "Loan approved" },
-              { step: "Funds Sent", time: "Day 3-5", desc: "EFT processed" },
-            ].map((item, idx) => (
-              <div key={idx} className="text-center">
-                <div
-                  className="flex items-center justify-center mx-auto mb-1.5"
-                  style={{
-                    width: 28, height: 28, borderRadius: 14,
-                    background: "transparent", border: "2px solid var(--c-border-blue)",
-                    fontSize: 10, fontWeight: 700, color: "var(--brand-primary)",
-                  }}
-                >
-                  {idx + 1}
-                </div>
-                <p style={{ fontSize: 12, fontWeight: 700, color: "inherit" }}>{item.step}</p>
-                <p style={{ fontSize: 10, fontWeight: 600, color: "var(--brand-primary)" }}>{item.time}</p>
-                <p style={{ fontSize: 10, fontWeight: 500, color: "inherit" }}>{item.desc}</p>
+        <div className="flex items-center gap-2 mb-4">
+          <Clock className="h-4 w-4 text-primary" />
+          <h4 className="text-[14px] font-bold text-text-primary tracking-tight">Processing Timeline</h4>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
+            { step: "Submitted", time: "Day 1", desc: "Request logged" },
+            { step: "Review", time: "Day 1–2", desc: "Documents verified" },
+            { step: "Approved", time: "Day 2–3", desc: "Loan approved" },
+            { step: "Funds Sent", time: "Day 3–5", desc: "EFT processed" },
+          ].map((item, idx) => (
+            <div key={idx} className="flex flex-col items-center text-center">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary/30 bg-surface-card text-[11px] font-bold text-primary mb-2">
+                {idx + 1}
               </div>
-            ))}
-          </div>
+              <p className="text-[12px] font-bold text-text-primary">{item.step}</p>
+              <p className="text-[10px] font-semibold text-primary">{item.time}</p>
+              <p className="text-[10px] text-text-secondary mt-0.5">{item.desc}</p>
+            </div>
+          ))}
         </div>
       </motion.div>
 
-      {/* Confirmation */}
+      {/* Agreement */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+        className="rounded-[16px] border border-border-default bg-surface-card p-5"
       >
-        <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--tx-border-light, #F1F5F9)", padding: "20px 24px" }}>
-          <div className="flex items-start gap-3">
-            <Checkbox
-              id="terms"
-              checked={agreed}
-              onCheckedChange={(checked) => setAgreed(checked === true)}
-            />
-            <div className="flex-1">
+        <div className="flex items-start gap-3">
+          <Shield className="h-5 w-5 shrink-0 text-primary mt-0.5" />
+          <div className="flex-1">
+            <p className="text-[13px] font-bold text-text-primary mb-2">Loan Agreement</p>
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="terms"
+                checked={agreed}
+                onCheckedChange={(checked) => setAgreed(checked === true)}
+              />
               <label
                 htmlFor="terms"
-                className="cursor-pointer leading-relaxed"
-                style={{ fontSize: 13, fontWeight: 500, color: "inherit" }}
+                className="cursor-pointer text-[13px] text-text-secondary leading-relaxed"
               >
                 I understand and agree to the loan terms, including the interest rate,
                 repayment schedule, and fees. I acknowledge that this loan will be repaid
@@ -224,22 +206,21 @@ function LoanReview() {
         </div>
       </motion.div>
 
-      <div className="flex justify-between items-center" style={{ paddingTop: 16 }}>
+      <div className="flex justify-between items-center pt-2">
         <button
           onClick={() => navigate("/transactions/loan/documents")}
-          className="flex min-h-[2.75rem] items-center gap-2 transition-all duration-200 cursor-pointer"
-          style={{ background: "transparent", border: "var(--c-border)", color: "inherit", padding: "10px 16px", borderRadius: 10, fontSize: 13, fontWeight: 600 }}
+          className="flex items-center gap-2 rounded-[10px] border border-border-default bg-transparent px-4 py-2.5 text-[13px] font-semibold text-text-primary transition-colors hover:bg-surface-elevated"
         >
-          <ArrowLeft style={{ width: 16, height: 16 }} />
+          <ArrowLeft className="h-4 w-4" />
           Back
         </button>
         <button
           onClick={handleSubmit}
           disabled={!agreed || isSubmitting}
-          className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn-brand flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "Submitting..." : "Submit Loan Request"}
-          {!isSubmitting && <ArrowRight style={{ width: 16, height: 16 }} />}
+          {!isSubmitting && <ArrowRight className="h-4 w-4" />}
         </button>
       </div>
     </div>

@@ -37,8 +37,8 @@ function MiniChart({ positive = true, compact = false }: { positive?: boolean; c
   const linePoints = points.map((p) => `${p[0]},${p[1]}`).join(" ");
   const areaPoints = `0,${h} ${linePoints} ${w},${h}`;
   const gradientId = `${uid}-${positive ? "pos" : "neg"}`;
-  const lineColor = positive ? "#2563EB" : "#EF4444";
-  const fillColor = positive ? "#2563EB" : "#EF4444";
+  const lineColor = positive ? "var(--color-primary)" : "var(--status-danger)";
+  const fillColor = positive ? "var(--color-primary)" : "var(--status-danger)";
   const years = ["2020", "2022", "2024", "2026"];
 
   return (
@@ -113,8 +113,8 @@ function RetirementImpactWidget({
             right: 0,
             height: 3,
             background: showImpact && impactAmount! < 0
-              ? "linear-gradient(90deg, #EF4444, #F59E0B)"
-              : "linear-gradient(90deg, #2563EB, #0EA5E9)",
+              ? "linear-gradient(90deg, var(--status-danger), var(--status-warning))"
+              : "linear-gradient(90deg, var(--color-primary), var(--chart-sky))",
             borderRadius: "16px 16px 0 0",
           }}
         />
@@ -135,8 +135,8 @@ function RetirementImpactWidget({
               ${projectedBalance.toLocaleString()}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
-              <TrendingUp style={{ width: 13, height: 13, color: "#10B981" }} />
-              <span style={{ fontSize: 12, fontWeight: 600, color: "#059669" }}>
+              <TrendingUp style={{ width: 13, height: 13, color: "var(--status-success)" }} />
+              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--status-success-text)" }}>
                 {growthRate}% avg. annual growth
               </span>
             </div>
@@ -168,7 +168,7 @@ function RetirementImpactWidget({
                 style={{
                   height: "100%",
                   width: `${goalProgress}%`,
-                  background: "linear-gradient(90deg, #10B981, #059669)",
+                  background: "linear-gradient(90deg, var(--status-success), var(--status-success-text))",
                   transition: "width 0.4s ease",
                   borderRadius: 4,
                 }}
@@ -237,22 +237,22 @@ function RetirementImpactWidget({
                 padding: "8px 12px",
                 borderRadius: 10,
                 background: impactAmount! < 0
-                  ? "rgba(245,158,11,0.1)"
-                  : "rgba(16,185,129,0.1)",
-                border: impactAmount! < 0 ? "1px solid #FED7AA" : "1px solid #BBF7D0",
+                  ? "var(--status-warning-tint)"
+                  : "var(--status-success-tint)",
+                border: impactAmount! < 0 ? "1px solid var(--status-warning)" : "1px solid var(--status-success)",
                 marginBottom: 10,
               }}
             >
               {impactAmount! < 0 ? (
-                <AlertTriangle style={{ width: 16, height: 16, color: "#F59E0B", flexShrink: 0 }} />
+                <AlertTriangle style={{ width: 16, height: 16, color: "var(--status-warning)", flexShrink: 0 }} />
               ) : (
-                <TrendingUp style={{ width: 16, height: 16, color: "#10B981", flexShrink: 0 }} />
+                <TrendingUp style={{ width: 16, height: 16, color: "var(--status-success)", flexShrink: 0 }} />
               )}
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: impactAmount! < 0 ? "#92400E" : "#059669" }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: impactAmount! < 0 ? "var(--status-warning-text)" : "var(--status-success-text)" }}>
                   {impactLabel}
                 </div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: impactAmount! < 0 ? "#B45309" : "#16A34A" }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: impactAmount! < 0 ? "var(--status-warning-text)" : "var(--status-success-text)" }}>
                   {impactAmount! < 0 ? "-" : "+"}${Math.abs(impactAmount!).toLocaleString()}
                 </div>
               </div>
@@ -269,12 +269,12 @@ function RetirementImpactWidget({
                 gap: 8,
                 padding: "8px 12px",
                 borderRadius: 8,
-                background: "rgba(16,185,129,0.1)",
+                background: "var(--status-success-tint)",
                 border: "1px solid var(--c-border-green)",
               }}
             >
-              <CheckCircle2 style={{ width: 14, height: 14, color: "#10B981" }} />
-              <span style={{ fontSize: 12, fontWeight: 600, color: "#059669" }}>
+              <CheckCircle2 style={{ width: 14, height: 14, color: "var(--status-success)" }} />
+              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--status-success-text)" }}>
                 You're on track to meet your goal
               </span>
             </div>
@@ -290,12 +290,12 @@ function RetirementImpactWidget({
                 gap: 8,
                 padding: "8px 12px",
                 borderRadius: 8,
-                background: "rgba(245,158,11,0.1)",
+                background: "var(--status-warning-tint)",
                 border: "1px solid var(--c-border-amber)",
               }}
             >
-              <Target style={{ width: 14, height: 14, color: "#F59E0B" }} />
-              <span style={{ fontSize: 12, fontWeight: 600, color: "#92400E" }}>
+              <Target style={{ width: 14, height: 14, color: "var(--status-warning)" }} />
+              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--status-warning-text)" }}>
                 Consider increasing contributions
               </span>
             </div>

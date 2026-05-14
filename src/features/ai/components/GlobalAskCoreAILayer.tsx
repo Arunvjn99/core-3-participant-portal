@@ -45,7 +45,7 @@ export function GlobalAskCoreAILayer() {
         enrollmentStepFlow ? 'bottom-6 max-sm:!bottom-20' : 'bottom-6',
       )}
       style={{
-        background: 'rgba(30, 30, 46, 0.9)',
+        background: 'var(--surface-overlay, rgba(30, 30, 46, 0.9))',
         boxShadow: '0 4px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
       }}
       aria-label="Ask CORE AI"

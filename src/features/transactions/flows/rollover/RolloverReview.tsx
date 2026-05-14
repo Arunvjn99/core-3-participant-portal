@@ -15,7 +15,7 @@ import {
   PartyPopper } from "lucide-react";
 import RetirementImpactWidget from "../../components/RetirementImpactWidget";
 
-const COLORS = ["#3b82f6", "#8b5cf6", "#10b981", "#f59e0b"];
+const COLORS = ["var(--chart-blue)", "var(--chart-teal)", "var(--chart-green)", "var(--status-warning)"];
 
 function RolloverReview() {
   const navigate = useNavigate();
@@ -56,7 +56,7 @@ function RolloverReview() {
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
           className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center mb-6"
-          style={{ boxShadow: "0 8px 32px rgba(16,185,129,0.3)" }}
+          style={{ boxShadow: "var(--shadow-success)" }}
         >
           <PartyPopper className="w-10 h-10 text-white" />
         </motion.div>
@@ -104,7 +104,7 @@ function RolloverReview() {
                   style={
                     step.active
                       ? {
-                          boxShadow: "0 0 0 3px rgba(99,102,241,0.15)" }
+                          boxShadow: "0 0 0 3px var(--status-success-tint)" }
                       : undefined
                   }
                 >
@@ -159,8 +159,7 @@ function RolloverReview() {
         <Card
           className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
-            boxShadow:
-              "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
+            boxShadow: "var(--shadow-elevated)" }}
         >
           <div className="flex items-center gap-2 mb-5">
             <Building2 className="w-4 h-4 text-gray-400 dark:text-gray-500" />
@@ -229,8 +228,7 @@ function RolloverReview() {
         <Card
           className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
-            boxShadow:
-              "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
+            boxShadow: "var(--shadow-elevated)" }}
         >
           <div className="flex items-center gap-2 mb-5">
             <PieChart className="w-4 h-4 text-gray-400 dark:text-gray-500" />
@@ -293,8 +291,7 @@ function RolloverReview() {
         <Card
           className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
-            boxShadow:
-              "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
+            boxShadow: "var(--shadow-elevated)" }}
         >
           <div className="flex items-center gap-2 mb-5">
             <FileText className="w-4 h-4 text-gray-400 dark:text-gray-500" />
@@ -344,8 +341,7 @@ function RolloverReview() {
         <Card
           className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80 bg-gradient-to-br from-indigo-50/30 dark:from-indigo-950/30 to-blue-50/20 dark:to-blue-950/20"
           style={{
-            boxShadow:
-              "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
+            boxShadow: "var(--shadow-elevated)" }}
         >
           <div className="flex items-center gap-2 mb-5">
             <Clock className="w-4 h-4 text-gray-400 dark:text-gray-500" />
@@ -406,8 +402,7 @@ function RolloverReview() {
         <Card
           className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
-            boxShadow:
-              "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
+            boxShadow: "var(--shadow-elevated)" }}
         >
           <div className="flex items-start gap-3">
             <Checkbox

@@ -71,7 +71,7 @@ function EnrollmentStepFooterBar({ config }: { config: EnrollmentNavConfig | nul
   if (!showBack && !showNext) return null
 
   return (
-    <div className="sticky bottom-0 z-10 mt-8 w-full border-t border-gray-200 bg-[#f5f7fa]/95 px-3 py-4 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-950/95 sm:px-6">
+    <div className="sticky bottom-0 z-10 mt-8 w-full border-t border-gray-200 bg-[var(--surface-shell)]/95 px-3 py-4 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-950/95 sm:px-6">
       {/* Single row: avoid two equal flex-1 columns (that parked Next mid-bar). Back left; Next flush right via ml-auto. */}
       <div className="mx-auto flex min-h-[48px] w-full max-w-5xl flex-col gap-3 sm:flex-row sm:items-center">
         {showBack && config.onBack && (

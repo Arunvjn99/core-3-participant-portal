@@ -74,7 +74,7 @@ function LoanFees() {
             {/* Total Fees */}
             <div className="flex items-center justify-between" style={{ padding: "14px 0", borderBottom: "var(--c-border)" }}>
               <p style={{ fontSize: 14, fontWeight: 600, color: "inherit" }}>Total Fees</p>
-              <p style={{ fontSize: 14, fontWeight: 700, color: "var(--c-red, #EF4444)" }}>-${totalFees}</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: "var(--status-danger)" }}>-${totalFees}</p>
             </div>
 
             {/* Net Amount */}

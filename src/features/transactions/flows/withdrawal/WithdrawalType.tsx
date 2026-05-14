@@ -17,12 +17,12 @@ function WithdrawalType() {
   };
 
   const types = [
-    { id: "hardship", label: "Hardship Withdrawal", description: "For immediate and heavy financial needs such as medical expenses, preventing eviction, or funeral expenses. Documentation required.", warning: "May be subject to 10% early withdrawal penalty if under age 59½", warningColor: "#B45309" },
-    { id: "in-service", label: "In-Service Withdrawal", description: "Available for participants who have reached age 59½ while still employed. No early withdrawal penalty applies.", warning: "Only available if you are age 59½ or older", warningColor: "#1E40AF" },
-    { id: "termination", label: "Termination Withdrawal", description: "Full or partial distribution available after separation from service. You may also choose to roll over funds to another plan or IRA.", warning: "Requires proof of separation from employment", warningColor: "#475569" },
-    { id: "rmd", label: "Required Minimum Distribution (RMD)", description: "Mandatory distribution required by law beginning at age 73. Failure to take RMDs may result in a 25% excise tax on the shortfall.", warning: "Calculated based on your account balance and life expectancy", warningColor: "#059669" },
+    { id: "hardship", label: "Hardship Withdrawal", description: "For immediate and heavy financial needs such as medical expenses, preventing eviction, or funeral expenses. Documentation required.", warning: "May be subject to 10% early withdrawal penalty if under age 59½", warningColor: "var(--status-warning-text)" },
+    { id: "in-service", label: "In-Service Withdrawal", description: "Available for participants who have reached age 59½ while still employed. No early withdrawal penalty applies.", warning: "Only available if you are age 59½ or older", warningColor: "var(--color-primary)" },
+    { id: "termination", label: "Termination Withdrawal", description: "Full or partial distribution available after separation from service. You may also choose to roll over funds to another plan or IRA.", warning: "Requires proof of separation from employment", warningColor: "var(--text-secondary)" },
+    { id: "rmd", label: "Required Minimum Distribution (RMD)", description: "Mandatory distribution required by law beginning at age 73. Failure to take RMDs may result in a 25% excise tax on the shortfall.", warning: "Calculated based on your account balance and life expectancy", warningColor: "var(--status-success-text)" },
     { id: "one-time", label: "One-Time Withdrawal", description: "Standard withdrawal for any purpose. Taxes and penalties may apply depending on your age and account type.", warning: undefined, warningColor: "" },
-    { id: "full-balance", label: "Full Balance Withdrawal", description: "Withdraw your entire vested account balance. This will close your retirement account with this plan.", warning: "Warning: This action cannot be undone", warningColor: "#B91C1C" },
+    { id: "full-balance", label: "Full Balance Withdrawal", description: "Withdraw your entire vested account balance. This will close your retirement account with this plan.", warning: "Warning: This action cannot be undone", warningColor: "var(--status-danger-text)" },
   ];
 
   return (
@@ -45,7 +45,7 @@ function WithdrawalType() {
                   className="block transition-all duration-200 cursor-pointer"
                   style={{
                     padding: "20px 24px", borderRadius: 16,
-                    border: isSelected ? "1.5px solid #2563EB" : "1.5px solid var(--c-border-color)",
+                    border: isSelected ? "1.5px solid var(--color-primary)" : "1.5px solid var(--border-default)",
                     background: isSelected ? "var(--c-blue-tint)" : "var(--c-card)",
                   }}
                 >
@@ -77,10 +77,10 @@ function WithdrawalType() {
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
           <FlowInfoBanner variant="success">
             <div className="flex items-start gap-2.5">
-              <Info className="flex-shrink-0 mt-0.5" style={{ width: 16, height: 16, color: "#10B981" }} />
+              <Info className="flex-shrink-0 mt-0.5" style={{ width: 16, height: 16, color: "var(--status-success)" }} />
               <div>
-                <p style={{ fontSize: 13, fontWeight: 700, color: "#166534", marginBottom: 4 }}>RMD Calculation</p>
-                <p className="leading-relaxed" style={{ fontSize: 12, fontWeight: 500, color: "#166534" }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--status-success-text)", marginBottom: 4 }}>RMD Calculation</p>
+                <p className="leading-relaxed" style={{ fontSize: 12, fontWeight: 500, color: "var(--status-success-text)" }}>
                   Your estimated RMD for 2026 is{" "}
                   <span style={{ fontWeight: 700 }}>$1,125</span> based on your
                   current account balance of $30,000 and the IRS Uniform

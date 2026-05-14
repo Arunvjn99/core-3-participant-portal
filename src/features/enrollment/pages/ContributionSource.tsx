@@ -194,7 +194,9 @@ export default function ContributionSource() {
               onClick={() => {
                 updateData({
                   contributionSources: { preTax: planDefault.preTax, roth: planDefault.roth, afterTax: planDefault.afterTax },
+                  useRecommendedPortfolio: true,
                 })
+                setCanEditTaxAllocation(false)
                 advanceStep(
                   {
                     preTax: planDefault.preTax,
@@ -205,7 +207,12 @@ export default function ContributionSource() {
                 )
                 navigate('/enrollment/auto-increase')
               }}
-              className="btn-brand w-full rounded-xl px-4 py-3 text-sm font-semibold shadow-md"
+              className={cn(
+                'w-full rounded-xl px-4 py-3 text-sm font-semibold transition-colors active:scale-[0.99]',
+                canEditTaxAllocation
+                  ? 'border-2 border-gray-300 bg-white text-gray-900 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:hover:bg-gray-800'
+                  : 'btn-brand shadow-md',
+              )}
             >
               {t('enrollment.source_page.select_plan_default')}
             </button>
@@ -291,7 +298,7 @@ export default function ContributionSource() {
                       canEditTaxAllocation ? 'cursor-pointer' : 'cursor-not-allowed',
                     )}
                     style={{
-                      background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${sources.preTax}%, #e5e7eb ${sources.preTax}%, #e5e7eb 100%)`,
+                      background: `linear-gradient(to right, var(--chart-blue) 0%, var(--chart-blue) ${sources.preTax}%, var(--slider-track) ${sources.preTax}%, var(--slider-track) 100%)`,
                     }}
                   />
                   <div className="flex items-center justify-between text-xs text-gray-400">
@@ -326,7 +333,7 @@ export default function ContributionSource() {
                       canEditTaxAllocation ? 'cursor-pointer' : 'cursor-not-allowed',
                     )}
                     style={{
-                      background: `linear-gradient(to right, #a855f7 0%, #a855f7 ${sources.roth}%, #e5e7eb ${sources.roth}%, #e5e7eb 100%)`,
+                      background: `linear-gradient(to right, var(--accent-purple) 0%, var(--accent-purple) ${sources.roth}%, var(--slider-track) ${sources.roth}%, var(--slider-track) 100%)`,
                     }}
                   />
                   <div className="flex items-center justify-between text-xs text-gray-400">
@@ -369,7 +376,7 @@ export default function ContributionSource() {
                         canEditTaxAllocation ? 'cursor-pointer' : 'cursor-not-allowed',
                       )}
                       style={{
-                        background: `linear-gradient(to right, #ea580c 0%, #ea580c ${sources.afterTax}%, #e5e7eb ${sources.afterTax}%, #e5e7eb 100%)`,
+                        background: `linear-gradient(to right, var(--chart-amber) 0%, var(--chart-amber) ${sources.afterTax}%, var(--slider-track) ${sources.afterTax}%, var(--slider-track) 100%)`,
                       }}
                     />
                     <div className="flex items-center justify-between text-xs text-gray-400">
@@ -443,6 +450,7 @@ export default function ContributionSource() {
                 onClick={() => {
                   if (canEditTaxAllocation) return
                   setCanEditTaxAllocation(true)
+                  updateData({ useRecommendedPortfolio: false })
                 }}
                 className={cn(
                   'inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 py-2.5 text-sm font-semibold shadow-sm transition-all active:scale-[0.99]',

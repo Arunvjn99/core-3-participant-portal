@@ -279,7 +279,7 @@ export default function AutoIncreaseSetup() {
                       onChange={(e) => setIncreaseAmount(parseFloat(e.target.value))}
                       className="h-2 w-full cursor-pointer appearance-none rounded-full"
                       style={{
-                        background: `linear-gradient(to right, #2563eb 0%, #2563eb ${(increaseAmount / 3) * 100}%, #e5e7eb ${(increaseAmount / 3) * 100}%, #e5e7eb 100%)`,
+                        background: `linear-gradient(to right, var(--color-primary) 0%, var(--color-primary) ${(increaseAmount / 3) * 100}%, var(--slider-track) ${(increaseAmount / 3) * 100}%, var(--slider-track) 100%)`,
                       }}
                     />
                   </div>
@@ -338,7 +338,7 @@ export default function AutoIncreaseSetup() {
                       onChange={(e) => setMaxContribution(parseInt(e.target.value, 10))}
                       className="h-2 w-full cursor-pointer appearance-none rounded-full"
                       style={{
-                        background: `linear-gradient(to right, #9333ea 0%, #9333ea ${((maxContribution - 10) / 5) * 100}%, #e5e7eb ${((maxContribution - 10) / 5) * 100}%, #e5e7eb 100%)`,
+                        background: `linear-gradient(to right, var(--accent-purple) 0%, var(--accent-purple) ${((maxContribution - 10) / 5) * 100}%, var(--slider-track) ${((maxContribution - 10) / 5) * 100}%, var(--slider-track) 100%)`,
                       }}
                     />
                   </div>
@@ -363,14 +363,14 @@ export default function AutoIncreaseSetup() {
                   <AreaChart data={progression}>
                     <defs>
                       <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
+                        <stop offset="5%" stopColor="var(--chart-green)" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="var(--chart-green)" stopOpacity={0.05} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                    <XAxis dataKey="year" tick={{ fontSize: 10, fill: '#64748b' }} tickLine={false} axisLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" vertical={false} />
+                    <XAxis dataKey="year" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} tickLine={false} axisLine={false} />
                     <YAxis
-                      tick={{ fontSize: 10, fill: '#64748b' }}
+                      tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
                       tickLine={false}
                       axisLine={false}
                       tickFormatter={(v) => `${v}%`}
@@ -380,7 +380,7 @@ export default function AutoIncreaseSetup() {
                     <Area
                       type="monotone"
                       dataKey="percent"
-                      stroke="#10b981"
+                      stroke="var(--chart-green)"
                       fill={`url(#${gradientId})`}
                       strokeWidth={2.5}
                       dot={false}

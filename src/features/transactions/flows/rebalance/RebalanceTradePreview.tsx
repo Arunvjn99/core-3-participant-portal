@@ -9,7 +9,7 @@ import {
   Shield,
   Clock } from "lucide-react";
 
-const COLORS = ["#3b82f6", "#8b5cf6", "#10b981", "#f59e0b"];
+const COLORS = ["var(--chart-blue)", "var(--chart-teal)", "var(--chart-green)", "var(--status-warning)"];
 
 function RebalanceTradePreview() {
   const navigate = useNavigate();
@@ -80,7 +80,7 @@ function RebalanceTradePreview() {
         >
           <Card
             className="p-5 rounded-2xl border-emerald-100/60 dark:border-emerald-800/40 bg-gradient-to-br from-emerald-50/50 dark:from-emerald-950/30 to-teal-50/30 dark:to-teal-950/20"
-            style={{ boxShadow: "0 1px 3px rgba(16,185,129,0.06)" }}
+            style={{ boxShadow: "var(--shadow-success)" }}
           >
             <div className="flex items-center gap-2 mb-2">
               <ArrowUpRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -107,7 +107,7 @@ function RebalanceTradePreview() {
         >
           <Card
             className="p-5 rounded-2xl border-rose-100/60 dark:border-rose-800/40 bg-gradient-to-br from-rose-50/50 dark:from-rose-950/30 to-pink-50/30 dark:to-pink-950/20"
-            style={{ boxShadow: "0 1px 3px rgba(244,63,94,0.06)" }}
+            style={{ boxShadow: "var(--shadow-subtle)" }}
           >
             <div className="flex items-center gap-2 mb-2">
               <ArrowDownRight className="w-4 h-4 text-rose-600 dark:text-rose-400" />
@@ -134,7 +134,7 @@ function RebalanceTradePreview() {
         >
           <Card
             className="p-5 rounded-2xl border-blue-100/60 dark:border-blue-800/40 bg-gradient-to-br from-blue-50/50 dark:from-blue-950/30 to-indigo-50/30 dark:to-indigo-950/20"
-            style={{ boxShadow: "0 1px 3px rgba(59,130,246,0.06)" }}
+            style={{ boxShadow: "var(--shadow-subtle)" }}
           >
             <div className="flex items-center gap-2 mb-2">
               <Shield className="w-4 h-4 text-blue-600 dark:text-blue-400" />
@@ -161,8 +161,7 @@ function RebalanceTradePreview() {
         <Card
           className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
           style={{
-            boxShadow:
-              "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
+            boxShadow: "var(--shadow-elevated)" }}
         >
           <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-5">
             Trade Details

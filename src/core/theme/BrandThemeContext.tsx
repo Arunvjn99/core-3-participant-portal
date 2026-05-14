@@ -22,11 +22,12 @@ export interface BrandTheme {
   supportPhone: string
 }
 
+/** Fallback theme values (hex required for JS color manipulation utilities) */
 export const DEFAULT_THEME: BrandTheme = {
-  primaryColor: '#2563EB',
-  primaryHover: '#1d4ed8',
-  primaryLight: '#eff6ff',
-  primaryRing: 'rgba(37,99,235,0.25)',
+  primaryColor: '#2563EB', // --color-primary fallback
+  primaryHover: '#1d4ed8', // --color-primary-hover fallback
+  primaryLight: '#eff6ff', // --color-primary-light fallback
+  primaryRing: 'rgba(37,99,235,0.25)', // derived from primaryColor
   companyName: 'Participant Portal',
   companyLogo: null,
   fontFamily: 'Inter, sans-serif',

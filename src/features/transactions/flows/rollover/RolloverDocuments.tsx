@@ -146,8 +146,8 @@ function RolloverDocuments() {
                 }`}
                 style={{
                   boxShadow: isUploaded
-                    ? "0 1px 3px rgba(16,185,129,0.06)"
-                    : "0 1px 2px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05)" }}
+                    ? "var(--shadow-success)"
+                    : "var(--shadow-elevated)" }}
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-3">

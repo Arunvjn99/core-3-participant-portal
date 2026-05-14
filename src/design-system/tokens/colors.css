@@ -13,10 +13,12 @@
   --surface-dark: #0a0a0a;
   --surface-dark-secondary: #0d0d0d;
   --surface-overlay: rgba(15, 23, 42, 0.45);
+  --surface-shell: #f5f7fa;
 
   --text-primary: #0f172a; /* slate-900 */
   --text-secondary: #64748b; /* slate-500 */
   --text-muted: #94a3b8; /* slate-400 */
+  --text-faint: #cbd5e1; /* slate-300 */
   --text-inverse: #ffffff;
   --text-link: #2563eb;
 
@@ -24,21 +26,79 @@
   --border-light: #f1f5f9; /* slate-100 */
   --border-focus: #3b82f6; /* blue-500 */
   --border-strong: #cbd5e1;
+  --border-blue: #bfdbfe;
+  --border-purple: #ddd6fe;
+  --border-green: #bbf7d0;
+  --border-amber: #fed7aa;
+  --border-red: #fca5a5;
 
   --status-success: #10b981;
   --status-success-bg: #ecfdf5;
+  --status-success-text: #059669;
+  --status-success-tint: rgba(16, 185, 129, 0.1);
   --status-warning: #f59e0b;
   --status-warning-bg: #fffbeb;
+  --status-warning-text: #92400e;
+  --status-warning-tint: rgba(245, 158, 11, 0.1);
   --status-danger: #ef4444;
   --status-danger-bg: #fef2f2;
+  --status-danger-text: #b91c1c;
+  --status-danger-tint: rgba(220, 38, 38, 0.1);
   --status-info: #2563eb;
   --status-info-bg: #eff6ff;
+  --status-info-text: #1d4ed8;
+  --status-info-tint: rgba(37, 99, 235, 0.1);
+
+  /* Chart / Data Visualization palette */
+  --chart-blue: #2563eb;
+  --chart-blue-light: #3b82f6;
+  --chart-teal: #0d9488;
+  --chart-cyan: #06b6d4;
+  --chart-sky: #0ea5e9;
+  --chart-green: #10b981;
+  --chart-green-dark: #16a34a;
+  --chart-emerald: #059669;
+  --chart-purple: #8b5cf6;
+  --chart-violet: #7c3aed;
+  --chart-amber: #f59e0b;
+  --chart-orange: #ea580c;
+  --chart-red: #ef4444;
+  --chart-gray: #94a3b8;
+  --chart-grid: rgba(17, 24, 39, 0.07);
+  --chart-grid-muted: rgba(17, 24, 39, 0.05);
+
+  /* Interactive / UI element colors */
+  --input-bg: #ffffff;
+  --input-border: #e5e7eb;
+  --input-border-focus: #bfdbfe;
+  --input-placeholder: #9ca3af;
+  --slider-track: #e5e7eb;
+  --slider-thumb: #ffffff;
+
+  /* Accent colors */
+  --accent-blue: #2b59c3;
+  --accent-blue-hover: #1e4a9e;
+  --accent-blue-tint: rgba(43, 89, 195, 0.1);
+  --accent-purple: #a855f7;
+  --accent-purple-tint: rgba(168, 85, 247, 0.1);
+
+  /* Gradient endpoints */
+  --gradient-blue-start: #3d82d0;
+  --gradient-blue-end: #3f85d2;
+  --gradient-dark-start: #1e3a5f;
+  --gradient-dark-end: #2563eb;
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
   --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.07);
   --shadow-modal: 0 32px 64px -12px rgba(0, 0, 0, 0.14);
   --shadow-dropdown: 0 4px 12px rgba(15, 23, 42, 0.08);
   --shadow-blue: 0 8px 24px rgba(37, 99, 235, 0.15);
+  --shadow-success: 0 8px 32px rgba(16, 185, 129, 0.3);
+  --shadow-teal: 0 8px 32px rgba(20, 184, 166, 0.3);
+  --shadow-btn: 0 4px 12px rgba(37, 99, 235, 0.3);
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-elevated: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-float: 0 8px 24px rgba(37, 99, 235, 0.18);
 
   --radius-sm: 0.5rem; /* 8px */
   --radius-md: 0.75rem; /* 12px */
@@ -58,4 +118,16 @@
   --enroll-amber-border: #fde68a;
   --enroll-orange-bg: #fff7ed;
   --enroll-orange-border: #fed7aa;
+
+  /* Password strength colors */
+  --strength-weak: #dc2626;
+  --strength-fair: #ca8a04;
+  --strength-good: #ca8a04;
+  --strength-strong: #16a34a;
+
+  /* Company/brand theme fallbacks */
+  --company-ascend: #1e3a8a;
+  --company-congruent: #7c3aed;
+  --company-lincoln: #6b1d4a;
+  --company-vanguard: #811926;
 }

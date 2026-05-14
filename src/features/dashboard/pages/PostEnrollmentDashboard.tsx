@@ -91,10 +91,10 @@ export default function PostEnrollmentDashboard() {
 
   const portfolioSegments = useMemo(
     () => [
-      { key: 'us', label: t('postDashboard.seg_us'), pct: 55, amount: '$78,591', color: '#2563EB' },
-      { key: 'intl', label: t('postDashboard.seg_intl'), pct: 25, amount: '$35,723', color: '#0D9488' },
-      { key: 'bonds', label: t('postDashboard.seg_bonds'), pct: 15, amount: '$21,433', color: '#16A34A' },
-      { key: 'cash', label: t('postDashboard.seg_cash'), pct: 5, amount: '$7,144', color: '#94A3B8' },
+      { key: 'us', label: t('postDashboard.seg_us'), pct: 55, amount: '$78,591', color: 'var(--chart-blue)' },
+      { key: 'intl', label: t('postDashboard.seg_intl'), pct: 25, amount: '$35,723', color: 'var(--chart-teal)' },
+      { key: 'bonds', label: t('postDashboard.seg_bonds'), pct: 15, amount: '$21,433', color: 'var(--chart-green-dark)' },
+      { key: 'cash', label: t('postDashboard.seg_cash'), pct: 5, amount: '$7,144', color: 'var(--chart-gray)' },
     ],
     [t]
   )
@@ -268,7 +268,7 @@ export default function PostEnrollmentDashboard() {
                   <div className="grid min-h-[220px] grid-cols-1 md:grid-cols-[35%_minmax(0,1fr)]">
                     <div className="relative flex min-h-[200px] flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-500 via-blue-600 to-violet-600 p-6 md:min-h-0">
                       <img
-                        src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400&q=80"
+                        src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&q=80"
                         alt=""
                         className="absolute inset-0 h-full w-full object-cover opacity-40"
                       />
@@ -351,23 +351,142 @@ export default function PostEnrollmentDashboard() {
 
             {/* RIGHT ~35% */}
             <aside className="flex flex-col gap-5 lg:col-span-4">
-              {/* Hardship */}
-              <SpecCard className="border-l-4 border-l-status-warning pl-4">
-                <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 shrink-0 text-status-warning" aria-hidden />
-                    <span className="text-[14px] font-bold text-text-primary">{t('postDashboard.hardship_title')}</span>
+              {/* Readiness */}
+              <SpecCard className="text-center">
+                <div className="mb-4 flex items-center justify-center gap-2">
+                  <Target className="h-5 w-5 text-status-success" aria-hidden />
+                  <span className="text-[15px] font-bold text-text-primary">{t('dashboard.readinessScore')}</span>
+                </div>
+                <div className="relative mx-auto h-[140px] w-[140px] text-text-primary [&_.recharts-surface]:overflow-visible">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadialBarChart
+                      cx="50%"
+                      cy="50%"
+                      innerRadius="78%"
+                      outerRadius="100%"
+                      barSize={10}
+                      data={[{ value: 80 }]}
+                      startAngle={90}
+                      endAngle={450}
+                    >
+                      <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+                      <RadialBar
+                        background={{ fill: isDark ? 'var(--chart-grid-muted)' : 'var(--chart-grid)' }}
+                        dataKey="value"
+                        cornerRadius={6}
+                        fill="var(--status-success)"
+                        animationDuration={1000}
+                      />
+                    </RadialBarChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pt-1">
+                    <span className="text-[36px] font-bold leading-none text-text-primary">80</span>
+                    <span className="text-[14px] text-text-secondary">/100</span>
                   </div>
-                  <span className="rounded-full bg-status-warning-bg px-2.5 py-0.5 text-[11px] font-bold text-status-warning">
-                    {t('common.pending').toUpperCase()}
+                </div>
+                <div className="mt-3 flex items-center justify-center gap-1.5 text-[14px] font-semibold text-status-success">
+                  <span className="h-2 w-2 rounded-full bg-status-success" aria-hidden />
+                  {t('dashboard.onTrack')}
+                </div>
+                <p className="mx-auto mt-3 max-w-[260px] text-[12px] leading-relaxed text-text-secondary">
+                  {t('postDashboard.projected_income')}
+                </p>
+                <button type="button" className="btn-brand mt-5 w-full">
+                  {t('dashboard.launchSimulator')}
+                </button>
+              </SpecCard>
+
+              {/* Active Loan */}
+              <SpecCard>
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4 text-primary" aria-hidden />
+                    <span className="text-[14px] font-bold text-text-primary">{t('dashboard.activeLoan')}</span>
+                  </div>
+                  <button type="button" className="text-[12px] font-semibold text-primary hover:underline">
+                    {t('postDashboard.request_new_loan')}
+                  </button>
+                </div>
+                <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
+                  <p className="text-[13px] font-bold text-text-primary">{t('postDashboard.loan_line_gp')}</p>
+                  <span className="rounded-full bg-status-success-bg px-2 py-0.5 text-[11px] font-semibold text-status-success">
+                    {t('common.active')}
                   </span>
                 </div>
-                <p className="text-[12px] text-text-secondary">{t('postDashboard.request_line')}</p>
-                <div className="mt-3 h-1 w-full overflow-hidden rounded-sm bg-surface-elevated">
-                  <div className="h-full w-[60%] rounded-sm bg-gradient-to-r from-amber-400 to-amber-500" />
+                <p className="mt-0.5 text-[10px] font-mono text-text-muted">LOAN-2024-001</p>
+                <p className="text-[11px] text-text-secondary">{t('postDashboard.originated')}</p>
+                <div className="mt-4 grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary">{t('postDashboard.remaining')}</p>
+                    <p className="mt-1 text-[18px] font-bold text-text-primary">$2,450</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary">{t('postDashboard.next_payment')}</p>
+                    <p className="mt-1 text-[14px] font-bold text-text-primary">
+                      {t('postDashboard.loan_payment_line')}
+                    </p>
+                  </div>
                 </div>
-                <p className="mt-1 text-right text-[11px] text-text-secondary">{t('postDashboard.under_review')}</p>
+                <div className="mt-3 h-1.5 w-full overflow-hidden rounded-[3px] bg-surface-elevated">
+                  <div className="h-full w-[60%] rounded-[3px] bg-status-success" />
+                </div>
+                <div className="mt-2 flex justify-between text-[11px] text-text-secondary">
+                  <span>{t('postDashboard.paid_off_progress')}</span>
+                  <span>{t('postDashboard.payments_left')}</span>
+                </div>
               </SpecCard>
+
+              {/* Your Advisor */}
+              <div
+                className="overflow-hidden rounded-[12px] border border-border-default shadow-card"
+                style={{
+                  background: 'linear-gradient(135deg, var(--gradient-dark-start), var(--gradient-dark-end))',
+                }}
+              >
+                <div className="relative p-5 pt-6 text-white">
+                  <img
+                    src="https://randomuser.me/api/portraits/women/44.jpg"
+                    alt="Sarah Jenkins"
+                    className="absolute right-5 top-5 h-[70px] w-[70px] rounded-full border-2 border-white object-cover ring-2 ring-white/30"
+                  />
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/80">{t('dashboard.yourAdvisor')}</p>
+                  <h3 className="mt-2 pr-20 text-[20px] font-bold">Sarah Jenkins</h3>
+                  <p className="mt-1 text-[13px] text-blue-100">{t('postDashboard.advisor_title_role')}</p>
+                  <div className="mt-6 grid grid-cols-3 divide-x divide-white/20 text-center">
+                    <div className="px-2">
+                      <p className="text-[16px] font-bold">4.9</p>
+                      <p className="text-[11px] text-white/70">{t('postDashboard.advisor_rating')}</p>
+                    </div>
+                    <div className="px-2">
+                      <p className="text-[16px] font-bold">12yr</p>
+                      <p className="text-[11px] text-white/70">{t('postDashboard.advisor_experience')}</p>
+                    </div>
+                    <div className="px-2">
+                      <p className="text-[16px] font-bold">240+</p>
+                      <p className="text-[11px] text-white/70">{t('postDashboard.advisor_clients')}</p>
+                    </div>
+                  </div>
+                  <p className="mt-4 text-[12px] leading-relaxed text-white/90">
+                    {t('postDashboard.advisor_bio')}
+                  </p>
+                  <div className="mt-5 flex gap-2.5">
+                    <button
+                      type="button"
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border-2 border-white py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
+                    >
+                      <Mail className="h-4 w-4" aria-hidden />
+                      {t('dashboard.message')}
+                    </button>
+                    <button
+                      type="button"
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white py-2.5 text-sm font-semibold text-primary shadow-sm transition hover:bg-slate-100"
+                    >
+                      <CalendarDays className="h-4 w-4" aria-hidden />
+                      {t('dashboard.scheduleCall')}
+                    </button>
+                  </div>
+                </div>
+              </div>
 
               {/* Recent Activity */}
               <SpecCard>
@@ -420,90 +539,6 @@ export default function PostEnrollmentDashboard() {
                 </ul>
               </SpecCard>
 
-              {/* Readiness */}
-              <SpecCard className="text-center">
-                <div className="mb-4 flex items-center justify-center gap-2">
-                  <Target className="h-5 w-5 text-status-success" aria-hidden />
-                  <span className="text-[15px] font-bold text-text-primary">{t('dashboard.readinessScore')}</span>
-                </div>
-                <div className="relative mx-auto h-[140px] w-[140px] text-text-primary [&_.recharts-surface]:overflow-visible">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RadialBarChart
-                      cx="50%"
-                      cy="50%"
-                      innerRadius="78%"
-                      outerRadius="100%"
-                      barSize={10}
-                      data={[{ value: 80 }]}
-                      startAngle={90}
-                      endAngle={450}
-                    >
-                      <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
-                      <RadialBar
-                        background={{ fill: isDark ? 'rgba(148, 163, 184, 0.22)' : '#E5E7EB' }}
-                        dataKey="value"
-                        cornerRadius={6}
-                        fill="var(--status-success)"
-                        animationDuration={1000}
-                      />
-                    </RadialBarChart>
-                  </ResponsiveContainer>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center pt-1">
-                    <span className="text-[36px] font-bold leading-none text-text-primary">80</span>
-                    <span className="text-[14px] text-text-secondary">/100</span>
-                  </div>
-                </div>
-                <div className="mt-3 flex items-center justify-center gap-1.5 text-[14px] font-semibold text-status-success">
-                  <span className="h-2 w-2 rounded-full bg-status-success" aria-hidden />
-                  {t('dashboard.onTrack')}
-                </div>
-                <p className="mx-auto mt-3 max-w-[260px] text-[12px] leading-relaxed text-text-secondary">
-                  {t('postDashboard.projected_income')}
-                </p>
-                <button type="button" className="btn-brand mt-5 w-full">
-                  {t('dashboard.launchSimulator')}
-                </button>
-              </SpecCard>
-
-              {/* Active Loan */}
-              <SpecCard>
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="h-4 w-4 text-primary" aria-hidden />
-                    <span className="text-[14px] font-bold text-text-primary">{t('dashboard.activeLoan')}</span>
-                  </div>
-                  <button type="button" className="text-[12px] font-semibold text-primary hover:underline">
-                    {t('postDashboard.request_new_loan')}
-                  </button>
-                </div>
-                <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
-                  <p className="text-[13px] font-bold text-text-primary">{t('postDashboard.loan_line_gp')}</p>
-                  <span className="rounded-full bg-status-success-bg px-2 py-0.5 text-[11px] font-semibold text-status-success">
-                    {t('common.active')}
-                  </span>
-                </div>
-                <p className="text-[11px] text-text-secondary">{t('postDashboard.originated')}</p>
-                <div className="mt-4 grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary">{t('postDashboard.remaining')}</p>
-                    <p className="mt-1 text-[18px] font-bold text-text-primary">$2,450</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary">{t('postDashboard.next_payment')}</p>
-                    <p className="mt-1 text-[14px] font-bold text-text-primary">
-                      {t('postDashboard.loan_payment_line')}
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-3 h-1.5 w-full overflow-hidden rounded-[3px] bg-surface-elevated">
-                  <div className="h-full w-[60%] rounded-[3px] bg-status-success" />
-                </div>
-                <div className="mt-2 flex justify-between text-[11px] text-text-secondary">
-                  <span>{t('postDashboard.paid_off_progress')}</span>
-                  <span>{t('postDashboard.payments_left')}</span>
-                </div>
-              </SpecCard>
-
               {/* Next Best Actions */}
               <SpecCard>
                 <div className="mb-4 flex items-center gap-2">
@@ -539,58 +574,6 @@ export default function PostEnrollmentDashboard() {
                   </div>
                 </div>
               </SpecCard>
-
-              {/* Your Advisor */}
-              <div
-                className="overflow-hidden rounded-[12px] border border-border-default shadow-card"
-                style={{
-                  background: 'linear-gradient(135deg, #1E3A5F 0%, #2563EB 100%)',
-                }}
-              >
-                <div className="relative p-5 pt-6 text-white">
-                  <img
-                    src="https://randomuser.me/api/portraits/women/44.jpg"
-                    alt="Sarah Jenkins"
-                    className="absolute right-5 top-5 h-[70px] w-[70px] rounded-full border-2 border-white object-cover ring-2 ring-white/30"
-                  />
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-white/80">{t('dashboard.yourAdvisor')}</p>
-                  <h3 className="mt-2 pr-20 text-[20px] font-bold">Sarah Jenkins</h3>
-                  <p className="mt-1 text-[13px] text-blue-100">{t('postDashboard.advisor_title_role')}</p>
-                  <div className="mt-6 grid grid-cols-3 divide-x divide-white/20 text-center">
-                    <div className="px-2">
-                      <p className="text-[16px] font-bold">4.9</p>
-                      <p className="text-[11px] text-white/70">{t('postDashboard.advisor_rating')}</p>
-                    </div>
-                    <div className="px-2">
-                      <p className="text-[16px] font-bold">12yr</p>
-                      <p className="text-[11px] text-white/70">{t('postDashboard.advisor_experience')}</p>
-                    </div>
-                    <div className="px-2">
-                      <p className="text-[16px] font-bold">240+</p>
-                      <p className="text-[11px] text-white/70">{t('postDashboard.advisor_clients')}</p>
-                    </div>
-                  </div>
-                  <p className="mt-4 text-[12px] leading-relaxed text-white/90">
-                    {t('postDashboard.advisor_bio')}
-                  </p>
-                  <div className="mt-5 flex gap-2.5">
-                    <button
-                      type="button"
-                      className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border-2 border-white py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
-                    >
-                      <Mail className="h-4 w-4" aria-hidden />
-                      {t('dashboard.message')}
-                    </button>
-                    <button
-                      type="button"
-                      className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white py-2.5 text-sm font-semibold text-primary shadow-sm transition hover:bg-slate-100"
-                    >
-                      <CalendarDays className="h-4 w-4" aria-hidden />
-                      {t('dashboard.scheduleCall')}
-                    </button>
-                  </div>
-                </div>
-              </div>
             </aside>
           </div>
         </div>

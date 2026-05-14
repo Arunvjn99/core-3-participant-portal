@@ -76,7 +76,7 @@ function calcStrength(pw: string) {
   }
   const score = Object.values(checks).filter(Boolean).length
   const labels = ['', 'Very Weak', 'Weak', 'Fair', 'Good', 'Strong']
-  const colors = ['', '#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e']
+  const colors = ['', 'var(--strength-weak)', 'var(--strength-fair)', 'var(--strength-good)', 'var(--strength-strong)']
   return { score, checks, label: labels[score] || '', color: colors[score] || '' }
 }
 
@@ -201,7 +201,7 @@ function CompanySelector({
               onClick={() => onSelect(company)}
               className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all text-left"
               style={{
-                borderColor: isSelected ? company.theme.primary : '#e5e7eb',
+                borderColor: isSelected ? company.theme.primary : 'var(--border-default)',
                 backgroundColor: isSelected ? `${company.theme.primary}10` : 'transparent',
               }}
               aria-pressed={isSelected}
@@ -256,7 +256,7 @@ function PasswordStrength({ password }: { password: string; theme: Theme }) {
           <div
             key={bar}
             className="h-1.5 flex-1 rounded-full transition-all duration-300"
-            style={{ backgroundColor: bar <= score ? color : '#e5e7eb' }}
+            style={{ backgroundColor: bar <= score ? color : 'var(--slider-track)' }}
           />
         ))}
       </div>
@@ -272,7 +272,7 @@ function PasswordStrength({ password }: { password: string; theme: Theme }) {
             <div key={req.key} className="flex items-center gap-2">
               <div
                 className="w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 transition-all"
-                style={{ backgroundColor: passed ? color : '#e5e7eb' }}
+                style={{ backgroundColor: passed ? color : 'var(--slider-track)' }}
               >
                 {passed
                   ? <Check className="w-2 h-2 text-white" strokeWidth={3} />
@@ -448,7 +448,7 @@ export default function WhiteLabelAuth() {
 
   const primaryBtn = {
     backgroundColor: theme.primary,
-    color: '#fff',
+    color: 'var(--text-inverse)',
   }
 
   const accentLink = { color: theme.accent }
