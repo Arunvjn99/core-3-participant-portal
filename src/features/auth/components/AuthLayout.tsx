@@ -11,7 +11,7 @@ const CAROUSEL_SLIDES = [
     fallbackIcon: '📊',
   },
   {
-    image: 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/Ai%20carosel.png',
+    image: 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/Image%202.png',
     title: 'AI-Powered Support',
     subtitle: 'Sign in to explore smarter tools for planning your financial future.',
     fallbackIcon: '🤖',
