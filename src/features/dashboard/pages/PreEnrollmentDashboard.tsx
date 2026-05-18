@@ -260,30 +260,12 @@ export function PreEnrollmentDashboard() {
                 <div className="absolute inset-0 bg-[radial-gradient(var(--chart-grid)_1px,transparent_1px)] bg-[length:24px_24px] opacity-60 dark:bg-[radial-gradient(var(--chart-grid-muted)_1px,transparent_1px)]" />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--accent-blue-tint),transparent_70%)] dark:bg-[radial-gradient(circle_at_center,var(--accent-blue-tint),transparent_70%)]" />
 
-                <div className="relative z-10 flex w-full flex-col items-center gap-8 px-16">
-                  <motion.div
-                    animate={{ y: [0, -4, 0] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                    className="flex h-14 w-full items-center gap-4 rounded-full border border-slate-200/90 bg-white/90 px-5 shadow-lg shadow-slate-200/50 backdrop-blur-xl dark:border-white/10 dark:bg-white/5 dark:shadow-black/30"
-                  >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[var(--accent-blue)] to-purple-500 shadow-md">
-                      <Sparkles className="h-4 w-4 text-white" />
-                    </div>
-                    <div className="h-2.5 w-40 rounded-full bg-slate-200 dark:bg-white/20" />
-                  </motion.div>
-
-                  <div className="flex w-full max-w-[280px] flex-col gap-3">
-                    {[1, 0.6, 0.3].map((opacity, i) => (
-                      <div
-                        key={i}
-                        className="h-12 w-full rounded-2xl border border-slate-200/80 bg-white/80 dark:border-white/10 dark:bg-white/5"
-                        style={{
-                          opacity,
-                          transform: `scale(${1 - i * 0.05}) translateY(${i * 4}px)`,
-                        }}
-                      />
-                    ))}
-                  </div>
+                <div className="relative z-10 flex w-full flex-col items-center justify-center px-8 py-12">
+                  <img 
+                    src="/dashboard-robot-hero.png" 
+                    alt="Ask Core AI Robot" 
+                    className="h-64 w-auto object-contain"
+                  />
                 </div>
               </div>
 
