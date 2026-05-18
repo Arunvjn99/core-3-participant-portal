@@ -39,19 +39,20 @@ export function GlobalAskCoreAILayer() {
       type="button"
       onClick={openChat}
       className={cn(
-        'fixed left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-[9999px] pl-1.5 pr-5 py-1.5 text-sm font-medium text-white transition-transform hover:scale-[1.02] active:scale-[0.98]',
-        'border border-white/15 backdrop-blur-[8px]',
+        'fixed left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-[9999px] pl-1.5 pr-5 py-1.5 text-sm font-medium transition-transform hover:scale-[1.02] active:scale-[0.98]',
+        'border border-blue-300/60 backdrop-blur-[8px]',
         enrollmentStepFlow ? 'bottom-6 max-sm:!bottom-20' : 'bottom-6',
       )}
       style={{
-        background: 'var(--surface-overlay, rgba(30, 30, 46, 0.9))',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)',
+        background: 'rgba(230, 241, 255, 0.95)',
+        boxShadow: '0 4px 24px rgba(59, 130, 246, 0.18), inset 0 1px 0 rgba(255,255,255,0.8)',
+        color: '#1e40af',
       }}
       aria-label="Ask CORE AI"
       data-global-ask-core-ai-pill
     >
       <img src="/ask-ai-robot.png" alt="" aria-hidden className="h-9 w-9 shrink-0 object-contain" />
-      <span className="whitespace-nowrap tracking-wide font-medium">
+      <span className="whitespace-nowrap tracking-wide font-semibold text-blue-700">
         Ask <span className="font-bold">CORE</span> AI
       </span>
     </button>
