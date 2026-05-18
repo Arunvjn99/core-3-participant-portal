@@ -256,7 +256,7 @@ export function PreEnrollmentDashboard() {
               whileHover={{ y: -8 }}
               className="flex flex-col overflow-hidden rounded-[32px] border border-slate-200/80 bg-white shadow-xl shadow-slate-200/60 transition-all hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:shadow-none dark:hover:border-slate-600"
             >
-              <div className="relative flex aspect-[16/9] items-center justify-center overflow-hidden border-b border-blue-100 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900" style={{ background: '#e8eef8' }}>
+              <div className="relative flex aspect-[16/9] items-center justify-center overflow-hidden border-b border-blue-100 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900" style={{ background: '#E6F1FF' }}>
 
                 <div className="relative z-10 flex w-full flex-col items-center justify-center px-8 py-12">
                   <img 
