@@ -51,9 +51,7 @@ export function GlobalAskCoreAILayer() {
       aria-label="Ask CORE AI"
       data-global-ask-core-ai-pill
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-100 ring-1 ring-blue-200">
-        <img src="/ask-ai-robot.png" alt="" aria-hidden className="h-8 w-8 object-contain" />
-      </span>
+      <img src="/ask-ai-robot.png" alt="" aria-hidden className="h-9 w-9 shrink-0 object-contain" />
       <span className="whitespace-nowrap tracking-wide font-semibold text-blue-700">
         Ask <span className="font-bold">CORE</span> AI
       </span>
