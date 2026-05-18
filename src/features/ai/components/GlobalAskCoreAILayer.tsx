@@ -39,14 +39,14 @@ export function GlobalAskCoreAILayer() {
       type="button"
       onClick={openChat}
       className={cn(
-        'fixed left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-[9999px] pl-1.5 pr-5 py-1.5 text-sm font-medium shadow-[0_4px_24px_rgba(59,130,246,0.25)] transition-transform hover:scale-[1.02] active:scale-[0.98]',
-        'border border-blue-200/60 backdrop-blur-[8px]',
+        'fixed left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-[9999px] pl-1.5 pr-5 py-1.5 text-sm font-medium transition-transform hover:scale-[1.02] active:scale-[0.98]',
+        'border border-blue-300/60 backdrop-blur-[8px]',
         enrollmentStepFlow ? 'bottom-6 max-sm:!bottom-20' : 'bottom-6',
       )}
       style={{
-        background: 'rgba(219, 234, 254, 0.92)',
-        boxShadow: '0 4px_24px rgba(59,130,246,0.2), inset 0 1px 0 rgba(255,255,255,0.6)',
-        color: '#1d4ed8',
+        background: 'rgba(191, 219, 254, 0.95)',
+        boxShadow: '0 4px 24px rgba(59, 130, 246, 0.35), inset 0 1px 0 rgba(255,255,255,0.7)',
+        color: '#1e40af',
       }}
       aria-label="Ask CORE AI"
       data-global-ask-core-ai-pill
