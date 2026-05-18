@@ -235,16 +235,7 @@ export function PreEnrollmentDashboard() {
               className="relative cursor-pointer overflow-hidden rounded-[32px] border border-slate-200/80 bg-gradient-to-br from-white to-slate-50 shadow-xl shadow-slate-200/60 transition-all hover:border-slate-300 hover:shadow-2xl dark:border-slate-700 dark:from-slate-900 dark:to-slate-950 dark:shadow-none dark:hover:border-slate-600"
               onClick={() => setAdvisorModalOpen(true)}
             >
-              {/* Illustration */}
-              <div className="relative flex aspect-[16/9] items-center justify-center overflow-hidden border-b border-slate-100 bg-gradient-to-b from-slate-50 to-white dark:border-slate-700 dark:from-slate-800 dark:to-slate-900">
-                <img
-                  src="/advisor-ai-cards.png"
-                  alt=""
-                  aria-hidden
-                  className="h-full w-full object-cover object-center"
-                />
-              </div>
-              <div className="relative flex flex-col justify-between p-8">
+              <div className="relative flex min-h-[280px] flex-col justify-between p-8">
                 <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--accent-blue)]/10 dark:bg-blue-500/15">
                   <UserCheck className="h-6 w-6 text-[var(--accent-blue)] dark:text-blue-400" />
                 </div>
@@ -265,9 +256,7 @@ export function PreEnrollmentDashboard() {
               whileHover={{ y: -8 }}
               className="flex flex-col overflow-hidden rounded-[32px] border border-slate-200/80 bg-white shadow-xl shadow-slate-200/60 transition-all hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:shadow-none dark:hover:border-slate-600"
             >
-              <div className="relative flex aspect-[16/9] items-center justify-center overflow-hidden border-b border-slate-100 bg-gradient-to-b from-slate-100 to-slate-50 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900">
-                <div className="absolute inset-0 bg-[radial-gradient(var(--chart-grid)_1px,transparent_1px)] bg-[length:24px_24px] opacity-60 dark:bg-[radial-gradient(var(--chart-grid-muted)_1px,transparent_1px)]" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--accent-blue-tint),transparent_70%)] dark:bg-[radial-gradient(circle_at_center,var(--accent-blue-tint),transparent_70%)]" />
+              <div className="relative flex aspect-[16/9] items-center justify-center overflow-hidden border-b border-blue-100 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900" style={{ background: '#e8eef8' }}>
 
                 <div className="relative z-10 flex w-full flex-col items-center justify-center px-8 py-12">
                   <img 
