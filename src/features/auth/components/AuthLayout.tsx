@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 
 const BG_IMAGE = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/background%20auth.png'
-const CORE_LOGO = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/CORE%20logo.png'
 
 const CAROUSEL_SLIDES = [
   {

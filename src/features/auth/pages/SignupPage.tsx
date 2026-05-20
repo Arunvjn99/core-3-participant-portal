@@ -42,7 +42,7 @@ interface Company {
 
 // Inline SVG logo components
 const CompanyLogo = ({ slug, className }: { slug: string; className?: string }) => {
-  const logos: Record<string, JSX.Element> = {
+  const logos: Record<string, React.JSX.Element> = {
     ascend: (
       <svg className={className} width="160" height="50" viewBox="0 0 160 50" fill="none" xmlns="http://www.w3.org/2000/svg">
         {/* Burgundy swoosh - signature element */}
