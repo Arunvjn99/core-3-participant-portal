@@ -387,7 +387,7 @@ function BentoCards({
 
         {/* Illustration — absolute, bottom-right, behind content */}
         <motion.img
-          src="/advisor-meeting.svg"
+          src="https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/1066378_103414-OM6JSZ-221%201.svg"
           alt=""
           aria-hidden
           width={300}
