@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle2, ChevronRight, Sparkles, UserCheck } from 'lucide-react'
+import { CheckCircle2, ChevronRight } from 'lucide-react'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { useAIStore } from '@/core/store/aiStore'
 import { useAuth } from '@/core/hooks/useAuth'
@@ -157,133 +157,176 @@ export function PreEnrollmentDashboard() {
             </motion.div>
           </section>
 
-          {/* Learning */}
+          {/* Learning Hub */}
           <section ref={learningRef} className="relative z-10">
-            <div className="relative overflow-hidden rounded-[40px] bg-gradient-to-r from-[var(--gradient-blue-start)] to-[var(--gradient-blue-end)] text-white shadow-2xl shadow-[var(--gradient-blue-start)]/35 dark:shadow-blue-900/40">
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.2),transparent_50%)]" />
+            <div
+              className="relative overflow-hidden rounded-[20px] text-white"
+              style={{ background: 'linear-gradient(135deg, #5B8CEF 0%, #3B6FE0 100%)' }}
+            >
+              {/* subtle top-left shine */}
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_10%_20%,rgba(255,255,255,0.22),transparent_55%)]" />
 
-              <div className="relative z-10 grid items-center gap-8 p-8 md:gap-10 md:p-12 lg:grid-cols-[minmax(0,1fr)_minmax(220px,380px)] lg:gap-12">
-                <div className="flex max-w-3xl flex-col items-start gap-6 md:gap-8">
-                  <div className="inline-flex w-fit items-center rounded-full border border-white/20 bg-white/20 px-4 py-1.5 backdrop-blur-md">
-                    <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-white">{t('learning.step1')}</span>
-                  </div>
-
-                  <div className="flex flex-col gap-3">
-                    <h2 className="text-2xl font-bold leading-[1.15] tracking-tight sm:text-3xl md:text-[2rem]">
-                      {t('learning.title_line1')} <br />
-                      {t('learning.title_line2')}
+              <div className="relative z-10 flex items-center justify-between gap-4 px-10 py-8">
+                {/* Left text column */}
+                <div className="flex max-w-[58%] flex-col gap-4">
+                  <div className="flex flex-col gap-1">
+                    <h2 className="text-[1.85rem] font-extrabold leading-[1.1] tracking-tight">
+                      {t('learning.title_line1')} {t('learning.title_line2')}
                     </h2>
-                    <p className="max-w-md text-sm leading-relaxed text-blue-50/90 sm:text-base">
+                    <p className="text-[13.5px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.78)' }}>
                       {t('learning.subtitle')}
                     </p>
                   </div>
 
-                  <div className="flex flex-col gap-4 pt-1 sm:flex-row sm:flex-wrap sm:gap-x-8 sm:gap-y-4">
-                    {[
-                      t('learning.item1'),
-                      t('learning.item2'),
-                      t('learning.item3'),
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/20">
-                          <CheckCircle2 className="h-3.5 w-3.5 text-white" />
+                  <div className="flex flex-col gap-2">
+                    {[t('learning.item1'), t('learning.item2'), t('learning.item3')].map((item, i) => (
+                      <div key={i} className="flex items-center gap-2.5">
+                        <div
+                          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+                          style={{ background: 'rgba(255,255,255,0.25)' }}
+                        >
+                          <svg width="11" height="9" viewBox="0 0 11 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 4.5L3.5 7L10 1" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
                         </div>
-                        <span className="text-sm font-semibold text-white/90">{item}</span>
+                        <span className="text-[13px] font-medium" style={{ color: 'rgba(255,255,255,0.90)' }}>
+                          {item}
+                        </span>
                       </div>
                     ))}
                   </div>
                 </div>
 
+                {/* Right illustration */}
                 <motion.div
-                  className="flex justify-center lg:justify-end lg:self-end"
-                  initial={prefersReducedMotion ? undefined : { opacity: 0, y: 24 }}
+                  className="flex shrink-0 items-end justify-end self-end"
+                  initial={prefersReducedMotion ? undefined : { opacity: 0, y: 16 }}
                   whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.35 }}
-                  transition={{
-                    duration: prefersReducedMotion ? 0 : 0.75,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
+                  transition={{ duration: prefersReducedMotion ? 0 : 0.6, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <motion.img
                     src="/learning-journey-illustration.png"
                     alt={t('learning.illustration_alt')}
-                    width={380}
-                    height={380}
-                    className="h-auto w-full max-w-[min(100%,380px)] object-contain object-bottom"
+                    width={240}
+                    height={200}
+                    className="h-auto w-[220px] object-contain object-bottom lg:w-[240px]"
                     loading="lazy"
                     decoding="async"
-                    animate={prefersReducedMotion ? undefined : { y: [0, -6, 0] }}
-                    transition={{
-                      duration: prefersReducedMotion ? 0 : 4.8,
-                      repeat: prefersReducedMotion ? 0 : Infinity,
-                      ease: 'easeInOut',
-                    }}
+                    animate={prefersReducedMotion ? undefined : { y: [0, -5, 0] }}
+                    transition={{ duration: prefersReducedMotion ? 0 : 4.5, repeat: prefersReducedMotion ? 0 : Infinity, ease: 'easeInOut' }}
                   />
                 </motion.div>
               </div>
-
-              <div className="pointer-events-none absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-white/10 blur-[80px]" />
-              <div className="pointer-events-none absolute -left-20 -top-20 h-48 w-48 rounded-full bg-[var(--accent-blue-tint)]/25 blur-[60px]" />
             </div>
           </section>
 
-          {/* Bento */}
-          <section className="relative z-10 grid gap-8 md:grid-cols-2">
-            {/* Contact Advisor Card */}
+          {/* Talk to Advisor + Ask Core AI */}
+          <section className="relative z-10 grid gap-5 md:grid-cols-2">
+
+            {/* ── Talk to an Advisor ── */}
             <motion.div
-              whileHover={{ y: -8 }}
-              className="relative cursor-pointer overflow-hidden rounded-[32px] border border-slate-200/80 bg-gradient-to-br from-white to-slate-50 shadow-xl shadow-slate-200/60 transition-all hover:border-slate-300 hover:shadow-2xl dark:border-slate-700 dark:from-slate-900 dark:to-slate-950 dark:shadow-none dark:hover:border-slate-600"
+              whileHover={{ y: -3 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+              className="relative flex min-h-[230px] cursor-pointer flex-col justify-between overflow-hidden rounded-[20px] border border-slate-100 bg-white p-7 shadow-sm"
               onClick={() => setAdvisorModalOpen(true)}
             >
-              <div className="relative flex min-h-[280px] flex-col justify-between p-8">
-                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--accent-blue)]/10 dark:bg-blue-500/15">
-                  <UserCheck className="h-6 w-6 text-[var(--accent-blue)] dark:text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">{t('advisor.title')}</h3>
-                  <p className="mb-6 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                    {t('advisor.subtitle')}
-                  </p>
-                  <div className="group flex items-center gap-2 text-sm font-medium text-[var(--accent-blue)] transition-colors hover:text-[var(--accent-blue-hover)] dark:text-blue-400 dark:hover:text-blue-300">
-                    <span>{t('advisor.browse')}</span>
-                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              {/* Text — constrained to left 50% to leave room for chips */}
+              <div className="flex max-w-[50%] flex-col gap-1.5">
+                <h3 className="text-[1.1rem] font-bold leading-tight text-slate-900">{t('advisor.title')}</h3>
+                <p className="text-[12.5px] leading-relaxed text-slate-500">
+                  {t('advisor.subtitle')}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setAdvisorModalOpen(true) }}
+                className="inline-flex w-fit items-center gap-1 text-[13px] font-semibold text-blue-600 hover:text-blue-700"
+              >
+                {t('advisor.meet_expert')} <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+
+              {/* Advisor chips — absolute right, vertically centred, stacked */}
+              <div className="absolute right-4 top-1/2 flex -translate-y-1/2 flex-col items-end gap-2">
+                {[
+                  { name: 'Sarah Jenkins', bg: '#FDDDD9', fg: '#7B3030' },
+                  { name: 'Alex Carter',   bg: '#D6E4FF', fg: '#1E3A8A' },
+                  { name: 'Maya Patel',    bg: '#D1FAE5', fg: '#065F46' },
+                  { name: 'James Liu',     bg: '#FEF3C7', fg: '#92400E' },
+                ].map(({ name, bg, fg }, i) => (
+                  <div
+                    key={name}
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white py-1.5 pl-1.5 pr-3 shadow-sm"
+                    style={{ transform: `translateX(${[2, 10, 5, 12][i]}px)` }}
+                  >
+                    {/* Avatar circle with person silhouette */}
+                    <div
+                      className="relative flex h-7 w-7 shrink-0 items-end justify-center overflow-hidden rounded-full"
+                      style={{ background: bg }}
+                    >
+                      {/* head */}
+                      <div className="absolute top-[5px] h-[9px] w-[9px] rounded-full" style={{ background: fg, opacity: 0.6 }} />
+                      {/* body */}
+                      <div className="h-[10px] w-[14px] rounded-t-full" style={{ background: fg, opacity: 0.4 }} />
+                    </div>
+                    <span className="whitespace-nowrap text-[12px] font-medium text-slate-700">{name}</span>
                   </div>
-                </div>
+                ))}
               </div>
             </motion.div>
 
+            {/* ── Ask Core AI ── */}
             <motion.div
-              whileHover={{ y: -8 }}
-              className="flex flex-col overflow-hidden rounded-[32px] border border-slate-200/80 bg-white shadow-xl shadow-slate-200/60 transition-all hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:shadow-none dark:hover:border-slate-600"
+              whileHover={{ y: -3 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+              className="relative flex min-h-[230px] cursor-pointer flex-col justify-between overflow-hidden rounded-[20px] border border-slate-100 bg-white p-7 shadow-sm"
+              onClick={openChat}
             >
-              <div className="relative flex aspect-[16/9] items-center justify-center overflow-hidden border-b border-blue-100 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900" style={{ background: '#E6F1FF' }}>
-
-                <div className="relative z-10 flex w-full flex-col items-center justify-center px-8 py-12">
-                  <img 
-                    src="/dashboard-robot-hero.png" 
-                    alt="Ask Core AI Robot" 
-                    className="h-64 w-auto object-contain"
-                  />
-                </div>
+              <div className="flex flex-col gap-1.5">
+                <h3 className="text-[1.1rem] font-bold leading-tight text-slate-900">{t('core_ai.title')}</h3>
+                <p className="text-[12.5px] leading-relaxed text-slate-500">
+                  {t('core_ai.description')}
+                </p>
               </div>
 
-              <div className="flex flex-col gap-4 bg-slate-50/50 p-8 dark:bg-slate-950/50">
-                <div className="flex flex-col gap-2">
-                  <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{t('core_ai.title')}</h3>
-                  <p className="text-base font-medium leading-relaxed text-slate-600 dark:text-slate-400">
-                    {t('core_ai.description')}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={openChat}
-                  className="flex w-fit items-center gap-2 text-sm font-bold text-[var(--accent-blue)] transition-colors hover:text-[var(--accent-blue-hover)] dark:text-blue-400 dark:hover:text-blue-300"
+              <button
+                type="button"
+                onClick={openChat}
+                className="inline-flex w-fit items-center gap-1 text-[13px] font-semibold text-blue-600 hover:text-blue-700"
+              >
+                {t('core_ai.start_chatting')} <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+
+              {/* "Ask AI | Core | fading query" pill — bottom of card */}
+              <div className="absolute bottom-5 left-7 right-7 flex items-center overflow-hidden rounded-full border border-slate-200 bg-white shadow-sm" style={{ height: 36 }}>
+                {/* Ask AI dark pill */}
+                <span className="mx-1.5 inline-flex shrink-0 items-center rounded-full bg-slate-900 px-3 py-1 text-[11px] font-semibold text-white">
+                  Ask AI
+                </span>
+                {/* vertical divider */}
+                <span className="h-4 w-px shrink-0 bg-slate-200" />
+                {/* Core green pill */}
+                <span
+                  className="mx-1.5 inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold"
+                  style={{ background: 'linear-gradient(135deg, #bbf7d0 0%, #bfdbfe 100%)', color: '#065f46' }}
                 >
-                  {t('core_ai.start_chatting')} <ChevronRight className="h-4 w-4" />
-                </button>
+                  ✦ Core
+                </span>
+                {/* fading query text */}
+                <span
+                  className="min-w-0 truncate pr-2 text-[11px] text-slate-400"
+                  style={{
+                    maskImage: 'linear-gradient(90deg, #000 50%, transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(90deg, #000 50%, transparent 100%)',
+                  }}
+                >
+                  what is my loan eligibility?
+                </span>
               </div>
             </motion.div>
           </section>
+
         </div>
       </div>
 

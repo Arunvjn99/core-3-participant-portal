@@ -113,17 +113,18 @@
   "learning": {
     "illustration_alt": "Illustration d'un parcours sur une carte de votre situation actuelle jusqu'à votre objectif d'épargne retraite",
     "step1": "Étape 1",
-    "title_line1": "Apprenez comment fonctionne",
-    "title_line2": "votre plan de retraite",
+    "title_line1": "Planification de la retraite",
+    "title_line2": "Simplifiee",
     "subtitle": "Comprenez les cotisations, l'abondement de l'employeur et comment votre épargne croît au fil du temps.",
-    "item1": "Qu'est-ce qu'un 401(k) et comment ça marche",
-    "item2": "Combien devriez-vous cotiser",
-    "item3": "Comment l'abondement de l'employeur impacte votre épargne"
+    "item1": "What is a 401(k) and how it works?",
+    "item2": "Contribution Planning Made Simple",
+    "item3": "Understand How Employer Matching Works"
   },
   "advisor": {
     "title": "Parler à un conseiller",
     "subtitle": "Obtenez des conseils personnalisés d'un planificateur de retraite certifié. Réservez une session gratuite de 30 minutes.",
-    "browse": "Voir les conseillers"
+    "browse": "Voir les conseillers",
+    "meet_expert": "Meet an Expert"
   },
   "core_ai": {
     "title": "Demander à Core AI",

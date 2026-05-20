@@ -51,7 +51,10 @@ export function GlobalAskCoreAILayer() {
       aria-label="Ask CORE AI"
       data-global-ask-core-ai-pill
     >
-      <img src="/ask-ai-robot.png" alt="" aria-hidden className="h-9 w-9 shrink-0 object-contain" />
+      {/* AI Sparkle icon */}
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center" aria-hidden>
+        <img src="/core-ai-sparkle.png" alt="Core AI" className="h-7 w-7 object-contain" />
+      </span>
       <span className="whitespace-nowrap tracking-wide font-semibold text-blue-700">
         Ask <span className="font-bold">CORE</span> AI
       </span>

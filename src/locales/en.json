@@ -115,17 +115,18 @@
   "learning": {
     "illustration_alt": "Illustration of a path on a map from where you are now to your retirement savings goal",
     "step1": "Step 1",
-    "title_line1": "Learn how your",
-    "title_line2": "retirement plan works",
+    "title_line1": "Retirement Planning",
+    "title_line2": "Made Easy",
     "subtitle": "Understand contributions, employer match, and how your savings grow over time.",
-    "item1": "What is a 401(k) and how it works",
-    "item2": "How much you should contribute",
-    "item3": "How employer matching impacts your savings"
+    "item1": "What is a 401(k) and how it works?",
+    "item2": "Contribution Planning Made Simple",
+    "item3": "Understand How Employer Matching Works"
   },
   "advisor": {
     "title": "Talk to an Advisor",
     "subtitle": "Get personalized guidance from a certified retirement planner. Book a free 30-minute session.",
-    "browse": "Browse Advisors"
+    "browse": "Browse Advisors",
+    "meet_expert": "Meet an Expert"
   },
   "core_ai": {
     "title": "Ask Core AI",

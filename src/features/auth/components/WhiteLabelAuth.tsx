@@ -112,13 +112,13 @@ function AuthCarousel() {
 
       {/* Carousel images */}
       <div className="relative z-10 flex-1 flex items-center justify-center px-10">
-        <div className="relative w-full max-w-sm aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl">
+        <div className="relative w-full max-w-sm aspect-[4/3] rounded-2xl shadow-2xl bg-white/10 flex items-center justify-center">
           {CAROUSEL_IMAGES.map((src, i) => (
             <img
               key={i}
               src={src}
               alt={`Slide ${i + 1}`}
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+              className={`absolute inset-0 w-full h-full object-contain p-4 transition-opacity duration-700 ${
                 i === active ? 'opacity-100' : 'opacity-0'
               }`}
             />

@@ -113,17 +113,18 @@
   "learning": {
     "illustration_alt": "Ilustración de un camino en un mapa desde donde está ahora hasta su meta de ahorro para la jubilación",
     "step1": "Paso 1",
-    "title_line1": "Aprenda cómo funciona",
-    "title_line2": "su plan de jubilación",
+    "title_line1": "Retirement Planning",
+    "title_line2": "Made Easy",
     "subtitle": "Entienda las contribuciones, la igualación del empleador y cómo crecen sus ahorros con el tiempo.",
-    "item1": "Qué es un 401(k) y cómo funciona",
-    "item2": "Cuánto debería contribuir",
-    "item3": "Cómo la igualación del empleador impacta sus ahorros"
+    "item1": "What is a 401(k) and how it works?",
+    "item2": "Contribution Planning Made Simple",
+    "item3": "Understand How Employer Matching Works"
   },
   "advisor": {
     "title": "Hablar con un asesor",
     "subtitle": "Obtenga orientación personalizada de un planificador de jubilación certificado. Reserve una sesión gratuita de 30 minutos.",
-    "browse": "Ver asesores"
+    "browse": "Ver asesores",
+    "meet_expert": "Meet an Expert"
   },
   "core_ai": {
     "title": "Preguntar a Core AI",

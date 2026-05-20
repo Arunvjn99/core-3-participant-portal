@@ -50,7 +50,7 @@ function AuthCarousel() {
     <div className="flex flex-col items-center justify-center px-6 pb-10 gap-5 h-full">
       {/* Image card — fixed 520×693.33px */}
       <div
-        className="overflow-hidden rounded-2xl border border-white/20 shadow-xl transition-opacity duration-200"
+        className="rounded-2xl border border-white/20 shadow-xl transition-opacity duration-200 flex items-center justify-center bg-white/5"
         style={{ width: 520, height: 693.33, opacity: fading ? 0 : 1 }}
       >
         {imgFailed ? (
@@ -63,7 +63,7 @@ function AuthCarousel() {
             key={current}
             src={`${slide.image}?v=2`}
             alt={slide.title}
-            className="h-full w-full object-cover"
+            className="max-h-full max-w-full object-contain"
             onError={() => setImgErrors((prev) => ({ ...prev, [current]: true }))}
           />
         )}

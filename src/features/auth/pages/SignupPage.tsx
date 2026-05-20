@@ -40,8 +40,58 @@ interface Company {
   slug: string
 }
 
+// Inline SVG logo components
+const CompanyLogo = ({ slug, className }: { slug: string; className?: string }) => {
+  const logos: Record<string, JSX.Element> = {
+    ascend: (
+      <svg className={className} width="160" height="50" viewBox="0 0 160 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Burgundy swoosh - signature element */}
+        <path d="M85 8 Q 105 6, 125 8 Q 135 9, 145 5 L 150 8 Q 140 13, 130 12 Q 110 10, 90 12 Z" fill="#8B1538" opacity="0.9"/>
+        <path d="M145 5 L 155 8 L 160 6 L 155 4 Z" fill="#8B1538"/>
+        
+        {/* Ascend text - bold dark */}
+        <text x="8" y="30" fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif" fontSize="24" fontWeight="700" fill="#2D1B4E" letterSpacing="-0.5">Ascend</text>
+        
+        {/* Federal Credit Union - smaller gray text */}
+        <text x="8" y="42" fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif" fontSize="9" fontWeight="500" fill="#6B7280" letterSpacing="0.3">Federal Credit Union</text>
+      </svg>
+    ),
+    vanguard: (
+      <svg className={className} width="150" height="40" viewBox="0 0 150 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <text x="45" y="28" fontFamily="Arial, sans-serif" fontSize="20" fontWeight="700" fill="#811926">VANGUARD</text>
+        <g transform="translate(5, 6)">
+          <path d="M18 4 L28 28 L18 22 L8 28 L18 4Z" fill="#811926"/>
+          <path d="M12 16 L18 10 L24 16" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round"/>
+        </g>
+      </svg>
+    ),
+    lincoln: (
+      <svg className={className} width="140" height="40" viewBox="0 0 140 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <text x="45" y="28" fontFamily="Arial, sans-serif" fontSize="22" fontWeight="700" fill="#6B1D4A">LINCOLN</text>
+        <g transform="translate(8, 6)">
+          <rect x="4" y="8" width="6" height="20" fill="#6B1D4A" rx="1"/>
+          <rect x="12" y="4" width="6" height="24" fill="#8B2E5A" rx="1"/>
+          <rect x="20" y="10" width="6" height="18" fill="#6B1D4A" rx="1"/>
+          <rect x="2" y="28" width="26" height="2" fill="#6B1D4A"/>
+        </g>
+      </svg>
+    ),
+    congruent: (
+      <svg className={className} width="160" height="40" viewBox="0 0 160 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <text x="45" y="28" fontFamily="Arial, sans-serif" fontSize="19" fontWeight="700" fill="#7c3aed">CONGRUENT</text>
+        <g transform="translate(8, 10)">
+          <polygon points="8,0 16,7 8,14 0,7" fill="#7c3aed"/>
+          <polygon points="20,0 28,7 20,14 12,7" fill="#8b5cf6" opacity="0.7"/>
+        </g>
+      </svg>
+    ),
+  }
+  
+  return logos[slug] || null
+}
+
 const FALLBACK_COMPANIES: Company[] = [
-  { id: 'ascend', name: 'Ascend', slug: 'ascend', logo_url: null, primary_color: '#1e3a8a' },
+  { id: 'ascend', name: 'Ascend Federal Credit Union', slug: 'ascend', logo_url: null, primary_color: '#8B1538' },
   { id: 'congruent', name: 'Congruent Solutions', slug: 'congruent', logo_url: null, primary_color: '#7c3aed' },
   { id: 'lincoln', name: 'Lincoln Financial', slug: 'lincoln', logo_url: null, primary_color: '#6B1D4A' },
   { id: 'vanguard', name: 'Vanguard', slug: 'vanguard', logo_url: null, primary_color: '#811926' },
@@ -188,15 +238,23 @@ export default function SignupPage() {
               className="p-4 rounded-2xl border-2 border-gray-100 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-all text-left group flex flex-col"
             >
               {company.logo_url ? (
-                <img src={company.logo_url} alt={company.name} className="h-8 mb-3 object-contain" />
-              ) : (
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 text-white font-bold text-sm shrink-0"
-                  style={{ background: company.primary_color || 'var(--color-primary)' }}
-                >
-                  {company.name.charAt(0)}
-                </div>
-              )}
+                <img 
+                  src={company.logo_url} 
+                  alt={company.name} 
+                  className="h-10 w-auto mb-3 object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none'
+                    const fallback = e.currentTarget.nextElementSibling as HTMLElement
+                    if (fallback) fallback.style.display = 'flex'
+                  }}
+                />
+              ) : <CompanyLogo slug={company.slug} className="h-10 w-auto mb-3" />}
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 text-white font-bold text-sm shrink-0 ${company.logo_url || company.slug ? 'hidden' : ''}`}
+                style={{ background: company.primary_color || 'var(--color-primary)' }}
+              >
+                {company.name.charAt(0)}
+              </div>
               <div className="flex items-center justify-between w-full">
                 <p className="font-semibold text-gray-900 dark:text-white text-sm group-hover:text-blue-700 dark:group-hover:text-blue-400 leading-tight">
                   {company.name}
@@ -228,17 +286,20 @@ export default function SignupPage() {
       <div className="flex items-center justify-between mb-6">
         {selectedCompany?.logo_url ? (
           <img src={selectedCompany.logo_url} alt={selectedCompany.name} className="h-8 object-contain" />
-        ) : (
+        ) : selectedCompany ? (
           <div className="flex items-center gap-2">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm shrink-0"
-              style={{ background: primaryColor }}
-            >
-              {selectedCompany?.name.charAt(0)}
-            </div>
-            <span className="font-bold text-gray-900 dark:text-white">{selectedCompany?.name}</span>
+            <CompanyLogo slug={selectedCompany.slug} className="h-8 w-auto object-contain" />
+            {!selectedCompany.slug && (
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm shrink-0"
+                style={{ background: primaryColor }}
+              >
+                {selectedCompany.name.charAt(0)}
+              </div>
+            )}
+            <span className="font-bold text-gray-900 dark:text-white">{selectedCompany.name}</span>
           </div>
-        )}
+        ) : null}
         <button
           type="button"
           onClick={() => setStep('company')}

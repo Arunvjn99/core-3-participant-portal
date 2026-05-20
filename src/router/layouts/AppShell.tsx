@@ -29,6 +29,9 @@ import { useBrandTheme } from '@/core/theme/BrandThemeContext'
 import AppFooter from '@/features/dashboard/components/AppFooter'
 import { supabase } from '@/core/supabase'
 import { ROUTES } from '@/lib/constants'
+
+const CORE_LOGO_URL =
+  'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/CORE%20logo.png'
 function getNavItems(isEnrolled: boolean) {
   return [
     {
@@ -231,23 +234,32 @@ export function AppShell() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-14 items-center justify-between gap-4">
             <div className="flex min-w-0 shrink-0 items-center gap-2.5">
-              {theme.companyLogo ? (
+              {/* Before login → CORE logo. After login → employer logo or initial fallback. */}
+              {!user ? (
+                /* Unauthenticated: always show CORE logo */
+                <img
+                  src={CORE_LOGO_URL}
+                  alt="CORE"
+                  className="h-8 w-auto max-w-[100px] object-contain"
+                  onError={(e) => { e.currentTarget.style.display = 'none' }}
+                />
+              ) : theme.companyLogo ? (
+                /* Authenticated with company logo */
                 <img
                   src={theme.companyLogo}
                   alt={theme.companyName}
-                  className="h-8 max-w-[100px] w-auto object-contain"
+                  className="h-8 w-auto max-w-[120px] object-contain"
+                  onError={(e) => { e.currentTarget.style.display = 'none' }}
                 />
               ) : (
+                /* Authenticated but no logo — initial-letter badge */
                 <div
                   className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white"
                   style={{ backgroundColor: 'var(--brand-primary)' }}
                 >
-                  {theme.companyName.charAt(0)}
+                  {theme.companyName.charAt(0).toUpperCase()}
                 </div>
               )}
-              <span className="hidden max-w-[120px] truncate text-sm font-bold text-text-primary sm:block">
-                {theme.companyName}
-              </span>
             </div>
 
             <nav className="hidden flex-1 items-center justify-center gap-0.5 md:flex">
