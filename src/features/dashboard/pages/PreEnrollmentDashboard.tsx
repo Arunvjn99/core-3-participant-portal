@@ -88,19 +88,6 @@ function LearningCard({
         <div className="flex flex-1 flex-col justify-between gap-6">
           {/* Top: badge + heading + subtitle */}
           <div className="flex flex-col gap-4">
-            {/* Step badge */}
-            <motion.div
-              initial={prefersReducedMotion ? false : { opacity: 0, y: -10 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              className="inline-flex w-fit items-center gap-2 rounded-full border border-white/25 bg-white/15 px-3.5 py-1 backdrop-blur-sm"
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-white/80" />
-              <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/90">
-                {t('learning.step1')}
-              </span>
-            </motion.div>
-
             <motion.div
               initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
