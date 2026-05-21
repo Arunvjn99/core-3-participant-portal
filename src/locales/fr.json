@@ -152,7 +152,8 @@
     "error_rating": "Veuillez choisir une évaluation par étoiles.",
     "success": "Merci pour votre commentaire !",
     "success_demo": "Merci ! Commentaire enregistré localement (mode démo).",
-    "open_feedback": "Ouvrir le formulaire de commentaires"
+    "open_feedback": "Ouvrir le formulaire de commentaires",
+    "leave_feedback": "Laisser un commentaire"
   },
   "footer": {
     "copyright": "© {{year}} Congruent Solutions Inc. Tous droits réservés.",

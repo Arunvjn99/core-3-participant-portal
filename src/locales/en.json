@@ -164,7 +164,8 @@
     "error_rating": "Please choose a star rating.",
     "success": "Thanks for your feedback!",
     "success_demo": "Thanks! Feedback saved locally (demo mode).",
-    "open_feedback": "Open feedback form"
+    "open_feedback": "Open feedback form",
+    "leave_feedback": "Leave feedback"
   },
   "footer": {
     "copyright": "© {{year}} Congruent Solutions Inc. All rights reserved.",

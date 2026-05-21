@@ -219,15 +219,15 @@ export function GlobalFeedback() {
           setModalOpen(true)
         }}
         className={cn(
-          'fixed bottom-[5.5rem] right-6 z-[60] flex h-12 w-12 items-center justify-center rounded-full',
+          'fixed bottom-[5.5rem] right-6 z-[60] flex h-12 items-center gap-2 rounded-full px-4',
           'border border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-primary)] shadow-[var(--shadow-card)]',
           'transition-transform hover:scale-105 hover:shadow-[var(--shadow-dropdown)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)]',
           'dark:border-[var(--border-strong)]'
         )}
-        aria-label={t('feedback.open_feedback')}
-        title={t('feedback.title')}
+        aria-label={t('feedback.leave_feedback')}
       >
-        <MessageSquarePlus className="h-5 w-5" aria-hidden />
+        <MessageSquarePlus className="h-5 w-5 shrink-0" aria-hidden />
+        <span className="whitespace-nowrap text-sm font-medium">{t('feedback.leave_feedback')}</span>
       </button>
       {modal}
       {toast}
