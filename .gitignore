@@ -31,3 +31,7 @@ dist-ssr
 
 # Cursor internal files
 .claude/
+
+# Local agent skills (installed via npx skills)
+.agents/
+skills-lock.json

@@ -2,8 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { useBrandTheme } from '@/core/theme/BrandThemeContext'
 import { LEGAL } from '@/lib/constants'
 import { LegalHrefLink } from '@/features/legal/components/LegalHrefLink'
-
-const CORE_LOGO = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/CORE%20logo.png'
+import CoreLogo from '@/components/ui/CoreLogo'
 
 export default function AppFooter() {
   const { t } = useTranslation()
@@ -18,12 +17,7 @@ export default function AppFooter() {
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
           {/* CORE logo + copyright */}
           <div className="flex items-center gap-3">
-            <img
-              src={CORE_LOGO}
-              alt="CORE"
-              className="h-6 opacity-70 transition-opacity hover:opacity-100"
-              onError={(e) => { e.currentTarget.style.display = 'none' }}
-            />
+            <CoreLogo className="h-6 w-auto object-contain opacity-70 transition-opacity hover:opacity-100" />
             <span className="text-xs text-gray-600 dark:text-gray-400">
               {t('footer.copyright', { year })}
             </span>

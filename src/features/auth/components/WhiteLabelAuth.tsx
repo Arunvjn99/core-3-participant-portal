@@ -12,6 +12,7 @@ import {
 import { signUpUser, signInUser, getAllCompanies } from '../../../lib/supabaseIntegration'
 import { LEGAL, ROUTES } from '@/lib/constants'
 import { LegalHrefLink } from '@/features/legal/components/LegalHrefLink'
+import CoreLogo from '@/components/ui/CoreLogo'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -33,7 +34,6 @@ interface Theme {
 const SUPABASE_BASE = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images'
 
 const BG_IMAGE = `${SUPABASE_BASE}/background%20auth.png`
-const CORE_LOGO = `${SUPABASE_BASE}/CORE%20logo.png`
 const CAROUSEL_IMAGES = [
   `${SUPABASE_BASE}/image%201.png`,
   `${SUPABASE_BASE}/image%202.png`,
@@ -458,7 +458,7 @@ export default function WhiteLabelAuth() {
               <span className="font-semibold text-sm text-gray-900 dark:text-white">{selectedCompany.name}</span>
             </div>
           ) : (
-            <img src={CORE_LOGO} alt="CORE" className="h-7 w-auto" onError={(e) => { e.currentTarget.style.display = 'none' }} />
+            <CoreLogo className="h-7 w-auto object-contain" />
           )}
         </div>
 

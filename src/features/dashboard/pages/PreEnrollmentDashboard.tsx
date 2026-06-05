@@ -14,6 +14,9 @@ import { formatFirstNameForDisplay, getAuthenticatedFirstName } from '@/lib/user
 const HERO_MEETING_VIDEO =
   'https://pmmvggrzowobvbebjzdo.supabase.co/storage/v1/object/public/company-logos/Heromeeting.webm'
 
+const LEARNING_CARD_ILLUSTRATION =
+  'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/Learning%20card.png'
+
 type DayPeriod = 'morning' | 'afternoon' | 'evening'
 
 function getLocalDayPeriod(): DayPeriod {
@@ -76,15 +79,39 @@ function LearningCard({
   return (
     <div
       ref={cardRef}
-      className="relative min-h-[420px] overflow-hidden rounded-[20px] text-white"
+      className="relative min-h-[400px] overflow-hidden rounded-[20px] text-white"
       style={{ background: 'linear-gradient(135deg, #5B8CEF 0%, #3B6FE0 100%)' }}
     >
       {/* Layered shine + noise */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_10%_15%,rgba(255,255,255,0.25),transparent_50%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_90%_80%,rgba(59,111,224,0.4),transparent_55%)]" />
 
-      <div className="relative z-10 flex h-full min-h-[420px] items-stretch gap-4 px-10 py-10">
-        {/* ── Left: text column ── */}
+      {/* Illustration — full card height, anchored bottom-right */}
+      <motion.div
+        className="pointer-events-none absolute inset-y-0 right-0 hidden w-[min(52%,440px)] items-end justify-end pr-2 lg:flex"
+        initial={prefersReducedMotion ? false : { opacity: 0, x: 20, scale: 0.96 }}
+        animate={inView ? { opacity: 1, x: 0, scale: 1 } : {}}
+        transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <motion.div
+          className="h-full w-full origin-bottom-right scale-[1.14]"
+          animate={prefersReducedMotion ? {} : { y: [0, -6, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <img
+            src={LEARNING_CARD_ILLUSTRATION}
+            alt={t('learning.illustration_alt')}
+            width={440}
+            height={400}
+            className="h-full w-full object-contain object-bottom object-right drop-shadow-2xl"
+            loading="lazy"
+            decoding="async"
+          />
+        </motion.div>
+      </motion.div>
+
+      <div className="relative z-10 flex min-h-[400px] flex-col justify-between gap-6 px-10 py-8 lg:max-w-[54%]">
+        {/* ── Text column ── */}
         <div className="flex flex-1 flex-col justify-between gap-6">
           {/* Top: badge + heading + subtitle */}
           <div className="flex flex-col gap-4">
@@ -146,27 +173,6 @@ function LearningCard({
             </button>
           </motion.div>
         </div>
-
-        {/* ── Right: floating illustration ── */}
-        <motion.div
-          className="hidden shrink-0 items-end justify-end self-end lg:flex"
-          style={{ width: 320, height: 380 }}
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 24, scale: 0.95 }}
-          animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
-          transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <motion.img
-            src="/learning-journey-illustration.png"
-            alt={t('learning.illustration_alt')}
-            width={320}
-            height={380}
-            className="h-full w-full object-contain object-bottom drop-shadow-2xl"
-            loading="lazy"
-            decoding="async"
-            animate={prefersReducedMotion ? {} : { y: [0, -8, 0] }}
-            transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-          />
-        </motion.div>
       </div>
 
       {/* Decorative glow orbs */}

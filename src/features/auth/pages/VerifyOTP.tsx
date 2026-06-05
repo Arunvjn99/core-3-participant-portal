@@ -17,9 +17,7 @@ import { ENV, LEGAL, ROUTES } from '@/lib/constants'
 import { LegalHrefLink } from '@/features/legal/components/LegalHrefLink'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import AuthLayout from '../components/AuthLayout'
-
-const CORE_LOGO =
-  'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/CORE%20logo.png'
+import CoreLogo from '@/components/ui/CoreLogo'
 
 interface VerifyLocationState {
   from?: { pathname: string }
@@ -148,12 +146,7 @@ export function VerifyOTP() {
             </div>
 
             <div className="pr-12 mb-6">
-              <img
-                src={CORE_LOGO}
-                alt="CORE"
-                className="h-8 w-auto object-contain mb-2"
-                onError={(e) => { e.currentTarget.style.display = 'none' }}
-              />
+              <CoreLogo className="h-8 w-auto object-contain mb-2" />
               <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">{t('auth.platform_name')}</p>
               <p className="text-gray-400 dark:text-gray-500 text-xs mt-0.5">{t('auth.platform_by')}</p>
             </div>
@@ -240,12 +233,7 @@ export function VerifyOTP() {
           <LegalHrefLink href={LEGAL.helpCenterHref} className="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-600 dark:hover:text-gray-400">
             {t('footer.help')}
           </LegalHrefLink>
-          <img
-            src={CORE_LOGO}
-            alt="CORE"
-            className="h-5 w-auto object-contain opacity-50"
-            onError={(e) => { e.currentTarget.style.display = 'none' }}
-          />
+          <CoreLogo className="h-5 w-auto object-contain opacity-50" />
         </div>
       </div>
     </AuthLayout>

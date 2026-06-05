@@ -5,8 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '@/core/supabase'
 import { ROUTES } from '@/lib/constants'
 import AuthLayout from '../components/AuthLayout'
-
-const CORE_LOGO = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/CORE%20logo.png'
+import CoreLogo from '@/components/ui/CoreLogo'
 
 // ─── Password strength ────────────────────────────────────────────────────────
 
@@ -220,8 +219,7 @@ export default function SignupPage() {
         <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
         <div className="flex justify-start mb-8">
-          <img src={CORE_LOGO} alt="CORE" className="h-8 w-auto object-contain"
-            onError={(e) => { e.currentTarget.style.display = 'none' }} />
+          <CoreLogo className="h-8 w-auto object-contain" />
         </div>
 
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1.5">Select your company</h1>

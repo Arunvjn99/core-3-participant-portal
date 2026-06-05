@@ -6,8 +6,7 @@ import { supabase } from '@/core/supabase'
 import { LEGAL, ROUTES } from '@/lib/constants'
 import { LegalHrefLink } from '@/features/legal/components/LegalHrefLink'
 import AuthLayout from '../components/AuthLayout'
-
-const CORE_LOGO = 'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/CORE%20logo.png'
+import CoreLogo from '@/components/ui/CoreLogo'
 
 export default function LoginPage() {
   const { t } = useTranslation()
@@ -51,12 +50,7 @@ export default function LoginPage() {
 
             {/* Logo */}
             <div className="mb-6">
-              <img
-                src={CORE_LOGO}
-                alt="CORE"
-                className="h-8 w-auto object-contain mb-2"
-                onError={(e) => { e.currentTarget.style.display = 'none' }}
-              />
+              <CoreLogo className="h-8 w-auto object-contain mb-2" />
               <p className="text-xs font-medium text-gray-500 dark:text-gray-400 leading-tight">
                 {t('auth.platform_name')}
               </p>
@@ -186,12 +180,7 @@ export default function LoginPage() {
           >
             {t('auth.privacy_policy')}
           </LegalHrefLink>
-          <img
-            src={CORE_LOGO}
-            alt="CORE"
-            className="h-5 w-auto object-contain opacity-50"
-            onError={(e) => { e.currentTarget.style.display = 'none' }}
-          />
+          <CoreLogo className="h-5 w-auto object-contain opacity-50" />
         </div>
       </div>
     </AuthLayout>

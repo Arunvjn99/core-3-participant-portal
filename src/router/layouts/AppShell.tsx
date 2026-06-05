@@ -29,9 +29,8 @@ import { useBrandTheme } from '@/core/theme/BrandThemeContext'
 import AppFooter from '@/features/dashboard/components/AppFooter'
 import { supabase } from '@/core/supabase'
 import { ROUTES } from '@/lib/constants'
+import CoreLogo from '@/components/ui/CoreLogo'
 
-const CORE_LOGO_URL =
-  'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/CORE%20logo.png'
 function getNavItems(isEnrolled: boolean) {
   return [
     {
@@ -237,12 +236,7 @@ export function AppShell() {
               {/* Before login → CORE logo. After login → employer logo or initial fallback. */}
               {!user ? (
                 /* Unauthenticated: always show CORE logo */
-                <img
-                  src={CORE_LOGO_URL}
-                  alt="CORE"
-                  className="h-8 w-auto max-w-[100px] object-contain"
-                  onError={(e) => { e.currentTarget.style.display = 'none' }}
-                />
+                <CoreLogo className="h-8 w-auto max-w-[100px] object-contain" />
               ) : theme.companyLogo ? (
                 /* Authenticated with company logo */
                 <img
