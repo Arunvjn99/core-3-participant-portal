@@ -1,5 +1,18 @@
 # Release Notes
 
+## 2026-07-01 — Analytics & AI chat env update
+
+### Analytics
+- Added Microsoft Clarity session recording and heatmaps (`index.html`, project `vlsu7y65s0`).
+
+### Core AI deployment
+- Netlify `ai-chat` function now reads `GROK_API_KEY` from environment variables (set in Netlify dashboard → Site settings → Environment variables).
+
+### Build
+- Production build verified: `tsc -b && vite build` passes with no errors.
+
+---
+
 ## 2026-07-01 — Core AI 2.0: LLM answers, rebalance & rollover flows
 
 ### Core AI panel

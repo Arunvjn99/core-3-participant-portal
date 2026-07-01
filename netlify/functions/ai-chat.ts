@@ -93,7 +93,7 @@ export default async (req: Request): Promise<Response> => {
     return new Response('Method Not Allowed', { status: 405 })
   }
 
-  const apiKey = process.env.GROQ_API_KEY
+  const apiKey = process.env.GROK_API_KEY
   if (!apiKey) {
     return new Response(JSON.stringify({ content: 'Service temporarily unavailable.' }), {
       status: 503,
