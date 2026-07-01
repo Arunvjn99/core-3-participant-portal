@@ -1,6 +1,6 @@
 import type { ChatMessage } from '../types'
 
-export type LocalFlowType = 'loan' | 'withdrawal' | 'enrollment' | 'vesting'
+export type LocalFlowType = 'loan' | 'withdrawal' | 'enrollment' | 'vesting' | 'rebalance' | 'rollover'
 
 export interface LocalFlowState {
   type: LocalFlowType
@@ -20,4 +20,5 @@ export interface LocalAIResult {
   nextState: LocalFlowState | null
   action?: string
   navigate?: string
+  isLLMFallback?: true
 }

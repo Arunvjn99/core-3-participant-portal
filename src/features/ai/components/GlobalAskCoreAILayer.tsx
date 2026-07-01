@@ -39,23 +39,24 @@ export function GlobalAskCoreAILayer() {
       type="button"
       onClick={openChat}
       className={cn(
-        'fixed left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-[9999px] pl-1.5 pr-5 py-1.5 text-sm font-medium transition-transform hover:scale-[1.02] active:scale-[0.98]',
-        'border border-blue-300/60 backdrop-blur-[8px]',
+        'fixed left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-[9999px] pl-1.5 pr-5 py-1.5 text-sm font-semibold transition-all hover:scale-[1.04] active:scale-[0.97]',
         enrollmentStepFlow ? 'bottom-6 max-sm:!bottom-20' : 'bottom-6',
       )}
       style={{
-        background: 'rgba(230, 241, 255, 0.95)',
-        boxShadow: '0 4px 24px rgba(59, 130, 246, 0.18), inset 0 1px 0 rgba(255,255,255,0.8)',
-        color: '#1e40af',
+        background: 'linear-gradient(135deg, #1e40af 0%, #2563eb 100%)',
+        boxShadow: '0 4px 24px rgba(37,99,235,0.55), 0 0 0 1px rgba(37,99,235,0.3)',
+        color: '#ffffff',
       }}
       aria-label="Ask CORE AI"
       data-global-ask-core-ai-pill
+      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 6px 32px rgba(37,99,235,0.7), 0 0 0 1px rgba(37,99,235,0.5)' }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 24px rgba(37,99,235,0.55), 0 0 0 1px rgba(37,99,235,0.3)' }}
     >
       {/* AI Sparkle icon */}
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center" aria-hidden>
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }} aria-hidden>
         <img src="/core-ai-sparkle.png" alt="Core AI" className="h-7 w-7 object-contain" />
       </span>
-      <span className="whitespace-nowrap tracking-wide font-semibold text-blue-700">
+      <span className="whitespace-nowrap tracking-wide text-white">
         Ask <span className="font-bold">CORE</span> AI
       </span>
     </button>

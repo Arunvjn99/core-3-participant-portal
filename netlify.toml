@@ -10,6 +10,12 @@
   # Ensures install matches lockfile; avoids stale global npm cache surprises in CI
   NPM_FLAGS = "--no-audit --no-fund"
 
+# Serverless functions (Groq LLM proxy — keeps API key server-side)
+# Set GROQ_API_KEY in the Netlify dashboard → Site settings → Environment variables
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
 # Single-page app: serve index.html for client-side routes (React Router).
 [[redirects]]
   from = "/*"

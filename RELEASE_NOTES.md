@@ -1,5 +1,34 @@
 # Release Notes
 
+## 2026-07-01 — Core AI 2.0: LLM answers, rebalance & rollover flows
+
+### Core AI panel
+- Redesigned Core AI chat panel with dark/light theme toggle, expand/collapse, and route-aware greetings.
+- Added LLM-powered answers via Groq (`llama-3.1-8b-instant`) for open-ended 401(k) questions, with guided-flow handoff when the user wants to take action.
+- Follow-up suggestion chips after LLM responses (e.g. enrollment, rebalance, rollover).
+- Improved structured cards for enrollment, withdrawal, rebalance, and rollover steps.
+
+### New guided flows
+- **Rebalance** — adjust fund allocation with preset targets and review step.
+- **Rollover** — bring in an old 401(k)/IRA with type selection and review step.
+- Enhanced enrollment, withdrawal, and vesting flows with richer step context.
+
+### Backend & deployment
+- Added Netlify serverless function `netlify/functions/ai-chat.ts` to proxy Groq API calls (keeps `GROQ_API_KEY` server-side).
+- Updated `netlify.toml` with functions directory and esbuild bundler config.
+- Dev mode supports direct Groq calls via `VITE_GROQ_API_KEY` in `.env.local`.
+
+### Intent & routing
+- Expanded intent resolver with rebalance and rollover scenario mappings.
+- Informational questions route to LLM; action phrases still trigger local guided flows.
+
+### Testing & build
+- Added Core AI scenario tests at `src/features/ai/__tests__/coreAI.test.ts` (run with `npx vitest`).
+- Excluded `__tests__` from app TypeScript build so production build stays clean.
+- Production build verified: `tsc -b && vite build` passes with no errors.
+
+---
+
 ## 2026-07-01 — Auth simplification & session theme switching
 
 ### Authentication

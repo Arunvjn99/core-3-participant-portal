@@ -9,6 +9,8 @@ const FLOW_START_BY_SCENARIO_ID: Partial<Record<string, LocalFlowType>> = {
   start_enrollment: 'enrollment',
   resume_enrollment: 'enrollment',
   vested_balance: 'vesting',
+  rebalance: 'rebalance',
+  rollover_in: 'rollover',
 }
 
 export function findBestScenario(input: string): SearchScenario | null {
@@ -47,7 +49,7 @@ export function resolveIntent(input: string): ResolvedIntent {
     const hint = match.queries[0] ?? 'that topic'
     return {
       kind: 'answer',
-      content: `"${hint}" is one of those "depends on your employer" things — I'm not gonna fake a legal answer. Your SPD or HR has the real rules. I can still help with loans, withdrawals, enrolment, or whatever's on the chips.`,
+      content: `"${hint}" is plan-specific — your Summary Plan Description or HR team has the accurate answer for your situation. I can help with loans, withdrawals, enrollment, rebalancing, or rollovers if you're ready to take action.`,
     }
   }
 

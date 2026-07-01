@@ -1,11 +1,13 @@
-export type EnrollmentAIStep = 'setup' | 'review' | 'success'
+export type EnrollmentAIStep = 'setup' | 'contribution' | 'investment' | 'review' | 'success'
 
 export type EnrollmentAIState = {
   step: EnrollmentAIStep
   data: {
-    plan?: string
+    planId?: string
+    planLabel?: string
     contribution?: number
     investment?: string
+    investmentLabel?: string
   }
 }
 

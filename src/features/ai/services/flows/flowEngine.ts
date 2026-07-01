@@ -4,6 +4,8 @@ import { loanFlow } from './loanFlow'
 import { withdrawalFlow } from './withdrawalFlow'
 import { enrollmentFlow } from './enrollmentFlow'
 import { vestingFlow } from './vestingFlow'
+import { rebalanceFlow } from './rebalanceFlow'
+import { rolloverFlow } from './rolloverFlow'
 
 export function runFlow(state: LocalFlowState, input: string, structured: CoreAIStructuredPayload | null = null): LocalAIResult {
   switch (state.type) {
@@ -11,6 +13,8 @@ export function runFlow(state: LocalFlowState, input: string, structured: CoreAI
     case 'withdrawal': return withdrawalFlow(state, input, structured)
     case 'enrollment': return enrollmentFlow(state, input, structured)
     case 'vesting': return vestingFlow(state, input, structured)
+    case 'rebalance': return rebalanceFlow(state, input, structured)
+    case 'rollover': return rolloverFlow(state, input, structured)
     default: return { messages: [], nextState: null }
   }
 }

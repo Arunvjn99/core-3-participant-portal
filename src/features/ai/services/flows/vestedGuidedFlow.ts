@@ -13,7 +13,7 @@ function vestedNextState(vestedAI: VestedAIState): LocalFlowState {
 
 function balancePayload(): BalanceCardPayload {
   const f = getUserFinancials()
-  return { total: f.totalBalance, vested: f.vestedBalance, unvested: f.totalBalance - f.vestedBalance }
+  return { total: f.totalBalance, vested: f.vestedBalance, unvested: f.unvestedBalance, vestedPercent: f.vestedPercent, allocation: f.allocation }
 }
 
 function insightPayload(): InfoCardPayload {

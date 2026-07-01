@@ -31,8 +31,9 @@ export function generateSchedule(
   const rows: SchedulePreviewRow[] = []
   const n = Math.min(previewMonths, tenureMonths)
 
-  const anchorYear = 2026
-  const anchorMonthIndex = 3
+  const now = new Date()
+  const anchorYear = now.getFullYear()
+  const anchorMonthIndex = now.getMonth()
 
   for (let m = 1; m <= n; m++) {
     const interest = Math.round(balance * r * 100) / 100

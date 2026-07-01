@@ -1,8 +1,10 @@
-export type WithdrawalAIStep = 'amount_selection' | 'method' | 'review' | 'success'
+export type WithdrawalAIStep = 'type_selection' | 'amount_selection' | 'method' | 'review' | 'success'
 
 export type WithdrawalAIState = {
   step: WithdrawalAIStep
   data: {
+    withdrawalType?: string
+    withdrawalTypeLabel?: string
     amount?: number
     tax?: number
     net?: number
