@@ -23,9 +23,7 @@ import { supabase } from '../core/supabase'
 
 // Auth pages — new two-panel design
 import LoginPage from '../features/auth/pages/LoginPage'
-import SignupPage from '../features/auth/pages/SignupPage'
 import ForgotPasswordPage from '../features/auth/pages/ForgotPasswordPage'
-import WhiteLabelAuth from '../features/auth/components/WhiteLabelAuth'
 
 // Enrollment pages
 import PlanSelection from '../features/enrollment/pages/PlanSelection'
@@ -75,7 +73,6 @@ import RolloverReview from '../features/transactions/flows/rollover/RolloverRevi
 
 // Legacy versioned auth pages
 const Login = lazy(() => import('../features/auth/pages/Login').then((m) => ({ default: m.Login })))
-const Signup = lazy(() => import('../features/auth/pages/Signup').then((m) => ({ default: m.Signup })))
 const VerifyOTP = lazy(() => import('../features/auth/pages/VerifyOTP').then((m) => ({ default: m.VerifyOTP })))
 const ForgotPassword = lazy(() => import('../features/auth/pages/ForgotPassword').then((m) => ({ default: m.ForgotPassword })))
 const ResetPassword = lazy(() => import('../features/auth/pages/ResetPassword').then((m) => ({ default: m.ResetPassword })))
@@ -179,11 +176,11 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="/login" replace /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'v1/login', element: <LoginPage /> },
-      { path: 'signup', element: <SignupPage /> },
-      { path: 'v1/signup', element: <SignupPage /> },
+      { path: 'signup', element: <Navigate to="/login" replace /> },
+      { path: 'v1/signup', element: <Navigate to="/login" replace /> },
       { path: 'forgot-password', element: <ForgotPasswordPage /> },
       { path: 'v1/forgot-password', element: <ForgotPasswordPage /> },
-      { path: 'auth', element: <WhiteLabelAuth /> },
+      { path: 'auth', element: <Navigate to="/login" replace /> },
       { path: 'privacy', element: <PrivacyPolicyPage /> },
       { path: 'terms', element: <TermsOfServicePage /> },
       { path: 'help', element: <HelpCenterPage /> },
@@ -199,7 +196,7 @@ export const router = createBrowserRouter([
             element: <AuthLayout />,
             children: [
               { path: 'login', element: withSuspense(Login) },
-              { path: 'signup', element: withSuspense(Signup) },
+              { path: 'signup', element: <Navigate to="/login" replace /> },
               { path: 'forgot-password', element: withSuspense(ForgotPassword) },
               { path: 'reset-password', element: withSuspense(ResetPassword) },
             ],

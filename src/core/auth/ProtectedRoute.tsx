@@ -1,8 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { useAuth } from '../hooks/useAuth'
-import { useOtpStore } from '../store/otpStore'
-import { ENV, ROUTES } from '../../lib/constants'
+import { ROUTES } from '../../lib/constants'
 
 interface ProtectedRouteProps {
   children: ReactNode
@@ -10,13 +9,7 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth()
-  const otpVerified = useOtpStore((s) => s.otpVerified)
   const location = useLocation()
-
-  // Only bypass in local development
-  if (import.meta.env.DEV && (ENV.DEBUG_BYPASS_AUTH || ENV.DEMO_MODE)) {
-    return <>{children}</>
-  }
 
   if (loading) {
     return (
@@ -28,10 +21,6 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (!user) {
     return <Navigate to={ROUTES.LOGIN} state={{ from: location }} replace />
-  }
-
-  if (!otpVerified) {
-    return <Navigate to={ROUTES.VERIFY_OTP} state={{ from: location }} replace />
   }
 
   return <>{children}</>

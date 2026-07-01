@@ -25,8 +25,8 @@ export default function LoginPage() {
     setLoading(true)
 
     if (!supabase) {
-      // Demo mode — go to verify step
-      navigate(ROUTES.VERIFY_OTP, { state: { email } })
+      // Demo mode — go straight to dashboard
+      navigate(ROUTES.DASHBOARD)
       return
     }
 
@@ -36,7 +36,7 @@ export default function LoginPage() {
       setError(signInError.message)
       setLoading(false)
     } else {
-      navigate(ROUTES.VERIFY_OTP, { state: { email } })
+      navigate(ROUTES.DASHBOARD)
     }
   }
 
@@ -148,14 +148,6 @@ export default function LoginPage() {
                 )}
               </button>
             </form>
-
-            {/* Sign up */}
-            <p className="mt-5 text-center text-sm text-gray-500 dark:text-gray-400">
-              {t('auth.no_account')}{' '}
-              <Link to="/signup" className="brand-text font-semibold hover:underline">
-                {t('auth.signup')}
-              </Link>
-            </p>
 
             {/* Help */}
             <p className="mt-2 text-center text-sm text-gray-500 dark:text-gray-400">

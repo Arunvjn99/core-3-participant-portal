@@ -200,7 +200,6 @@ export async function getAllCompanies(): Promise<Company[]> {
   const { data, error } = await supabase
     .from('companies')
     .select('*')
-    .eq('status', 'active')
     .order('name')
 
   if (error) {
