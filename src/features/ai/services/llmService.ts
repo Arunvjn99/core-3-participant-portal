@@ -137,7 +137,7 @@ export async function callLLM(
 }
 
 function fallbackText() {
-  return "I'm having a moment — please try again. I can help with loans, enrollment, withdrawals, rebalancing, and rollovers."
+  return "I was unable to process your request. Please try again. I can assist with loans, enrollment, withdrawals, rebalancing, and rollovers."
 }
 
 export function detectFollowUpSuggestions(content: string): string[] {

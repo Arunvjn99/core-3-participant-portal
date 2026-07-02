@@ -1,5 +1,17 @@
 # Release Notes
 
+## 2026-07-01 — Core AI professional tone refresh
+
+### Copy & messaging
+- Updated Core AI guided-flow copy across loan, enrollment, and vesting flows to use a more professional, enterprise-appropriate tone.
+- Refined plan, contribution, investment, and withdrawal insight messages for clarity and consistency.
+- Standardised error and fallback messages in the LLM service, local AI handler, and Netlify `ai-chat` function.
+
+### Build
+- Production build verified: `tsc -b && vite build` passes with no errors.
+
+---
+
 ## 2026-07-01 — Demo script & Clarity project update
 
 ### Demo tooling

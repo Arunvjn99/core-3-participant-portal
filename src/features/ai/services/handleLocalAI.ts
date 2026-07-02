@@ -31,7 +31,7 @@ export function handleLocalAI(
       const entry = getFAQById(structured.faqId)
       if (entry) return { messages: [assistantMessage(entry.fullAnswer)], nextState: null }
       return {
-        messages: [assistantMessage("That one hit a snag — try asking again a different way.", { suggestions: FALLBACK_SUGGESTIONS })],
+        messages: [assistantMessage("We were unable to retrieve that information. Please try asking in a different way.", { suggestions: FALLBACK_SUGGESTIONS })],
         nextState: null,
       }
     }
@@ -61,7 +61,7 @@ export function handleLocalAI(
   if (!trimmed) return { messages: [], nextState: flowState }
 
   if (/^(cancel|stop|never mind|forget it|exit|quit)\b/i.test(trimmed)) {
-    return { messages: [assistantMessage("No problem — I'm here whenever you need help.", { suggestions: FALLBACK_SUGGESTIONS })], nextState: null }
+    return { messages: [assistantMessage("Understood — I am here whenever you need assistance.", { suggestions: FALLBACK_SUGGESTIONS })], nextState: null }
   }
 
   if (flowState?.type) return runFlow(flowState, trimmed, null)

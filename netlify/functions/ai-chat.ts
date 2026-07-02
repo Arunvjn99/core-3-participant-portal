@@ -121,14 +121,14 @@ export default async (req: Request): Promise<Response> => {
 
     const data = await groqResponse.json() as { choices?: Array<{ message?: { content?: string } }> }
     const content = data.choices?.[0]?.message?.content?.trim() ??
-      "I'm having a moment — please try again."
+      "I was unable to process your request. Please try again."
 
     return new Response(JSON.stringify({ content }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
     })
   } catch {
-    return new Response(JSON.stringify({ content: "I'm having a moment — please try again." }), {
+    return new Response(JSON.stringify({ content: "I was unable to process your request. Please try again." }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     })

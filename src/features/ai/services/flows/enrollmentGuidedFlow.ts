@@ -125,7 +125,7 @@ export function runEnrollmentGuidedFlow(
       return {
         messages: [
           assistantMessage(
-            `${structured.contribution}% — nice. Last piece: how do you want your money invested? Pick what matches how hands-on you want to be.`,
+            `Your contribution rate has been set to ${structured.contribution}%. The final step is selecting your investment strategy. Please choose the option that best suits your preferences.`,
             {
               interactiveType: 'enrollment_investment_card',
               interactivePayload: investmentPayload(structured.planId, structured.planLabel, structured.contribution),
