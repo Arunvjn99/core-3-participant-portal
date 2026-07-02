@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CONGRUENT — Demo Script</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg2: #f8f9fa;
+    --bg3: #f1f3f5;
+    --text: #1a1a2e;
+    --text2: #555770;
+    --text3: #888a9a;
+    --border: rgba(0,0,0,0.1);
+    --border2: rgba(0,0,0,0.15);
+    --blue-bg: #E6F1FB;
+    --blue-text: #185FA5;
+    --green-bg: #EAF3DE;
+    --green-text: #3B6D11;
+    --success-bg: #EAF3DE;
+    --success-text: #3B6D11;
+    --success-border: #9dd56b;
+    --info-bg: #E6F1FB;
+    --info-text: #185FA5;
+    --info-border: #85B7EB;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --shadow: 0 1px 4px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1117;
+      --bg2: #1a1d27;
+      --bg3: #22253a;
+      --text: #f0f0f8;
+      --text2: #9a9cb8;
+      --text3: #666880;
+      --border: rgba(255,255,255,0.1);
+      --border2: rgba(255,255,255,0.16);
+      --blue-bg: #0c2240;
+      --blue-text: #85B7EB;
+      --green-bg: #0d2008;
+      --green-text: #9dd56b;
+      --success-bg: #0d2008;
+      --success-text: #9dd56b;
+      --success-border: #3B6D11;
+      --info-bg: #0c2240;
+      --info-text: #85B7EB;
+      --info-border: #185FA5;
+      --shadow: 0 1px 4px rgba(0,0,0,0.4), 0 4px 24px rgba(0,0,0,0.3);
+    }
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg3);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 56px;
+  }
+  .topbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text);
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .logo-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #1e40af, #2563eb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 16px;
+  }
+  .topbar-divider { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
+  .topbar-title { font-size: 13px; color: var(--text2); }
+  .topbar-spacer { flex: 1; }
+  .topbar-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--green-bg);
+    color: var(--green-text);
+    font-weight: 500;
+    border: 0.5px solid var(--success-border);
+  }
+  .download-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--border2);
+    background: var(--bg2);
+    color: var(--text);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+  .download-btn:hover { background: var(--bg3); }
+  .print-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--info-border);
+    background: var(--info-bg);
+    color: var(--info-text);
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .print-btn:hover { opacity: 0.8; }
+
+  /* ── Layout ── */
+  .layout {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 28px 20px 60px;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* ── Sidebar nav ── */
+  .sidebar {
+    position: sticky;
+    top: 72px;
+    background: var(--bg);
+    border-radius: var(--radius-lg);
+    border: 0.5px solid var(--border);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .sidebar-header {
+    padding: 12px 14px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    border-bottom: 0.5px solid var(--border);
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text2);
+    cursor: pointer;
+    border-bottom: 0.5px solid var(--border);
+    transition: all 0.12s;
+    text-decoration: none;
+  }
+  .nav-item:last-child { border-bottom: none; }
+  .nav-item:hover { background: var(--bg2); color: var(--text); }
+  .nav-item.active {
+    background: var(--info-bg);
+    color: var(--info-text);
+    font-weight: 500;
+  }
+  .nav-item i { font-size: 16px; flex-shrink: 0; }
+  .nav-count {
+    margin-left: auto;
+    font-size: 10px;
+    color: var(--text3);
+  }
+  .nav-count.done-all {
+    color: var(--success-text);
+    font-weight: 500;
+  }
+
+  /* ── Main content ── */
+  .content { min-width: 0; }
+
+  /* Module hero */
+  .module-hero {
+    background: var(--bg);
+    border-radius: var(--radius-lg);
+    border: 0.5px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .module-hero-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .module-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .module-meta h2 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .module-meta p { font-size: 12px; color: var(--text2); }
+  .module-badge-wrap { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .module-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 500;
+  }
+
+  /* Progress */
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--bg3);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #2563eb;
+    border-radius: 2px;
+    transition: width 0.35s ease;
+  }
+  .progress-label { font-size: 11px; color: var(--text3); flex-shrink: 0; min-width: 50px; text-align: right; }
+
+  /* Steps */
+  .steps-list { list-style: none; }
+  .step-item {
+    display: flex;
+    gap: 14px;
+    padding: 14px 20px;
+    border-bottom: 0.5px solid var(--border);
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .step-item:last-child { border-bottom: none; }
+  .step-item:hover { background: var(--bg2); }
+  .step-item.expanded { background: var(--bg2); }
+  .step-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 0.5px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text2);
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all 0.2s;
+  }
+  .step-num.done {
+    background: var(--success-bg);
+    color: var(--success-text);
+    border-color: var(--success-border);
+  }
+  .step-body { flex: 1; min-width: 0; }
+  .step-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .step-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .step-tagline { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .tag {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .tag-ai { background: var(--info-bg); color: var(--info-text); border: 0.5px solid var(--info-border); }
+  .tag-key { background: var(--success-bg); color: var(--success-text); border: 0.5px solid var(--success-border); }
+
+  .step-detail {
+    display: none;
+    margin-top: 12px;
+  }
+  .step-detail.open { display: block; }
+  .step-detail-box {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.7;
+    padding: 12px 14px;
+    background: var(--bg3);
+    border-radius: var(--radius-md);
+    border-left: 3px solid #2563eb;
+  }
+  .talk-track {
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    font-style: italic;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .talk-track::before {
+    content: '💬 Say: ';
+    font-style: normal;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text3);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .mark-done-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--success-border);
+    background: var(--success-bg);
+    color: var(--success-text);
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .mark-done-btn:hover { opacity: 0.8; }
+  .chevron-icon {
+    font-size: 16px;
+    color: var(--text3);
+    flex-shrink: 0;
+    margin-top: 4px;
+    transition: transform 0.15s;
+  }
+  .chevron-icon.open { transform: rotate(180deg); }
+
+  /* Footer tip */
+  .module-footer {
+    padding: 12px 20px;
+    border-top: 0.5px solid var(--border);
+    background: var(--bg2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  }
+  .footer-tip { font-size: 11px; color: var(--text2); flex: 1; }
+  .footer-tip i { font-size: 13px; vertical-align: -2px; margin-right: 4px; }
+
+  /* Overall progress card */
+  .overall-card {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .overall-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+  .overall-row { display: flex; align-items: center; gap: 10px; }
+  .overall-bar { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+  .overall-fill { height: 100%; background: linear-gradient(90deg, #1e40af, #2563eb); border-radius: 3px; transition: width 0.4s ease; }
+  .overall-pct { font-size: 13px; font-weight: 600; color: var(--info-text); min-width: 36px; text-align: right; }
+  .module-counts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .module-count-pill {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--bg3);
+    color: var(--text2);
+    border: 0.5px solid var(--border);
+  }
+  .module-count-pill.done-pill {
+    background: var(--success-bg);
+    color: var(--success-text);
+    border-color: var(--success-border);
+  }
+
+  /* Hidden modules */
+  .module-section { display: none; }
+  .module-section.active { display: block; }
+
+  /* Print styles */
+  @media print {
+    .topbar, .sidebar, .download-btn, .print-btn, .mark-done-btn { display: none !important; }
+    .layout { display: block; max-width: 100%; padding: 0; }
+    .module-section { display: block !important; margin-bottom: 32px; page-break-inside: avoid; }
+    .step-detail { display: block !important; }
+    body { background: white; color: black; }
+  }
+
+  @media (max-width: 680px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+    .topbar { padding: 0 12px; gap: 8px; }
+    .topbar-title { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<header class="topbar">
+  <div class="topbar-logo">
+    <div class="logo-mark"><i class="ti ti-sparkles" aria-hidden="true"></i></div>
+    CONGRUENT
+  </div>
+  <div class="topbar-divider"></div>
+  <span class="topbar-title">Demo Script — Usability Test Prep</span>
+  <div class="topbar-spacer"></div>
+  <span class="topbar-badge"><i class="ti ti-checks" aria-hidden="true" style="font-size:12px;vertical-align:-1px;margin-right:3px;"></i>8 modules · 46 talking points</span>
+  <button class="print-btn" onclick="window.print()">
+    <i class="ti ti-printer" aria-hidden="true"></i> Print
+  </button>
+  <a class="download-btn" id="dl-btn" href="#" download="congruent-demo-script.html">
+    <i class="ti ti-download" aria-hidden="true"></i> Save HTML
+  </a>
+</header>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar" aria-label="Module navigation">
+    <div class="sidebar-header">Modules</div>
+    <a class="nav-item active" onclick="switchModule(0)" href="#">
+      <i class="ti ti-lock"></i> Login
+      <span class="nav-count" id="nc-0">3 steps</span>
+    </a>
+    <a class="nav-item" onclick="switchModule(1)" href="#">
+      <i class="ti ti-sparkles"></i> Pre-enroll
+      <span class="nav-count" id="nc-1">5 steps</span>
+    </a>
+    <a class="nav-item" onclick="switchModule(2)" href="#">
+      <i class="ti ti-clipboard-check"></i> Enrollment
+      <span class="nav-count" id="nc-2">8 steps</span>
+    </a>
+    <a class="nav-item" onclick="switchModule(3)" href="#">
+      <i class="ti ti-layout-dashboard"></i> Dashboard
+      <span class="nav-count" id="nc-3">5 steps</span>
+    </a>
+    <a class="nav-item" onclick="switchModule(4)" href="#">
+      <i class="ti ti-chart-line"></i> Investments
+      <span class="nav-count" id="nc-4">5 steps</span>
+    </a>
+    <a class="nav-item" onclick="switchModule(5)" href="#">
+      <i class="ti ti-arrows-exchange"></i> Transactions
+      <span class="nav-count" id="nc-5">7 steps</span>
+    </a>
+    <a class="nav-item" onclick="switchModule(6)" href="#">
+      <i class="ti ti-user-circle"></i> Profile
+      <span class="nav-count" id="nc-6">4 steps</span>
+    </a>
+    <a class="nav-item" onclick="switchModule(7)" href="#">
+      <i class="ti ti-robot"></i> Core AI
+      <span class="nav-count" id="nc-7">7 steps</span>
+    </a>
+  </nav>
+
+  <!-- Main -->
+  <main class="content">
+
+    <!-- Overall progress -->
+    <div class="overall-card">
+      <div class="overall-label">Overall demo progress</div>
+      <div class="overall-row">
+        <div class="overall-bar"><div class="overall-fill" id="overall-fill" style="width:0%;"></div></div>
+        <div class="overall-pct" id="overall-pct">0%</div>
+      </div>
+      <div class="module-counts" id="module-counts"></div>
+    </div>
+
+    <!-- Module sections rendered by JS -->
+    <div id="modules-container"></div>
+
+  </main>
+</div>
+
+<script>
+const MODULES = [
+  {
+    id: 0,
+    label: 'Login',
+    icon: 'ti-lock',
+    iconBg: '#E6F1FB',
+    iconColor: '#185FA5',
+    title: 'Sign-in & authentication',
+    subtitle: "Secure, frictionless entry for plan participants",
+    badge: 'Entry point',
+    badgeBg: '#E6F1FB',
+    badgeColor: '#185FA5',
+    tip: 'Keep this under 30 seconds — the goal is to get them into the portal fast.',
+    steps: [
+      {
+        title: 'Login page',
+        tagline: 'Clean, brand-led entry screen',
+        detail: 'Participants arrive at a focused login page — email and password. The design is intentionally minimal so nothing competes with the action. Show the brand mark and the clean layout.',
+        talk: "This is the first thing a participant sees. It's clean, fast, and gets them where they need to go in seconds."
+      },
+      {
+        title: 'OTP / verification',
+        tagline: 'One-time passcode for identity confirmation',
+        detail: 'After login, participants verify their identity via OTP — adds a security layer without friction. For the demo, any code is accepted.',
+        talk: "We have a two-step verification built in — participants confirm their identity before accessing their retirement account."
+      },
+      {
+        title: 'New user signup',
+        tagline: 'Self-service registration for new participants',
+        detail: "New participants can register themselves — name, email, password. Straight into their account setup without calling HR.",
+        talk: "New employees don't need to call HR. They self-register, verify, and they're in."
+      }
+    ]
+  },
+  {
+    id: 1,
+    label: 'Pre-enrollment',
+    icon: 'ti-sparkles',
+    iconBg: '#EAF3DE',
+    iconColor: '#3B6D11',
+    title: 'Pre-enrollment dashboard',
+    subtitle: "First experience for participants who haven't yet enrolled",
+    badge: 'Key moment',
+    badgeBg: '#EAF3DE',
+    badgeColor: '#3B6D11',
+    tip: "This is where first impressions are made. Emphasise the personalised greeting and the video.",
+    steps: [
+      {
+        title: 'Time-aware personalised greeting',
+        tagline: '"Good morning, Arun" — adapts to time of day',
+        detail: 'The dashboard greets participants by name with a morning / afternoon / evening message. It immediately feels personal, not like a generic financial portal.',
+        talk: "The moment someone logs in, they see their name and a greeting that matches the time of day. It sets a warm, human tone right away."
+      },
+      {
+        title: 'Animated hero with video',
+        tagline: 'Visual storytelling about retirement readiness',
+        detail: 'A hero video plays above the fold — showing real people in a workplace context. Drives emotional engagement before the participant sees any numbers.',
+        talk: "Instead of leading with numbers, we lead with a story. This video makes retirement feel tangible and worth planning for."
+      },
+      {
+        title: 'Typing effect CTA',
+        tagline: 'Animated prompt cycling through benefit messages',
+        detail: 'A typewriter-style animation cycles through benefit messages — "Start saving today", "Get employer match", etc. Draws attention to the enrollment CTA naturally.',
+        talk: "The animated text here cycles through the key benefits — it keeps the page feeling alive and draws the eye to the enroll button."
+      },
+      {
+        title: 'Learning card & advisor access',
+        tagline: 'Education resources and live advisor booking',
+        detail: 'Below the hero, participants can access learning materials and book time with a financial advisor directly from the portal.',
+        talk: "Participants aren't just handed a form — they can learn at their own pace or connect with an advisor if they have questions before enrolling."
+      },
+      {
+        title: 'Core AI floating pill',
+        tagline: '"Ask CORE AI" — always accessible at the bottom',
+        detail: 'The blue "Ask CORE AI" pill is pinned to the bottom of every page — including this dashboard. Participants can ask questions before they even start enrolling.',
+        talk: "The AI assistant is right there before enrollment even starts. If someone wonders 'what's the difference between Roth and Traditional?' they get an instant, professional answer.",
+        tag: 'ai'
+      }
+    ]
+  },
+  {
+    id: 2,
+    label: 'Enrollment',
+    icon: 'ti-clipboard-check',
+    iconBg: '#FAEEDA',
+    iconColor: '#854F0B',
+    title: '401(k) enrollment flow',
+    subtitle: 'Step-by-step guided enrollment — the core participant journey',
+    badge: 'Core flow',
+    badgeBg: '#FAEEDA',
+    badgeColor: '#854F0B',
+    tip: "Walk through this end-to-end. It's the most important flow in the portal.",
+    steps: [
+      {
+        title: 'Plan selection — Traditional vs. Roth',
+        tagline: 'Side-by-side comparison with guided help',
+        detail: 'Participants choose between Traditional (pre-tax) and Roth (after-tax) 401(k). Cards clearly explain each option. Core AI is available inline on this page.',
+        talk: "Plan selection is where most people get stuck. We've made it a clear visual comparison, and Core AI is right on this screen if someone needs guidance before choosing.",
+        tag: 'ai'
+      },
+      {
+        title: 'Contribution rate setup',
+        tagline: 'Set deferral percentage with real-time impact preview',
+        detail: "Participants set their contribution percentage. The UI shows the impact on their take-home pay in real time. Encourages participants to contribute enough to get the full employer match.",
+        talk: "As they move the slider, they can immediately see what that means for their paycheck. It removes the guesswork and helps people commit to a rate they're comfortable with."
+      },
+      {
+        title: 'Contribution source',
+        tagline: 'Pre-tax, Roth, or split allocation',
+        detail: 'If the plan supports it, participants can split contributions between pre-tax and Roth buckets. Flexible and clearly labelled.',
+        talk: "Some participants want to hedge — contribute partly pre-tax and partly Roth. This step gives them that control."
+      },
+      {
+        title: 'Investment strategy selection',
+        tagline: 'Target-date funds or custom fund lineup',
+        detail: 'Participants choose how their money is invested — a simple target-date fund or a custom allocation across the fund lineup.',
+        talk: "For most people, we surface the simplest option first — a target-date fund that automatically rebalances as they approach retirement. Those who want to pick their own funds can do that too."
+      },
+      {
+        title: 'Auto-increase setup',
+        tagline: 'Schedule automatic annual contribution increases',
+        detail: "Participants can opt in to automatic annual increases — e.g. contribution rate goes up 1% each year. A proven behavioural tool for long-term savings growth.",
+        talk: "This is one of the highest-impact features. Setting it once means contributions grow automatically — participants barely notice, but their balance does."
+      },
+      {
+        title: 'Retirement readiness score',
+        tagline: 'Projected outcome based on current settings',
+        detail: 'Before confirming, participants see a projected retirement readiness score based on their current choices. Makes the abstract feel real.',
+        talk: "Right before they submit, they see a projection of where they'll be at retirement based on what they just set up. It makes the decision feel meaningful, not just administrative."
+      },
+      {
+        title: 'Review & confirm enrollment',
+        tagline: 'Summary of all choices before submission',
+        detail: 'A clean summary page — plan type, contribution rate, investment selection, auto-increase opt-in. One place to review everything before committing.',
+        talk: "Nothing is submitted until they've seen a full summary. Clear, transparent, no surprises."
+      },
+      {
+        title: 'Enrollment success',
+        tagline: 'Confirmation screen with next steps',
+        detail: 'A celebratory confirmation screen — enrolled! Next steps are shown clearly: when contributions start, how to access their account, who to contact.',
+        talk: "The success screen is intentionally positive. It's a milestone — let's make them feel good about the decision they just made.",
+        tag: 'key'
+      }
+    ]
+  },
+  {
+    id: 3,
+    label: 'Dashboard',
+    icon: 'ti-layout-dashboard',
+    iconBg: '#E1F5EE',
+    iconColor: '#0F6E56',
+    title: 'Post-enrollment dashboard',
+    subtitle: "The participant's home — balance, growth, and quick actions",
+    badge: 'Home screen',
+    badgeBg: '#E1F5EE',
+    badgeColor: '#0F6E56',
+    tip: 'This is what participants see every time they log in after enrolling. Make it feel powerful.',
+    steps: [
+      {
+        title: 'Live account balance & growth chart',
+        tagline: 'Running balance with visual growth line',
+        detail: "The headline balance is front and centre, with a smooth growth curve beneath it showing historical performance. At a glance, participants can see that their money is moving in the right direction.",
+        talk: "The first thing participants see is their balance and a chart showing how it's grown. That positive visual is motivating — it reinforces that saving is working."
+      },
+      {
+        title: 'Contribution breakdown',
+        tagline: 'Employee + employer match, this pay period',
+        detail: "A clear breakdown of what the participant contributed vs. what the employer matched this pay period. Makes the employer match tangible and visible.",
+        talk: "Seeing the employer match right here — next to what they personally contributed — is one of the most effective ways to reinforce the value of staying enrolled."
+      },
+      {
+        title: 'Radial vesting progress',
+        tagline: '% of employer contributions vested — visualised',
+        detail: 'A radial chart shows how much of the employer contributions are vested (permanently owned). Updated automatically as tenure increases.',
+        talk: "Vesting is a concept many employees don't fully understand. This visual makes it immediately clear — this is the portion of your employer's contributions that's yours to keep."
+      },
+      {
+        title: 'Quick-action tiles',
+        tagline: 'Loan, withdrawal, rebalance, rollover — one tap',
+        detail: 'Four prominent tiles give quick access to the most common actions. No digging through menus.',
+        talk: "Anything they might need to do — loan, withdrawal, rebalance — is one tap from the home screen. We've removed all the friction."
+      },
+      {
+        title: 'Plan & employer details',
+        tagline: 'Match formula, plan type, contact info',
+        detail: "Key plan details surfaced on the dashboard — employer match formula, plan type, HR contact. The things participants always search for, always visible.",
+        talk: "Participants shouldn't have to call HR to find out their match formula. It's right here on their home screen."
+      }
+    ]
+  },
+  {
+    id: 4,
+    label: 'Investments',
+    icon: 'ti-chart-line',
+    iconBg: '#EEEDFE',
+    iconColor: '#534AB7',
+    title: 'Investments & portfolio',
+    subtitle: 'Full picture of holdings, performance, and allocation',
+    badge: 'Analytics',
+    badgeBg: '#EEEDFE',
+    badgeColor: '#534AB7',
+    tip: 'Show all five sections — each one tells a different part of the investment story.',
+    steps: [
+      {
+        title: 'Portfolio snapshot',
+        tagline: 'Total balance, YTD return, and fund count',
+        detail: "Top-level numbers — total balance, year-to-date return as a dollar amount and percentage, and how many funds they're invested in.",
+        talk: "The snapshot gives participants everything they need to know in one line — how much they have, how much they've made this year, and what they're in."
+      },
+      {
+        title: 'Portfolio performance chart',
+        tagline: 'Historical returns vs. benchmark',
+        detail: 'A performance chart showing how the portfolio has performed over time, with benchmark comparison. Participants can see if their strategy is working.',
+        talk: "This is where participants can see whether their investment choices are performing. The benchmark line gives context — are we ahead of the market or behind?"
+      },
+      {
+        title: 'Portfolio allocation',
+        tagline: 'Fund-by-fund breakdown with % allocation',
+        detail: 'A detailed view of every fund, the percentage allocated, current value, and performance. Clear labels for equities vs. bonds vs. target-date.',
+        talk: "Fund by fund — here's exactly where their money is sitting, how much is in each, and how each one has performed."
+      },
+      {
+        title: 'Retirement planning projection',
+        tagline: 'Projected balance at retirement age',
+        detail: 'A forward-looking projection based on current contribution rate, employer match, and assumed return. Shows participants what they are on track for.',
+        talk: "This projection is powerful. It connects today's decisions to retirement outcomes — 'if you keep saving at this rate, here's where you land'."
+      },
+      {
+        title: 'Recommended actions',
+        tagline: 'Smart nudges — rebalance, increase contributions',
+        detail: "Context-aware recommendations — e.g. 'Your allocation has drifted, consider rebalancing' or 'Increase contributions by 1% to capture full employer match'.",
+        talk: "These are not generic tips. They're based on the participant's actual account state — relevant, timely, actionable.",
+        tag: 'key'
+      }
+    ]
+  },
+  {
+    id: 5,
+    label: 'Transactions',
+    icon: 'ti-arrows-exchange',
+    iconBg: '#FAECE7',
+    iconColor: '#993C1D',
+    title: 'Transaction centre',
+    subtitle: 'Loans, withdrawals, rebalancing, rollovers, transfers',
+    badge: '5 flows',
+    badgeBg: '#FAECE7',
+    badgeColor: '#993C1D',
+    tip: 'Demo the loan flow end-to-end — it is the most commonly used transaction.',
+    steps: [
+      {
+        title: 'Transaction hub overview',
+        tagline: 'All actions in one place with eligibility indicators',
+        detail: "The hub shows all available transaction types. Displays the participant's loan-eligible and withdrawable amounts so they know their options before clicking.",
+        talk: "Before they even start a transaction, they can see what they're eligible for. Eligible loan amount, withdrawable balance — right on the hub page."
+      },
+      {
+        title: 'Loan flow — apply & simulate',
+        tagline: 'Borrow up to 50% of vested balance, guided steps',
+        detail: 'Step-by-step loan application: select purpose, choose amount with a real-time repayment simulator, review terms, submit. The simulator is interactive.',
+        talk: "The loan simulator is a standout. Participants drag a slider to choose their loan amount and instantly see — this is my monthly repayment, this is my payoff date. No surprises.",
+        tag: 'key'
+      },
+      {
+        title: 'Withdrawal flow',
+        tagline: 'Hardship, in-service, or normal distribution',
+        detail: 'Participants select the type of withdrawal. Each type shows the relevant requirements and tax implications before proceeding.',
+        talk: "The withdrawal flow walks participants through the right type of withdrawal for their situation — and shows them the tax implications upfront so they can make an informed decision."
+      },
+      {
+        title: 'Portfolio rebalance flow',
+        tagline: 'Adjust allocations with preset or custom targets',
+        detail: 'Participants can rebalance to a preset (aggressive, moderate, conservative) or set custom percentages. A before/after view shows what will change before they confirm.',
+        talk: "Rebalancing used to require calling a phone number. Here it's a three-step guided flow — pick your target, review what changes, confirm. Done in under two minutes."
+      },
+      {
+        title: 'Rollover flow',
+        tagline: "Consolidate an old 401(k) into this plan",
+        detail: "Participants can initiate a rollover from a previous employer's plan. The flow asks for source account details, rollover type, and generates the paperwork needed.",
+        talk: "If a participant has a 401(k) sitting at a previous employer, this flow lets them bring it in without making a single phone call."
+      },
+      {
+        title: 'Fund transfer flow',
+        tagline: 'Move money between investment funds',
+        detail: 'For participants who want to shift money from one fund to another without changing their ongoing allocation percentage.',
+        talk: "Different from rebalancing — this is for moving a specific dollar amount between two funds. More surgical control."
+      },
+      {
+        title: 'Draft transactions & history',
+        tagline: 'Saved drafts and recent transaction log',
+        detail: 'Participants can save transactions as drafts and return to complete them. A transaction history log shows all past activity — dates, amounts, status.',
+        talk: "If someone starts a loan application and saves it as a draft, it's waiting for them next time they log in. And the history log means they always have a record of every action."
+      }
+    ]
+  },
+  {
+    id: 6,
+    label: 'Profile',
+    icon: 'ti-user-circle',
+    iconBg: '#FBEAF0',
+    iconColor: '#993556',
+    title: 'Profile & account settings',
+    subtitle: 'Personal info, beneficiaries, preferences, security',
+    badge: '4 tabs',
+    badgeBg: '#FBEAF0',
+    badgeColor: '#993556',
+    tip: "Beneficiaries tab is the most emotionally significant — many participants don't realise they need to set this.",
+    steps: [
+      {
+        title: 'Personal information',
+        tagline: 'Name, address, contact details — self-managed',
+        detail: 'Participants can update their personal information — name, address, phone, email — without contacting HR.',
+        talk: "Participants manage their own details. No calling HR to update an address — they do it here in under a minute."
+      },
+      {
+        title: 'Beneficiaries',
+        tagline: 'Who receives the account if the participant passes away',
+        detail: 'Add or update beneficiaries — primary and contingent. This is often overlooked. The portal surfaces it prominently and makes updating it straightforward.',
+        talk: "Beneficiary designation is the most important account setting most participants never think about. We surface it clearly and make updating it simple — a few clicks, not a form and a fax.",
+        tag: 'key'
+      },
+      {
+        title: 'Preferences',
+        tagline: 'Language, theme (light/dark), notifications',
+        detail: 'Participants can personalise their experience — language preference, light or dark theme, notification settings.',
+        talk: "We support multiple languages, light and dark mode, and granular notification controls. The portal adapts to each participant's preferences."
+      },
+      {
+        title: 'Security settings',
+        tagline: 'Password change, 2FA, session management',
+        detail: 'Security tab covers password management, two-factor authentication settings, and active session visibility.',
+        talk: "Security is handled at the participant level — they can change their password, manage 2FA, and see which devices are logged in."
+      }
+    ]
+  },
+  {
+    id: 7,
+    label: 'Core AI',
+    icon: 'ti-robot',
+    iconBg: '#E6F1FB',
+    iconColor: '#185FA5',
+    title: 'Core AI assistant',
+    subtitle: 'Conversational 401(k) assistant — scripted flows + live LLM',
+    badge: 'Differentiator',
+    badgeBg: '#EAF3DE',
+    badgeColor: '#3B6D11',
+    tip: 'This is the biggest differentiator. Demo both a guided flow and a free-form question.',
+    steps: [
+      {
+        title: 'Context-aware greeting',
+        tagline: 'Opening message adapts to the current page',
+        detail: "When Core AI opens, it greets participants based on where they are in the portal. On the investments page: 'Looking at your investments?' It always feels relevant.",
+        talk: "The assistant knows which page the participant is on and opens with a relevant greeting. It doesn't feel like a generic chatbot — it feels like it's been paying attention."
+      },
+      {
+        title: 'Guided action flows — in-chat',
+        tagline: 'Start a loan, enroll, rebalance — all inside the chat',
+        detail: 'Typing "I want to apply for a loan" launches the full loan flow inside the chat panel — with interactive cards, sliders, and confirmation — without leaving the conversation.',
+        talk: "The participant never has to leave the chat. They can apply for a loan, rebalance their portfolio, or start enrollment — all inside Core AI, guided step by step.",
+        tag: 'key'
+      },
+      {
+        title: 'LLM fallback — free-form questions',
+        tagline: 'Any 401(k) question answered intelligently',
+        detail: "For questions like 'What's the difference between Roth and Traditional?', 'How does vesting work?' — the AI routes to a live LLM trained on 401(k) domain knowledge.",
+        talk: "If a participant asks something the scripted flows don't cover — any general retirement question — it goes to our AI model. It answers like a knowledgeable benefits advisor, not a search engine.",
+        tag: 'ai'
+      },
+      {
+        title: 'Conversation history & follow-ups',
+        tagline: 'AI remembers context within the session',
+        detail: "The AI tracks the last 5 exchanges so follow-up questions make sense. Asking 'what about the penalty?' after asking about withdrawals — the AI knows what penalty you mean.",
+        talk: "It holds context throughout the conversation. Participants don't have to repeat themselves — the AI remembers what was just discussed."
+      },
+      {
+        title: 'Smart follow-up chips',
+        tagline: 'Suggested next questions auto-generated from answers',
+        detail: 'After every AI response, relevant follow-up chips appear. After an answer about loans: "How much can I borrow?" and "What\'s the repayment schedule?"',
+        talk: "After each answer, the AI suggests natural follow-up questions. It makes the conversation feel like a real advisory session rather than a search box."
+      },
+      {
+        title: 'Fullscreen mode & light/dark theme',
+        tagline: 'Expand to full viewport, toggle theme in header',
+        detail: 'Core AI has a fullscreen toggle (Maximize icon in the header) that expands it to fill the entire screen. A theme toggle switches between dark and light mode.',
+        talk: "For participants who want to spend more time with the AI, fullscreen mode gives them a focused workspace. And the light/dark toggle means it works comfortably in any environment."
+      },
+      {
+        title: 'Speech input & text-to-speech',
+        tagline: 'Speak your question, hear the answer',
+        detail: 'Participants can tap the mic and speak their question — transcribed and sent to Core AI. Answers can also be read aloud. Accessibility covered.',
+        talk: "Participants can talk to Core AI like they'd talk to a person — speak the question, hear the answer. This opens the portal up to a much wider range of users."
+      }
+    ]
+  }
+];
+
+// State
+const completedSteps = {};
+MODULES.forEach(m => { completedSteps[m.id] = new Set(); });
+let activeModule = 0;
+let expandedStep = null;
+
+function getTotalSteps() {
+  return MODULES.reduce((acc, m) => acc + m.steps.length, 0);
+}
+function getTotalDone() {
+  return Object.values(completedSteps).reduce((acc, s) => acc + s.size, 0);
+}
+
+function updateOverall() {
+  const pct = Math.round((getTotalDone() / getTotalSteps()) * 100);
+  document.getElementById('overall-fill').style.width = pct + '%';
+  document.getElementById('overall-pct').textContent = pct + '%';
+
+  const countsEl = document.getElementById('module-counts');
+  countsEl.innerHTML = MODULES.map(m => {
+    const done = completedSteps[m.id].size;
+    const total = m.steps.length;
+    const isDone = done === total;
+    return `<span class="module-count-pill${isDone ? ' done-pill' : ''}">${m.label}: ${done}/${total}</span>`;
+  }).join('');
+}
+
+function updateNavCounts() {
+  MODULES.forEach(m => {
+    const done = completedSteps[m.id].size;
+    const total = m.steps.length;
+    const el = document.getElementById('nc-' + m.id);
+    if (!el) return;
+    if (done === total) {
+      el.textContent = '✓ done';
+      el.className = 'nav-count done-all';
+    } else {
+      el.textContent = `${done}/${total} steps`;
+      el.className = 'nav-count';
+    }
+  });
+}
+
+function renderModules() {
+  const container = document.getElementById('modules-container');
+  container.innerHTML = MODULES.map(m => `
+    <div class="module-section${m.id === activeModule ? ' active' : ''}" id="mod-${m.id}">
+      <div class="module-hero">
+        <div class="module-hero-inner">
+          <div class="module-icon" style="background:${m.iconBg};">
+            <i class="ti ${m.icon}" aria-hidden="true" style="color:${m.iconColor};"></i>
+          </div>
+          <div class="module-meta">
+            <h2>${m.title}</h2>
+            <p>${m.subtitle}</p>
+          </div>
+          <div class="module-badge-wrap">
+            <span class="module-badge" style="background:${m.badgeBg};color:${m.badgeColor};">${m.badge}</span>
+          </div>
+        </div>
+        <div class="progress-row">
+          <div class="progress-bar">
+            <div class="progress-fill" id="pb-${m.id}" style="width:${Math.round(completedSteps[m.id].size/m.steps.length*100)}%;"></div>
+          </div>
+          <div class="progress-label" id="pl-${m.id}">${completedSteps[m.id].size}/${m.steps.length} covered</div>
+        </div>
+        <ul class="steps-list">
+          ${m.steps.map((s, si) => `
+            <li class="step-item${expandedStep === m.id + '-' + si ? ' expanded' : ''}" id="si-${m.id}-${si}" onclick="toggleStep(${m.id},${si})">
+              <div class="step-num${completedSteps[m.id].has(si) ? ' done' : ''}" id="sn-${m.id}-${si}">
+                ${completedSteps[m.id].has(si) ? '<i class="ti ti-check" style="font-size:12px;" aria-hidden="true"></i>' : si + 1}
+              </div>
+              <div class="step-body">
+                <div class="step-top">
+                  <span class="step-title">${s.title}</span>
+                  ${s.tag === 'ai' ? '<span class="tag tag-ai">Core AI</span>' : ''}
+                  ${s.tag === 'key' ? '<span class="tag tag-key">Key moment</span>' : ''}
+                </div>
+                <div class="step-tagline">${s.tagline}</div>
+                <div class="step-detail${expandedStep === m.id + '-' + si ? ' open' : ''}" id="sd-${m.id}-${si}">
+                  <div class="step-detail-box">${s.detail}</div>
+                  <div class="talk-track">${s.talk}</div>
+                  <button class="mark-done-btn" onclick="markDone(event,${m.id},${si})">
+                    <i class="ti ti-check" aria-hidden="true" style="font-size:11px;"></i>
+                    ${completedSteps[m.id].has(si) ? 'Covered' : 'Mark as covered'}
+                  </button>
+                </div>
+              </div>
+              <i class="ti ti-chevron-down chevron-icon${expandedStep === m.id + '-' + si ? ' open' : ''}" aria-hidden="true"></i>
+            </li>
+          `).join('')}
+        </ul>
+        <div class="module-footer">
+          <span class="footer-tip"><i class="ti ti-info-circle" aria-hidden="true"></i> ${m.tip}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function switchModule(idx) {
+  activeModule = idx;
+  expandedStep = null;
+  document.querySelectorAll('.module-section').forEach(el => el.classList.remove('active'));
+  document.getElementById('mod-' + idx).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleStep(moduleId, stepIdx) {
+  const key = moduleId + '-' + stepIdx;
+  if (expandedStep === key) {
+    expandedStep = null;
+    document.getElementById('sd-' + moduleId + '-' + stepIdx).classList.remove('open');
+    document.getElementById('si-' + moduleId + '-' + stepIdx).classList.remove('expanded');
+    document.querySelector('#si-' + moduleId + '-' + stepIdx + ' .chevron-icon').classList.remove('open');
+  } else {
+    if (expandedStep) {
+      const [pm, ps] = expandedStep.split('-');
+      const prevDetail = document.getElementById('sd-' + pm + '-' + ps);
+      const prevItem = document.getElementById('si-' + pm + '-' + ps);
+      if (prevDetail) prevDetail.classList.remove('open');
+      if (prevItem) {
+        prevItem.classList.remove('expanded');
+        prevItem.querySelector('.chevron-icon').classList.remove('open');
+      }
+    }
+    expandedStep = key;
+    document.getElementById('sd-' + moduleId + '-' + stepIdx).classList.add('open');
+    document.getElementById('si-' + moduleId + '-' + stepIdx).classList.add('expanded');
+    document.querySelector('#si-' + moduleId + '-' + stepIdx + ' .chevron-icon').classList.add('open');
+  }
+}
+
+function markDone(e, moduleId, stepIdx) {
+  e.stopPropagation();
+  completedSteps[moduleId].add(stepIdx);
+  const numEl = document.getElementById('sn-' + moduleId + '-' + stepIdx);
+  numEl.className = 'step-num done';
+  numEl.innerHTML = '<i class="ti ti-check" style="font-size:12px;" aria-hidden="true"></i>';
+  const btn = e.currentTarget;
+  btn.textContent = 'Covered';
+  btn.prepend(Object.assign(document.createElement('i'), { className: 'ti ti-check', ariaHidden: 'true', style: 'font-size:11px;margin-right:5px;' }));
+  const total = MODULES[moduleId].steps.length;
+  const done = completedSteps[moduleId].size;
+  document.getElementById('pb-' + moduleId).style.width = Math.round(done/total*100) + '%';
+  document.getElementById('pl-' + moduleId).textContent = done + '/' + total + ' covered';
+  updateNavCounts();
+  updateOverall();
+}
+
+// Init
+renderModules();
+updateOverall();
+updateNavCounts();
+
+// Wire download button to itself
+const dlBtn = document.getElementById('dl-btn');
+dlBtn.addEventListener('click', function(e) {
+  e.preventDefault();
+  const blob = new Blob([document.documentElement.outerHTML], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'congruent-demo-script.html';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>

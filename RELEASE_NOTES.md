@@ -1,5 +1,18 @@
 # Release Notes
 
+## 2026-07-01 — Demo script & Clarity project update
+
+### Demo tooling
+- Added standalone demo script page at `/congruent-demo-script.html` for usability test prep, with module-based walkthroughs (enrollment, transactions, Core AI, etc.).
+
+### Analytics
+- Updated Microsoft Clarity project ID to `vmcsp3vwom` in `index.html`.
+
+### Build
+- Production build verified: `tsc -b && vite build` passes with no errors.
+
+---
+
 ## 2026-07-01 — Analytics & AI chat env update
 
 ### Analytics
