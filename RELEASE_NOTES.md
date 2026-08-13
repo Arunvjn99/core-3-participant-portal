@@ -1,5 +1,32 @@
 # Release Notes
 
+## 2026-08-13 — Fix: hero illustration not rendering in production
+
+### Root cause
+- The pre-enrollment hero animation was a single VP9 WebM with a transparent alpha layer. WebKit (Safari on macOS, and every browser on iOS) cannot decode VP9 alpha, and the element had no alternate source, no poster, and no error handling — so affected browsers rendered an empty box instead of the illustration.
+- The asset was also loaded from a Supabase project unrelated to this app (`pmmvggrzowobvbebjzdo`, while the portal uses `vrivhbghtffppkezvkfg`), served with `cache-control: no-cache`. That made a hero asset depend on third-party availability and re-downloaded 442 KB on every page view.
+
+### Fixes
+- Added an HEVC/MP4 encoding with an alpha layer (`hvc1`) for WebKit, alongside the existing WebM for Chromium and Gecko. Format is chosen per engine, since neither engine can decode the other's alpha format.
+- Added a transparent still frame as the `poster`, so the illustration appears immediately while the video loads.
+- Added fallback to the still frame when playback errors, when autoplay is refused, or when the video has not produced a frame within 8s. The hero can no longer render blank.
+- The still frame is now also used when the user has `prefers-reduced-motion` set.
+- Self-hosted all three assets under `public/media/`, removing the third-party dependency.
+
+### Assets
+- `public/media/hero-meeting.webm` — 374 KB (audio track stripped; video stream copied, so the artwork is unchanged).
+- `public/media/hero-meeting.mp4` — 245 KB, HEVC with alpha.
+- `public/media/hero-meeting-poster.png` — 145 KB, transparent still.
+- Per-visit hero payload is now roughly 530 KB on Chromium and 400 KB on WebKit, cached rather than refetched.
+
+### Deployment
+- Added an immutable one-year `Cache-Control` header for `/media/*` in `netlify.toml`.
+
+### Build
+- Production build verified: `tsc -b && vite build` passes with no errors. ESLint clean on changed files.
+
+---
+
 ## 2026-07-01 — Core AI professional tone refresh
 
 ### Copy & messaging

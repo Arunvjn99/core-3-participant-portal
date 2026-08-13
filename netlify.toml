@@ -33,3 +33,10 @@
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# Hero media is content-stable and referenced by a fixed path, so cache it hard.
+# Rename the file if the artwork ever changes.
+[[headers]]
+  for = "/media/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

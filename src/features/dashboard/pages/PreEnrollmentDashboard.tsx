@@ -11,11 +11,28 @@ import { EnrollmentPersonalizationModal } from '../components/EnrollmentPersonal
 import AdvisorModal from '@/features/advisors/AdvisorModal'
 import { formatFirstNameForDisplay, getAuthenticatedFirstName } from '@/lib/userDisplayName'
 
-const HERO_MEETING_VIDEO =
-  'https://pmmvggrzowobvbebjzdo.supabase.co/storage/v1/object/public/company-logos/Heromeeting.webm'
+/**
+ * Hero illustration is a transparent-background animation, which no single format
+ * covers: WebKit cannot decode VP9 alpha in WebM, and Chromium cannot decode the
+ * HEVC alpha layer in MP4. Each engine therefore gets the encoding it can render,
+ * with the still frame as the universal fallback.
+ */
+const HERO_MEETING_VIDEO_WEBM = '/media/hero-meeting.webm'
+const HERO_MEETING_VIDEO_MP4 = '/media/hero-meeting.mp4'
+const HERO_MEETING_POSTER = '/media/hero-meeting-poster.png'
 
 const LEARNING_CARD_ILLUSTRATION =
   'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/Learning%20card.png'
+
+/** Every iOS browser is WebKit, so platform matters here rather than the browser brand. */
+function prefersHevcAlpha(): boolean {
+  if (typeof navigator === 'undefined') return false
+  const ua = navigator.userAgent
+  const isIOS =
+    /iP(hone|ad|od)/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  const isSafari = /safari/i.test(ua) && !/chrome|chromium|crios|fxios|edg|android/i.test(ua)
+  return isIOS || isSafari
+}
 
 type DayPeriod = 'morning' | 'afternoon' | 'evening'
 
@@ -469,6 +486,72 @@ function BentoCards({
   )
 }
 
+// ─── HeroIllustration ────────────────────────────────────────────────────────
+function HeroIllustration({
+  t,
+  prefersReducedMotion,
+}: {
+  t: (key: string) => string
+  prefersReducedMotion: boolean
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [playbackFailed, setPlaybackFailed] = useState(false)
+  const [source] = useState(() =>
+    prefersHevcAlpha()
+      ? { src: HERO_MEETING_VIDEO_MP4, type: 'video/mp4; codecs="hvc1"' }
+      : { src: HERO_MEETING_VIDEO_WEBM, type: 'video/webm' },
+  )
+  const useStill = prefersReducedMotion || playbackFailed
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    // Autoplay can be refused (power saving, browser policy) without raising an error.
+    void video.play().catch(() => setPlaybackFailed(true))
+
+    // A codec the engine cannot decode may stall rather than fail, so time it out.
+    const watchdog = window.setTimeout(() => {
+      if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) setPlaybackFailed(true)
+    }, 8000)
+    return () => window.clearTimeout(watchdog)
+  }, [useStill])
+
+  const shared =
+    'h-full w-full max-h-full scale-[1.35] -translate-x-[8%] object-contain object-center transition-transform duration-300'
+
+  return (
+    <div className="relative flex aspect-[4/3] w-full max-w-[min(100%,720px)] items-center justify-center overflow-hidden rounded-2xl bg-white dark:bg-gray-950 lg:-translate-x-3 xl:-translate-x-6 2xl:max-w-[min(100%,800px)]">
+      {useStill ? (
+        <img
+          src={HERO_MEETING_POSTER}
+          width={800}
+          height={600}
+          className={shared}
+          alt={t('hero.video_aria')}
+        />
+      ) : (
+        <video
+          ref={videoRef}
+          width={800}
+          height={600}
+          className={shared}
+          poster={HERO_MEETING_POSTER}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          onError={() => setPlaybackFailed(true)}
+          aria-label={t('hero.video_aria')}
+        >
+          <source src={source.src} type={source.type} />
+        </video>
+      )}
+    </div>
+  )
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 export function PreEnrollmentDashboard() {
   const { t } = useTranslation()
@@ -577,21 +660,7 @@ export function PreEnrollmentDashboard() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="flex w-full flex-col items-start gap-8"
             >
-              <div className="relative flex aspect-[4/3] w-full max-w-[min(100%,720px)] items-center justify-center overflow-hidden rounded-2xl bg-white dark:bg-gray-950 lg:-translate-x-3 xl:-translate-x-6 2xl:max-w-[min(100%,800px)]">
-                <video
-                  width={800}
-                  height={600}
-                  className="h-full w-full max-h-full scale-[1.35] -translate-x-[8%] object-contain object-center transition-transform duration-300"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="auto"
-                  aria-label={t('hero.video_aria')}
-                >
-                  <source src={HERO_MEETING_VIDEO} type="video/webm" />
-                </video>
-              </div>
+              <HeroIllustration t={t} prefersReducedMotion={!!prefersReducedMotion} />
             </motion.div>
           </section>
 
