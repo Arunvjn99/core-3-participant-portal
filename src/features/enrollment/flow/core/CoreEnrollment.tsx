@@ -55,7 +55,6 @@ import { AgentMark, AnimatedNumber, Confetti, DrawnCheck, EdgeGlow, InfoTip, She
 type Stage = 'ask' | 'working' | 'review' | 'submitting' | 'done'
 type StepState = 'pending' | 'active' | 'done' | 'error'
 type SheetKind = 'contribution' | 'auto' | 'invest' | 'disclosures' | null
-type Update = { id: number; changes: { label: string; from: string; to: string }[]; reapprove: boolean }
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const WORK_STEPS = 6
@@ -261,7 +260,8 @@ export default function CoreEnrollment() {
   const [election, setElection] = useState<Election>(initialElection)
   /** What Core AI first proposed, so its report keeps describing its own work after the participant edits */
   const [baseline, setBaseline] = useState<Election>(initialElection)
-  const [updates, setUpdates] = useState<Update[]>([])
+  // Id of the latest edit; the conversation shows one "changes updated" note instead of a log of every edit
+  const [updatedAt, setUpdatedAt] = useState(0)
   const [sheet, setSheet] = useState<SheetKind>(null)
   const [staged, setStaged] = useState<Election>(initialElection)
   const [showFunds, setShowFunds] = useState(false)
@@ -284,7 +284,6 @@ export default function CoreEnrollment() {
       tax: e.preTax > 0 && e.roth > 0 ? t('enrollment.core.tax_mix', { pre: e.preTax, roth: e.roth }) : e.roth > 0 ? t('enrollment.core.tax_roth') : t('enrollment.core.tax_pre'),
       invest: e.mode === 'plan_selected' ? t('enrollment.core.inv_plan') : e.mode === 'own' ? t('enrollment.core.inv_own') : t('enrollment.core.inv_risk', { level: level(e.risk) }),
       auto: e.auto.enabled ? t('enrollment.core.auto_short', { amount: e.auto.amount.preTax, max: e.auto.cap.preTax }) : t('enrollment.core.auto_off_short'),
-      options: [e.autoRebalance ? t('plan.inv.auto_rebalance') : null, e.sdb ? t('plan.inv.sdb') : null].filter(Boolean).join(' · ') || t('enrollment.core.options_none'),
     }
   }
   const f = facts(election)
@@ -330,7 +329,7 @@ export default function CoreEnrollment() {
     const id = window.setTimeout(() => toLatest(true), 60)
     return () => window.clearTimeout(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stage, updates.length, submitError, problem])
+  }, [stage, updatedAt, submitError, problem])
 
   // Keep the whole draft on one screen: if its natural height is taller than the window, scale it down a little
   const showDraft = stage === 'review' || stage === 'submitting' || stage === 'done'
@@ -429,22 +428,10 @@ export default function CoreEnrollment() {
     setStaged(election)
     setSheet(k)
   }
-  const describe = (e: Election) => {
-    const x = facts(e)
-    return [
-      { key: 'rate', label: t('enrollment.core.row_contribution'), text: `${x.total}% · ${x.tax}` },
-      { key: 'auto', label: t('enrollment.core.row_auto'), text: x.auto },
-      { key: 'invest', label: t('enrollment.core.row_invest'), text: `${x.invest} · ${t('enrollment.core.funds_n', { count: x.rows.length })}` },
-      { key: 'options', label: t('enrollment.core.row_options'), text: x.options },
-    ]
-  }
   const commit = (next: Election) => {
     if (sameElection(next, election)) return
-    const before = describe(election)
-    const after = describe(next)
-    const changes = after.filter((a, i) => a.text !== before[i].text).map((a, i) => ({ label: a.label, from: before.find((b) => b.key === a.key)?.text ?? '', to: a.text, i }))
     setElection(next)
-    setUpdates((u) => [...u, { id: Date.now(), changes: changes.map(({ label, from, to }) => ({ label, from, to })), reapprove: consent }])
+    setUpdatedAt(Date.now())
     setConsent(false)
     setSubmitError(false)
   }
@@ -886,7 +873,7 @@ export default function CoreEnrollment() {
                     </div>
                     <motion.div initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8, duration: 0.4 }} className="px-4 pb-1 pt-1.5">
                       <div className="mt-1 h-8 [&_svg]:h-8">
-                        <Sparkline key={`${f.total}-${election.risk}`} points={series} height={32} delay={updates.length ? 0 : 0.9} />
+                        <Sparkline key={`${f.total}-${election.risk}`} points={series} height={32} delay={updatedAt ? 0 : 0.9} />
                       </div>
                       <div className="mt-0.5 flex justify-between text-[11px] leading-4 text-slate-400">
                         <span>{t('enrollment.core.today', { age })}</span>
@@ -923,12 +910,11 @@ export default function CoreEnrollment() {
                       >
                         <div className="mt-1.5 flex h-1.5 gap-[3px] overflow-hidden rounded-full" aria-hidden>
                           {f.rows.map((r, i) => (
-                            <motion.span key={r.ticker} initial={reduce ? false : { flexGrow: 0.001 }} animate={{ flexGrow: r.pct }} transition={{ delay: updates.length ? 0 : 1.45 + i * 0.07, duration: 0.6, ease }} className="h-full min-w-[3px] first:rounded-l-full last:rounded-r-full" style={{ flexBasis: 0, background: FUND_COLORS[i % FUND_COLORS.length] }} />
+                            <motion.span key={r.ticker} initial={reduce ? false : { flexGrow: 0.001 }} animate={{ flexGrow: r.pct }} transition={{ delay: updatedAt ? 0 : 1.45 + i * 0.07, duration: 0.6, ease }} className="h-full min-w-[3px] first:rounded-l-full last:rounded-r-full" style={{ flexBasis: 0, background: FUND_COLORS[i % FUND_COLORS.length] }} />
                           ))}
                         </div>
                         {fundsError && <p role="alert" className="mt-2 text-[12px] font-medium text-red-600">{t('enrollment.feed.err_funds', { total: f.rowsTotal })}</p>}
                       </DraftRow>
-                      <DraftRow icon={Settings2} index={3} label={t('enrollment.core.row_options')} value={f.options} onEdit={stage === 'done' ? undefined : () => openSheet('invest')} editLabel={t('enrollment.core.edit')} />
                     </div>
 
                     {stage !== 'done' && election.mode === 'risk_style' && (
@@ -984,23 +970,12 @@ export default function CoreEnrollment() {
               )}
             </AgentTurn>
 
-            {/* 4 · Changes the participant made, reported back */}
-            {updates.map((u) => (
-              <AgentTurn key={u.id}>
+            {/* 4 · One note that the draft reflects the participant's edits; re-keyed so each edit replays it */}
+            {updatedAt > 0 && (
+              <AgentTurn key={updatedAt}>
                 <p className="text-[15px] leading-[1.65] text-slate-700 dark:text-gray-200">{t('enrollment.core.updated')}</p>
-                <ul className="space-y-1.5">
-                  {u.changes.map((c) => (
-                    <li key={c.label} className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px]">
-                      <span className="text-slate-500 dark:text-gray-400">{c.label}</span>
-                      <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-slate-500 line-through decoration-slate-400 dark:bg-gray-800">{c.from}</span>
-                      <ArrowRight className="h-3 w-3 text-slate-400" aria-hidden />
-                      <span className="rounded-md bg-blue-50 px-1.5 py-0.5 font-medium text-blue-800 dark:bg-blue-950/40 dark:text-blue-200">{c.to}</span>
-                    </li>
-                  ))}
-                </ul>
-                {u.reapprove && <p className="text-[13px] text-slate-500 dark:text-gray-400">{t('enrollment.core.reapprove')}</p>}
               </AgentTurn>
-            ))}
+            )}
 
             {submitError && stage === 'review' && (
               <AgentTurn>
