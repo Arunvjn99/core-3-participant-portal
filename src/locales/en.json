@@ -1569,7 +1569,18 @@
       "sv_1": "Getting started",
       "sv_2": "Building up",
       "sv_3": "Well on the way",
-      "sv_other": "Enter your figure"
+      "sv_other": "Enter your figure",
+      "funds_sub": "Compare performance, expenses and fees across every fund in your plan.",
+      "step_of": "{{n}} of {{total}}",
+      "s1_ing": "Verifying your eligibility…",
+      "s2_ing": "Reading your plan rules…",
+      "s3_ing": "Choosing your contribution…",
+      "s4_ing": "Building your portfolio…",
+      "s5_ing": "Projecting your outcome…",
+      "s6_ing": "Drafting your enrollment…",
+      "u1_ing": "Checking every election…",
+      "u2_ing": "Sending to your plan…",
+      "u3_ing": "Waiting for confirmation…"
     }
   },
   "transactions": {

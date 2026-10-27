@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
@@ -31,7 +31,6 @@ import { LEGAL } from '@/lib/constants'
 import { getAppDateLocale } from '@/lib/dateLocale'
 import { useNow } from '@/lib/useNow'
 import { ALL_US_STATES, POPULAR_LOCATIONS } from '@/lib/usStates'
-import { Modal } from '@/design-system/components/Modal'
 import { LegalHrefLink } from '@/features/legal/components/LegalHrefLink'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { useEnrollmentSave } from '@/core/hooks/useEnrollmentSave'
@@ -44,7 +43,7 @@ import { ageFromBirth, buildQuickEnrollmentDefaults, projectBalance } from '../.
 import { PLAN_CONFIG, PLAN_LIMITS, employerMatch } from '../../agent/planConfig'
 import { checkEligibility, getPlanRules, submitEnrollment } from '../../agent/enrollmentService'
 import { AutoIncreaseEditor, ContributionEditor, InvestmentsEditor } from './editors'
-import { FUND_COLORS, blendedFee, byAssetClass, fundMeta, pause, round2, rowsFor, sameElection, type Election } from './model'
+import { FUND_COLORS, blendedFee, pause, round2, rowsFor, sameElection, type Election } from './model'
 import { AgentMark, AnimatedNumber, Confetti, DrawnCheck, EdgeGlow, InfoTip, Sheet, Shimmer, Sparkline, StatusPill, StreamText, Switch } from './ui'
 
 /**
@@ -89,42 +88,71 @@ function UserTurn({ children }: { children: React.ReactNode }) {
   )
 }
 
-/** The agent's work log: live while it works, then folded into one line. */
-function WorkLog({ title, doneTitle, steps, open, onToggle }: { title: string; doneTitle: string; steps: { state: StepState; label: string; detail?: string }[]; open: boolean; onToggle: () => void }) {
+/**
+ * The agent's work log. While it works it's a single live line: the current step slides in and replaces the last one.
+ * Once finished it folds into a summary ("Worked for 4s") that expands to every step.
+ */
+function WorkLog({ title, doneTitle, steps, open, onToggle }: { title: string; doneTitle: string; steps: { state: StepState; label: string; activeLabel?: string; detail?: string }[]; open: boolean; onToggle: () => void }) {
+  const { t } = useTranslation()
   const reduce = useReducedMotion()
-  const working = steps.some((s) => s.state === 'active')
-  const failed = steps.some((s) => s.state === 'error')
-  const visible = steps.filter((s) => s.state !== 'pending')
+  const active = steps.findIndex((s) => s.state === 'active')
+  const failed = steps.find((s) => s.state === 'error')
+  const finished = steps.filter((s) => s.state === 'done' || s.state === 'error')
+
+  if (active >= 0) {
+    const s = steps[active]
+    return (
+      <div className="flex h-6 items-center gap-2.5" role="status" aria-label={title}>
+        <Loader2 className="h-4 w-4 shrink-0 animate-spin text-blue-600" aria-hidden />
+        <div className="relative h-5 min-w-0 flex-1 overflow-hidden">
+          <AnimatePresence initial={false}>
+            <motion.p
+              key={s.activeLabel ?? s.label}
+              initial={reduce ? false : { y: 16, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={reduce ? { opacity: 0 } : { y: -16, opacity: 0 }}
+              transition={{ duration: 0.3, ease }}
+              className="absolute inset-0 truncate text-[13px] font-medium leading-5"
+            >
+              <Shimmer>{s.activeLabel ?? s.label}</Shimmer>
+            </motion.p>
+          </AnimatePresence>
+        </div>
+        <span className="shrink-0 text-[12px] tabular-nums text-slate-400">{t('enrollment.core.step_of', { n: active + 1, total: steps.length })}</span>
+      </div>
+    )
+  }
+
   return (
     <div>
       <button type="button" onClick={onToggle} aria-expanded={open} className="group inline-flex items-center gap-2 text-[13px] text-slate-500 transition-colors hover:text-slate-800 dark:text-gray-400 dark:hover:text-gray-200">
-        {working ? <Shimmer className="font-medium">{title}</Shimmer> : <span className={cn('font-medium', failed && 'text-red-600')}>{doneTitle}</span>}
+        {failed ? <X className="h-3.5 w-3.5 text-red-600" strokeWidth={3} aria-hidden /> : <Check className="h-3.5 w-3.5 text-emerald-600" strokeWidth={3} aria-hidden />}
+        <span className={cn('font-medium', failed && 'text-red-600')}>{failed ? `${doneTitle} · ${failed.label}` : doneTitle}</span>
         <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', open && 'rotate-180')} aria-hidden />
       </button>
+      {failed?.detail && !open && <p className="mt-1 pl-[22px] text-[12px] text-slate-500 dark:text-gray-400">{failed.detail}</p>}
       <AnimatePresence initial={false}>
         {open && (
-          <motion.ol initial={reduce ? false : { height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25, ease }} className="relative mt-3 overflow-hidden pl-1" aria-live="polite">
-            {visible.map((s, i) => (
-              <motion.li key={s.label} initial={reduce ? false : { opacity: 0, x: -4 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }} className="relative flex gap-3 pb-3.5 last:pb-0">
-                {i < visible.length - 1 && <span className="absolute left-[7px] top-5 h-[calc(100%-12px)] w-px bg-slate-200 dark:bg-gray-700" aria-hidden />}
+          <motion.ol initial={reduce ? false : { height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25, ease }} className="relative mt-3 overflow-hidden pl-1">
+            {finished.map((s, i) => (
+              <li key={s.label} className="relative flex gap-3 pb-3 last:pb-0">
+                {i < finished.length - 1 && <span className="absolute left-[7px] top-5 h-[calc(100%-12px)] w-px bg-slate-200 dark:bg-gray-700" aria-hidden />}
                 <span className="relative mt-[3px] flex h-[15px] w-[15px] shrink-0 items-center justify-center">
-                  {s.state === 'active' && <Loader2 className="h-[15px] w-[15px] animate-spin text-blue-600" aria-hidden />}
-                  {s.state === 'done' && (
-                    <motion.span initial={reduce ? false : { scale: 0.4 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 22 }} className="flex h-[15px] w-[15px] items-center justify-center rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900">
+                  {s.state === 'done' ? (
+                    <span className="flex h-[15px] w-[15px] items-center justify-center rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900">
                       <Check className="h-2.5 w-2.5" strokeWidth={3.5} aria-hidden />
-                    </motion.span>
-                  )}
-                  {s.state === 'error' && (
+                    </span>
+                  ) : (
                     <span className="flex h-[15px] w-[15px] items-center justify-center rounded-full bg-red-600 text-white">
                       <X className="h-2.5 w-2.5" strokeWidth={3.5} aria-hidden />
                     </span>
                   )}
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-[13px] font-medium leading-[1.4] text-slate-800 dark:text-gray-100">{s.state === 'active' ? <Shimmer>{s.label}</Shimmer> : s.label}</span>
-                  {s.detail && s.state !== 'active' && <span className="mt-0.5 block text-[12px] leading-[1.5] text-slate-500 dark:text-gray-400">{s.detail}</span>}
+                  <span className="block text-[13px] font-medium leading-[1.4] text-slate-800 dark:text-gray-100">{s.label}</span>
+                  {s.detail && <span className="mt-0.5 block text-[12px] leading-[1.5] text-slate-500 dark:text-gray-400">{s.detail}</span>}
                 </span>
-              </motion.li>
+              </li>
             ))}
           </motion.ol>
         )}
@@ -137,27 +165,29 @@ function WorkLog({ title, doneTitle, steps, open, onToggle }: { title: string; d
 function DraftRow({ icon: Icon, label, value, reason, onEdit, editLabel, aside, children, index = 0 }: { icon: typeof Gift; label: string; value: React.ReactNode; reason?: React.ReactNode; onEdit?: () => void; editLabel: string; aside?: React.ReactNode; children?: React.ReactNode; index?: number }) {
   const reduce = useReducedMotion()
   return (
-    <motion.div initial={reduce ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1 + index * 0.1, duration: 0.4, ease }} className="group relative flex gap-3.5 px-5 py-3 transition-colors hover:bg-slate-50/70 dark:hover:bg-gray-800/30">
-      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-gray-800 dark:text-gray-300">
-        <Icon className="h-4 w-4" aria-hidden />
+    <motion.div initial={reduce ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1 + index * 0.1, duration: 0.4, ease }} className="group relative flex gap-3 px-4 py-1.5 transition-colors hover:bg-slate-50/70 dark:hover:bg-gray-800/30">
+      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-gray-800 dark:text-gray-300">
+        <Icon className="h-3.5 w-3.5" aria-hidden />
       </span>
       <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[12px] font-medium text-slate-500 dark:text-gray-400">{label}</p>
-            <p className="mt-0.5 text-[15px] font-semibold leading-[1.35] text-slate-900 dark:text-white">{value}</p>
+            <p className="flex items-center gap-0.5 text-[11px] font-medium leading-4 text-slate-500 dark:text-gray-400">
+              {label}
+              {typeof reason === 'string' && <InfoTip label={label} text={reason} />}
+            </p>
+            <p className="truncate text-[14px] font-semibold leading-5 text-slate-900 dark:text-white">{value}</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {aside}
             {onEdit && (
-              <button type="button" onClick={onEdit} aria-label={editLabel} className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[13px] font-medium text-slate-500 opacity-80 transition-all hover:bg-white hover:text-slate-900 hover:opacity-100 hover:shadow-[0_0_0_1px_rgba(15,23,42,0.08)] group-hover:opacity-100 dark:hover:bg-gray-900 dark:hover:text-white">
+              <button type="button" onClick={onEdit} aria-label={editLabel} className="inline-flex h-7 items-center gap-1.5 rounded-lg px-2 text-[13px] font-medium text-slate-500 opacity-80 transition-all hover:bg-white hover:text-slate-900 hover:opacity-100 hover:shadow-[0_0_0_1px_rgba(15,23,42,0.08)] group-hover:opacity-100 dark:hover:bg-gray-900 dark:hover:text-white">
                 <Pencil className="h-3.5 w-3.5" aria-hidden />
                 <span className="hidden sm:inline">{editLabel}</span>
               </button>
             )}
           </div>
         </div>
-        {reason && <p className="mt-1 text-[13px] leading-[1.5] text-slate-500 dark:text-gray-400">{reason}</p>}
         {children}
       </div>
     </motion.div>
@@ -211,6 +241,9 @@ export default function CoreEnrollment() {
   const [effective, setEffective] = useState<Date | null>(null)
   const rulesAttempt = useRef(0)
   const bottom = useRef<HTMLDivElement>(null)
+  const draftRef = useRef<HTMLElement>(null)
+  /** How much the draft is scaled so the whole card fits the window (1 = natural size) */
+  const [fit, setFit] = useState(1)
   const main = useRef<HTMLElement>(null)
 
   // ── The draft ──
@@ -232,7 +265,6 @@ export default function CoreEnrollment() {
   const [sheet, setSheet] = useState<SheetKind>(null)
   const [staged, setStaged] = useState<Election>(initialElection)
   const [showFunds, setShowFunds] = useState(false)
-  const [allFunds, setAllFunds] = useState(false)
   const [consent, setConsent] = useState(false)
 
   const wait = (ms: number) => pause(reduce ? 0 : ms)
@@ -299,6 +331,33 @@ export default function CoreEnrollment() {
     return () => window.clearTimeout(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage, updates.length, submitError, problem])
+
+  // Keep the whole draft on one screen: if its natural height is taller than the window, scale it down a little
+  const showDraft = stage === 'review' || stage === 'submitting' || stage === 'done'
+  useLayoutEffect(() => {
+    const el = draftRef.current
+    if (!showDraft || !el) return
+    let current = parseFloat(getComputedStyle(el).zoom) || 1
+    const measure = () => {
+      // The visible height divided by the zoom in effect gives the card's natural height
+      const natural = el.getBoundingClientRect().height / (parseFloat(getComputedStyle(el).zoom) || 1)
+      const top = document.querySelector('header.sticky')?.getBoundingClientRect().bottom ?? 0
+      const available = window.innerHeight - Math.max(top, 0) - 24
+      const next = Math.round(Math.max(0.82, Math.min(1, available / natural)) * 100) / 100
+      if (next !== current) {
+        current = next
+        setFit(next)
+      }
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    window.addEventListener('resize', measure)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', measure)
+    }
+  }, [showDraft])
 
   // ── The work ──
   const markStep = (i: number, s: StepState) => setSteps((all) => all.map((x, j) => (j === i ? s : x)))
@@ -480,24 +539,22 @@ export default function CoreEnrollment() {
 
   const secs = (a: number, b: number) => Math.max(1, Math.round((b - a) / 1000))
   const workSteps = [
-    { label: t('enrollment.core.s1'), detail: problem === 'ineligible' ? t('enrollment.core.s1_fail', { min: PLAN_CONFIG.eligibility.minAge }) : t('enrollment.core.s1_d', { age, min: PLAN_CONFIG.eligibility.minAge }) },
-    { label: t('enrollment.core.s2'), detail: problem === 'rules' ? t('enrollment.core.s2_fail') : t('enrollment.core.s2_d', { rate: PLAN_CONFIG.match.ratePercent, cap, min: PLAN_LIMITS.rate[0], max: PLAN_LIMITS.rate[1] }) },
-    { label: t('enrollment.core.s3'), detail: t('enrollment.core.s3_d', { rate: fb.total, amount: money(fb.match) }) },
-    { label: t('enrollment.core.s4'), detail: t('enrollment.core.s4_d', { level: level(baseline.risk).toLowerCase(), years, count: fb.rows.length, fee: fb.fee.toFixed(2) }) },
-    { label: t('enrollment.core.s5'), detail: t('enrollment.core.s5_d', { amount: compact(fb.projected), age: retireAge }) },
-    { label: t('enrollment.core.s6'), detail: t('enrollment.core.s6_d') },
+    { label: t('enrollment.core.s1'), activeLabel: t('enrollment.core.s1_ing'), detail: problem === 'ineligible' ? t('enrollment.core.s1_fail', { min: PLAN_CONFIG.eligibility.minAge }) : t('enrollment.core.s1_d', { age, min: PLAN_CONFIG.eligibility.minAge }) },
+    { label: t('enrollment.core.s2'), activeLabel: t('enrollment.core.s2_ing'), detail: problem === 'rules' ? t('enrollment.core.s2_fail') : t('enrollment.core.s2_d', { rate: PLAN_CONFIG.match.ratePercent, cap, min: PLAN_LIMITS.rate[0], max: PLAN_LIMITS.rate[1] }) },
+    { label: t('enrollment.core.s3'), activeLabel: t('enrollment.core.s3_ing'), detail: t('enrollment.core.s3_d', { rate: fb.total, amount: money(fb.match) }) },
+    { label: t('enrollment.core.s4'), activeLabel: t('enrollment.core.s4_ing'), detail: t('enrollment.core.s4_d', { level: level(baseline.risk).toLowerCase(), years, count: fb.rows.length, fee: fb.fee.toFixed(2) }) },
+    { label: t('enrollment.core.s5'), activeLabel: t('enrollment.core.s5_ing'), detail: t('enrollment.core.s5_d', { amount: compact(fb.projected), age: retireAge }) },
+    { label: t('enrollment.core.s6'), activeLabel: t('enrollment.core.s6_ing'), detail: t('enrollment.core.s6_d') },
   ].map((s, i) => ({ ...s, state: steps[i] }))
   const submitLog = [
-    { label: t('enrollment.core.u1'), detail: t('enrollment.core.u1_d') },
-    { label: t('enrollment.core.u2'), detail: submitSteps[1] === 'error' ? t('enrollment.core.u2_fail') : t('enrollment.core.u2_d', { plan: planName }) },
-    { label: t('enrollment.core.u3'), detail: t('enrollment.core.u3_d') },
+    { label: t('enrollment.core.u1'), activeLabel: t('enrollment.core.u1_ing'), detail: t('enrollment.core.u1_d') },
+    { label: t('enrollment.core.u2'), activeLabel: t('enrollment.core.u2_ing'), detail: submitSteps[1] === 'error' ? t('enrollment.core.u2_fail') : t('enrollment.core.u2_d', { plan: planName }) },
+    { label: t('enrollment.core.u3'), activeLabel: t('enrollment.core.u3_ing'), detail: t('enrollment.core.u3_d') },
   ].map((s, i) => ({ ...s, state: submitSteps[i] }))
 
   const popular = POPULAR_LOCATIONS.slice(0, 4)
   const matches = locQuery.trim() ? ALL_US_STATES.filter((st) => st.toLowerCase().includes(locQuery.trim().toLowerCase())).slice(0, 6) : []
   const answered = location !== null && savings !== null
-  const shownRows = allFunds ? f.rows : f.rows.slice(0, 4)
-  const classes = byAssetClass(f.rows)
 
   const record = [
     { icon: CalendarClock, label: t('enrollment.core.rec_dob'), value: t('enrollment.core.rec_dob_v', { date: new Date(birthYear, MONTHS.indexOf(birthMonth), birthDay).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' }), age }) },
@@ -795,14 +852,14 @@ export default function CoreEnrollment() {
                   />
 
                   {/* The draft */}
-                  <motion.article initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.45, ease }} aria-labelledby="draft-title" className="overflow-hidden rounded-[20px] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_rgba(15,23,42,0.06)] ring-1 ring-slate-200/80 dark:bg-gray-900 dark:ring-gray-800">
-                    <div className="flex items-start gap-3 px-5 pb-3 pt-4">
-                      <motion.span initial={reduce ? false : { scale: 0.6, rotate: -12, opacity: 0 }} animate={{ scale: 1, rotate: 0, opacity: 1 }} transition={{ delay: 0.35, type: 'spring', stiffness: 380, damping: 18 }} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-[0_4px_12px_rgba(37,99,235,0.3)]">
-                        <ShieldCheck className="h-5 w-5" aria-hidden />
+                  <motion.article ref={draftRef} style={fit < 1 ? { zoom: fit } : undefined} initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.45, ease }} aria-labelledby="draft-title" className="overflow-hidden rounded-[20px] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_rgba(15,23,42,0.06)] ring-1 ring-slate-200/80 dark:bg-gray-900 dark:ring-gray-800">
+                    <div className="flex items-center gap-3 px-4 py-2">
+                      <motion.span initial={reduce ? false : { scale: 0.6, rotate: -12, opacity: 0 }} animate={{ scale: 1, rotate: 0, opacity: 1 }} transition={{ delay: 0.35, type: 'spring', stiffness: 380, damping: 18 }} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-[0_4px_12px_rgba(37,99,235,0.3)]">
+                        <ShieldCheck className="h-4 w-4" aria-hidden />
                       </motion.span>
                       <div className="min-w-0 flex-1">
-                        <h2 id="draft-title" className="text-[16px] font-semibold tracking-[-0.01em] text-slate-900 dark:text-white">{t('enrollment.core.doc_title')}</h2>
-                        <p className="mt-0.5 truncate text-[12px] text-slate-500 dark:text-gray-400">{planName} · {PLAN_CONFIG.plan.planId}</p>
+                        <h2 id="draft-title" className="text-[15px] font-semibold leading-5 tracking-[-0.01em] text-slate-900 dark:text-white">{t('enrollment.core.doc_title')}</h2>
+                        <p className="truncate text-[12px] leading-4 text-slate-500 dark:text-gray-400" title={PLAN_CONFIG.plan.planId}>{planName}</p>
                       </div>
                       <span className={cn('inline-flex h-6 shrink-0 items-center gap-1.5 rounded-md px-2 text-[12px] font-medium', stage === 'done' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' : 'bg-slate-100 text-slate-600 dark:bg-gray-800 dark:text-gray-300')}>
                         {stage === 'done' ? <Check className="h-3 w-3" aria-hidden /> : <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />}
@@ -815,40 +872,35 @@ export default function CoreEnrollment() {
                       {[
                         { label: t('enrollment.core.m_save'), value: <AnimatedNumber countUp delay={0.5} value={f.total} format={(v) => `${round2(v)}%`} />, sub: t('enrollment.core.per_check', { amount: money(f.perCheck) }) },
                         { label: t('enrollment.core.m_match'), value: <AnimatedNumber countUp delay={0.6} value={f.match} format={money} />, sub: f.match >= fullMatch ? t('enrollment.core.m_match_full') : t('enrollment.core.m_match_gap', { amount: money(fullMatch - f.match) }), good: f.match >= fullMatch },
-                        { label: t('enrollment.core.m_proj', { age: retireAge }), value: <AnimatedNumber countUp delay={0.7} value={f.projected} format={compact} />, sub: t('enrollment.core.m_proj_sub') },
+                        { label: t('enrollment.core.m_proj', { age: retireAge }), value: <AnimatedNumber countUp delay={0.7} value={f.projected} format={compact} />, sub: '', tip: t('enrollment.core.growth_tip') },
                       ].map((m, i) => (
-                        <motion.div key={m.label} initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 + i * 0.1, duration: 0.45, ease }} className="min-w-0 px-3 py-3 sm:px-5">
-                          <p className="text-[12px] leading-[1.35] text-slate-500 sm:truncate dark:text-gray-400">{m.label}</p>
-                          <p className="mt-1 text-[22px] font-semibold tracking-[-0.02em] text-slate-900 sm:text-[28px] dark:text-white">{m.value}</p>
-                          <p className={cn('mt-0.5 text-[12px] leading-[1.35] sm:truncate', m.good === true ? 'text-emerald-700 dark:text-emerald-400' : m.good === false ? 'text-amber-700 dark:text-amber-400' : 'text-slate-500 dark:text-gray-400')}>{m.sub}</p>
+                        <motion.div key={m.label} initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 + i * 0.1, duration: 0.45, ease }} className="min-w-0 px-3 py-1.5 sm:px-4">
+                          <p className="flex items-center gap-0.5 text-[11px] leading-4 text-slate-500 dark:text-gray-400">
+                            <span className="sm:truncate">{m.label}</span>
+                            {'tip' in m && m.tip && <InfoTip side="bottom" label={m.label} text={m.tip} />}
+                          </p>
+                          <p className="text-[20px] font-semibold leading-7 tracking-[-0.02em] text-slate-900 sm:text-[22px] dark:text-white">{m.value}</p>
+                          {m.sub && <p className={cn('text-[11px] leading-4 sm:truncate', m.good === true ? 'text-emerald-700 dark:text-emerald-400' : m.good === false ? 'text-amber-700 dark:text-amber-400' : 'text-slate-500 dark:text-gray-400')}>{m.sub}</p>}
                         </motion.div>
                       ))}
                     </div>
-                    <motion.div initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8, duration: 0.4 }} className="px-5 pb-1 pt-3">
-                      <div className="flex items-center justify-between text-[12px] text-slate-500 dark:text-gray-400">
-                        <span className="flex items-center gap-1">
-                          {t('enrollment.core.growth')}
-                          <InfoTip label={t('enrollment.core.growth')} text={t('enrollment.core.growth_tip')} />
-                        </span>
-                        <span className="font-medium text-slate-700 dark:text-gray-200"><AnimatedNumber countUp delay={0.9} value={f.projected} format={compact} /></span>
+                    <motion.div initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8, duration: 0.4 }} className="px-4 pb-1 pt-1.5">
+                      <div className="mt-1 h-8 [&_svg]:h-8">
+                        <Sparkline key={`${f.total}-${election.risk}`} points={series} height={32} delay={updates.length ? 0 : 0.9} />
                       </div>
-                      <div className="mt-2">
-                        <Sparkline key={`${f.total}-${election.risk}`} points={series} delay={updates.length ? 0 : 0.9} />
-                      </div>
-                      <div className="mt-1.5 flex justify-between text-[11px] text-slate-400">
+                      <div className="mt-0.5 flex justify-between text-[11px] leading-4 text-slate-400">
                         <span>{t('enrollment.core.today', { age })}</span>
                         <span>{t('enrollment.core.at_age', { age: retireAge })}</span>
                       </div>
                     </motion.div>
 
                     {/* Decisions */}
-                    <div className="mt-1 divide-y divide-slate-100 border-t border-slate-100 dark:divide-gray-800 dark:border-gray-800">
+                    <div className="divide-y divide-slate-100 border-t border-slate-100 dark:divide-gray-800 dark:border-gray-800">
                       <DraftRow
                         icon={Gift}
                         index={0}
                         label={t('enrollment.core.row_contribution')}
                         value={`${f.total}% · ${f.tax}`}
-                        reason={f.match >= fullMatch ? t('enrollment.core.why_rate', { amount: money(f.match) }) : t('enrollment.core.why_rate_gap', { rate: cap })}
                         onEdit={stage === 'done' ? undefined : () => openSheet('contribution')}
                         editLabel={t('enrollment.core.edit')}
                       />
@@ -857,7 +909,6 @@ export default function CoreEnrollment() {
                         index={1}
                         label={t('enrollment.core.row_auto')}
                         value={f.auto}
-                        reason={election.auto.enabled ? t('enrollment.core.why_auto', { date: dateLong(nextAuto) }) : t('enrollment.core.why_auto_off')}
                         onEdit={stage === 'done' ? undefined : () => openSheet('auto')}
                         editLabel={t('enrollment.core.edit')}
                         aside={stage === 'done' ? undefined : <Switch checked={election.auto.enabled} onChange={(v) => commit({ ...election, auto: { ...election.auto, enabled: v } })} label={t('enrollment.core.row_auto')} />}
@@ -867,49 +918,30 @@ export default function CoreEnrollment() {
                         index={2}
                         label={t('enrollment.core.row_invest')}
                         value={`${f.invest} · ${t('enrollment.core.funds_n', { count: f.rows.length })}`}
-                        reason={t('enrollment.core.why_invest', { fee: f.fee.toFixed(2), classes: classes.map((c) => `${t(`enrollment.core.class_${c.name.toLowerCase().replace(/\s+/g, '_')}`)} ${c.pct}%`).join(' · ') })}
                         onEdit={stage === 'done' ? undefined : () => openSheet('invest')}
                         editLabel={t('enrollment.core.edit')}
                       >
-                        <div className="mt-3 flex h-2 gap-[3px] overflow-hidden rounded-full" aria-hidden>
+                        <div className="mt-1.5 flex h-1.5 gap-[3px] overflow-hidden rounded-full" aria-hidden>
                           {f.rows.map((r, i) => (
                             <motion.span key={r.ticker} initial={reduce ? false : { flexGrow: 0.001 }} animate={{ flexGrow: r.pct }} transition={{ delay: updates.length ? 0 : 1.45 + i * 0.07, duration: 0.6, ease }} className="h-full min-w-[3px] first:rounded-l-full last:rounded-r-full" style={{ flexBasis: 0, background: FUND_COLORS[i % FUND_COLORS.length] }} />
                           ))}
                         </div>
-                        <ul className="mt-3 grid grid-cols-1 gap-x-6 gap-y-1.5 sm:grid-cols-2">
-                          {shownRows.map((r) => {
-                            const i = f.rows.indexOf(r)
-                            return (
-                              <motion.li key={r.ticker} initial={reduce ? false : { opacity: 0, x: -4 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: updates.length || allFunds ? 0 : 1.6 + i * 0.06 }} className="flex items-center gap-2 text-[13px]">
-                                <span className="h-2 w-2 shrink-0 rounded-[3px]" style={{ background: FUND_COLORS[i % FUND_COLORS.length] }} aria-hidden />
-                                <span className="min-w-0 flex-1 truncate text-slate-600 dark:text-gray-300">{fundMeta(r.ticker)?.name ?? r.ticker}</span>
-                                <span className="font-medium tabular-nums text-slate-900 dark:text-white">{r.pct}%</span>
-                              </motion.li>
-                            )
-                          })}
-                        </ul>
-                        {f.rows.length > 4 && (
-                          <button type="button" onClick={() => setAllFunds((v) => !v)} aria-expanded={allFunds} className="mt-2 text-[13px] font-medium text-blue-700 hover:underline dark:text-blue-300">
-                            {allFunds ? t('enrollment.core.fewer_funds') : t('enrollment.core.all_funds', { count: f.rows.length })}
-                          </button>
-                        )}
                         {fundsError && <p role="alert" className="mt-2 text-[12px] font-medium text-red-600">{t('enrollment.feed.err_funds', { total: f.rowsTotal })}</p>}
                       </DraftRow>
-                      <DraftRow icon={Settings2} index={3} label={t('enrollment.core.row_options')} value={f.options} reason={t('enrollment.core.why_options')} onEdit={stage === 'done' ? undefined : () => openSheet('invest')} editLabel={t('enrollment.core.edit')} />
+                      <DraftRow icon={Settings2} index={3} label={t('enrollment.core.row_options')} value={f.options} onEdit={stage === 'done' ? undefined : () => openSheet('invest')} editLabel={t('enrollment.core.edit')} />
                     </div>
 
                     {stage !== 'done' && election.mode === 'risk_style' && (
-                      <motion.div initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }} className="relative mx-5 mb-3 mt-1 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50/60 px-4 py-3 ring-1 ring-blue-100 dark:from-blue-950/40 dark:to-indigo-950/20 dark:ring-blue-900">
+                      <motion.div initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }} className="relative mx-4 mb-2 mt-0.5 overflow-hidden rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50/60 px-3 py-1.5 ring-1 ring-blue-100 dark:from-blue-950/40 dark:to-indigo-950/20 dark:ring-blue-900">
                         {!reduce && <motion.span className="pointer-events-none absolute inset-y-0 w-24 bg-gradient-to-r from-transparent via-white/60 to-transparent" initial={{ x: '-30%' }} animate={{ x: '900%' }} transition={{ delay: 1.2, duration: 1.4, ease: 'easeInOut' }} aria-hidden />}
-                        <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center">
-                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600 shadow-[0_1px_2px_rgba(37,99,235,0.15)] ring-1 ring-blue-100 dark:bg-gray-900 dark:ring-blue-900">
+                        <div className="relative flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600 shadow-[0_1px_2px_rgba(37,99,235,0.15)] ring-1 ring-blue-100 dark:bg-gray-900 dark:ring-blue-900">
                             <Sparkles className="h-4 w-4" aria-hidden />
                           </span>
                           <div className="min-w-0 flex-1">
-                            <p className="text-[14px] font-semibold text-slate-900 dark:text-white">{t('enrollment.core.assume_title', { level: level(election.risk) })}</p>
-                            <p className="mt-0.5 text-[13px] leading-[1.5] text-slate-600 dark:text-gray-300">{t('enrollment.core.assumption', { level: level(election.risk).toLowerCase(), years })}</p>
+                            <p className="text-[13px] font-semibold leading-5 text-slate-900 dark:text-white">{t('enrollment.core.assume_title', { level: level(election.risk) })}</p>
                           </div>
-                          <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={() => openSheet('invest')} className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-white px-3.5 text-[13px] font-semibold text-blue-700 shadow-[0_1px_2px_rgba(15,23,42,0.06)] ring-1 ring-blue-200 transition-colors hover:bg-blue-600 hover:text-white hover:ring-blue-600 dark:bg-gray-900 dark:text-blue-300">
+                          <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={() => openSheet('invest')} className="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-white px-3 text-[13px] font-semibold text-blue-700 shadow-[0_1px_2px_rgba(15,23,42,0.06)] ring-1 ring-blue-200 transition-colors hover:bg-blue-600 hover:text-white hover:ring-blue-600 dark:bg-gray-900 dark:text-blue-300">
                             <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden />
                             {t('enrollment.core.adjust_risk')}
                           </motion.button>
@@ -919,14 +951,14 @@ export default function CoreEnrollment() {
 
                     {/* Approval: Core AI asks for permission before it submits anything */}
                     {(stage === 'review' || stage === 'submitting') && (
-                      <div className="border-t border-slate-100 bg-slate-50/70 px-5 py-3 dark:border-gray-800 dark:bg-gray-800/30">
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
+                      <div className="border-t border-slate-100 bg-slate-50/70 px-4 py-1.5 dark:border-gray-800 dark:bg-gray-800/30">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
                           <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-3">
                             <input type="checkbox" checked={consent} disabled={stage === 'submitting'} onChange={(e) => setConsent(e.target.checked)} className="peer sr-only" />
                             <span className={cn('mt-0.5 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] border transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500 peer-focus-visible:ring-offset-2', consent ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300 bg-white dark:border-gray-600 dark:bg-gray-900')} aria-hidden>
                               {consent && <DrawnCheck className="h-3 w-3" />}
                             </span>
-                            <span className="text-[13px] leading-[1.5] text-slate-600 dark:text-gray-300">
+                            <span className="text-[12px] leading-[1.45] text-slate-600 dark:text-gray-300">
                               {t('enrollment.core.consent', { plan: planName })}{' '}
                               <button type="button" onClick={(e) => { e.preventDefault(); setSheet('disclosures') }} className="font-medium text-blue-700 underline-offset-2 hover:underline dark:text-blue-300">
                                 {t('enrollment.core.read_disclosures', { n: PLAN_CONFIG.disclosures.length })}
@@ -938,7 +970,7 @@ export default function CoreEnrollment() {
                             whileTap={canApprove ? { scale: 0.97 } : undefined}
                             onClick={() => void approve()}
                             disabled={!canApprove}
-                            className="relative inline-flex h-11 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-xl bg-blue-600 px-5 text-[14px] font-semibold text-white shadow-[0_1px_2px_rgba(37,99,235,0.4),inset_0_1px_0_rgba(255,255,255,0.15)] transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
+                            className="relative inline-flex h-9 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-xl bg-blue-600 px-4 text-[14px] font-semibold text-white shadow-[0_1px_2px_rgba(37,99,235,0.4),inset_0_1px_0_rgba(255,255,255,0.15)] transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
                           >
                             {canApprove && !reduce && <motion.span className="pointer-events-none absolute inset-y-0 w-16 bg-gradient-to-r from-transparent via-white/25 to-transparent" initial={{ x: '-120%' }} animate={{ x: '400%' }} transition={{ duration: 1.6, repeat: Infinity, repeatDelay: 1.4 }} aria-hidden />}
                             {stage === 'submitting' ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : submitError ? <RotateCw className="h-4 w-4" aria-hidden /> : <Lock className="h-4 w-4" aria-hidden />}
@@ -1098,9 +1130,12 @@ export default function CoreEnrollment() {
         </ul>
       </Sheet>
 
-      <Modal open={showFunds} onClose={() => setShowFunds(false)} size="2xl" title={t('plan.inv.plan_investments')}>
-        <PlanFundsTable includeSdb={staged.sdb || election.sdb} />
-      </Modal>
+      {/* The plan's full fund list, on top of whichever editor opened it */}
+      <Sheet open={showFunds} onClose={() => setShowFunds(false)} wide stacked title={t('plan.inv.plan_investments')} subtitle={t('enrollment.core.funds_sub')}>
+        <div className="-mx-6 overflow-x-auto px-6">
+          <PlanFundsTable showHeading={false} includeSdb={staged.sdb || election.sdb} />
+        </div>
+      </Sheet>
     </div>
   )
 }

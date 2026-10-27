@@ -232,7 +232,7 @@ export function Stepper({ value, onChange, min, max, step = 1, label, prefix, su
 }
 
 /** A short explanation on hover, focus or tap. */
-export function InfoTip({ label, text }: { label: string; text: string }) {
+export function InfoTip({ label, text, side = 'top' }: { label: string; text: string; side?: 'top' | 'bottom' }) {
   const [open, setOpen] = useState(false)
   return (
     <span className="group relative inline-flex align-middle" onMouseLeave={() => setOpen(false)}>
@@ -249,7 +249,8 @@ export function InfoTip({ label, text }: { label: string; text: string }) {
       <span
         role="tooltip"
         className={cn(
-          'pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 w-64 -translate-x-1/2 rounded-lg bg-slate-900 px-3 py-2 text-left text-[12px] font-normal leading-[1.5] text-white shadow-xl group-hover:block group-focus-within:block dark:bg-gray-800',
+          'pointer-events-none absolute left-1/2 z-30 w-64 -translate-x-1/2 rounded-lg bg-slate-900 px-3 py-2 text-left text-[12px] font-normal leading-[1.5] text-white shadow-xl group-hover:block group-focus-within:block dark:bg-gray-800',
+          side === 'top' ? 'bottom-full mb-2' : 'top-full mt-2',
           open ? 'block' : 'hidden',
         )}
       >
@@ -260,7 +261,7 @@ export function InfoTip({ label, text }: { label: string; text: string }) {
 }
 
 /** A side panel on wide screens and a bottom sheet on phones, for focused edits. */
-export function Sheet({ open, onClose, title, subtitle, children, footer }: { open: boolean; onClose: () => void; title: string; subtitle?: string; children: React.ReactNode; footer?: React.ReactNode }) {
+export function Sheet({ open, onClose, title, subtitle, children, footer, wide = false, stacked = false }: { open: boolean; onClose: () => void; title: string; subtitle?: string; children: React.ReactNode; footer?: React.ReactNode; wide?: boolean; stacked?: boolean }) {
   const { t } = useTranslation()
   const reduce = useReducedMotion()
   const panel = useRef<HTMLDivElement>(null)
@@ -277,8 +278,10 @@ export function Sheet({ open, onClose, title, subtitle, children, footer }: { op
     document.body.style.overflow = 'hidden'
     const focusFirst = window.setTimeout(() => panel.current?.querySelector<HTMLElement>('button, [href], input, select, textarea')?.focus(), 60)
     const onKey = (e: KeyboardEvent) => {
+      // Only the panel that holds focus responds, so a stacked panel closes on its own
+      if (!panel.current?.contains(document.activeElement)) return
       if (e.key === 'Escape') closeRef.current()
-      if (e.key !== 'Tab' || !panel.current) return
+      if (e.key !== 'Tab') return
       const items = [...panel.current.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input:not([disabled]), select, textarea')]
       if (!items.length) return
       const first = items[0]
@@ -303,7 +306,7 @@ export function Sheet({ open, onClose, title, subtitle, children, footer }: { op
   return createPortal(
     <AnimatePresence>
       {open && (
-        <motion.div className="fixed inset-0 z-[70] flex items-end justify-end sm:items-stretch" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
+        <motion.div className={cn('fixed inset-0 flex items-end justify-end sm:items-stretch', stacked ? 'z-[80]' : 'z-[70]')} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
           <button type="button" aria-label={t('enrollment.core.close')} onClick={onClose} className="absolute inset-0 cursor-default bg-slate-900/25 backdrop-blur-[2px]" />
           <motion.div
             ref={panel}
@@ -314,7 +317,7 @@ export function Sheet({ open, onClose, title, subtitle, children, footer }: { op
             animate={{ x: 0, opacity: 1 }}
             exit={reduce ? { opacity: 0 } : { x: 32, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 420, damping: 40 }}
-            className="relative flex max-h-[88vh] w-full flex-col rounded-t-[20px] bg-white shadow-[0_24px_64px_rgba(15,23,42,0.18)] sm:m-3 sm:max-h-none sm:w-[440px] sm:rounded-[20px] dark:bg-gray-900"
+            className={cn('relative flex w-full flex-col rounded-t-[20px] bg-white shadow-[0_24px_64px_rgba(15,23,42,0.18)] sm:m-3 sm:max-h-none sm:rounded-[20px] dark:bg-gray-900', wide ? 'max-h-[94vh] sm:w-[min(980px,calc(100vw-24px))]' : 'max-h-[88vh] sm:w-[440px]')}
           >
             <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 pb-4 pt-5 dark:border-gray-800">
               <div className="min-w-0">

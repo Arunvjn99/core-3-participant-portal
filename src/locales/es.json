@@ -1565,7 +1565,18 @@
       "sv_1": "Recién empiezo",
       "sv_2": "Voy creciendo",
       "sv_3": "Bien encaminado",
-      "sv_other": "Indique su cifra"
+      "sv_other": "Indique su cifra",
+      "funds_sub": "Compare el rendimiento, los gastos y las comisiones de todos los fondos de su plan.",
+      "step_of": "{{n}} de {{total}}",
+      "s1_ing": "Verificando su elegibilidad…",
+      "s2_ing": "Leyendo las reglas de su plan…",
+      "s3_ing": "Eligiendo su aportación…",
+      "s4_ing": "Armando su cartera…",
+      "s5_ing": "Proyectando el resultado…",
+      "s6_ing": "Redactando su inscripción…",
+      "u1_ing": "Revisando cada elección…",
+      "u2_ing": "Enviando a su plan…",
+      "u3_ing": "Esperando la confirmación…"
     }
   },
   "transactions": {
