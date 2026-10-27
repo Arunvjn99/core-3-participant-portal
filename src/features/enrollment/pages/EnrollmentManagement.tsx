@@ -4,8 +4,9 @@ import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { Shield, ChevronRight, AlertCircle } from 'lucide-react'
 import { getAppDateLocale } from '@/lib/dateLocale'
+import { useElectionsStore } from '@/features/plan/electionsStore'
 
-type PlanStatus = 'enrolled' | 'eligible' | 'ineligible'
+type PlanStatus = 'enrolled' | 'eligible' | 'ineligible' | 'opted_out'
 type FilterTab = 'all' | PlanStatus
 
 type PlanId = 'roth-401k' | 'trad-401k' | 'roth-ira' | '403b'
@@ -67,6 +68,11 @@ function StatusBadge({ status }: { status: PlanStatus }) {
       bg: 'bg-[var(--surface-elevated)] dark:bg-gray-800',
       text: 'text-[var(--text-muted)] dark:text-gray-500',
     },
+    opted_out: {
+      labelKey: 'status_opted_out',
+      bg: 'bg-amber-100 dark:bg-amber-950/40',
+      text: 'text-amber-800 dark:text-amber-300',
+    },
   }
   const s = styles[status]
   return (
@@ -83,6 +89,7 @@ function PlanCard({ plan }: { plan: Plan & { name: string; balanceChange?: strin
   const isEnrolled = plan.status === 'enrolled'
   const isEligible = plan.status === 'eligible'
   const isIneligible = plan.status === 'ineligible'
+  const isOptedOut = plan.status === 'opted_out'
 
   return (
     <motion.div
@@ -144,13 +151,36 @@ function PlanCard({ plan }: { plan: Plan & { name: string; balanceChange?: strin
         </>
       )}
 
+      {isOptedOut && (
+        <>
+          <p className="mb-5 text-sm leading-relaxed text-[var(--text-secondary)]">{t('enrollment.manage_page.opted_out_message')}</p>
+          <div className="flex flex-wrap items-center gap-4">
+            <button type="button" onClick={() => navigate('/enrollment/quick')} className="btn-brand rounded-xl px-5 py-2.5 text-sm font-semibold">
+              {t('enrollment.manage_page.reenroll')}
+            </button>
+            <button type="button" onClick={() => navigate(`/enrollment/manage/${plan.id}`)} className="text-sm font-semibold text-[var(--color-primary)] hover:underline dark:text-blue-400">
+              {t('enrollment.manage_page.manage_plan')}
+            </button>
+          </div>
+        </>
+      )}
+
       {isIneligible && (
-        <div className="flex items-start gap-2.5 rounded-xl bg-[var(--surface-elevated)] p-3.5 dark:bg-gray-800">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--text-muted)]" />
-          <p className="text-xs leading-relaxed text-[var(--text-muted)]">
-            {plan.ineligibleReason}
-          </p>
-        </div>
+        <>
+          <div className="flex items-start gap-2.5 rounded-xl bg-[var(--surface-elevated)] p-3.5 dark:bg-gray-800">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--text-muted)]" />
+            <p className="text-xs leading-relaxed text-[var(--text-muted)]">
+              {plan.ineligibleReason}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/enrollment/plan')}
+            className="mt-4 text-sm font-semibold text-[var(--color-primary)] hover:underline dark:text-blue-400"
+          >
+            {t('enrollment.manage_page.provide_in_advance')}
+          </button>
+        </>
       )}
     </motion.div>
   )
@@ -159,18 +189,20 @@ function PlanCard({ plan }: { plan: Plan & { name: string; balanceChange?: strin
 export default function EnrollmentManagement() {
   const { t } = useTranslation()
   const [filter, setFilter] = useState<FilterTab>('all')
+  const optedOut = useElectionsStore((st) => st.optedOut)
 
   const plans = useMemo(
     () =>
       PLANS_BASE.map((p) => ({
         ...p,
+        status: (p.id === 'roth-401k' && optedOut ? 'opted_out' : p.status) as PlanStatus,
         name: t(`enrollment.manage_page.plans.${p.id}.name`),
         balanceChange:
           p.id === 'roth-401k' ? t(`enrollment.manage_page.plans.${p.id}.balance_change`) : undefined,
         description: p.status === 'eligible' ? t(`enrollment.manage_page.plans.${p.id}.description`) : undefined,
         ineligibleReason: p.status === 'ineligible' ? t(`enrollment.manage_page.plans.${p.id}.ineligible`) : undefined,
       })),
-    [t],
+    [t, optedOut],
   )
 
   const filtered = filter === 'all' ? plans : plans.filter((p) => p.status === filter)
@@ -180,6 +212,7 @@ export default function EnrollmentManagement() {
     enrolled: plans.filter((p) => p.status === 'enrolled').length,
     eligible: plans.filter((p) => p.status === 'eligible').length,
     ineligible: plans.filter((p) => p.status === 'ineligible').length,
+    opted_out: plans.filter((p) => p.status === 'opted_out').length,
   }
 
   const filterTabs: { key: FilterTab; labelKey: string }[] = [
@@ -187,6 +220,7 @@ export default function EnrollmentManagement() {
     { key: 'enrolled', labelKey: 'tab_enrolled' },
     { key: 'eligible', labelKey: 'tab_eligible' },
     { key: 'ineligible', labelKey: 'tab_ineligible' },
+    ...(optedOut ? [{ key: 'opted_out' as const, labelKey: 'tab_opted_out' }] : []),
   ]
 
   return (

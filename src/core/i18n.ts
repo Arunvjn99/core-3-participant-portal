@@ -4,7 +4,6 @@ import LanguageDetector from 'i18next-browser-languagedetector'
 
 import en from '../locales/en.json'
 import es from '../locales/es.json'
-import fr from '../locales/fr.json'
 
 /** Persisted key for language preference (header toggle + i18next). */
 export const PREFERRED_LANGUAGE_KEY = 'preferred_language'
@@ -29,10 +28,10 @@ function migrateLanguageStorage() {
 migrateLanguageStorage()
 
 /** Languages shown in the header language menu. */
-export const LANGUAGE_MENU_LANGS = ['en', 'es', 'fr'] as const
+export const LANGUAGE_MENU_LANGS = ['en', 'es'] as const
 export type LanguageMenuLang = (typeof LANGUAGE_MENU_LANGS)[number]
 
-export const SUPPORTED_LANGS = ['en', 'es', 'fr'] as const
+export const SUPPORTED_LANGS = ['en', 'es'] as const
 export type SupportedLang = (typeof SUPPORTED_LANGS)[number]
 
 function normalizeLangCode(lng?: string): string {
@@ -64,7 +63,6 @@ void i18n
       resources: {
         en: { translation: en },
         es: { translation: es },
-        fr: { translation: fr },
       },
     },
     () => {

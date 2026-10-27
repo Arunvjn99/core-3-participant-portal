@@ -25,6 +25,8 @@ import {
   CalendarDays,
 } from 'lucide-react'
 import { ResponsiveContainer, RadialBarChart, RadialBar, PolarAngleAxis } from 'recharts'
+import { NotificationBanner } from '@/features/notifications/NotificationBanner'
+import { ContributionLimitsCard } from '@/features/contributions/ContributionLimitsCard'
 import { PremiumBalanceChart } from '@/features/dashboard/components/PremiumBalanceChart'
 
 /** Card shell — uses theme tokens so light/dark follow `data-theme` on `html`. */
@@ -108,6 +110,8 @@ export default function PostEnrollmentDashboard() {
             <p className="mt-2 text-[14px] leading-relaxed text-text-secondary">{subtitle}</p>
           </header>
 
+          <NotificationBanner />
+
           <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-6">
             {/* LEFT ~65% */}
             <div className="flex flex-col gap-5 lg:col-span-8">
@@ -122,9 +126,14 @@ export default function PostEnrollmentDashboard() {
                       {t('postDashboard.quarter_return')}
                     </p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-status-success-bg px-3 py-1 text-xs font-semibold text-status-success">
-                    {t('postDashboard.on_track_badge')}
-                  </span>
+                  <div className="flex shrink-0 flex-col items-end">
+                    <span className="rounded-full bg-status-success-bg px-3 py-1 text-xs font-semibold text-status-success">
+                      {t('postDashboard.on_track_badge')}
+                    </span>
+                    <Link to="/account-summary" className="mt-2 text-xs font-semibold text-primary hover:underline">
+                      {t('portfolio.view_summary')}
+                    </Link>
+                  </div>
                 </div>
 
                 <div className="h-[120px] w-full">
@@ -390,10 +399,12 @@ export default function PostEnrollmentDashboard() {
                 <p className="mx-auto mt-3 max-w-[260px] text-[12px] leading-relaxed text-text-secondary">
                   {t('postDashboard.projected_income')}
                 </p>
-                <button type="button" className="btn-brand mt-5 w-full">
+                <Link to="/retirement-goal" className="btn-brand mt-5 block w-full text-center">
                   {t('dashboard.launchSimulator')}
-                </button>
+                </Link>
               </SpecCard>
+
+              <ContributionLimitsCard />
 
               {/* Active Loan */}
               <SpecCard>
@@ -469,20 +480,20 @@ export default function PostEnrollmentDashboard() {
                     {t('postDashboard.advisor_bio')}
                   </p>
                   <div className="mt-5 flex gap-2.5">
-                    <button
-                      type="button"
+                    <Link
+                      to="/advisor?tab=messages"
                       className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border-2 border-white py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
                     >
                       <Mail className="h-4 w-4" aria-hidden />
                       {t('dashboard.message')}
-                    </button>
-                    <button
-                      type="button"
+                    </Link>
+                    <Link
+                      to="/advisor?tab=meetings"
                       className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white py-2.5 text-sm font-semibold text-primary shadow-sm transition hover:bg-slate-100"
                     >
                       <CalendarDays className="h-4 w-4" aria-hidden />
                       {t('dashboard.scheduleCall')}
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -572,6 +583,27 @@ export default function PostEnrollmentDashboard() {
                     </div>
                   </div>
                 </div>
+              </SpecCard>
+              <SpecCard>
+                <p className="mb-2 text-[14px] font-bold text-text-primary">{t('dashboard.quick_links')}</p>
+                <ul className="space-y-1.5 text-[13px] font-semibold">
+                  {[
+                    ['/profile?section=beneficiary&add=1', 'dashboard.ql_beneficiary'],
+                    ['/documents', 'dashboard.ql_documents'],
+                    ['/investments', 'dashboard.ql_portfolio'],
+                    ['/documents?generate=1', 'dashboard.ql_statement'],
+                  ].map(([to, key]) => (
+                    <li key={key}>
+                      <Link to={to} className="text-primary hover:underline">{t(key)}</Link>
+                    </li>
+                  ))}
+                </ul>
+              </SpecCard>
+              <SpecCard>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-text-secondary">{t('enrich.title')}</p>
+                <p className="mt-1 text-[14px] font-bold text-text-primary">{t('enrich.subtitle')}</p>
+                <p className="mt-1 text-[12px] text-text-secondary">{t('enrich.intro')}</p>
+                <Link to="/enrich" className="mt-3 inline-block text-[13px] font-semibold text-primary hover:underline">{t('enrich.read')} →</Link>
               </SpecCard>
             </aside>
           </div>

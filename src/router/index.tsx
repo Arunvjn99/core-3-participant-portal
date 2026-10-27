@@ -2,7 +2,7 @@
 import { lazy, Suspense, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
-import { ROUTES, dashboardPath } from '@/lib/constants'
+import { ENV, ROUTES, dashboardPath } from '@/lib/constants'
 import {
   PrivacyPolicyPage,
   TermsOfServicePage,
@@ -43,6 +43,7 @@ import LoanEligibility from '../features/transactions/flows/loan/LoanEligibility
 import LoanSimulator from '../features/transactions/flows/loan/LoanSimulator'
 import LoanConfiguration from '../features/transactions/flows/loan/LoanConfiguration'
 import LoanFees from '../features/transactions/flows/loan/LoanFees'
+import CoreEnrollment from '../features/enrollment/flow/core/CoreEnrollment'
 import LoanDocuments from '../features/transactions/flows/loan/LoanDocuments'
 import LoanReview from '../features/transactions/flows/loan/LoanReview'
 import WithdrawalFlowLayout from '../features/transactions/flows/withdrawal/WithdrawalFlowLayout'
@@ -60,6 +61,7 @@ import TransferAmount from '../features/transactions/flows/transfer/TransferAmou
 import TransferImpact from '../features/transactions/flows/transfer/TransferImpact'
 import TransferReview from '../features/transactions/flows/transfer/TransferReview'
 import RebalanceFlowLayout from '../features/transactions/flows/rebalance/RebalanceFlowLayout'
+import RebalanceSourceSelection from '../features/transactions/flows/rebalance/RebalanceSourceSelection'
 import RebalanceCurrentAllocation from '../features/transactions/flows/rebalance/RebalanceCurrentAllocation'
 import RebalanceAdjustAllocation from '../features/transactions/flows/rebalance/RebalanceAdjustAllocation'
 import RebalanceTradePreview from '../features/transactions/flows/rebalance/RebalanceTradePreview'
@@ -78,6 +80,13 @@ const ForgotPassword = lazy(() => import('../features/auth/pages/ForgotPassword'
 const ResetPassword = lazy(() => import('../features/auth/pages/ResetPassword').then((m) => ({ default: m.ResetPassword })))
 
 // Lazy app pages
+const AdvisorPage = lazy(() => import('../features/advisors/collab/AdvisorPage'))
+const ServiceRequestsPage = lazy(() => import('../features/support/ServiceRequestsPage'))
+const AccountSummaryPage = lazy(() => import('../features/portfolio/AccountSummaryPage'))
+const RetirementGoalPage = lazy(() => import('../features/retirement/RetirementGoalPage'))
+const EnrichPage = lazy(() => import('../features/learning/EnrichPage'))
+const DocumentsPage = lazy(() => import('../features/documents/DocumentsPage'))
+const FeeReportPage = lazy(() => import('../features/fees/FeeReportPage'))
 const InvestmentsPage = lazy(() => import('../features/investments/pages/InvestmentsPage'))
 const ProfilePage = lazy(() => import('../features/profile/pages/ProfilePage').then((m) => ({ default: m.ProfilePage })))
 
@@ -166,6 +175,10 @@ function PostEnrollmentDashboardGate() {
 
 // ─── Router ──────────────────────────────────────────────────────────────────
 
+/** In the local demo bypass there is nothing to sign in to, so auth screens go straight to the app. */
+const skipIfDemo = (page: React.ReactNode) =>
+  ENV.LOCAL_DEMO_BYPASS ? <Navigate to={ROUTES.DASHBOARD} replace /> : page
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -173,9 +186,9 @@ export const router = createBrowserRouter([
     errorElement: <RootErrorBoundary />,
     children: [
       // Public auth routes — redirect root to /login
-      { index: true, element: <Navigate to="/login" replace /> },
-      { path: 'login', element: <LoginPage /> },
-      { path: 'v1/login', element: <LoginPage /> },
+      { index: true, element: <Navigate to={ENV.LOCAL_DEMO_BYPASS ? ROUTES.DASHBOARD : '/login'} replace /> },
+      { path: 'login', element: skipIfDemo(<LoginPage />) },
+      { path: 'v1/login', element: skipIfDemo(<LoginPage />) },
       { path: 'signup', element: <Navigate to="/login" replace /> },
       { path: 'v1/signup', element: <Navigate to="/login" replace /> },
       { path: 'forgot-password', element: <ForgotPasswordPage /> },
@@ -195,7 +208,7 @@ export const router = createBrowserRouter([
           {
             element: <AuthLayout />,
             children: [
-              { path: 'login', element: withSuspense(Login) },
+              { path: 'login', element: skipIfDemo(withSuspense(Login)) },
               { path: 'signup', element: <Navigate to="/login" replace /> },
               { path: 'forgot-password', element: withSuspense(ForgotPassword) },
               { path: 'reset-password', element: withSuspense(ResetPassword) },
@@ -211,6 +224,7 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="plan" replace /> },
           { path: 'source', element: <Navigate to="/enrollment/contribution-source" replace /> },
+          { path: 'quick', element: <CoreEnrollment /> },
           { path: 'plan', element: <PlanSelection /> },
           { path: 'contribution', element: <Contribution /> },
           { path: 'contribution-source', element: <ContributionSource /> },
@@ -239,6 +253,14 @@ export const router = createBrowserRouter([
           { path: 'enrollment/manage', element: <EnrollmentManagement /> },
           { path: 'enrollment/manage/:planId', element: <PlanDetail /> },
           { path: 'investments', element: withSuspense(InvestmentsPage) },
+          { path: 'fees', element: withSuspense(FeeReportPage) },
+          { path: 'documents', element: withSuspense(DocumentsPage) },
+          { path: 'advisor', element: withSuspense(AdvisorPage) },
+          { path: 'enrich', element: withSuspense(EnrichPage) },
+          { path: 'enrich/:articleId', element: withSuspense(EnrichPage) },
+          { path: 'retirement-goal', element: withSuspense(RetirementGoalPage) },
+          { path: 'account-summary', element: withSuspense(AccountSummaryPage) },
+          { path: 'service-requests', element: withSuspense(ServiceRequestsPage) },
           { path: 'profile', element: withSuspense(ProfilePage) },
           { path: 'transactions', element: <TransactionCenter /> },
           {
@@ -281,7 +303,8 @@ export const router = createBrowserRouter([
             path: 'transactions/rebalance',
             element: <RebalanceFlowLayout />,
             children: [
-              { index: true, element: <RebalanceCurrentAllocation /> },
+              { index: true, element: <RebalanceSourceSelection /> },
+              { path: 'current', element: <RebalanceCurrentAllocation /> },
               { path: 'adjust', element: <RebalanceAdjustAllocation /> },
               { path: 'trades', element: <RebalanceTradePreview /> },
               { path: 'review', element: <RebalanceReview /> },

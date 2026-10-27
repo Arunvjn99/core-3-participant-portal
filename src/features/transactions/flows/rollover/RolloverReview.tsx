@@ -1,4 +1,5 @@
 import { Card } from "../../components/ui/card";
+import { useTransactionTracker } from "../../tracking/trackerStore";
 import { Checkbox } from "../../components/ui/checkbox";
 import { Separator } from "../../components/ui/separator";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +21,7 @@ const COLORS = ["var(--chart-blue)", "var(--chart-teal)", "var(--chart-green)", 
 function RolloverReview() {
   const navigate = useNavigate();
   const { rolloverData } = useRolloverFlow();
+  const trackTransaction = useTransactionTracker((s) => s.track);
   const [agreed, setAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -36,6 +38,7 @@ function RolloverReview() {
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
+      trackTransaction({ type: "rollover", amount: estimatedAmount, description: "Rollover from previous employer" });
       setSubmitted(true);
       setTimeout(() => {
         navigate("/transactions");
@@ -199,6 +202,30 @@ function RolloverReview() {
               </p>
               <p className="text-sm font-medium text-gray-900 dark:text-white capitalize">
                 {rolloverData.rolloverType || "Traditional"} 401(k)
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                Trustee / Custodian
+              </p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                {rolloverData.trusteeName || "—"}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                Trustee Phone
+              </p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                {rolloverData.trusteePhone || "—"}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                Trustee Address
+              </p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                {rolloverData.trusteeAddress || "—"}
               </p>
             </div>
           </div>

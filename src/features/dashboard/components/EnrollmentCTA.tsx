@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
-import { ClipboardList, ArrowRight, Clock } from 'lucide-react'
+import { ClipboardList, ArrowRight, Clock, Zap } from 'lucide-react'
 import { Button } from '../../../design-system/components/Button'
 import { Badge } from '../../../design-system/components/Badge'
 import { fadeInUp } from '../../../design-system/motion/variants'
@@ -55,10 +55,22 @@ export function EnrollmentCTA() {
         )}
       </div>
 
-      <Button onClick={() => navigate(destination)} className="flex shrink-0 items-center gap-2">
-        {isInProgress ? t('enrollment.cta.resume') : t('enrollment.cta.get_started')}
-        <ArrowRight className="h-4 w-4" />
-      </Button>
+      <div className="flex shrink-0 flex-col gap-2 sm:items-stretch">
+        {!isInProgress && (
+          <Button onClick={() => navigate('/enrollment/quick')} className="flex items-center gap-2">
+            <Zap className="h-4 w-4" />
+            {t('enrollment.cta.one_click')}
+          </Button>
+        )}
+        <Button
+          variant={isInProgress ? 'primary' : 'secondary'}
+          onClick={() => navigate(destination)}
+          className="flex items-center gap-2"
+        >
+          {isInProgress ? t('enrollment.cta.resume') : t('enrollment.cta.get_started')}
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      </div>
     </motion.div>
   )
 }

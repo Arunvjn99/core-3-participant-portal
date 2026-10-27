@@ -1,4 +1,5 @@
 import { Checkbox } from "../../components/ui/checkbox";
+import { useTransactionTracker } from "../../tracking/trackerStore";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useTransferFlow } from "./TransferFlowLayout";
@@ -10,6 +11,7 @@ const COLORS = ["var(--chart-blue)", "var(--chart-purple, #8b5cf6)", "var(--char
 function TransferReview() {
   const navigate = useNavigate();
   const { transferData } = useTransferFlow();
+  const trackTransaction = useTransactionTracker((s) => s.track);
   const [agreed, setAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -20,6 +22,7 @@ function TransferReview() {
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
+      trackTransaction({ type: "transfer", description: "Fund transfer" });
       setSubmitted(true);
       setTimeout(() => { navigate("/transactions"); }, 2000);
     }, 1500);

@@ -25,13 +25,17 @@ export function EnrollmentShell() {
       .find((s) => location.pathname.endsWith(`/${s.path}`))?.step ?? fromUrl ?? 1
   const activeStep = activeStepFromPath
 
-  const showStepper = !location.pathname.includes('/enrollment/success')
+  const showStepper =
+    !location.pathname.includes('/enrollment/success') && !location.pathname.includes('/enrollment/quick')
+
+  // The one-click agent uses a soft light-grey page so its white cards and blue accents stand out gently
+  const isQuick = location.pathname.includes('/enrollment/quick')
 
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--surface-shell)] dark:bg-gray-950">
+    <div className={`flex min-h-screen flex-col dark:bg-gray-950 ${isQuick ? 'bg-[#f5f6f8]' : 'bg-[var(--surface-shell)]'}`}>
       <div className="flex h-12 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 dark:border-gray-700 dark:bg-gray-900 sm:px-6">
         <div className="flex items-center gap-3">
-          {activeStep > 1 && (
+          {activeStep > 1 && !location.pathname.includes('/enrollment/quick') && (
             <button
               type="button"
               onClick={() => navigate(-1)}
@@ -42,7 +46,7 @@ export function EnrollmentShell() {
             </button>
           )}
           <span className="text-sm text-gray-400 dark:text-gray-500">{t('enrollment.shell.title')}</span>
-          {activeStep <= STEPPER_STEPS.length && (
+          {activeStep <= STEPPER_STEPS.length && !location.pathname.includes('/enrollment/quick') && (
             <>
               <span className="text-sm text-gray-300 dark:text-gray-600">/</span>
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">

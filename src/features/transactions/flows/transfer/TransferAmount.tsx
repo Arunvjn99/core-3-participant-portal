@@ -2,30 +2,43 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useTransferFlow } from "./TransferFlowLayout";
 import { motion } from "framer-motion";
-import { ArrowRight, ArrowLeft, DollarSign, Percent, Info } from "lucide-react";
+import { ArrowRight, ArrowLeft, DollarSign, Percent, Info, Hash } from "lucide-react";
 
 function TransferAmount() {
   const navigate = useNavigate();
   const { updateTransferData } = useTransferFlow();
 
-  const [method, setMethod] = useState<"dollar" | "percent">("dollar");
+  const [method, setMethod] = useState<"dollar" | "percent" | "units">("dollar");
   const [amount, setAmount] = useState("");
   const [percentage, setPercentage] = useState("");
+  const [units, setUnits] = useState("");
+  const [sourceWise, setSourceWise] = useState(false);
+  const [sourceAmounts, setSourceAmounts] = useState<Record<string, string>>({});
 
   const maxBalance = 12000;
+  /** Placeholder net asset value per unit of the fund being moved. */
+  const NAV = 48.5;
+  const maxUnits = Math.floor((maxBalance / NAV) * 1000) / 1000;
+  const SOURCES = ["Pre-Tax", "Roth", "Match"] as const;
   const parsedAmount =
     method === "dollar"
       ? parseFloat(amount.replace(/,/g, "")) || 0
-      : (parseFloat(percentage) / 100) * maxBalance || 0;
+      : method === "units"
+        ? (parseFloat(units) || 0) * NAV
+        : (parseFloat(percentage) / 100) * maxBalance || 0;
   const effectivePercent =
     method === "percent"
       ? parseFloat(percentage) || 0
       : ((parsedAmount / maxBalance) * 100) || 0;
 
+  const sourceTotal = SOURCES.reduce((sum, k) => sum + (parseFloat((sourceAmounts[k] ?? "").replace(/,/g, "")) || 0), 0);
+  const sourcesMatch = !sourceWise || Math.abs(sourceTotal - parsedAmount) < 0.01;
+
   const isValid =
     parsedAmount > 0 &&
     parsedAmount <= maxBalance &&
-    effectivePercent <= 100;
+    effectivePercent <= 100 &&
+    sourcesMatch;
 
   const handleContinue = () => {
     // Update transfer data with allocation info
@@ -52,7 +65,7 @@ function TransferAmount() {
         newAllocation: 15,
       },
     ];
-    updateTransferData({ funds });
+    updateTransferData({ funds, method, sourceWise, amount: parsedAmount });
     navigate("/transactions/transfer/impact");
   };
 
@@ -79,10 +92,10 @@ function TransferAmount() {
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.05 }}
       >
         <div className="flex items-center gap-1 p-1 w-fit" style={{ background: "transparent", borderRadius: 12, border: "1px solid var(--border-light)" }}>
-          {([["dollar", "Dollar Amount", <DollarSign key="d" className="w-3.5 h-3.5" />], ["percent", "Percentage", <Percent key="p" className="w-3.5 h-3.5" />]] as const).map(([id, label, icon]) => (
+          {([["dollar", "Dollar Amount", <DollarSign key="d" className="w-3.5 h-3.5" />], ["percent", "Percentage", <Percent key="p" className="w-3.5 h-3.5" />], ["units", "Units", <Hash key="u" className="w-3.5 h-3.5" />]] as const).map(([id, label, icon]) => (
             <button
               key={id}
-              onClick={() => setMethod(id as "dollar" | "percent")}
+              onClick={() => setMethod(id as "dollar" | "percent" | "units")}
               className="flex items-center gap-1.5 transition-all duration-200"
               style={{
                 padding: "6px 14px", borderRadius: 8, fontSize: 12, fontWeight: method === id ? 700 : 500,
@@ -134,6 +147,32 @@ function TransferAmount() {
                   className="text-xs text-blue-600 dark:text-blue-400 font-medium hover:underline"
                 >
                   Transfer All (${maxBalance.toLocaleString()})
+                </button>
+              </div>
+            </div>
+          ) : method === "units" ? (
+            <div>
+              <label htmlFor="transfer-units" className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-3 block">
+                Units to transfer
+              </label>
+              <input
+                id="transfer-units"
+                type="text"
+                inputMode="decimal"
+                value={units}
+                onChange={(e) => setUnits(e.target.value.replace(/[^0-9.]/g, ""))}
+                placeholder="0.000"
+                className="w-full px-4 py-4 text-3xl font-semibold rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+              />
+              <div className="flex items-center justify-between mt-3">
+                <span className="text-xs text-gray-400 dark:text-gray-500">
+                  {(parseFloat(units) || 0).toLocaleString(undefined, { maximumFractionDigits: 3 })} units × ${NAV.toFixed(2)} NAV ≈ ${parsedAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                </span>
+                <button
+                  onClick={() => setUnits(maxUnits.toString())}
+                  className="text-xs text-blue-600 dark:text-blue-400 font-medium hover:underline"
+                >
+                  Transfer all ({maxUnits.toLocaleString(undefined, { maximumFractionDigits: 3 })} units)
                 </button>
               </div>
             </div>
@@ -196,6 +235,39 @@ function TransferAmount() {
           </div>
         </div>
       </motion.div>
+
+      {/* Source-wise transfer */}
+      <div style={{ background: "transparent", borderRadius: 16, border: "1px solid var(--border-light)", padding: "16px 20px" }}>
+        <label className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-gray-700 dark:text-gray-200">
+          <input type="checkbox" checked={sourceWise} onChange={(e) => setSourceWise(e.target.checked)} className="h-4 w-4 rounded accent-blue-600" />
+          Source wise transfer
+        </label>
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Choose how much comes from each contribution source. The amounts must add up to the transfer total.</p>
+        {sourceWise && (
+          <div className="mt-3 space-y-2">
+            {SOURCES.map((k) => (
+              <div key={k} className="flex items-center justify-between gap-3">
+                <label htmlFor={`src-${k}`} className="text-sm text-gray-700 dark:text-gray-200">{k}</label>
+                <div className="relative w-40">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">$</span>
+                  <input
+                    id={`src-${k}`}
+                    type="text"
+                    inputMode="decimal"
+                    value={sourceAmounts[k] ?? ""}
+                    onChange={(e) => setSourceAmounts((a) => ({ ...a, [k]: e.target.value.replace(/[^0-9.,]/g, "") }))}
+                    placeholder="0.00"
+                    className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-7 pr-3 text-right text-sm tabular-nums text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800/50 dark:text-white"
+                  />
+                </div>
+              </div>
+            ))}
+            <p role="status" className={sourcesMatch ? "text-xs font-medium text-green-600" : "text-xs font-medium text-amber-700"}>
+              {sourcesMatch ? "Sources add up to the transfer total." : `Sources total $${sourceTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}; the transfer is $${parsedAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}.`}
+            </p>
+          </div>
+        )}
+      </div>
 
       {parsedAmount > maxBalance && (
         <div

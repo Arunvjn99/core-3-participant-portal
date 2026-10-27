@@ -8,6 +8,7 @@ import type { CoreAIStructuredPayload } from '../types'
 import type { LocalAIResult, LocalFlowState } from '../store/flowTypes'
 import { parseLoanInput } from './parseLoanInput'
 import { getFAQById } from './faqAnswers'
+import { findTerm, termAnswer } from '@/features/learning/glossary'
 
 const FALLBACK_SUGGESTIONS = [
   'Apply for a loan',
@@ -69,6 +70,15 @@ export function handleLocalAI(
   // Informational questions ("what is X?", "how does X work?", "explain X", "tell me about X")
   // should go to LLM for rich domain answers instead of being caught by keyword matchers.
   const isInformational = /^(what\s+is|what\s+are|what'?s|how\s+does|how\s+do|how\s+is|explain|tell\s+me\s+(about|more)|why\s+(is|do|does)|define|describe|difference\s+between|pros?\s+and\s+cons?|should\s+i|is\s+it\s+(worth|good|better)|can\s+you\s+explain)/i.test(trimmed.trim())
+  // Plain-language definitions from the glossary answer "what is X?" without needing the LLM.
+  // Also catches "what does X mean", a question mark, and Spanish ("¿Qué es…?", "qué significa").
+  if (isInformational || /^¿|\?\s*$|\b(what does|mean|meaning|definition)\b|\b(qué es|significa)\b/i.test(trimmed)) {
+    const term = findTerm(trimmed)
+    if (term) {
+      const { content, suggestions } = termAnswer(term)
+      return { messages: [assistantMessage(content, { suggestions })], nextState: null }
+    }
+  }
   if (isInformational) return { messages: [], nextState: null, isLLMFallback: true }
 
   // Rebalance intent detection — action phrases only

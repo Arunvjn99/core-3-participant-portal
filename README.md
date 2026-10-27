@@ -81,7 +81,7 @@ The app runs in **demo mode** when Supabase env vars are absent — auth guards 
 |----------|----------|-------------|
 | `VITE_SUPABASE_URL` | No | Supabase project URL |
 | `VITE_SUPABASE_ANON_KEY` | No | Supabase anon/public key |
-| `VITE_DEBUG_BYPASS_AUTH` | No | Set `true` to skip auth in development |
+| `VITE_DEBUG_BYPASS_AUTH` | No | Set `true` to sign in a demo participant in the local dev server (only when Supabase is not configured) |
 
 `VITE_*` variables are inlined at **build** time. After changing them in Netlify (or another host), trigger a **new deploy**.
 

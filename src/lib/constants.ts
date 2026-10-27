@@ -49,11 +49,19 @@ export function hasValidSupabaseEnv(): boolean {
   return true
 }
 
+const DEMO_MODE = !hasValidSupabaseEnv()
+const DEBUG_BYPASS_AUTH = import.meta.env.VITE_DEBUG_BYPASS_AUTH === 'true'
+
 export const ENV = {
   SUPABASE_URL: trimEnv(import.meta.env.VITE_SUPABASE_URL) || undefined,
   SUPABASE_ANON_KEY: trimEnv(import.meta.env.VITE_SUPABASE_ANON_KEY) || undefined,
-  DEBUG_BYPASS_AUTH: import.meta.env.VITE_DEBUG_BYPASS_AUTH === 'true',
-  DEMO_MODE: !hasValidSupabaseEnv(),
+  DEBUG_BYPASS_AUTH,
+  DEMO_MODE,
+  /**
+   * Signs in a fake demo participant. Only ever true in a local dev server (`vite`) with no Supabase
+   * configured; production builds ignore VITE_DEBUG_BYPASS_AUTH.
+   */
+  LOCAL_DEMO_BYPASS: DEBUG_BYPASS_AUTH && DEMO_MODE && import.meta.env.DEV,
 } as const
 
 const env = import.meta.env as Record<string, string | undefined>

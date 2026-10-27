@@ -26,9 +26,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { useEnrollmentStepNav, type EnrollmentPrimaryLabel } from '@/features/enrollment/components/EnrollmentStepNavContext'
 
 /* ─── Types ─── */
-interface FundDetail { name: string; ticker: string; expense: string }
-interface AllocationEntry { name: string; value: number; color: string; funds: FundDetail[] }
-interface SourceFundAllocation { name: string; ticker: string; expense: string; assetClass: string; color: string; allocation: number }
+import { allocations, fundCatalog, type AllocationEntry, type SourceFundAllocation } from '../investmentCatalog'
 type SourceKey = 'roth' | 'preTax' | 'afterTax'
 interface PerSourceAllocations { sameForAll: boolean; unified: SourceFundAllocation[]; sources: Record<SourceKey, SourceFundAllocation[]> }
 
@@ -39,46 +37,7 @@ const sourceBorderColors: Record<SourceKey, string> = { roth: 'border-purple-200
 const sourceBgColors: Record<SourceKey, string> = { roth: 'bg-purple-50', preTax: 'bg-blue-50', afterTax: 'bg-green-50' }
 
 /* ─── Static Data ─── */
-const allocations: Record<string, AllocationEntry[]> = {
-  conservative: [
-    { name: 'Bonds', value: 45, color: 'var(--chart-blue)', funds: [{ name: 'Vanguard Total Bond Market', ticker: 'VBTLX', expense: '0.05%' }, { name: 'PIMCO Income Fund', ticker: 'PONAX', expense: '0.59%' }] },
-    { name: 'US Stocks', value: 25, color: 'var(--chart-green)', funds: [{ name: 'Vanguard Total Stock Market', ticker: 'VTSAX', expense: '0.04%' }] },
-    { name: 'International Stocks', value: 15, color: 'var(--chart-purple)', funds: [{ name: 'International Growth Fund', ticker: 'VWIGX', expense: '0.42%' }] },
-    { name: 'Real Estate', value: 15, color: 'var(--chart-amber)', funds: [{ name: 'Vanguard Real Estate Index', ticker: 'VGSLX', expense: '0.12%' }] },
-  ],
-  balanced: [
-    { name: 'US Stocks', value: 40, color: 'var(--chart-green)', funds: [{ name: 'Vanguard Total Stock Market', ticker: 'VTSAX', expense: '0.04%' }, { name: 'Vanguard Mid-Cap Index', ticker: 'VIMAX', expense: '0.05%' }] },
-    { name: 'Bonds', value: 25, color: 'var(--chart-blue)', funds: [{ name: 'Vanguard Total Bond Market', ticker: 'VBTLX', expense: '0.05%' }] },
-    { name: 'International Stocks', value: 20, color: 'var(--chart-purple)', funds: [{ name: 'International Growth Fund', ticker: 'VWIGX', expense: '0.42%' }] },
-    { name: 'Real Estate', value: 15, color: 'var(--chart-amber)', funds: [{ name: 'Vanguard Real Estate Index', ticker: 'VGSLX', expense: '0.12%' }] },
-  ],
-  growth: [
-    { name: 'US Stocks', value: 50, color: 'var(--chart-green)', funds: [{ name: 'Vanguard Total Stock Market', ticker: 'VTSAX', expense: '0.04%' }, { name: 'Vanguard Growth Index', ticker: 'VIGAX', expense: '0.05%' }] },
-    { name: 'International Stocks', value: 20, color: 'var(--chart-purple)', funds: [{ name: 'International Growth Fund', ticker: 'VWIGX', expense: '0.42%' }] },
-    { name: 'Bonds', value: 20, color: 'var(--chart-blue)', funds: [{ name: 'Vanguard Total Bond Market', ticker: 'VBTLX', expense: '0.05%' }] },
-    { name: 'Real Estate', value: 10, color: 'var(--chart-amber)', funds: [{ name: 'Vanguard Real Estate Index', ticker: 'VGSLX', expense: '0.12%' }] },
-  ],
-  aggressive: [
-    { name: 'US Stocks', value: 50, color: 'var(--chart-green)', funds: [{ name: 'Vanguard Total Stock Market', ticker: 'VTSAX', expense: '0.04%' }, { name: 'Vanguard Small-Cap Growth', ticker: 'VSGAX', expense: '0.07%' }] },
-    { name: 'International Stocks', value: 20, color: 'var(--chart-purple)', funds: [{ name: 'International Growth Fund', ticker: 'VWIGX', expense: '0.42%' }, { name: 'Vanguard Emerging Markets', ticker: 'VEMAX', expense: '0.14%' }] },
-    { name: 'Bonds', value: 20, color: 'var(--chart-blue)', funds: [{ name: 'Vanguard Total Bond Market', ticker: 'VBTLX', expense: '0.05%' }] },
-    { name: 'Real Estate', value: 10, color: 'var(--chart-amber)', funds: [{ name: 'Vanguard Real Estate Index', ticker: 'VGSLX', expense: '0.12%' }] },
-  ],
-}
-
 const riskLevelKeys = ['conservative', 'balanced', 'growth', 'aggressive'] as const
-
-const fundCatalog: SourceFundAllocation[] = [
-  { name: 'Vanguard Total Stock Market', ticker: 'VTSAX', expense: '0.04%', assetClass: 'Equity', color: 'var(--chart-green)', allocation: 0 },
-  { name: 'Vanguard Mid-Cap Index', ticker: 'VIMAX', expense: '0.05%', assetClass: 'Equity', color: 'var(--chart-green)', allocation: 0 },
-  { name: 'Vanguard Growth Index', ticker: 'VIGAX', expense: '0.05%', assetClass: 'Equity', color: 'var(--chart-green)', allocation: 0 },
-  { name: 'Vanguard Small-Cap Growth', ticker: 'VSGAX', expense: '0.07%', assetClass: 'Equity', color: 'var(--chart-green)', allocation: 0 },
-  { name: 'Vanguard Total Bond Market', ticker: 'VBTLX', expense: '0.05%', assetClass: 'Fixed Income', color: 'var(--chart-blue)', allocation: 0 },
-  { name: 'PIMCO Income Fund', ticker: 'PONAX', expense: '0.59%', assetClass: 'Fixed Income', color: 'var(--chart-blue)', allocation: 0 },
-  { name: 'International Growth Fund', ticker: 'VWIGX', expense: '0.42%', assetClass: 'International', color: 'var(--chart-purple)', allocation: 0 },
-  { name: 'Vanguard Emerging Markets', ticker: 'VEMAX', expense: '0.14%', assetClass: 'International', color: 'var(--chart-purple)', allocation: 0 },
-  { name: 'Vanguard Real Estate Index', ticker: 'VGSLX', expense: '0.12%', assetClass: 'Real Estate', color: 'var(--chart-amber)', allocation: 0 },
-]
 
 function buildFundsFromRecommended(alloc: AllocationEntry[]): SourceFundAllocation[] {
   return fundCatalog.map((fund) => {

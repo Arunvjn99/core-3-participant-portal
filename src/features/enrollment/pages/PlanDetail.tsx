@@ -11,7 +11,11 @@ import {
   FileText,
   Eye,
 } from 'lucide-react'
+import { useState } from 'react'
 import { getAppDateLocale } from '@/lib/dateLocale'
+import { PlanElections } from '@/features/plan/PlanElections'
+import { OptOutDialog } from '@/features/plan/OptOutDialog'
+import { useElectionsStore } from '@/features/plan/electionsStore'
 
 /** Numeric / structural demo data for roth-401k; all copy from `enrollment.plan_detail` + `roth`. */
 const ROTH_PLAN_CORE = {
@@ -48,8 +52,6 @@ const ROTH_PLAN_CORE = {
   ],
 } as const
 
-const FUND_KEYS = ['fund_sp500', 'fund_intl', 'fund_bond'] as const
-
 function Section({
   title,
   action,
@@ -82,22 +84,14 @@ function Section({
   )
 }
 
-function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
-  return (
-    <div className="flex items-center justify-between border-b border-[var(--border-light)] py-3 last:border-0 dark:border-gray-800">
-      <span className="text-sm text-[var(--text-secondary)]">{label}</span>
-      <span className={`text-sm ${bold ? 'font-bold' : 'font-medium'} text-[var(--text-primary)]`}>
-        {value}
-      </span>
-    </div>
-  )
-}
-
 export default function PlanDetail() {
   const { t } = useTranslation()
   const locale = getAppDateLocale()
   const { planId } = useParams<{ planId: string }>()
   const navigate = useNavigate()
+  const [optOutOpen, setOptOutOpen] = useState(false)
+  const deferral = useElectionsStore((st) => st.deferral)
+  const optedOut = useElectionsStore((st) => st.optedOut)
 
   const tr = (k: string) => t(`enrollment.plan_detail.roth.${k}`)
 
@@ -170,12 +164,14 @@ export default function PlanDetail() {
         <div className="flex gap-2">
           <button
             type="button"
+            onClick={() => window.print()}
             className="btn-brand flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold"
           >
             <Printer className="h-3.5 w-3.5" /> {t('enrollment.plan_detail.print')}
           </button>
           <button
             type="button"
+            onClick={() => setOptOutOpen(true)}
             className="flex items-center gap-1.5 rounded-lg border border-[var(--status-danger)] px-4 py-2 text-xs font-semibold text-[var(--status-danger)] transition-colors hover:bg-[var(--status-danger-bg)] dark:border-red-500 dark:text-red-400"
           >
             <XCircle className="h-3.5 w-3.5" /> {t('enrollment.plan_detail.opt_out_plan')}
@@ -205,7 +201,7 @@ export default function PlanDetail() {
             {
               icon: TrendingUp,
               label: t('enrollment.plan_detail.stat_my_contribution'),
-              value: plan.contribution,
+              value: optedOut ? '0%' : deferral.unit === 'percent' ? `${Math.round((deferral.preTax + deferral.roth) * 100) / 100}%` : `$${deferral.preTax + deferral.roth}`,
               sub: tr('contrib_note'),
               subColor: 'text-[var(--text-muted)]' as const,
               isHealth: false as const,
@@ -247,41 +243,9 @@ export default function PlanDetail() {
       </div>
 
       <div className="flex flex-col gap-5">
-        <Section
-          title={t('enrollment.plan_detail.section_contribution_election')}
-          action={{ label: t('enrollment.plan_detail.edit_contribution') }}
-        >
-          {plan.contributions.map((c, idx) => (
-            <Row key={idx} label={c.total ? tr('election_total') : tr('election_roth')} value={c.value} />
-          ))}
-        </Section>
+        <PlanElections />
 
-        <Section
-          title={t('enrollment.plan_detail.section_investment_election')}
-          action={{ label: t('enrollment.plan_detail.change_investments') }}
-        >
-          {plan.investments.map((group, gi) => (
-            <div key={gi}>
-              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                {tr('inv_category_roth')}
-              </p>
-              {group.funds.map((f, fi) => (
-                <Row key={fi} label={tr(FUND_KEYS[fi])} value={f.pct} />
-              ))}
-            </div>
-          ))}
-        </Section>
-
-        <Section title={t('enrollment.plan_detail.auto_features')} action={{ label: t('enrollment.plan_detail.manage_features') }}>
-          {plan.autoFeatures.map((f, idx) => {
-            const labelKeys = ['auto_label_increase', 'auto_label_annual', 'auto_label_catchup', 'auto_label_match', 'auto_label_modified'] as const
-            return (
-              <Row key={idx} label={tr(labelKeys[idx])} value={tr(f.valueKey)} />
-            )
-          })}
-        </Section>
-
-        <Section title={t('enrollment.plan_detail.beneficiaries')} action={{ label: t('enrollment.plan_detail.update') }}>
+        <Section title={t('enrollment.plan_detail.beneficiaries')} action={{ label: t('enrollment.plan_detail.update'), onClick: () => navigate('/profile?section=beneficiary') }}>
           <p className="mb-3 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
             {t('enrollment.plan_detail.beneficiaries_primary')}
           </p>
@@ -321,25 +285,8 @@ export default function PlanDetail() {
           ))}
         </Section>
 
-        <Section
-          title={t('enrollment.plan_detail.section_activity_log')}
-          action={{ label: t('enrollment.plan_detail.view_all_activity'), onClick: undefined }}
-        >
-          <div className="relative pl-4">
-            <div className="absolute bottom-2 left-[7px] top-2 w-px bg-[var(--border-default)] dark:bg-gray-700" />
-            {plan.activity.map((event, i) => (
-              <div key={i} className="relative mb-5 last:mb-0">
-                <div className="absolute -left-4 top-1.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--surface-card)] bg-[var(--color-primary)] dark:border-gray-900" />
-                <div className="ml-2">
-                  <p className="text-[11px] font-medium text-[var(--text-muted)]">{tr(event.dateKey)}</p>
-                  <p className="text-sm font-bold text-[var(--text-primary)]">{tr(event.titleKey)}</p>
-                  <p className="text-xs text-[var(--text-secondary)]">{tr(event.descKey)}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Section>
       </div>
+      <OptOutDialog open={optOutOpen} onClose={() => setOptOutOpen(false)} />
     </div>
   )
 }

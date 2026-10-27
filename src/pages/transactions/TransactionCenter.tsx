@@ -13,6 +13,7 @@ import {
   ChartBar,
   ChevronRight,
   TrendingUp,
+  Route,
 } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { Card } from '@/design-system/components/Card'
@@ -22,6 +23,9 @@ import DraftTransactions from '@/features/transactions/components/DraftTransacti
 import RecentTransactionsCompact from '@/features/transactions/components/RecentTransactionsCompact'
 import FinancialGuidanceCompact from '@/features/transactions/components/FinancialGuidanceCompact'
 import RetirementImpactWidget from '@/features/transactions/components/RetirementImpactWidget'
+import { TransactionTracker } from '@/features/transactions/tracking/TransactionTracker'
+import { ActivityHistory } from '@/features/transactions/components/ActivityHistory'
+import { useTrackedTransactions } from '@/features/transactions/tracking/useTrackedTransactions'
 import { computeLoanEligible, computeWithdrawable, formatUsd } from '@/features/transactions/utils/transactionCenterAmounts'
 
 const CP = 'transactions.center_page.'
@@ -246,6 +250,7 @@ function PlanSummaryCard({
 export default function TransactionCenter() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const activeRequests = useTrackedTransactions().filter((r) => !r.timeline.complete).length
 
   const planBalance = DEMO_PLAN.planBalance
   const vestedBalance = DEMO_PLAN.vestedBalance
@@ -352,6 +357,25 @@ export default function TransactionCenter() {
             </div>
           </motion.section>
 
+          {/* ── Request status tracking ── */}
+          <motion.section
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
+          >
+            <SectionHeader
+              icon={<Route className="h-4 w-4" />}
+              title={t('tracking.title')}
+              subtitle={t('tracking.subtitle')}
+              badge={
+                activeRequests > 0
+                  ? { text: t('tracking.active_badge', { count: activeRequests }), color: 'bg-primary/10 text-primary' }
+                  : undefined
+              }
+            />
+            <TransactionTracker />
+          </motion.section>
+
           {/* ── Main 2-col grid ── */}
           <div className="grid grid-cols-1 items-stretch gap-6 sm:gap-8 lg:grid-cols-[1fr_400px]">
 
@@ -423,6 +447,22 @@ export default function TransactionCenter() {
 
             </div>
           </div>
+
+          {/* ── Contribution & activity history ── */}
+          <motion.section
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
+          >
+            <SectionHeader
+              icon={<ChartBar className="h-4 w-4" />}
+              title={t('activity.title')}
+              subtitle={t('activity.subtitle')}
+            />
+            <Card padding="md" className="rounded-2xl border border-border-default">
+              <ActivityHistory />
+            </Card>
+          </motion.section>
 
           {/* ── Financial Guidance — full width ── */}
           <motion.section

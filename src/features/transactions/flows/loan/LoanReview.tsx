@@ -1,4 +1,5 @@
 import { Checkbox } from "../../components/ui/checkbox";
+import { useTransactionTracker } from "../../tracking/trackerStore";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useLoanFlow } from "./LoanFlowLayout";
@@ -8,6 +9,7 @@ import { motion } from "framer-motion";
 function LoanReview() {
   const navigate = useNavigate();
   const { loanData } = useLoanFlow();
+  const trackTransaction = useTransactionTracker((s) => s.track);
   const [agreed, setAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -17,7 +19,8 @@ function LoanReview() {
   const interestRate = 8;
 
   const monthlyRate = interestRate / 100 / 12;
-  const numPayments = tenure * 12;
+  const tenureMonths = loanData.tenureMonths || 0;
+  const numPayments = tenure * 12 + tenureMonths;
   const monthlyPayment =
     (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, numPayments)) /
     (Math.pow(1 + monthlyRate, numPayments) - 1);
@@ -29,6 +32,7 @@ function LoanReview() {
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
+      trackTransaction({ type: "loan", amount: loanAmount, description: "General purpose loan", method: loanData.disbursementMethod === "check" ? "check" : "eft" });
       setSubmitted(true);
       setTimeout(() => {
         navigate("/transactions");
@@ -63,7 +67,7 @@ function LoanReview() {
     { icon: DollarSign, label: "Net Disbursement", value: `$${netAmount.toLocaleString()}`, highlight: false },
     { icon: Calendar, label: "Monthly Payment", value: `$${Math.round(monthlyPayment).toLocaleString()}`, highlight: true },
     { icon: Percent, label: "Interest Rate", value: `${interestRate}%`, highlight: false },
-    { icon: Clock, label: "Loan Tenure", value: `${tenure} ${tenure === 1 ? "year" : "years"}`, highlight: false },
+    { icon: Clock, label: "Loan Tenure", value: `${tenure} ${tenure === 1 ? "year" : "years"}${tenureMonths ? ` ${tenureMonths} ${tenureMonths === 1 ? "month" : "months"}` : ""}`, highlight: false },
     { icon: CreditCard, label: "Total Fees", value: `$${totalFees}`, highlight: false },
   ];
 

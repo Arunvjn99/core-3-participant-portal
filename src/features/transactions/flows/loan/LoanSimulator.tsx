@@ -9,6 +9,7 @@ const LABEL = {
   general: "General Purpose",
   home: "Home Purchase",
   refinance: "Refinance",
+  educational: "Educational",
 } as const;
 
 type LoanTypeId = keyof typeof LABEL;
@@ -17,6 +18,7 @@ const LOAN_TYPE_PILLS: { id: LoanTypeId; label: string }[] = [
   { id: "general", label: "💳 General Purpose" },
   { id: "home", label: "🏠 Home Purchase" },
   { id: "refinance", label: "🔄 Refinance" },
+  { id: "educational", label: "🎓 Educational" },
 ];
 
 const capLabelStyle: CSSProperties = {
@@ -57,13 +59,17 @@ function LoanSimulator() {
   const [amountTouched, setAmountTouched] = useState(false);
   const [amountWarnMax, setAmountWarnMax] = useState(false);
   const [tenure, setTenure] = useState(3);
+  const [tenureMonths, setTenureMonths] = useState(0);
+  const [reasonDetail, setReasonDetail] = useState("");
+  const [takeEntire, setTakeEntire] = useState<"yes" | "no">("no");
 
   /** Amount used for amortization (clamped to product limits). */
   const amortPrincipal = Math.min(maxLoan, Math.max(minLoan, loanAmount));
 
   const interestRate = 0.08;
   const monthlyRate = interestRate / 12;
-  const numPayments = tenure * 12;
+  const extraMonths = tenure >= 5 ? 0 : tenureMonths;
+  const numPayments = tenure * 12 + extraMonths;
   const monthlyPayment =
     (amortPrincipal * monthlyRate * Math.pow(1 + monthlyRate, numPayments)) /
     (Math.pow(1 + monthlyRate, numPayments) - 1);
@@ -139,6 +145,9 @@ function LoanSimulator() {
       selectedLoanPurpose: selectedPurpose,
       amount: amortPrincipal,
       tenure,
+      tenureMonths: extraMonths,
+      reasonDetail: reasonDetail.trim(),
+      takeEntireAmount: takeEntire === "yes",
       loanType: loanTypeId,
       reason: selectedPurpose,
       monthlyPayment: Math.round(monthlyPayment),
@@ -284,6 +293,48 @@ function LoanSimulator() {
                 </div>
               </div>
 
+              {/* Reason for loan (free text) */}
+              <div>
+                <label htmlFor="loan-reason" style={{ ...capLabelStyle, display: "block", marginBottom: 6 }}>Reason for loan</label>
+                <input
+                  id="loan-reason"
+                  type="text"
+                  value={reasonDetail}
+                  maxLength={120}
+                  onChange={(e) => setReasonDetail(e.target.value)}
+                  placeholder="e.g. Educational purpose"
+                  className="w-full bg-white"
+                  style={{ height: 36, border: "1px solid var(--input-border)", borderRadius: 8, padding: "6px 10px", fontSize: 13, color: "var(--text-primary)", outline: "none" }}
+                />
+              </div>
+
+              {/* Take entire available amount */}
+              <fieldset>
+                <legend style={{ ...capLabelStyle, marginBottom: 6 }}>Take the entire available loan amount?</legend>
+                <div className="flex gap-2" role="radiogroup" aria-label="Take the entire available loan amount">
+                  {(["yes", "no"] as const).map((v) => (
+                    <button
+                      key={v}
+                      type="button"
+                      role="radio"
+                      aria-checked={takeEntire === v}
+                      onClick={() => {
+                        setTakeEntire(v);
+                        if (v === "yes") clampAndSetAmount(maxLoan);
+                      }}
+                      style={{
+                        padding: "6px 18px", borderRadius: 8, fontSize: 13, fontWeight: takeEntire === v ? 700 : 500, cursor: "pointer",
+                        border: takeEntire === v ? "1.5px solid var(--color-primary)" : "1px solid var(--input-border)",
+                        background: takeEntire === v ? "var(--color-primary-light)" : "transparent",
+                        color: takeEntire === v ? "var(--color-primary)" : "var(--text-secondary)",
+                      }}
+                    >
+                      {v === "yes" ? "Yes" : "No"}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+
               {/* Loan Amount */}
               <div>
                 <div className="mb-1.5 flex items-center justify-between">
@@ -333,6 +384,7 @@ function LoanSimulator() {
                   <span className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>$1,000</span>
                   <span className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>$10,000 max</span>
                 </div>
+                <p className="mt-1 text-[11px]" style={{ color: "var(--text-secondary)" }}>You can request from ${formatAmount(minLoan)} to ${formatAmount(maxLoan)}, subject to plan rules and regulations.</p>
               </div>
 
               {/* Loan Tenure */}
@@ -356,6 +408,31 @@ function LoanSimulator() {
                   <span className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>5 years max</span>
                 </div>
               </div>
+
+              {/* Additional months */}
+              <div>
+                <label htmlFor="loan-months" style={{ ...capLabelStyle, display: "block", marginBottom: 6 }}>Additional months</label>
+                <select
+                  id="loan-months"
+                  value={tenure >= 5 ? 0 : tenureMonths}
+                  disabled={tenure >= 5}
+                  onChange={(e) => setTenureMonths(Number(e.target.value))}
+                  className="w-full bg-white disabled:opacity-60"
+                  style={{ height: 36, border: "1px solid var(--input-border)", borderRadius: 8, padding: "6px 10px", fontSize: 13, color: "var(--text-primary)", outline: "none" }}
+                >
+                  {Array.from({ length: 12 }, (_, m) => (
+                    <option key={m} value={m}>{m} {m === 1 ? "month" : "months"}</option>
+                  ))}
+                </select>
+                <p className="mt-1 text-[11px]" style={{ color: "var(--text-secondary)" }}>Maximum term is 5 years 0 months.</p>
+              </div>
+
+              {/* Interest rate and processing time */}
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg px-3 py-2" style={{ background: "var(--surface-elevated)" }}>
+                <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>Interest rate (fixed)</span>
+                <span style={{ fontSize: 13, fontWeight: 700 }}>{(interestRate * 100).toFixed(1)}%</span>
+              </div>
+              <p className="text-[11px]" style={{ color: "var(--text-secondary)" }}>The processing time for your loan is about 10 days.</p>
               </div>
             </div>
           </div>

@@ -5,6 +5,7 @@ import { useEnrollment } from '@/core/hooks/useEnrollment'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { ROUTES } from '@/lib/constants'
 import { useEnrollmentSave } from '@/core/hooks/useEnrollmentSave'
+import { useElectionsStore } from '@/features/plan/electionsStore'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { LEGAL } from '@/lib/constants'
 import { getAppDateLocale } from '@/lib/dateLocale'
@@ -103,12 +104,20 @@ export default function ReviewEnrollment() {
   const handleConfirm = useCallback(async () => {
     advanceStep({ confirmedAt: Date.now(), agreed: true }, 'review')
     useEnrollmentDraftStore.getState().setEnrollmentStatus('complete')
+    const split = data.contributionSources
+    const splitTotal = split.preTax + split.roth + split.afterTax || 100
+    useElectionsStore.getState().applyEnrollment({
+      preTaxRate: Math.round(((data.contributionPercent * split.preTax) / splitTotal) * 100) / 100,
+      rothRate: Math.round(((data.contributionPercent * split.roth) / splitTotal) * 100) / 100,
+      autoIncrease: { enabled: data.autoIncrease, amount: data.autoIncreaseAmount, max: data.autoIncreaseMax },
+      risk: data.riskLevel,
+    })
     const result = await saveCompleteEnrollment()
     if (!result.ok) {
       console.warn('[Enrollment] Save failed, proceeding to dashboard anyway:', result.error)
     }
     navigate(ROUTES.POST_ENROLLMENT_DASHBOARD)
-  }, [advanceStep, saveCompleteEnrollment, navigate])
+  }, [advanceStep, saveCompleteEnrollment, navigate, data])
 
   useEffect(() => {
     setStepNav({

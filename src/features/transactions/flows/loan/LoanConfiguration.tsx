@@ -32,6 +32,8 @@ function LoanConfiguration() {
 
   const [repaymentStartDate, setRepaymentStartDate] = useState("2026-05-30");
   const [repaymentMethod, setRepaymentMethod] = useState("payroll");
+  const [repaymentFrequency, setRepaymentFrequency] = useState("monthly");
+  const [maritalStatus, setMaritalStatus] = useState<"" | "married" | "single">("");
   const [periodicPayment, setPeriodicPayment] = useState("100.00");
   const [showAmortization, setShowAmortization] = useState(false);
 
@@ -52,12 +54,14 @@ function LoanConfiguration() {
       disbursementMethod,
       bankAccount,
       repaymentMethod,
+      repaymentFrequency,
+      maritalStatus: maritalStatus as "married" | "single",
       repaymentStartDate,
     });
     navigate("/transactions/loan/fees");
   };
 
-  const canContinue = !(disbursementMethod === "eft" && !bankAccount);
+  const canContinue = !(disbursementMethod === "eft" && !bankAccount) && maritalStatus !== "";
 
   return (
     <div className="space-y-4">
@@ -116,7 +120,7 @@ function LoanConfiguration() {
               },
               {
                 label: "TENURE",
-                value: loanData.tenure != null ? `${loanData.tenure} Years` : "—",
+                value: loanData.tenure != null ? `${loanData.tenure} Years${loanData.tenureMonths ? ` ${loanData.tenureMonths} Months` : ""}` : "—",
               },
             ] as const
           ).map((cell, i) => (
@@ -320,6 +324,52 @@ function LoanConfiguration() {
 
               <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
+                  <label htmlFor="loan-frequency" className="mb-1.5 block text-[12px] font-bold text-inherit">Loan repayment frequency <span aria-hidden>*</span></label>
+                  <select
+                    id="loan-frequency"
+                    value={repaymentFrequency}
+                    onChange={(e) => setRepaymentFrequency(e.target.value)}
+                    className="h-[42px] w-full rounded-[10px] border bg-transparent px-3 text-[14px] font-semibold outline-none"
+                    style={{ borderColor: "var(--c-border-color)", color: "inherit" }}
+                  >
+                    <option value="monthly">Monthly</option>
+                    <option value="semimonthly">Twice a month</option>
+                    <option value="biweekly">Every two weeks</option>
+                    <option value="weekly">Weekly</option>
+                  </select>
+                  <p className="mt-1 text-[11px] font-medium opacity-80">
+                    {repaymentMethod === "payroll" ? "Repayments are deducted automatically from your paycheck." : "You choose how often payments are made."}
+                  </p>
+                </div>
+                <fieldset>
+                  <legend className="mb-1.5 block text-[12px] font-bold text-inherit">Marital status <span aria-hidden>*</span></legend>
+                  <div className="flex gap-2" role="radiogroup" aria-label="Marital status">
+                    {(["married", "single"] as const).map((v) => (
+                      <button
+                        key={v}
+                        type="button"
+                        role="radio"
+                        aria-checked={maritalStatus === v}
+                        onClick={() => setMaritalStatus(v)}
+                        className="h-[42px] flex-1 rounded-[10px] border text-[14px] font-semibold transition-all"
+                        style={{
+                          borderWidth: maritalStatus === v ? 2 : 1,
+                          borderColor: maritalStatus === v ? "var(--color-primary)" : "var(--c-border-color)",
+                          background: maritalStatus === v ? "var(--color-primary-light)" : undefined,
+                        }}
+                      >
+                        {v === "married" ? "Married" : "Single"}
+                      </button>
+                    ))}
+                  </div>
+                  {maritalStatus === "married" && (
+                    <p className="mt-1 text-[11px] font-medium opacity-80">Your spouse may need to consent to this loan. You'll see this in the documents step.</p>
+                  )}
+                </fieldset>
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
                   <label className="mb-1.5 block text-[12px] font-bold text-inherit">Periodic Payment</label>
                   <div
                     className="flex items-center overflow-hidden rounded-[10px] border"
@@ -402,7 +452,7 @@ function LoanConfiguration() {
                     [
                       { k: "Total repayment", v: `$${(loanData.totalPayback ?? 5200).toLocaleString()}` },
                       { k: "Total interest", v: `$${(loanData.totalInterest ?? 200).toLocaleString()}` },
-                      { k: "Payments", v: String((loanData.tenure ?? 3) * 12) },
+                      { k: "Payments", v: String((loanData.tenure ?? 3) * 12 + (loanData.tenureMonths ?? 0)) },
                     ] as const
                   ).map((row) => (
                     <div

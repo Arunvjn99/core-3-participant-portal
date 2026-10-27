@@ -12,6 +12,9 @@ interface Fund {
 interface TransferData {
   transferType?: string
   funds?: Fund[]
+  method?: 'dollar' | 'percent' | 'units'
+  sourceWise?: boolean
+  amount?: number
 }
 
 interface TransferFlowContextType {

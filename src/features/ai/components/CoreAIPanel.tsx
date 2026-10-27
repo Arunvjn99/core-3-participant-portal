@@ -1149,6 +1149,18 @@ export function CoreAIPanel() {
     [flowState, processResult],
   )
 
+  // Questions handed over from elsewhere in the portal (e.g. "Ask CORE AI about this" in a glossary popover)
+  const pendingQuestion = useAIStore((s) => s.pendingQuestion)
+  useEffect(() => {
+    if (!isChatOpen || !pendingQuestion) return
+    // Deferred so the panel has rendered before the question appears
+    const id = setTimeout(() => {
+      const q = useAIStore.getState().takePendingQuestion()
+      if (q) void sendMessage(q)
+    }, 0)
+    return () => clearTimeout(id)
+  }, [isChatOpen, pendingQuestion, sendMessage])
+
   const handleStructured = useCallback(
     (payload: CoreAIStructuredPayload) => {
       setIsTyping(true)

@@ -7,6 +7,9 @@ interface RolloverData {
   previousEmployer?: string
   planAdministrator?: string
   accountNumber?: string
+  trusteeName?: string
+  trusteePhone?: string
+  trusteeAddress?: string
   estimatedAmount?: number
   rolloverType?: string
   isCompatible?: boolean

@@ -19,10 +19,13 @@ function WithdrawalType() {
   const types = [
     { id: "hardship", label: "Hardship Withdrawal", description: "For immediate and heavy financial needs such as medical expenses, preventing eviction, or funeral expenses. Documentation required.", warning: "May be subject to 10% early withdrawal penalty if under age 59½", warningColor: "var(--status-warning-text)" },
     { id: "in-service", label: "In-Service Withdrawal", description: "Available for participants who have reached age 59½ while still employed. No early withdrawal penalty applies.", warning: "Only available if you are age 59½ or older", warningColor: "var(--color-primary)" },
-    { id: "termination", label: "Termination Withdrawal", description: "Full or partial distribution available after separation from service. You may also choose to roll over funds to another plan or IRA.", warning: "Requires proof of separation from employment", warningColor: "var(--text-secondary)" },
+    { id: "termination", label: "Separation from Service (Termination)", description: "Full or partial distribution available after separation from service. You may also choose to roll over funds to another plan or IRA.", warning: "Requires proof of separation from employment", warningColor: "var(--text-secondary)" },
     { id: "rmd", label: "Required Minimum Distribution (RMD)", description: "Mandatory distribution required by law beginning at age 73. Failure to take RMDs may result in a 25% excise tax on the shortfall.", warning: "Calculated based on your account balance and life expectancy", warningColor: "var(--status-success-text)" },
     { id: "one-time", label: "One-Time Withdrawal", description: "Standard withdrawal for any purpose. Taxes and penalties may apply depending on your age and account type.", warning: undefined, warningColor: "" },
     { id: "full-balance", label: "Full Balance Withdrawal", description: "Withdraw your entire vested account balance. This will close your retirement account with this plan.", warning: "Warning: This action cannot be undone", warningColor: "var(--status-danger-text)" },
+    { id: "permissible", label: "Permissible Withdrawal", description: "Withdrawals of certain contribution sources that your plan allows at any time, such as after-tax or rollover money.", warning: undefined, warningColor: "", available: false },
+    { id: "force-out", label: "Force-Out Distribution", description: "A distribution your plan makes for you when a small balance remains after you leave the company.", warning: undefined, warningColor: "", available: false },
+    { id: "qbad", label: "Qualified Birth or Adoption Distribution", description: "Up to $5,000 within one year of a child's birth or adoption, without the 10% early withdrawal penalty.", warning: "Documentation of the birth or adoption is required", warningColor: "var(--text-secondary)", available: false },
   ];
 
   return (
@@ -33,6 +36,7 @@ function WithdrawalType() {
         <div className="space-y-3">
           {types.map((type, idx) => {
             const isSelected = selectedType === type.id;
+            const unavailable = "available" in type && type.available === false;
             return (
               <motion.div
                 key={type.id}
@@ -42,7 +46,7 @@ function WithdrawalType() {
               >
                 <label
                   htmlFor={type.id}
-                  className="block transition-all duration-200 cursor-pointer"
+                  className={unavailable ? "block transition-all duration-200 cursor-not-allowed opacity-60" : "block transition-all duration-200 cursor-pointer"}
                   style={{
                     padding: "20px 24px", borderRadius: 16,
                     border: isSelected ? "1.5px solid var(--color-primary)" : "1.5px solid var(--border-default)",
@@ -50,10 +54,15 @@ function WithdrawalType() {
                   }}
                 >
                   <div className="flex items-start space-x-3">
-                    <RadioGroupItem value={type.id} id={type.id} className="mt-0.5" />
+                    <RadioGroupItem value={type.id} id={type.id} disabled={unavailable} className="mt-0.5" />
                     <div className="flex-1">
                       <span style={{ fontSize: 14, fontWeight: 700, color: "inherit", display: "block" }}>
                         {type.label}
+                        {unavailable && (
+                          <span className="ml-2 rounded-full bg-gray-100 px-2 py-0.5 align-middle text-[11px] font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                            Not available
+                          </span>
+                        )}
                       </span>
                       <p style={{ fontSize: 13, fontWeight: 500, color: "inherit", marginTop: 6, lineHeight: "20px" }}>
                         {type.description}

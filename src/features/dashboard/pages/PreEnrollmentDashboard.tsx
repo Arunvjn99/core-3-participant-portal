@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, useReducedMotion, AnimatePresence, useInView } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ChevronRight, Sparkles } from 'lucide-react'
+import { ChevronRight, Sparkles, Zap } from 'lucide-react'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { useAIStore } from '@/core/store/aiStore'
 import { useAuth } from '@/core/hooks/useAuth'
@@ -652,6 +652,18 @@ export function PreEnrollmentDashboard() {
                   {t('hero.learn_plan')}
                 </button>
               </div>
+
+              <p className="flex flex-wrap items-center gap-x-2 text-sm text-slate-500 dark:text-slate-400">
+                <span>{t('hero.one_click_hint')}</span>
+                <button
+                  type="button"
+                  onClick={() => navigate('/enrollment/quick')}
+                  className="brand-text inline-flex items-center gap-1 font-semibold hover:underline"
+                >
+                  <Zap className="h-3.5 w-3.5" aria-hidden />
+                  {t('hero.one_click')}
+                </button>
+              </p>
             </motion.div>
 
             <motion.div

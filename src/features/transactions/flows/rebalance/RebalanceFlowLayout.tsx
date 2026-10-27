@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { useState, createContext, useContext, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import FlowProgress from '../../components/FlowProgress'
+import type { SourceId } from '@/features/portfolio/portfolioData'
 
 interface Fund {
   name: string
@@ -12,6 +13,8 @@ interface Fund {
 }
 
 interface RebalanceData {
+  /** Contribution sources the participant chose to rebalance */
+  sources?: SourceId[]
   funds?: Fund[]
 }
 
@@ -31,10 +34,11 @@ export function useRebalanceFlow() {
 }
 
 const REBALANCE_STEP_DEFS = [
-  { number: 1, path: '/transactions/rebalance', stepKey: 'current' },
-  { number: 2, path: '/transactions/rebalance/adjust', stepKey: 'target' },
-  { number: 3, path: '/transactions/rebalance/trades', stepKey: 'trades' },
-  { number: 4, path: '/transactions/rebalance/review', stepKey: 'review' },
+  { number: 1, path: '/transactions/rebalance', stepKey: 'sources' },
+  { number: 2, path: '/transactions/rebalance/current', stepKey: 'current' },
+  { number: 3, path: '/transactions/rebalance/adjust', stepKey: 'target' },
+  { number: 4, path: '/transactions/rebalance/trades', stepKey: 'trades' },
+  { number: 5, path: '/transactions/rebalance/review', stepKey: 'review' },
 ] as const
 
 function RebalanceFlowLayout() {

@@ -1,4 +1,5 @@
 import { Checkbox } from "../../components/ui/checkbox";
+import { useTransactionTracker } from "../../tracking/trackerStore";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useWithdrawalFlow } from "./WithdrawalFlowLayout";
@@ -8,6 +9,7 @@ import { motion } from "framer-motion";
 function WithdrawalReview() {
   const navigate = useNavigate();
   const { withdrawalData } = useWithdrawalFlow();
+  const trackTransaction = useTransactionTracker((s) => s.track);
   const [agreed, setAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -23,6 +25,7 @@ function WithdrawalReview() {
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
+      trackTransaction({ type: "withdrawal", amount, description: "Withdrawal", method: withdrawalData.paymentMethod === "check" ? "check" : "eft" });
       setSubmitted(true);
       setTimeout(() => {
         navigate("/transactions");

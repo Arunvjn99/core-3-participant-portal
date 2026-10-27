@@ -19,6 +19,9 @@ function RolloverPlanDetails() {
   const [previousEmployer, setPreviousEmployer] = useState("");
   const [planAdministrator, setPlanAdministrator] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
+  const [trusteeName, setTrusteeName] = useState("");
+  const [trusteePhone, setTrusteePhone] = useState("");
+  const [trusteeAddress, setTrusteeAddress] = useState("");
   const [estimatedAmount, setEstimatedAmount] = useState("");
   const [rolloverType, setRolloverType] = useState<string>("");
 
@@ -44,6 +47,8 @@ function RolloverPlanDetails() {
     previousEmployer.trim() !== "" &&
     planAdministrator.trim() !== "" &&
     accountNumber.trim() !== "" &&
+    trusteeName.trim() !== "" &&
+    trusteeAddress.trim() !== "" &&
     estimatedAmount.trim() !== "" &&
     rolloverType !== "";
 
@@ -52,6 +57,9 @@ function RolloverPlanDetails() {
       previousEmployer,
       planAdministrator,
       accountNumber,
+      trusteeName: trusteeName.trim(),
+      trusteePhone: trusteePhone.trim(),
+      trusteeAddress: trusteeAddress.trim(),
       estimatedAmount: parseFloat(estimatedAmount.replace(/,/g, "")) || 0,
       rolloverType });
     navigate("/transactions/rollover/validation");
@@ -205,6 +213,67 @@ function RolloverPlanDetails() {
                   className="w-full pl-8 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
                 />
               </div>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+
+      {/* Trustee / Custodian */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.12 }}
+      >
+        <Card
+          className="p-6 rounded-2xl border-gray-100 dark:border-gray-700/80"
+          style={{ boxShadow: "var(--shadow-elevated)" }}
+        >
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Trustee / Custodian details</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">
+            Who holds the money today and where the check or transfer should come from
+          </p>
+          <div className="space-y-5">
+            <div>
+              <label htmlFor="ro-trustee-name" className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                <Building2 className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                Trustee / Custodian name <span aria-hidden>*</span>
+              </label>
+              <input
+                id="ro-trustee-name"
+                type="text"
+                value={trusteeName}
+                onChange={(e) => setTrusteeName(e.target.value)}
+                placeholder="e.g., Example Trust Company"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+              />
+            </div>
+            <div>
+              <label htmlFor="ro-trustee-phone" className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                <Hash className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                Trustee phone
+              </label>
+              <input
+                id="ro-trustee-phone"
+                type="tel"
+                value={trusteePhone}
+                onChange={(e) => setTrusteePhone(e.target.value)}
+                placeholder="e.g., 800-555-0100"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+              />
+            </div>
+            <div>
+              <label htmlFor="ro-trustee-address" className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                <Building2 className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                Trustee address <span aria-hidden>*</span>
+              </label>
+              <input
+                id="ro-trustee-address"
+                type="text"
+                value={trusteeAddress}
+                onChange={(e) => setTrusteeAddress(e.target.value)}
+                placeholder="Street, city, state, zip"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+              />
             </div>
           </div>
         </Card>

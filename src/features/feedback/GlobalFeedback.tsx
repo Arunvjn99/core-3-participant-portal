@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { MessageSquarePlus, Star, X } from 'lucide-react'
@@ -7,6 +7,7 @@ import { useFeedbackUiStore } from '@/core/store/feedbackUiStore'
 import { submitFeedback } from '@/features/feedback/submitFeedback'
 import { Button } from '@/design-system/components/Button'
 import { cn } from '@/lib/cn'
+import { router } from '@/router'
 
 const TOAST_MS = 4200
 
@@ -210,6 +211,8 @@ export function GlobalFeedback() {
       document.body
     )
 
+  const onQuickEnrol = useSyncExternalStore(router.subscribe, () => router.state.location.pathname === '/enrollment/quick')
+
   return (
     <>
       <button
@@ -220,6 +223,8 @@ export function GlobalFeedback() {
         }}
         className={cn(
           'fixed bottom-[5.5rem] right-6 z-[60] flex h-12 items-center gap-2 rounded-full px-4',
+          // One-click enrolment has its own message bar and a summary panel that this would cover
+          onQuickEnrol && 'hidden',
           'border border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-primary)] shadow-[var(--shadow-card)]',
           'transition-transform hover:scale-105 hover:shadow-[var(--shadow-dropdown)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)]',
           'dark:border-[var(--border-strong)]'

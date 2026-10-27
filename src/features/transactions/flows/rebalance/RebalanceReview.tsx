@@ -1,4 +1,5 @@
 import { Card } from "../../components/ui/card";
+import { useTransactionTracker } from "../../tracking/trackerStore";
 import { Checkbox } from "../../components/ui/checkbox";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -16,6 +17,7 @@ const COLORS = ["var(--chart-blue)", "var(--chart-teal)", "var(--chart-green)", 
 function RebalanceReview() {
   const navigate = useNavigate();
   const { rebalanceData } = useRebalanceFlow();
+  const trackTransaction = useTransactionTracker((s) => s.track);
   const [agreed, setAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -27,6 +29,7 @@ function RebalanceReview() {
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
+      trackTransaction({ type: "rebalance", description: "Portfolio rebalance" });
       setSubmitted(true);
       setTimeout(() => navigate("/transactions"), 2500);
     }, 1800);

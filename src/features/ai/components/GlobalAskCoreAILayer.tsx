@@ -32,7 +32,10 @@ export function GlobalAskCoreAILayer() {
   const enrollmentStepFlow =
     location.pathname.startsWith('/enrollment/') && !location.pathname.includes('/enrollment/success')
 
-  const hideFloating = isChatOpen || isSearchOpen || feedbackModalOpen || appBlockingModal
+  // One-click enrolment is itself a CORE AI conversation, with its own message box
+  const ownConversation = location.pathname === '/enrollment/quick'
+
+  const hideFloating = isChatOpen || isSearchOpen || feedbackModalOpen || appBlockingModal || ownConversation
 
   const pill = !hideFloating && portalReady && (
     <button

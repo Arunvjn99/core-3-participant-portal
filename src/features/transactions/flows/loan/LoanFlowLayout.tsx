@@ -6,8 +6,13 @@ import FlowProgress from '../../components/FlowProgress'
 interface LoanData {
   amount?: number
   tenure?: number
+  /** Extra months on top of whole years (0–11) */
+  tenureMonths?: number
+  reasonDetail?: string
+  takeEntireAmount?: boolean
+  maritalStatus?: 'married' | 'single'
   selectedLoanType?: string
-  selectedLoanTypeId?: 'general' | 'home' | 'refinance'
+  selectedLoanTypeId?: 'general' | 'home' | 'refinance' | 'educational'
   selectedLoanPurpose?: string
   monthlyPayment?: number
   totalInterest?: number

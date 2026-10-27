@@ -17,6 +17,7 @@ import {
   Globe,
   ChevronDown,
   Check,
+  FileText,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { LANGUAGE_MENU_LANGS, type LanguageMenuLang } from '@/core/i18n'
@@ -28,6 +29,9 @@ import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { useBrandTheme } from '@/core/theme/BrandThemeContext'
 import AppFooter from '@/features/dashboard/components/AppFooter'
 import { supabase } from '@/core/supabase'
+import { useNotifications } from '@/features/notifications/useNotifications'
+import { SEVERITY_STYLE } from '@/features/notifications/severityStyle'
+import { getAppDateLocale } from '@/lib/dateLocale'
 import { ROUTES } from '@/lib/constants'
 import CoreLogo from '@/components/ui/CoreLogo'
 
@@ -45,6 +49,7 @@ function getNavItems(isEnrolled: boolean) {
     },
     { labelKey: 'nav.transactions', href: '/transactions', icon: ArrowLeftRight },
     { labelKey: 'nav.investments', href: '/investments', icon: TrendingUp },
+    { labelKey: 'nav.documents', href: '/documents', icon: FileText },
     { labelKey: 'nav.profile', href: '/profile', icon: User },
   ]
 }
@@ -57,21 +62,6 @@ function isNavActive(href: string, pathname: string): boolean {
     return pathname.startsWith('/enrollment')
   return pathname.startsWith(href)
 }
-
-const HEADER_NOTIFICATIONS = [
-  {
-    id: 'loan',
-    titleKey: 'nav.notification_loan_title',
-    descKey: 'nav.notification_loan_desc',
-    href: '/transactions/loan/documents',
-  },
-  {
-    id: 'stmt',
-    titleKey: 'nav.notification_stmt_title',
-    descKey: 'nav.notification_stmt_desc',
-    href: '/transactions',
-  },
-] as const
 
 export function AppShell() {
   const { theme } = useBrandTheme()
@@ -90,7 +80,9 @@ export function AppShell() {
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [langMenuOpen, setLangMenuOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
-  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true)
+  const notifications = useNotifications()
+  const hasUnreadNotifications = notifications.unreadCount > 0
+  const fmtNotifDate = (ms: number) => new Date(ms).toLocaleDateString(getAppDateLocale(), { month: 'short', day: 'numeric' })
   const userMenuRef = useRef<HTMLDivElement>(null)
   const langMenuRef = useRef<HTMLDivElement>(null)
   const notificationsRef = useRef<HTMLDivElement>(null)
@@ -300,7 +292,7 @@ export function AppShell() {
                   onClick={() => {
                     setNotificationsOpen((prev) => {
                       const next = !prev
-                      if (next) setHasUnreadNotifications(false)
+                      if (next) notifications.markAllRead()
                       return next
                     })
                     setLangMenuOpen(false)
@@ -330,18 +322,28 @@ export function AppShell() {
                       <p className="text-sm font-semibold text-text-primary">{t('nav.notifications_title')}</p>
                     </div>
                     <ul className="max-h-[min(60vh,16rem)] divide-y divide-border-default overflow-y-auto">
-                      {HEADER_NOTIFICATIONS.map((n) => (
-                        <li key={n.id}>
-                          <Link
-                            to={n.href}
-                            className="block px-4 py-3 transition-colors hover:bg-surface-elevated"
-                            onClick={() => setNotificationsOpen(false)}
-                          >
-                            <p className="text-sm font-medium text-text-primary">{t(n.titleKey)}</p>
-                            <p className="mt-0.5 text-xs leading-snug text-text-secondary">{t(n.descKey)}</p>
-                          </Link>
-                        </li>
-                      ))}
+                      {notifications.items.length === 0 && (
+                        <li className="px-4 py-6 text-center text-xs text-text-muted">{t('alerts.empty')}</li>
+                      )}
+                      {notifications.items.map((n) => {
+                        const { title, body } = n.render(t, fmtNotifDate)
+                        const { icon, Icon } = SEVERITY_STYLE[n.severity]
+                        return (
+                          <li key={n.id}>
+                            <Link
+                              to={n.href ?? '/transactions'}
+                              className="flex gap-2.5 px-4 py-3 transition-colors hover:bg-surface-elevated"
+                              onClick={() => setNotificationsOpen(false)}
+                            >
+                              <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${icon}`} aria-hidden />
+                              <span className="min-w-0">
+                                <span className="block text-sm font-medium text-text-primary">{title}</span>
+                                {body && <span className="mt-0.5 block text-xs leading-snug text-text-secondary">{body}</span>}
+                              </span>
+                            </Link>
+                          </li>
+                        )
+                      })}
                     </ul>
                     <div className="border-t border-border-default px-3 py-2">
                       <Link
@@ -469,6 +471,22 @@ export function AppShell() {
                         onClick={() => setUserMenuOpen(false)}
                       >
                         {t('nav.settings')}
+                      </Link>
+                      <Link
+                        role="menuitem"
+                        to="/service-requests"
+                        className="block px-4 py-2.5 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-200/60 dark:text-white dark:hover:bg-white/10"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        {t('nav.service_requests')}
+                      </Link>
+                      <Link
+                        role="menuitem"
+                        to="/profile?section=security"
+                        className="block px-4 py-2.5 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-200/60 dark:text-white dark:hover:bg-white/10"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        {t('nav.change_password')}
                       </Link>
                     </div>
                     <div className="border-t border-slate-200 dark:border-gray-700" />
