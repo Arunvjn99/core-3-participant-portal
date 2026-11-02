@@ -33,36 +33,39 @@ export function EnrollmentShell() {
 
   return (
     <div className={`flex min-h-screen flex-col dark:bg-gray-950 ${isQuick ? 'bg-[#f5f6f8]' : 'bg-[var(--surface-shell)]'}`}>
-      <div className="flex h-12 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 dark:border-gray-700 dark:bg-gray-900 sm:px-6">
-        <div className="flex items-center gap-3">
-          {activeStep > 1 && !location.pathname.includes('/enrollment/quick') && (
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('enrollment.shell.back')}</span>
-            </button>
-          )}
-          <span className="text-sm text-gray-400 dark:text-gray-500">{t('enrollment.shell.title')}</span>
-          {activeStep <= STEPPER_STEPS.length && !location.pathname.includes('/enrollment/quick') && (
-            <>
-              <span className="text-sm text-gray-300 dark:text-gray-600">/</span>
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {STEPPER_STEPS[activeStep - 1] ? t(`enrollment.steps.${STEPPER_STEPS[activeStep - 1].key}.label`) : ''}
-              </span>
-            </>
-          )}
+      {/* The one-click page has its own header with steps, Start over and Save & exit */}
+      {!isQuick && (
+        <div className="flex h-12 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 dark:border-gray-700 dark:bg-gray-900 sm:px-6">
+          <div className="flex items-center gap-3">
+            {activeStep > 1 && (
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">{t('enrollment.shell.back')}</span>
+              </button>
+            )}
+            <span className="text-sm text-gray-400 dark:text-gray-500">{t('enrollment.shell.title')}</span>
+            {activeStep <= STEPPER_STEPS.length && (
+              <>
+                <span className="text-sm text-gray-300 dark:text-gray-600">/</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {STEPPER_STEPS[activeStep - 1] ? t(`enrollment.steps.${STEPPER_STEPS[activeStep - 1].key}.label`) : ''}
+                </span>
+              </>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate(ROUTES.PRE_ENROLLMENT_DASHBOARD)}
+            className="brand-text text-sm font-medium transition-colors hover:opacity-80"
+          >
+            {t('enrollment.shell.save_exit')}
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => navigate(ROUTES.PRE_ENROLLMENT_DASHBOARD)}
-          className="brand-text text-sm font-medium transition-colors hover:opacity-80"
-        >
-          {t('enrollment.shell.save_exit')}
-        </button>
-      </div>
+      )}
 
       {showStepper && (
         <div className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">

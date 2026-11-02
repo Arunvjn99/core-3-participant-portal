@@ -1,38 +1,24 @@
-import { useState, useRef, useEffect } from 'react'
-import { motion, useReducedMotion, AnimatePresence, useInView } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import { AnimatePresence, motion, useInView, useReducedMotion } from 'framer-motion'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ChevronRight, Sparkles, Zap } from 'lucide-react'
+import { ArrowRight, ArrowUp, ChevronRight, Pause, Play, RotateCcw, Sparkles, Zap } from 'lucide-react'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { useAIStore } from '@/core/store/aiStore'
 import { useAuth } from '@/core/hooks/useAuth'
 import { useUser } from '@/core/hooks/useUser'
 import { EnrollmentPersonalizationModal } from '../components/EnrollmentPersonalizationModal'
+import { HeroRideScene } from '../components/HeroRideScene'
 import AdvisorModal from '@/features/advisors/AdvisorModal'
+import { PLAN_CONFIG } from '@/features/enrollment/agent/planConfig'
 import { formatFirstNameForDisplay, getAuthenticatedFirstName } from '@/lib/userDisplayName'
 
 /**
- * Hero illustration is a transparent-background animation, which no single format
- * covers: WebKit cannot decode VP9 alpha in WebM, and Chromium cannot decode the
- * HEVC alpha layer in MP4. Each engine therefore gets the encoding it can render,
- * with the still frame as the universal fallback.
+ * The dashboard before enrollment. A first-time user has no data worth charting, so the banner carries one message and one
+ * action, with the reasons and the ways to get help below it.
  */
-const HERO_MEETING_VIDEO_WEBM = '/media/hero-meeting.webm'
-const HERO_MEETING_VIDEO_MP4 = '/media/hero-meeting.mp4'
-const HERO_MEETING_POSTER = '/media/hero-meeting-poster.png'
 
-const LEARNING_CARD_ILLUSTRATION =
-  'https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/Learning%20card.png'
-
-/** Every iOS browser is WebKit, so platform matters here rather than the browser brand. */
-function prefersHevcAlpha(): boolean {
-  if (typeof navigator === 'undefined') return false
-  const ua = navigator.userAgent
-  const isIOS =
-    /iP(hone|ad|od)/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-  const isSafari = /safari/i.test(ua) && !/chrome|chromium|crios|fxios|edg|android/i.test(ua)
-  return isIOS || isSafari
-}
+const ease = [0.22, 1, 0.36, 1] as const
 
 type DayPeriod = 'morning' | 'afternoon' | 'evening'
 
@@ -43,511 +29,244 @@ function getLocalDayPeriod(): DayPeriod {
   return 'evening'
 }
 
-const HERO_TIME_GREETING_KEYS: Record<
-  DayPeriod,
-  { generic: string; withName: string }
-> = {
+const HERO_TIME_GREETING_KEYS: Record<DayPeriod, { generic: string; withName: string }> = {
   morning: { generic: 'hero.greeting_morning', withName: 'hero.greeting_morning_with_name' },
   afternoon: { generic: 'hero.greeting_afternoon', withName: 'hero.greeting_afternoon_with_name' },
   evening: { generic: 'hero.greeting_evening', withName: 'hero.greeting_evening_with_name' },
 }
 
-// ─── Typing hook ────────────────────────────────────────────────────────────
-function useTypingEffect(text: string, speed = 45, pause = 2200) {
-  const [displayed, setDisplayed] = useState('')
-  const [phase, setPhase] = useState<'typing' | 'hold' | 'erasing'>('typing')
-  useEffect(() => {
-    let timeout: ReturnType<typeof setTimeout>
-    if (phase === 'typing') {
-      if (displayed.length < text.length) {
-        timeout = setTimeout(() => setDisplayed(text.slice(0, displayed.length + 1)), speed)
-      } else {
-        timeout = setTimeout(() => setPhase('hold'), pause)
-      }
-    } else if (phase === 'hold') {
-      timeout = setTimeout(() => setPhase('erasing'), 600)
-    } else {
-      if (displayed.length > 0) {
-        timeout = setTimeout(() => setDisplayed(displayed.slice(0, -1)), speed * 0.6)
-      } else {
-        timeout = setTimeout(() => setPhase('typing'), 500)
-      }
-    }
-    return () => clearTimeout(timeout)
-  }, [displayed, phase, text, speed, pause])
-  return { displayed, isTyping: phase === 'typing' }
+const ADVISORS = [
+  { name: 'Sarah Jenkins', initials: 'SJ', from: '#2563eb', to: '#1d4ed8' },
+  { name: 'Marcus Chen', initials: 'MC', from: '#047857', to: '#065f46' },
+  { name: 'Priya Patel', initials: 'PP', from: '#b45309', to: '#92400e' },
+]
+
+/** Makes a whole card respond to its one real button, so it stays one stop for keyboards and screen readers. */
+const stretchedAction =
+  "after:absolute after:inset-0 after:rounded-[20px] focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-primary"
+/** Visible on the sky, the scene and the brand color alike. */
+const bannerFocus = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0B1533] dark:focus-visible:outline-white'
+
+/** Reveals a card the first time it scrolls into view. */
+function Reveal({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+  const reduce = useReducedMotion()
+  return (
+    <motion.div
+      initial={reduce ? false : { opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.5, delay, ease }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  )
 }
 
-// ─── LearningCard ────────────────────────────────────────────────────────────
-function LearningCard({
-  t,
-  prefersReducedMotion,
-  onLearnMore,
-}: {
-  t: (key: string) => string
-  prefersReducedMotion: boolean
-  onLearnMore: () => void
-}) {
-  const cardRef = useRef<HTMLDivElement>(null)
-  const inView = useInView(cardRef, { once: true, margin: '-60px' })
+/** Plays while a card is on screen, holds while it's hovered or focused, and stays still for people who prefer less motion. */
+function useCardMotion<T extends HTMLElement>() {
+  const ref = useRef<T>(null)
+  const reduce = useReducedMotion()
+  const inView = useInView(ref, { margin: '-60px' })
+  const [held, setHeld] = useState(false)
+  return {
+    ref,
+    reduce,
+    running: inView && !reduce && !held,
+    hold: { onMouseEnter: () => setHeld(true), onMouseLeave: () => setHeld(false), onFocus: () => setHeld(true), onBlur: () => setHeld(false) },
+  }
+}
 
-  const items = [t('learning.item1'), t('learning.item2'), t('learning.item3')]
+// ─── Ask Core AI ─────────────────────────────────────────────────────────────
+interface ChatTurn {
+  q: string
+  a: string
+}
+
+type ExchangePhase = 'arriving' | 'typing' | 'thinking' | 'answering' | 'reading'
+interface Exchange {
+  turn: number
+  phase: ExchangePhase
+  count: number
+}
+
+const EXCHANGE_DELAY: Record<ExchangePhase, number> = { arriving: 350, typing: 26, thinking: 650, answering: 45, reading: 2200 }
+
+function nextExchange(e: Exchange, turns: ChatTurn[]): Exchange {
+  const { q, a } = turns[e.turn % turns.length]
+  if (e.phase === 'arriving') return { ...e, phase: 'typing', count: 0 }
+  if (e.phase === 'typing') return e.count < q.length ? { ...e, count: e.count + 1 } : { ...e, phase: 'thinking', count: 0 }
+  if (e.phase === 'thinking') return { ...e, phase: 'answering', count: 1 }
+  if (e.phase === 'answering') return e.count < a.split(' ').length ? { ...e, count: e.count + 1 } : { ...e, phase: 'reading', count: 0 }
+  return { turn: e.turn + 1, phase: 'arriving', count: 0 }
+}
+
+/** One question and its answer. The answer's words are all in place from the start and fade in, so nothing reflows as they arrive. */
+function ChatMessages({ turn, state, running }: { turn: ChatTurn; state: Exchange; running: boolean }) {
+  const reduce = useReducedMotion()
+  const { phase, count } = state
+  const sent = phase === 'thinking' || phase === 'answering' || phase === 'reading'
+  const words = turn.a.split(' ')
+  const shown = phase === 'thinking' ? 0 : phase === 'answering' ? count : words.length
+  const bubbleIn = reduce ? false : { opacity: 0, y: 8 }
 
   return (
-    <div
-      ref={cardRef}
-      className="relative min-h-[400px] overflow-hidden rounded-[20px] text-white"
-      style={{ background: 'linear-gradient(135deg, #5B8CEF 0%, #3B6FE0 100%)' }}
+    <motion.div
+      exit={reduce ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, y: -10, transition: { duration: 0.25, ease } }}
+      className="absolute inset-x-0 top-0 flex flex-col gap-2"
     >
-      {/* Layered shine + noise */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_10%_15%,rgba(255,255,255,0.25),transparent_50%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_90%_80%,rgba(59,111,224,0.4),transparent_55%)]" />
-
-      {/* Illustration — full card height, anchored bottom-right */}
-      <motion.div
-        className="pointer-events-none absolute inset-y-0 right-0 hidden w-[min(52%,440px)] items-end justify-end pr-2 lg:flex"
-        initial={prefersReducedMotion ? false : { opacity: 0, x: 20, scale: 0.96 }}
-        animate={inView ? { opacity: 1, x: 0, scale: 1 } : {}}
-        transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <motion.div
-          className="h-full w-full origin-bottom-right scale-[1.14]"
-          animate={prefersReducedMotion ? {} : { y: [0, -6, 0] }}
-          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <img
-            src={LEARNING_CARD_ILLUSTRATION}
-            alt={t('learning.illustration_alt')}
-            width={440}
-            height={400}
-            className="h-full w-full object-contain object-bottom object-right drop-shadow-2xl"
-            loading="lazy"
-            decoding="async"
-          />
-        </motion.div>
-      </motion.div>
-
-      <div className="relative z-10 flex min-h-[400px] flex-col justify-between gap-6 px-10 py-8 lg:max-w-[54%]">
-        {/* ── Text column ── */}
-        <div className="flex flex-1 flex-col justify-between gap-6">
-          {/* Top: badge + heading + subtitle */}
-          <div className="flex flex-col gap-4">
-            <motion.div
-              initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-              className="flex flex-col gap-2"
-            >
-              <h2 className="text-[2rem] font-extrabold leading-[1.1] tracking-tight">
-                {t('learning.title_line1')}
-                <br />
-                {t('learning.title_line2')}
-              </h2>
-              <p className="max-w-sm text-[13.5px] leading-relaxed text-white/75">
-                {t('learning.subtitle')}
-              </p>
-            </motion.div>
-          </div>
-
-          {/* Middle: checklist items — staggered */}
-          <div className="flex flex-col gap-2.5">
-            {items.map((item, i) => (
-              <motion.div
-                key={i}
-                initial={prefersReducedMotion ? false : { opacity: 0, x: -16 }}
-                animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.42, delay: 0.22 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                className="flex items-center gap-2.5"
-              >
-                <motion.div
-                  initial={prefersReducedMotion ? false : { scale: 0 }}
-                  animate={inView ? { scale: 1 } : {}}
-                  transition={{ duration: 0.3, delay: 0.28 + i * 0.1, ease: [0.34, 1.56, 0.64, 1] }}
-                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/25"
-                >
-                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                    <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </motion.div>
-                <span className="text-[13px] font-medium text-white/90">{item}</span>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Bottom: CTA */}
-          <motion.div
-            initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.45, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      {sent && (
+        <>
+          <motion.p
+            initial={bubbleIn}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, ease }}
+            className="max-w-[85%] self-end rounded-2xl rounded-br-md bg-primary px-3.5 py-2.5 text-[13px] font-semibold leading-snug text-white dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)]"
           >
-            <button
-              type="button"
-              onClick={onLearnMore}
-              className="group inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-5 py-2.5 text-[13px] font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/25 hover:border-white/50 active:scale-[0.97]"
+            {turn.q}
+          </motion.p>
+          <motion.div
+            initial={bubbleIn}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, ease, delay: reduce ? 0 : 0.12 }}
+            className="flex w-[94%] items-start gap-2 self-start rounded-2xl rounded-bl-md bg-slate-100 px-3 py-2.5 text-left dark:bg-slate-800"
+          >
+            <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-primary text-white">
+              <Sparkles className="h-2.5 w-2.5" />
+            </span>
+            <motion.div
+              initial={false}
+              animate={{ height: phase === 'thinking' ? 18 : 'auto' }}
+              transition={reduce ? { duration: 0 } : { duration: 0.25, ease }}
+              className="relative min-w-0 flex-1 overflow-hidden"
             >
-              {t('hero.learn_plan')}
-              <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-            </button>
+              <p className="text-[13px] leading-snug text-slate-700 dark:text-slate-200">
+                {words.map((word, i) => (
+                  <span key={i} className={`transition-opacity duration-200 motion-reduce:transition-none ${i < shown ? 'opacity-100' : 'opacity-0'}`}>
+                    {word}{i < words.length - 1 ? ' ' : ''}
+                  </span>
+                ))}
+              </p>
+              {phase === 'thinking' && (
+                <span className="absolute left-0 top-0 flex h-[18px] items-center gap-1">
+                  {[0, 1, 2].map((i) => (
+                    <motion.span
+                      key={i}
+                      className="h-1.5 w-1.5 rounded-full bg-slate-500 dark:bg-slate-300"
+                      animate={running ? { opacity: [0.3, 1, 0.3], y: [0, -2, 0] } : { opacity: 0.5, y: 0 }}
+                      transition={running ? { duration: 0.7, repeat: Infinity, delay: i * 0.12 } : { duration: 0.2 }}
+                    />
+                  ))}
+                </span>
+              )}
+            </motion.div>
           </motion.div>
+        </>
+      )}
+    </motion.div>
+  )
+}
+
+function AskCoreAiCard({ turns, onStart }: { turns: ChatTurn[]; onStart: () => void }) {
+  const { t } = useTranslation()
+  const { ref, running, hold } = useCardMotion<HTMLDivElement>()
+  const [state, tick] = useReducer((e: Exchange) => nextExchange(e, turns), { turn: 0, phase: 'reading', count: 0 })
+
+  useEffect(() => {
+    if (!running) return
+    const id = window.setTimeout(tick, EXCHANGE_DELAY[state.phase])
+    return () => window.clearTimeout(id)
+  }, [running, state])
+
+  const turn = turns[state.turn % turns.length]
+  const typing = state.phase === 'typing' && state.count > 0
+
+  return (
+    <div ref={ref} {...hold} className="group relative flex h-full min-h-[380px] flex-col overflow-hidden rounded-[20px] bg-[linear-gradient(180deg,#EAF2FF_0%,#F6F9FF_100%)] p-5 xl:min-h-0 text-left ring-1 ring-blue-100 dark:bg-[linear-gradient(180deg,rgba(59,130,246,0.16)_0%,rgba(15,23,42,1)_100%)] dark:ring-blue-400/20">
+      <div className="flex flex-col items-start">
+        <h3 className="text-[16px] font-bold text-text-primary">{t('core_ai.title')}</h3>
+        <p className="mt-1 text-[13px] leading-relaxed text-slate-600 dark:text-slate-300">{t('pre_dashboard.ask_note')}</p>
+      </div>
+
+      {/* The chat window stays still; only the conversation inside it changes */}
+      <div className="pointer-events-none mt-3 flex min-h-[220px] flex-1 flex-col gap-2.5 rounded-2xl bg-surface-card p-2.5 xl:min-h-0 shadow-[0_12px_28px_-18px_rgba(30,64,175,0.35)] ring-1 ring-blue-100 dark:ring-white/10" aria-hidden>
+        <div className="relative min-h-0 flex-1 overflow-hidden">
+          <AnimatePresence initial={false}>
+            <ChatMessages key={state.turn} turn={turn} state={state} running={running} />
+          </AnimatePresence>
+        </div>
+
+        {/* One line tall whatever is typed: a long question scrolls left, as it does in a real box */}
+        <div className="flex h-11 shrink-0 items-center gap-2 rounded-full bg-slate-100 pl-4 pr-1.5 text-left text-[13px] dark:bg-slate-800">
+          {state.phase === 'typing' ? (
+            <span className={`flex min-w-0 flex-1 justify-end overflow-hidden ${typing ? 'font-semibold text-text-primary' : 'text-slate-600 dark:text-slate-300'}`}>
+              <span className="min-w-full shrink-0 whitespace-nowrap">
+                {typing ? turn.q.slice(0, state.count) : t('core_ai.placeholder')}
+                {typing && <span className="ml-0.5 inline-block h-3.5 w-px translate-y-0.5 bg-current" />}
+              </span>
+            </span>
+          ) : (
+            <span className="min-w-0 flex-1 truncate text-slate-600 dark:text-slate-300">{t('core_ai.placeholder')}</span>
+          )}
+          <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-colors duration-200 motion-reduce:transition-none ${typing ? 'bg-primary' : 'bg-slate-400 dark:bg-slate-600'}`}>
+            <ArrowUp className="h-4 w-4" />
+          </span>
         </div>
       </div>
 
-      {/* Decorative glow orbs */}
-      <div className="pointer-events-none absolute -bottom-12 -right-12 h-48 w-48 rounded-full bg-white/10 blur-[60px]" />
-      <div className="pointer-events-none absolute -left-8 -top-8 h-32 w-32 rounded-full bg-blue-300/20 blur-[50px]" />
+      <button
+        type="button"
+        onClick={onStart}
+        className={`mt-4 inline-flex self-start h-10 items-center gap-1 rounded-full bg-primary px-4 text-sm font-semibold text-white shadow-[0_8px_20px_-10px_rgba(11,21,51,0.35)] dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)] ${stretchedAction}`}
+      >
+        {t('core_ai.start_chatting')}
+        <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+      </button>
     </div>
   )
 }
 
-// ─── BentoCards ─────────────────────────────────────────────────────────────
-const ADVISOR_CHIPS = [
-  { name: 'Sarah Jenkins', initials: 'SJ', from: '#60a5fa', to: '#3b82f6' },
-  { name: 'Alex Carter',   initials: 'AC', from: '#34d399', to: '#059669' },
-  { name: 'Maya Patel',    initials: 'MP', from: '#fbbf24', to: '#d97706' },
-  { name: 'James Liu',     initials: 'JL', from: '#f472b6', to: '#db2777' },
-]
+// ─── Talk to an Advisor ──────────────────────────────────────────────────────
+/** A slim strip: the advisors take turns stepping forward while the promise and the button stay put. */
+function AdvisorCard({ onMeet }: { onMeet: () => void }) {
+  const { t } = useTranslation()
+  const { ref, reduce, running, hold } = useCardMotion<HTMLDivElement>()
+  const [active, setActive] = useState(0)
 
-function BentoCards({
-  openChat,
-  onAdvisorOpen,
-  t,
-  prefersReducedMotion,
-}: {
-  openChat: () => void
-  onAdvisorOpen: () => void
-  t: (key: string) => string
-  prefersReducedMotion: boolean
-}) {
-  const { displayed: typedQuery, isTyping } = useTypingEffect('What is my loan eligibility?', 48, 2400)
-
-  const [aiReplyPhase, setAiReplyPhase] = useState<'skeleton' | 'answer'>('skeleton')
   useEffect(() => {
-    const t1 = setTimeout(() => setAiReplyPhase('answer'), 1800)
-    const interval = setInterval(() => {
-      setAiReplyPhase('skeleton')
-      setTimeout(() => setAiReplyPhase('answer'), 1800)
-    }, 6800)
-    return () => { clearTimeout(t1); clearInterval(interval) }
-  }, [])
-
-  const [activeChip, setActiveChip] = useState(0)
-  useEffect(() => {
-    const interval = setInterval(() => setActiveChip(i => (i + 1) % ADVISOR_CHIPS.length), 1800)
-    return () => clearInterval(interval)
-  }, [])
-
-  const sectionRef = useRef<HTMLElement>(null)
-  const inView = useInView(sectionRef, { once: true, margin: '-80px' })
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 32 },
-    visible: (delay: number) => ({
-      opacity: 1, y: 0,
-      transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const, delay },
-    }),
-  }
+    if (!running) return
+    const id = window.setInterval(() => setActive((a) => (a + 1) % ADVISORS.length), 2400)
+    return () => window.clearInterval(id)
+  }, [running])
 
   return (
-    <section ref={sectionRef} className="relative z-10 grid gap-5 lg:grid-cols-[1.4fr_1fr]">
-
-      {/* ── Ask Core AI — primary ── */}
-      <motion.div
-        custom={0}
-        variants={prefersReducedMotion ? {} : cardVariants}
-        initial="hidden"
-        animate={inView ? 'visible' : 'hidden'}
-        whileHover={prefersReducedMotion ? {} : { y: -4, boxShadow: '0 20px 40px -12px rgba(59,111,224,0.18)' }}
-        transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-        className="flex cursor-pointer flex-col overflow-hidden rounded-[20px] border border-[var(--border-light)] bg-[var(--surface-card)] shadow-[var(--shadow-card)]"
-        onClick={openChat}
-      >
-        {/* Mockup area */}
-        <div className="relative flex-1 overflow-hidden bg-[var(--surface-elevated)] px-7 pb-6 pt-7">
-          <div
-            className="absolute inset-0 opacity-40 dark:opacity-20"
-            style={{ backgroundImage: 'radial-gradient(var(--border-strong) 1px, transparent 1px)', backgroundSize: '22px 22px' }}
-          />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,rgba(59,111,224,0.07),transparent_60%)] dark:bg-[radial-gradient(circle_at_30%_70%,rgba(59,130,246,0.1),transparent_60%)]" />
-
-          <div className="relative z-10 flex flex-col gap-3">
-            {/* Floating AI header */}
-            <motion.div
-              animate={prefersReducedMotion ? {} : { y: [0, -3, 0] }}
-              transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-              className="flex items-center gap-3 rounded-2xl border border-[var(--border-default)] bg-[var(--surface-card)] px-4 py-3 shadow-[var(--shadow-card)]"
+    <div ref={ref} {...hold} className="group relative flex h-full flex-col rounded-[20px] bg-slate-100 px-5 py-3.5 text-left dark:bg-slate-900 dark:ring-1 dark:ring-white/10">
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="text-[15px] font-bold text-text-primary">{t('advisor.title')}</h3>
+        <div className="flex shrink-0 -space-x-2.5" aria-hidden>
+          {ADVISORS.map((a, i) => (
+            <motion.span
+              key={a.name}
+              initial={false}
+              animate={{ scale: i === active ? 1 : 0.86, opacity: i === active ? 1 : 0.7 }}
+              transition={reduce ? { duration: 0 } : { duration: 0.3, ease }}
+              style={{ background: `linear-gradient(135deg,${a.from},${a.to})`, zIndex: i === active ? 2 : 1 }}
+              className="relative flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-bold text-white ring-2 ring-slate-100 dark:ring-slate-900"
             >
-              <motion.div
-                animate={prefersReducedMotion ? {} : { rotate: [0, 8, -8, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full shadow-sm"
-                style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--chart-purple) 100%)' }}
-              >
-                <Sparkles className="h-4 w-4 text-white" />
-              </motion.div>
-              <span className="text-sm font-semibold text-[var(--text-primary)]">Core AI</span>
-              <div className="ml-auto flex items-center gap-1.5">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-                </span>
-                <span className="text-xs text-[var(--text-muted)]">{t('core_ai.online')}</span>
-              </div>
-            </motion.div>
-
-            {/* Chat bubbles */}
-            <div className="flex flex-col gap-2.5 px-1">
-              <motion.div
-                initial={prefersReducedMotion ? {} : { opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.35, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="self-end rounded-2xl rounded-br-sm px-4 py-2.5 text-sm font-medium text-white shadow-sm"
-                style={{ background: 'var(--color-primary)', minWidth: 180 }}
-              >
-                <span>{typedQuery}</span>
-                <motion.span
-                  animate={{ opacity: isTyping ? [1, 0, 1] : 0 }}
-                  transition={{ duration: 0.7, repeat: Infinity }}
-                  className="ml-0.5 inline-block h-3.5 w-0.5 rounded-full bg-white align-middle"
-                />
-              </motion.div>
-
-              <motion.div
-                initial={prefersReducedMotion ? {} : { opacity: 0, x: -16 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.55, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="self-start w-fit max-w-[75%] rounded-2xl rounded-bl-sm border border-[var(--border-default)] bg-[var(--surface-card)] px-4 py-3 shadow-[var(--shadow-sm)]"
-              >
-                <AnimatePresence mode="wait">
-                  {aiReplyPhase === 'skeleton' ? (
-                    <motion.div key="sk" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="flex flex-col gap-2">
-                      {[36, 24].map((w, i) => (
-                        <div key={i} className="relative h-2 overflow-hidden rounded-full bg-[var(--border-light)]" style={{ width: `${w * 4}px` }}>
-                          <motion.div
-                            className="absolute inset-y-0 w-1/2 rounded-full"
-                            style={{ background: 'linear-gradient(90deg, transparent, var(--border-strong), transparent)' }}
-                            animate={{ x: ['-100%', '250%'] }}
-                            transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut', delay: i * 0.2 }}
-                          />
-                        </div>
-                      ))}
-                    </motion.div>
-                  ) : (
-                    <motion.p key="ans" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.4 }} className="text-[12px] leading-relaxed text-[var(--text-secondary)]">
-                      You may be eligible for up to <strong className="text-[var(--text-primary)]">$15,000</strong> based on your balance.
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            </div>
-
-            {/* Input pill */}
-            <div className="flex items-center gap-2 rounded-full border border-[var(--border-default)] bg-[var(--surface-card)] px-4 py-2.5 shadow-[var(--shadow-sm)]">
-              <span className="inline-flex shrink-0 items-center rounded-full bg-[var(--surface-dark)] px-2.5 py-1 text-[11px] font-semibold text-white dark:bg-[var(--surface-elevated)] dark:text-[var(--text-primary)]">
-                Ask AI
-              </span>
-              <span className="h-3.5 w-px shrink-0 bg-[var(--border-default)]" />
-              <span
-                className="inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold"
-                style={{ background: 'linear-gradient(135deg, var(--border-green) 0%, var(--border-blue) 100%)', color: 'var(--status-success-text)' }}
-              >
-                ✦ Core
-              </span>
-              <span
-                className="min-w-0 flex-1 truncate pr-2 text-[11px] text-[var(--text-muted)]"
-                style={{ maskImage: 'linear-gradient(90deg,#000 60%,transparent 100%)', WebkitMaskImage: 'linear-gradient(90deg,#000 60%,transparent 100%)' }}
-              >
-                {typedQuery}
-              </span>
-            </div>
-          </div>
+              {a.initials}
+            </motion.span>
+          ))}
         </div>
-
-        {/* Text + CTA */}
-        <div className="flex flex-col gap-3 border-t border-[var(--border-light)] bg-[var(--surface-card)] p-7">
-          <div>
-            <h3 className="text-[1.15rem] font-bold leading-tight text-[var(--text-primary)]">{t('core_ai.title')}</h3>
-            <p className="mt-1 text-[12.5px] leading-relaxed text-[var(--text-secondary)]">{t('core_ai.description')}</p>
-          </div>
-          <button
-            type="button"
-            onClick={openChat}
-            className="flex w-fit items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-semibold text-white shadow-[var(--shadow-btn)] transition-all hover:opacity-90 hover:shadow-[var(--shadow-float)] active:scale-[0.97]"
-            style={{ background: 'var(--color-primary)' }}
-          >
-            {t('core_ai.start_chatting')} <ChevronRight className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      </motion.div>
-
-      {/* ── Talk to an Advisor — secondary, intentionally dark ── */}
-      <motion.div
-        custom={0.12}
-        variants={prefersReducedMotion ? {} : cardVariants}
-        initial="hidden"
-        animate={inView ? 'visible' : 'hidden'}
-        whileHover={prefersReducedMotion ? {} : { y: -4 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-        className="relative flex cursor-pointer flex-col overflow-hidden rounded-[20px] border border-white/[0.07] shadow-[var(--shadow-card)] dark:border-white/[0.12]"
-        style={{ background: 'linear-gradient(160deg,#1e2d4a 0%,#0f172a 100%)' }}
-        onClick={onAdvisorOpen}
+      </div>
+      <p className="mt-1 text-[13px] leading-snug text-slate-600 dark:text-slate-300">{t('pre_dashboard.advisor_note')}</p>
+      <button
+        type="button"
+        onClick={onMeet}
+        className={`mt-auto inline-flex h-10 shrink-0 items-center gap-1 self-start rounded-full bg-white px-4 text-sm font-semibold text-slate-900 shadow-[0_8px_20px_-12px_rgba(11,21,51,0.35)] ring-1 ring-slate-200 dark:bg-slate-800 dark:text-white dark:ring-white/15 ${stretchedAction}`}
       >
-        {/* Ambient glows */}
-        <div className="pointer-events-none absolute -left-16 top-1/4 h-52 w-52 rounded-full blur-[80px]" style={{ background: 'rgba(59,130,246,0.28)' }} />
-        <div className="pointer-events-none absolute -bottom-10 right-0 h-40 w-40 rounded-full blur-[70px]" style={{ background: 'rgba(139,92,246,0.20)' }} />
-
-        {/* Illustration — absolute, bottom-right, behind content */}
-        <motion.img
-          src="https://vrivhbghtffppkezvkfg.supabase.co/storage/v1/object/public/Logo%20and%20images/1066378_103414-OM6JSZ-221%201.svg"
-          alt=""
-          aria-hidden
-          width={300}
-          height={300}
-          className="pointer-events-none absolute bottom-0 right-0 h-[300px] w-[300px] select-none object-contain object-bottom"
-          style={{ filter: 'brightness(0) invert(1)', opacity: 0 }}
-          initial={{ opacity: 0, y: 16 }}
-          animate={inView ? { opacity: 0.18, y: 0 } : {}}
-          transition={{ duration: 1, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        />
-
-        {/* Bottom-edge fade so illustration blends into card */}
-        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#0f172a] to-transparent" />
-        <div className="pointer-events-none absolute bottom-0 right-0 top-0 w-16 bg-gradient-to-l from-[#0f172a]/40 to-transparent" />
-
-        {/* Single-column content */}
-        <div className="relative z-10 flex flex-col justify-between p-7" style={{ minHeight: 'inherit' }}>
-          {/* Chips */}
-          <div className="flex flex-col items-start gap-2.5">
-            {ADVISOR_CHIPS.map(({ name, initials, from, to }, i) => {
-              const isActive = i === activeChip
-              return (
-                <motion.div
-                  key={name}
-                  initial={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
-                  animate={{
-                    opacity: prefersReducedMotion ? 1 : isActive ? 1 : 0.35 + (ADVISOR_CHIPS.length - 1 - i) * 0.15,
-                    x: 0,
-                    scale: isActive ? 1.04 : 1,
-                  }}
-                  transition={{
-                    opacity: { delay: prefersReducedMotion ? 0 : 0.2 + i * 0.1, duration: 0.45 },
-                    x: { delay: prefersReducedMotion ? 0 : 0.2 + i * 0.1, duration: 0.45, ease: [0.22, 1, 0.36, 1] },
-                    scale: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
-                  }}
-                  className="inline-flex items-center gap-2.5 rounded-full border px-3.5 py-1.5 backdrop-blur-sm"
-                  style={{
-                    marginLeft: [0, 18, 32, 10][i],
-                    borderColor: isActive ? 'rgba(255,255,255,0.32)' : 'rgba(255,255,255,0.09)',
-                    background: isActive ? 'rgba(255,255,255,0.13)' : 'rgba(255,255,255,0.06)',
-                    transition: 'border-color 0.35s, background 0.35s',
-                  }}
-                >
-                  <div
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
-                    style={{ background: `linear-gradient(135deg,${from} 0%,${to} 100%)` }}
-                  >
-                    {initials}
-                  </div>
-                  <span className="whitespace-nowrap text-[12px] font-medium text-white/90">{name}</span>
-                  <AnimatePresence>
-                    {isActive && (
-                      <motion.span
-                        key="dot"
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0, opacity: 0 }}
-                        transition={{ duration: 0.25 }}
-                        className="ml-0.5 h-1.5 w-1.5 rounded-full bg-emerald-400"
-                      />
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              )
-            })}
-          </div>
-
-          {/* Text + CTA */}
-          <div className="mt-6">
-            <h3 className="text-[1.15rem] font-bold leading-tight text-white">{t('advisor.title')}</h3>
-            <p className="mt-1 mb-5 text-[12.5px] leading-relaxed text-white/55">
-              {t('advisor.subtitle')}
-            </p>
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onAdvisorOpen() }}
-              className="group inline-flex items-center gap-1 text-[13px] font-semibold text-white/70 transition-colors hover:text-white"
-            >
-              {t('advisor.meet_expert')}
-              <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-            </button>
-          </div>
-        </div>
-      </motion.div>
-    </section>
-  )
-}
-
-// ─── HeroIllustration ────────────────────────────────────────────────────────
-function HeroIllustration({
-  t,
-  prefersReducedMotion,
-}: {
-  t: (key: string) => string
-  prefersReducedMotion: boolean
-}) {
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const [playbackFailed, setPlaybackFailed] = useState(false)
-  const [source] = useState(() =>
-    prefersHevcAlpha()
-      ? { src: HERO_MEETING_VIDEO_MP4, type: 'video/mp4; codecs="hvc1"' }
-      : { src: HERO_MEETING_VIDEO_WEBM, type: 'video/webm' },
-  )
-  const useStill = prefersReducedMotion || playbackFailed
-
-  useEffect(() => {
-    const video = videoRef.current
-    if (!video) return
-
-    // Autoplay can be refused (power saving, browser policy) without raising an error.
-    void video.play().catch(() => setPlaybackFailed(true))
-
-    // A codec the engine cannot decode may stall rather than fail, so time it out.
-    const watchdog = window.setTimeout(() => {
-      if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) setPlaybackFailed(true)
-    }, 8000)
-    return () => window.clearTimeout(watchdog)
-  }, [useStill])
-
-  const shared =
-    'h-full w-full max-h-full scale-[1.35] -translate-x-[8%] object-contain object-center transition-transform duration-300'
-
-  return (
-    <div className="relative flex aspect-[4/3] w-full max-w-[min(100%,720px)] items-center justify-center overflow-hidden rounded-2xl bg-white dark:bg-gray-950 lg:-translate-x-3 xl:-translate-x-6 2xl:max-w-[min(100%,800px)]">
-      {useStill ? (
-        <img
-          src={HERO_MEETING_POSTER}
-          width={800}
-          height={600}
-          className={shared}
-          alt={t('hero.video_aria')}
-        />
-      ) : (
-        <video
-          ref={videoRef}
-          width={800}
-          height={600}
-          className={shared}
-          poster={HERO_MEETING_POSTER}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          onError={() => setPlaybackFailed(true)}
-          aria-label={t('hero.video_aria')}
-        >
-          <source src={source.src} type={source.type} />
-        </video>
-      )}
+        {t('advisor.meet_expert')}
+        <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+      </button>
     </div>
   )
 }
@@ -556,13 +275,17 @@ function HeroIllustration({
 export function PreEnrollmentDashboard() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const reduce = useReducedMotion()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [advisorModalOpen, setAdvisorModalOpen] = useState(false)
+  const [heroPaused, setHeroPaused] = useState(false)
+  const [heroEnded, setHeroEnded] = useState(false)
+  const [heroRun, setHeroRun] = useState(0)
+  const handleHeroEnded = useCallback(() => setHeroEnded(true), [])
+  const { ref: heroRef, running: heroRunning } = useCardMotion<HTMLElement>()
   const { openChat } = useAIStore()
   const { user, loading: authLoading } = useAuth()
   const { profile } = useUser()
-  const learningRef = useRef<HTMLElement | null>(null)
-  const prefersReducedMotion = useReducedMotion()
 
   const firstNameRaw = getAuthenticatedFirstName(profile, user)
   const displayFirstName = formatFirstNameForDisplay(firstNameRaw)
@@ -576,10 +299,17 @@ export function PreEnrollmentDashboard() {
         ? formatFirstNameForDisplay(emailLocal)
         : 'there'
   /** Time-based greeting + first name when session is ready and we have a usable name (see getAuthenticatedFirstName). */
-  const heroGreetingName =
-    !authLoading && heroPillName !== 'there' ? heroPillName : null
-  const dayPeriod = getLocalDayPeriod()
-  const heroGreetingKeys = HERO_TIME_GREETING_KEYS[dayPeriod]
+  const heroGreetingName = !authLoading && heroPillName !== 'there' ? heroPillName : null
+  const heroGreetingKeys = HERO_TIME_GREETING_KEYS[getLocalDayPeriod()]
+
+  const cap = PLAN_CONFIG.match.capPercent
+  const matchRate = PLAN_CONFIG.match.ratePercent
+  const chatTurns = [
+    { q: t('pre_dashboard.chat_q2'), a: t('pre_dashboard.chat_a2', { rate: matchRate, cap }) },
+    { q: t('pre_dashboard.chat_q1'), a: t('pre_dashboard.chat_a1') },
+    { q: t('pre_dashboard.chat_q3'), a: t('pre_dashboard.chat_a3') },
+  ]
+  const dollarsPerDollar = matchRate % 100 === 0 ? `$${matchRate / 100}` : `$${(matchRate / 100).toFixed(2)}`
 
   return (
     <AnimatedPage className="min-h-full">
@@ -590,110 +320,152 @@ export function PreEnrollmentDashboard() {
         userName={authLoading ? 'there' : heroPillName}
       />
 
-      <div className="relative min-h-screen overflow-hidden bg-white font-sans transition-colors dark:bg-gray-950">
-        <div className="absolute inset-0 -z-20 bg-white dark:bg-gray-950" />
+      <div className="min-h-screen bg-surface-page font-sans text-text-primary">
+        <div className="mx-auto flex max-w-[1280px] flex-col gap-10 px-4 py-6 sm:px-6 lg:gap-6 lg:px-8 lg:pt-5">
+          {/* Banner: one message and one action, beside the story of bills paid and the road ahead */}
+          <motion.section
+            ref={heroRef}
+            initial={reduce ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease }}
+            aria-labelledby="pre-dashboard-title"
+            className="relative isolate flex min-h-[340px] overflow-hidden rounded-[24px] lg:min-h-[280px] xl:min-h-[236px] bg-[radial-gradient(90%_120%_at_0%_0%,#D9F3FF_0%,rgba(217,243,255,0)_60%),radial-gradient(80%_120%_at_100%_100%,#DDF9E3_0%,rgba(221,249,227,0)_60%),linear-gradient(#FFFFFF,#FFFFFF)] ring-1 ring-slate-200/70 lg:items-center dark:bg-[radial-gradient(90%_120%_at_0%_0%,#12305C_0%,rgba(18,48,92,0)_60%),radial-gradient(80%_120%_at_100%_100%,#123F46_0%,rgba(18,63,70,0)_60%),linear-gradient(#0B1436,#0B1436)] dark:ring-white/10"
+          >
+            <div className="pointer-events-none absolute inset-x-3 bottom-3 -z-10 h-[170px] sm:h-[220px] lg:inset-y-3 lg:left-auto lg:right-4 lg:h-auto lg:w-[calc(100%-570px)]">
+              <HeroRideScene key={heroRun} running={heroRunning && !heroPaused} onEnded={handleHeroEnded} />
+            </div>
 
-        <div
-          className="absolute bottom-[-10%] left-1/2 -z-10 h-[50%] w-[140%] -translate-x-1/2 bg-[radial-gradient(ellipse_at_center,var(--accent-blue-tint)_0%,var(--accent-blue-tint)_50%,transparent_100%)] opacity-50 blur-[120px] dark:bg-[radial-gradient(ellipse_at_center,var(--gradient-dark-start)_0%,var(--gradient-dark-end)_50%,transparent_100%)]"
-        />
-
-        <div
-          className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,var(--chart-grid)_1px,transparent_1px),linear-gradient(to_bottom,var(--chart-grid)_1px,transparent_1px)] bg-[length:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_20%,transparent_100%)] opacity-20 dark:bg-[linear-gradient(to_right,var(--chart-grid-muted)_1px,transparent_1px),linear-gradient(to_bottom,var(--chart-grid-muted)_1px,transparent_1px)]"
-        />
-
-        <div className="mx-auto flex max-w-6xl flex-col gap-32 px-6 pb-20 pt-8">
-          {/* Hero */}
-          <section className="grid items-center gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="flex flex-col gap-6"
-            >
-              <div className="inline-flex w-fit max-w-full items-center gap-2.5 rounded-full border border-slate-200 bg-white px-4 py-2 shadow-sm dark:border-slate-600 dark:bg-slate-900">
-                <span
-                  className="h-2 w-2 shrink-0 rounded-full bg-[var(--accent-blue)] dark:bg-blue-400"
-                  aria-hidden
-                />
-                <span className="text-sm font-semibold text-[var(--accent-blue)] dark:text-blue-400">
-                  {heroGreetingName
-                    ? t(heroGreetingKeys.withName, { name: heroGreetingName })
-                    : t(heroGreetingKeys.generic)}
-                </span>
-              </div>
-
-              <h1 className="max-w-xl text-4xl font-bold leading-[1.15] tracking-[-0.02em] text-slate-900 dark:text-white sm:text-[2.5rem] lg:text-[2.75rem]">
-                {t('hero.title_line1')} <br />
-                <span className="brand-text">{t('hero.title_line2')}</span>{t('hero.title_line3')}
+            <div className="relative w-full min-w-0 p-5 pb-[190px] sm:p-10 sm:pb-[240px] lg:max-w-[560px] lg:py-6 xl:py-5">
+              <p className="text-[14px] font-medium text-slate-700 dark:text-slate-300">
+                {heroGreetingName ? t(heroGreetingKeys.withName, { name: heroGreetingName }) : t(heroGreetingKeys.generic)}
+              </p>
+              <h1 id="pre-dashboard-title" className="mt-2 max-w-[560px] text-[28px] font-bold leading-tight text-[#0B1533] dark:text-white">
+                {t('pre_dashboard.title')}
+                {' '}
+                <span className="text-primary dark:text-blue-300">{t('pre_dashboard.title_accent')}</span>
               </h1>
 
-              <p className="max-w-lg text-base leading-relaxed text-slate-600 dark:text-slate-400 sm:text-[1.0625rem]">
-                {t('hero.subtitle')}
-              </p>
-
-              <div className="flex flex-wrap items-center gap-4 pt-1">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(true)}
-                  className="btn-brand inline-flex !min-h-0 flex-col items-center justify-center gap-0 rounded-full !bg-[var(--color-primary)] px-[28px] py-3 shadow-lg transition-all hover:scale-[1.02] hover:!bg-[var(--color-primary-hover)] active:scale-[0.98]"
-                >
-                  <span className="text-center text-[15px] font-semibold leading-tight text-white">
-                    {t('hero.start_enrollment')}
-                  </span>
-                  <span className="mt-[2px] text-center text-[11px] font-normal leading-tight tracking-[0.01em] text-white">
-                    {t('hero.time_note')}
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => learningRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                  className="inline-flex shrink-0 items-center justify-center self-center rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition-all hover:scale-[1.02] hover:bg-slate-50 active:scale-[0.98] dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800/50 sm:px-6 sm:py-3.5 sm:text-[0.9375rem]"
-                >
-                  {t('hero.learn_plan')}
-                </button>
-              </div>
-
-              <p className="flex flex-wrap items-center gap-x-2 text-sm text-slate-500 dark:text-slate-400">
-                <span>{t('hero.one_click_hint')}</span>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+                {/* Primary: one-click enrollment */}
                 <button
                   type="button"
                   onClick={() => navigate('/enrollment/quick')}
-                  className="brand-text inline-flex items-center gap-1 font-semibold hover:underline"
+                  className={`group inline-flex items-center justify-between gap-3 rounded-full bg-primary text-left text-white dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)] sm:gap-5 sm:whitespace-nowrap shadow-[inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-10px_18px_rgba(11,21,51,0.2),0_0_0_4px_rgba(255,255,255,0.4),0_16px_32px_-12px_rgba(37,99,235,0.8)] transition-transform hover:scale-[1.02] active:scale-[0.98] motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100 ${bannerFocus} dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.4),inset_0_-10px_18px_rgba(11,21,51,0.25),0_0_0_4px_rgba(255,255,255,0.12),0_16px_32px_-12px_rgba(37,99,235,0.8)] min-h-14 py-2 pl-5 pr-2 sm:pl-6`}
                 >
-                  <Zap className="h-3.5 w-3.5" aria-hidden />
-                  {t('hero.one_click')}
+                  <span className="inline-flex min-w-0 items-center gap-2.5">
+                    <Zap className="h-[18px] w-[18px] shrink-0" aria-hidden />
+                    <span>
+                      <span className="block text-sm font-semibold leading-tight">{t('hero.one_click')}</span>
+                      <span className="block text-[12px] leading-tight text-white">{t('hero.one_click_note')}</span>
+                    </span>
+                  </span>
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-primary transition-transform group-hover:translate-x-0.5" aria-hidden>
+                    <ArrowRight className="h-5 w-5" />
+                  </span>
                 </button>
-              </p>
-            </motion.div>
+                {/* Secondary: guided enrollment */}
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(true)}
+                  className={`min-h-14 rounded-full bg-white px-5 py-2 text-center text-slate-900 sm:whitespace-nowrap sm:px-6 shadow-[0_8px_20px_-10px_rgba(11,21,51,0.3)] ring-1 ring-slate-200 transition-transform hover:scale-[1.02] active:scale-[0.98] motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100 ${bannerFocus} dark:bg-slate-900 dark:text-white dark:ring-1 dark:ring-white/15`}
+                >
+                  <span className="block text-sm font-semibold leading-tight">{t('hero.start_enrollment')}</span>
+                  <span className="block text-[12px] leading-tight text-slate-600 dark:text-slate-300">{t('hero.time_note')}</span>
+                </button>
+              </div>
+              {/* Tertiary: learn about the plan */}
+              <Link to="/enrollment/plan" className={`mt-1.5 inline-flex min-h-11 items-center gap-0.5 rounded text-[13px] font-semibold text-slate-800 hover:underline ${bannerFocus} dark:text-slate-200`}>
+                {t('hero.learn_plan')}
+                <ChevronRight className="h-4 w-4" aria-hidden />
+              </Link>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex w-full flex-col items-start gap-8"
-            >
-              <HeroIllustration t={t} prefersReducedMotion={!!prefersReducedMotion} />
-            </motion.div>
+            {!reduce && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (heroEnded) {
+                    setHeroEnded(false)
+                    setHeroPaused(false)
+                    setHeroRun((run) => run + 1)
+                  } else {
+                    setHeroPaused((paused) => !paused)
+                  }
+                }}
+                aria-label={t(heroEnded ? 'pre_dashboard.replay_animation' : heroPaused ? 'pre_dashboard.play_animation' : 'pre_dashboard.pause_animation')}
+                className={`absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/85 text-slate-700 shadow-[0_6px_14px_-8px_rgba(11,21,51,0.4)] ring-1 ring-slate-200 transition-colors hover:bg-white ${bannerFocus} dark:bg-slate-900/85 dark:text-slate-100 dark:ring-white/15 dark:hover:bg-slate-900`}
+              >
+                {heroEnded ? <RotateCcw className="h-3.5 w-3.5" aria-hidden /> : heroPaused ? <Play className="h-3.5 w-3.5" aria-hidden /> : <Pause className="h-3.5 w-3.5" aria-hidden />}
+              </button>
+            )}
+          </motion.section>
+
+          {/* Why enroll now, ranked: the one-click setup leads, Ask Core AI sits beside it, two quick lessons follow, then an advisor */}
+          <section aria-labelledby="pre-dashboard-why">
+            <div className="mb-3 xl:flex xl:items-baseline xl:gap-4">
+              <h2 id="pre-dashboard-why" className="text-[22px] font-bold leading-tight text-text-primary">{t('pre_dashboard.why_title')}</h2>
+              <p className="mt-1 text-[14px] leading-relaxed text-text-secondary md:whitespace-nowrap xl:mt-0">{t('pre_dashboard.why_sub')}</p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)]">
+              {/* Core AI does the setup: the lead card */}
+              <Reveal className="relative flex min-h-[180px] flex-col overflow-hidden rounded-[20px] bg-[linear-gradient(135deg,#0B1533_0%,#122B6B_100%)] p-5 text-left ring-1 ring-white/10 md:col-span-2 xl:col-span-3">
+                <span className="pointer-events-none absolute -bottom-24 right-10 h-56 w-80 rounded-full bg-primary opacity-50 blur-[80px]" aria-hidden />
+                <div className="relative flex items-start justify-between gap-3">
+                  <h3 className="text-[16px] font-bold text-white">{t('pre_dashboard.ai_title')}</h3>
+                  <span className="flex h-10 w-10 shrink-0 -rotate-6 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-500 via-slate-800 to-slate-950 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.55),inset_0_-5px_10px_rgba(0,0,0,0.5),0_10px_20px_rgba(0,0,0,0.5)] ring-1 ring-white/15" aria-hidden>
+                    <Sparkles className="h-5 w-5" />
+                  </span>
+                </div>
+                <div className="relative mt-auto flex flex-col gap-3 pt-3 sm:flex-row sm:items-end sm:justify-between sm:gap-8">
+                  <span className="block" aria-hidden>
+                    <span className="block text-[48px] font-bold leading-none tracking-tight text-white">{t('pre_dashboard.ai_big')}</span>
+                    <span className="block h-[30px] -scale-y-100 overflow-hidden text-[48px] font-bold leading-none tracking-tight text-white opacity-25 [mask-image:linear-gradient(to_top,black,transparent_80%)]">{t('pre_dashboard.ai_big')}</span>
+                  </span>
+                  <span className="max-w-[280px] pb-2 text-[13px] leading-relaxed text-white/90">{t('pre_dashboard.ai_desc')}</span>
+                </div>
+              </Reveal>
+
+              {/* Ask Core AI: the second feature, a tall column so the chat is always in view */}
+              <Reveal delay={0.06} className="md:col-span-2 lg:col-span-1 lg:col-start-3 lg:row-span-3 lg:row-start-1 xl:col-start-4 xl:row-span-2">
+                <AskCoreAiCard turns={chatTurns} onStart={openChat} />
+              </Reveal>
+
+              {/* Employer match: a quick lesson */}
+              <Reveal delay={0.1} className="relative flex min-h-[144px] flex-col overflow-hidden rounded-[20px] bg-[linear-gradient(180deg,#ECFDF5_0%,#F7FDFA_100%)] px-5 py-3.5 text-left ring-1 ring-emerald-100 dark:bg-[linear-gradient(180deg,rgba(16,185,129,0.12)_0%,rgba(15,23,42,1)_100%)] dark:ring-emerald-400/15">
+                <h3 className="text-[15px] font-bold text-text-primary">{t('pre_dashboard.match_title')}</h3>
+                <p className="mt-1 text-[13px] leading-normal text-slate-600 dark:text-slate-300">{t('pre_dashboard.match_desc', { you: '$1', employer: dollarsPerDollar, cap })}</p>
+                <div className="mt-auto flex items-center justify-between gap-3 pt-2">
+                  <span className="inline-flex rounded-full bg-white px-3 py-1 text-[12px] font-medium text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-200 dark:ring-emerald-400/20">
+                    {PLAN_CONFIG.vestingYears === 0 ? t('pre_dashboard.chip_vest_now') : t('pre_dashboard.chip_vest_years', { years: PLAN_CONFIG.vestingYears })}
+                  </span>
+                  <span className="flex shrink-0 items-center" aria-hidden>
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[13px] font-bold text-slate-900 shadow-[0_8px_16px_-10px_rgba(11,21,51,0.4)] ring-1 ring-emerald-100 dark:bg-slate-800 dark:text-white dark:ring-white/10">$1</span>
+                    <span className="z-10 -mx-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-[12px] font-bold text-white">+</span>
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-[13px] font-bold text-white shadow-[0_8px_16px_-10px_rgba(37,99,235,0.7)]">{dollarsPerDollar}</span>
+                  </span>
+                </div>
+              </Reveal>
+
+              {/* Tax: a quick lesson */}
+              <Reveal delay={0.14} className="relative flex min-h-[144px] flex-col overflow-hidden rounded-[20px] bg-[linear-gradient(180deg,#FFF7EB_0%,#FFFCF7_100%)] px-5 py-3.5 text-left ring-1 ring-amber-100 dark:bg-[linear-gradient(180deg,rgba(245,158,11,0.12)_0%,rgba(15,23,42,1)_100%)] dark:ring-amber-400/15">
+                <h3 className="text-[15px] font-bold text-text-primary">{t('pre_dashboard.tax_title')}</h3>
+                <p className="mt-1 text-[13px] leading-normal text-slate-600 dark:text-slate-300">{t('pre_dashboard.tax_desc')}</p>
+                <div className="mt-auto pt-2">
+                  <span className="inline-flex rounded-full bg-white px-3 py-1 text-[12px] font-bold text-amber-800 ring-1 ring-amber-200 dark:bg-amber-500/15 dark:text-amber-200 dark:ring-amber-400/20">{t('pre_dashboard.tax_chip')}</span>
+                </div>
+              </Reveal>
+
+              {/* Talk to an Advisor: a slim strip, for when people want a person */}
+              <Reveal delay={0.18} className="md:col-span-2 xl:col-span-1">
+                <AdvisorCard onMeet={() => setAdvisorModalOpen(true)} />
+              </Reveal>
+            </div>
           </section>
-
-          {/* Learning Hub */}
-          <section ref={learningRef} className="relative z-10">
-            <LearningCard
-              t={t}
-              prefersReducedMotion={!!prefersReducedMotion}
-              onLearnMore={() => navigate('/enrollment/plan')}
-            />
-          </section>
-
-          {/* Core AI (primary) + Advisor (secondary) */}
-          <BentoCards openChat={openChat} onAdvisorOpen={() => setAdvisorModalOpen(true)} t={t} prefersReducedMotion={!!prefersReducedMotion} />
-
         </div>
       </div>
 
-      {advisorModalOpen && (
-        <AdvisorModal onClose={() => setAdvisorModalOpen(false)} />
-      )}
+      {advisorModalOpen && <AdvisorModal onClose={() => setAdvisorModalOpen(false)} />}
     </AnimatedPage>
   )
 }

@@ -11,9 +11,10 @@ import { clamp, round2 } from './model'
  * (8 / 12 / 16 / 20px), slate ink and a single blue accent, so every surface reads as the same product.
  */
 
-/** The agent's mark. While it works, the gradient turns slowly. */
-export function AgentMark({ size = 28, working = false }: { size?: number; working?: boolean }) {
+/** The agent's mark. While it works, the gradient turns slowly. With `face`, it has two eyes that blink now and then. */
+export function AgentMark({ size = 28, working = false, face = false }: { size?: number; working?: boolean; face?: boolean }) {
   const reduce = useReducedMotion()
+  const eye = { width: Math.max(2, size * 0.09), height: size * 0.2 }
   return (
     <span className="relative inline-flex shrink-0 overflow-hidden rounded-full shadow-[0_1px_2px_rgba(15,23,42,0.12),0_0_0_1px_rgba(255,255,255,0.9)]" style={{ width: size, height: size }} aria-hidden>
       <motion.span
@@ -22,9 +23,55 @@ export function AgentMark({ size = 28, working = false }: { size?: number; worki
         transition={working && !reduce ? { duration: 2.4, ease: 'linear', repeat: Infinity } : { duration: 0.6 }}
       />
       <span className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.55),transparent_55%)]" />
-      <svg viewBox="0 0 24 24" className="relative m-auto" style={{ width: size * 0.5, height: size * 0.5 }}>
-        <path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1L5 10.5l5.1-1.9L12 3.5z" fill="white" />
+      {face ? (
+        <motion.span
+          className="relative m-auto flex items-center"
+          style={{ gap: size * 0.14 }}
+          animate={reduce ? undefined : { scaleY: [1, 1, 0.1, 1, 1] }}
+          transition={{ duration: 4.2, times: [0, 0.9, 0.93, 0.96, 1], repeat: Infinity }}
+        >
+          <span className="rounded-full bg-white" style={eye} />
+          <span className="rounded-full bg-white" style={eye} />
+        </motion.span>
+      ) : (
+        <svg viewBox="0 0 24 24" className="relative m-auto" style={{ width: size * 0.5, height: size * 0.5 }}>
+          <path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1L5 10.5l5.1-1.9L12 3.5z" fill="white" />
+        </svg>
+      )}
+    </span>
+  )
+}
+
+/** A three-quarter ring that fills to `fraction`, with whatever sits in its middle. */
+export function RingGauge({ fraction, size = 128, delay = 0, children }: { fraction: number; size?: number; delay?: number; children?: React.ReactNode }) {
+  const reduce = useReducedMotion()
+  const gid = useId().replace(/:/g, '')
+  const filled = 75 * clamp(fraction, 0, 1)
+  return (
+    <span className="relative inline-flex shrink-0 items-center justify-center" style={{ width: size, height: size }}>
+      <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full rotate-[135deg]" aria-hidden>
+        <defs>
+          <linearGradient id={gid} x1="0" x2="1" y1="1" y2="0">
+            <stop offset="0%" stopColor="#3b82f6" />
+            <stop offset="100%" stopColor="#2563eb" />
+          </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="42" fill="none" pathLength={100} strokeDasharray="75 100" strokeWidth={9} strokeLinecap="round" className="stroke-slate-100 dark:stroke-gray-800" />
+        <motion.circle
+          cx="50"
+          cy="50"
+          r="42"
+          fill="none"
+          pathLength={100}
+          stroke={`url(#${gid})`}
+          strokeWidth={9}
+          strokeLinecap="round"
+          initial={reduce ? false : { strokeDasharray: '0 100' }}
+          animate={{ strokeDasharray: `${filled} 100` }}
+          transition={{ delay, duration: 1, ease: [0.22, 1, 0.36, 1] }}
+        />
       </svg>
+      <span className="relative flex flex-col items-center leading-none">{children}</span>
     </span>
   )
 }
@@ -391,6 +438,65 @@ export function EdgeGlow({ active }: { active: boolean }) {
       )}
     </AnimatePresence>,
     document.body,
+  )
+}
+
+/** Core AI as a character: a glossy orb with gently curved eyes that floats, glows and beams now and then. */
+export function Mascot({ size = 132 }: { size?: number }) {
+  const reduce = useReducedMotion()
+  return (
+    <motion.span className="relative inline-flex" style={{ width: size, height: size }} animate={reduce ? undefined : { y: [0, -7, 0] }} transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut' }} aria-hidden>
+      <span className="absolute -inset-8 rounded-full bg-blue-400/20 blur-3xl" />
+      <span className="absolute left-1/2 top-[108%] h-4 w-3/5 -translate-x-1/2 rounded-full bg-blue-600/20 blur-md" />
+      <span
+        className="relative h-full w-full rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle at 26% 34%, rgba(103,232,249,0.95) 0%, rgba(103,232,249,0) 36%), radial-gradient(circle at 70% 24%, rgba(224,231,255,0.9) 0%, rgba(224,231,255,0) 30%), radial-gradient(circle at 55% 88%, #2563eb 0%, rgba(37,99,235,0) 58%), linear-gradient(160deg, #7dd3fc 0%, #60a5fa 36%, #3b82f6 74%, #2563eb 100%)',
+          boxShadow: 'inset -10px -14px 28px rgba(37,99,235,0.35), inset 8px 10px 20px rgba(255,255,255,0.4), 0 20px 44px rgba(37,99,235,0.28)',
+        }}
+      >
+        <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full overflow-visible">
+          {/* Gently curved eyes that beam a little now and then */}
+          <motion.g style={{ transformOrigin: '50% 45%' }} animate={reduce ? undefined : { scaleY: [1, 1, 0.55, 1, 1] }} transition={{ duration: 4.6, times: [0, 0.88, 0.92, 0.96, 1], repeat: Infinity }}>
+            <path d="M30 49 Q36 42 42 49" fill="none" stroke="white" strokeWidth="5" strokeLinecap="round" />
+            <path d="M58 49 Q64 42 70 49" fill="none" stroke="white" strokeWidth="5" strokeLinecap="round" />
+          </motion.g>
+        </svg>
+      </span>
+    </motion.span>
+  )
+}
+
+const FIELD = ['#93c5fd', '#2563eb', '#1e3a8a', '#fbbf24', '#60a5fa']
+
+/** Confetti that drifts down across the whole page and settles, each piece then floating gently. */
+export function ConfettiField({ pieces = 18 }: { pieces?: number }) {
+  const reduce = useReducedMotion()
+  if (reduce) return null
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+      {Array.from({ length: pieces }, (_, i) => {
+        const shape = i % 3
+        return (
+          <motion.span
+            key={i}
+            className="absolute block"
+            style={{ left: `${(i * 53 + 7) % 96}%`, top: `${(i * 37 + 9) % 90}%` }}
+            initial={{ y: -240, opacity: 0, rotate: -90 }}
+            animate={{ y: 0, opacity: 1, rotate: (i % 2 ? 1 : -1) * (15 + ((i * 23) % 50)) }}
+            transition={{ duration: 1.5 + (i % 5) * 0.2, delay: 0.15 + (i % 7) * 0.09, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <motion.span
+              className={cn('block', shape === 2 ? 'rounded-full' : 'rounded-[3px]')}
+              style={{ width: shape === 0 ? 7 : shape === 1 ? 14 : 9, height: shape === 0 ? 15 : shape === 1 ? 6 : 9, background: FIELD[i % FIELD.length] }}
+              animate={{ y: [0, -6, 0], rotate: [0, 12, 0] }}
+              transition={{ duration: 3 + (i % 4) * 0.5, delay: 2 + (i % 5) * 0.3, repeat: Infinity, ease: 'easeInOut' }}
+            />
+          </motion.span>
+        )
+      })}
+    </div>
   )
 }
 

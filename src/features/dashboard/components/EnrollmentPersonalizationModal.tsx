@@ -1,3 +1,4 @@
+import { useDialogA11y } from '@/lib/useDialogA11y'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -141,6 +142,7 @@ interface Props {
 
 export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, userName }: Props) {
   const { t } = useTranslation()
+  const dialogRef = useDialogA11y<HTMLDivElement>(isOpen, onClose)
   const [currentStep, setCurrentStep] = useState(1)
   const [retirementAge, setRetirementAge] = useState(62)
   const [isEditingBirthDate, setIsEditingBirthDate] = useState(false)
@@ -220,6 +222,10 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
       {isOpen && (
         <motion.div
           key="enrollment-personalization-modal"
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('hero.modal_personalize_subtitle')}
           data-app-blocking-overlay
           className="fixed inset-0 z-[100] flex items-end justify-center p-0 sm:items-center sm:p-4 sm:p-6"
           initial={{ opacity: 0 }}

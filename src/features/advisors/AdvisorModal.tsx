@@ -10,6 +10,7 @@ import {
   Mail,
 } from 'lucide-react'
 import { supabase } from '@/core/supabase'
+import { useDialogA11y } from '@/lib/useDialogA11y'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -383,6 +384,7 @@ function BookingSuccess({
 // ─── Main Modal ───────────────────────────────────────────────────────────────
 
 export default function AdvisorModal({ onClose }: { onClose: () => void }) {
+  const dialogRef = useDialogA11y<HTMLDivElement>(true, onClose)
   const [view, setView] = useState<View>('list')
   const [advisors, setAdvisors] = useState<Advisor[]>([])
   const [loadingAdvisors, setLoadingAdvisors] = useState(true)
@@ -438,6 +440,10 @@ export default function AdvisorModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
       data-app-blocking-overlay
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
@@ -451,6 +457,7 @@ export default function AdvisorModal({ onClose }: { onClose: () => void }) {
               <button
                 type="button"
                 onClick={goBack}
+                aria-label="Back"
                 className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
               >
                 <ArrowLeft className="h-4 w-4 text-gray-500" />
@@ -461,6 +468,7 @@ export default function AdvisorModal({ onClose }: { onClose: () => void }) {
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close"
             className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
           >
             <X className="h-4 w-4 text-gray-500" />
