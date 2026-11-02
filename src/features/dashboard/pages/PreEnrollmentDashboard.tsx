@@ -241,8 +241,17 @@ function AdvisorCard({ onMeet }: { onMeet: () => void }) {
 
   return (
     <div ref={ref} {...hold} className="group relative flex h-full flex-col rounded-[20px] bg-slate-100 px-5 py-3.5 text-left dark:bg-slate-900 dark:ring-1 dark:ring-white/10">
-      <div className="flex items-start justify-between gap-3">
-        <h3 className="text-[15px] font-bold text-text-primary">{t('advisor.title')}</h3>
+      <h3 className="text-[15px] font-bold text-text-primary">{t('advisor.title')}</h3>
+      <p className="mt-1 text-[13px] leading-snug text-slate-600 dark:text-slate-300">{t('pre_dashboard.advisor_note')}</p>
+      <div className="mt-auto flex items-center justify-between gap-3 pt-3">
+        <button
+          type="button"
+          onClick={onMeet}
+          className={`inline-flex h-10 shrink-0 items-center gap-1 self-start rounded-full bg-white px-4 text-sm font-semibold text-slate-900 shadow-[0_8px_20px_-12px_rgba(11,21,51,0.35)] ring-1 ring-slate-200 dark:bg-slate-800 dark:text-white dark:ring-white/15 ${stretchedAction}`}
+        >
+          {t('advisor.meet_expert')}
+          <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+        </button>
         <div className="flex shrink-0 -space-x-2.5" aria-hidden>
           {ADVISORS.map((a, i) => (
             <motion.span
@@ -258,15 +267,6 @@ function AdvisorCard({ onMeet }: { onMeet: () => void }) {
           ))}
         </div>
       </div>
-      <p className="mt-1 text-[13px] leading-snug text-slate-600 dark:text-slate-300">{t('pre_dashboard.advisor_note')}</p>
-      <button
-        type="button"
-        onClick={onMeet}
-        className={`mt-auto inline-flex h-10 shrink-0 items-center gap-1 self-start rounded-full bg-white px-4 text-sm font-semibold text-slate-900 shadow-[0_8px_20px_-12px_rgba(11,21,51,0.35)] ring-1 ring-slate-200 dark:bg-slate-800 dark:text-white dark:ring-white/15 ${stretchedAction}`}
-      >
-        {t('advisor.meet_expert')}
-        <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
-      </button>
     </div>
   )
 }
@@ -321,7 +321,7 @@ export function PreEnrollmentDashboard() {
       />
 
       <div className="min-h-screen bg-surface-page font-sans text-text-primary">
-        <div className="mx-auto flex max-w-[1280px] flex-col gap-10 px-4 py-6 sm:px-6 lg:gap-6 lg:px-8 lg:pt-5">
+        <div className="mx-auto flex max-w-[1280px] flex-col gap-10 px-4 py-6 sm:px-6 lg:gap-8 lg:px-8 lg:py-7">
           {/* Banner: one message and one action, beside the story of bills paid and the road ahead */}
           <motion.section
             ref={heroRef}
@@ -402,12 +402,12 @@ export function PreEnrollmentDashboard() {
 
           {/* Why enroll now, ranked: the one-click setup leads, Ask Core AI sits beside it, two quick lessons follow, then an advisor */}
           <section aria-labelledby="pre-dashboard-why">
-            <div className="mb-3 xl:flex xl:items-baseline xl:gap-4">
+            <div className="mb-5">
               <h2 id="pre-dashboard-why" className="text-[22px] font-bold leading-tight text-text-primary">{t('pre_dashboard.why_title')}</h2>
-              <p className="mt-1 text-[14px] leading-relaxed text-text-secondary md:whitespace-nowrap xl:mt-0">{t('pre_dashboard.why_sub')}</p>
+              <p className="mt-1 text-[14px] leading-relaxed text-text-secondary md:whitespace-nowrap">{t('pre_dashboard.why_sub')}</p>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)]">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)]">
               {/* Core AI does the setup: the lead card */}
               <Reveal className="relative flex min-h-[180px] flex-col overflow-hidden rounded-[20px] bg-[linear-gradient(135deg,#0B1533_0%,#122B6B_100%)] p-5 text-left ring-1 ring-white/10 md:col-span-2 xl:col-span-3">
                 <span className="pointer-events-none absolute -bottom-24 right-10 h-56 w-80 rounded-full bg-primary opacity-50 blur-[80px]" aria-hidden />
@@ -436,7 +436,7 @@ export function PreEnrollmentDashboard() {
                 <h3 className="text-[15px] font-bold text-text-primary">{t('pre_dashboard.match_title')}</h3>
                 <p className="mt-1 text-[13px] leading-normal text-slate-600 dark:text-slate-300">{t('pre_dashboard.match_desc', { you: '$1', employer: dollarsPerDollar, cap })}</p>
                 <div className="mt-auto flex items-center justify-between gap-3 pt-2">
-                  <span className="inline-flex rounded-full bg-white px-3 py-1 text-[12px] font-medium text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-200 dark:ring-emerald-400/20">
+                  <span className="inline-flex whitespace-nowrap rounded-full bg-white px-3 py-1 text-[12px] font-medium text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-200 dark:ring-emerald-400/20">
                     {PLAN_CONFIG.vestingYears === 0 ? t('pre_dashboard.chip_vest_now') : t('pre_dashboard.chip_vest_years', { years: PLAN_CONFIG.vestingYears })}
                   </span>
                   <span className="flex shrink-0 items-center" aria-hidden>
