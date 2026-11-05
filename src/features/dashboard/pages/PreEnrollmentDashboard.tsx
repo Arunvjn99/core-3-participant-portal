@@ -2,7 +2,7 @@ import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { AnimatePresence, motion, useInView, useReducedMotion } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowRight, ArrowUp, ChevronRight, GraduationCap, Pause, Play, RotateCcw, Sparkles, Zap } from 'lucide-react'
+import { ArrowRight, ArrowUp, ChevronRight, GraduationCap, Sparkles, Zap } from 'lucide-react'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { useAIStore } from '@/core/store/aiStore'
 import { useAuth } from '@/core/hooks/useAuth'
@@ -274,10 +274,19 @@ export function PreEnrollmentDashboard() {
     if (searchParams.has('customize')) setSearchParams({}, { replace: true })
   }
   const [advisorModalOpen, setAdvisorModalOpen] = useState(false)
-  const [heroPaused, setHeroPaused] = useState(false)
-  const [heroEnded, setHeroEnded] = useState(false)
+  /** Bumped to replay the banner story; it plays on its own and loops */
   const [heroRun, setHeroRun] = useState(0)
+  const [heroEnded, setHeroEnded] = useState(false)
   const handleHeroEnded = useCallback(() => setHeroEnded(true), [])
+  // Rest on the final scene for a moment, then play it again
+  useEffect(() => {
+    if (!heroEnded || reduce) return
+    const id = window.setTimeout(() => {
+      setHeroEnded(false)
+      setHeroRun((run) => run + 1)
+    }, 3000)
+    return () => window.clearTimeout(id)
+  }, [heroEnded, reduce])
   const { ref: heroRef, running: heroRunning } = useCardMotion<HTMLElement>()
   const { openChat } = useAIStore()
   const { user, loading: authLoading } = useAuth()
@@ -329,25 +338,7 @@ export function PreEnrollmentDashboard() {
           >
             {/* The story: under the headline and above the buttons on phones, behind the copy on larger screens */}
             <div className="pointer-events-none absolute inset-x-3 bottom-3 -z-10 h-[170px] max-sm:relative max-sm:inset-auto max-sm:order-2 max-sm:mx-3 max-sm:mt-4 sm:h-[220px] lg:inset-y-3 lg:left-auto lg:right-4 lg:h-auto lg:w-[calc(100%-570px)]">
-              <HeroRideScene key={heroRun} running={heroRunning && !heroPaused} onEnded={handleHeroEnded} />
-              {!reduce && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (heroEnded) {
-                      setHeroEnded(false)
-                      setHeroPaused(false)
-                      setHeroRun((run) => run + 1)
-                    } else {
-                      setHeroPaused((paused) => !paused)
-                    }
-                  }}
-                  aria-label={t(heroEnded ? 'pre_dashboard.replay_animation' : heroPaused ? 'pre_dashboard.play_animation' : 'pre_dashboard.pause_animation')}
-                  className={`pointer-events-auto absolute bottom-0 right-0 flex max-sm:bottom-1 max-sm:right-1 h-9 w-9 items-center justify-center rounded-full bg-white/85 text-slate-700 shadow-[0_6px_14px_-8px_rgba(11,21,51,0.4)] ring-1 ring-slate-200 transition-colors hover:bg-white ${bannerFocus} dark:bg-slate-900/85 dark:text-slate-100 dark:ring-white/15 dark:hover:bg-slate-900`}
-                >
-                  {heroEnded ? <RotateCcw className="h-3.5 w-3.5" aria-hidden /> : heroPaused ? <Play className="h-3.5 w-3.5" aria-hidden /> : <Pause className="h-3.5 w-3.5" aria-hidden />}
-                </button>
-              )}
+              <HeroRideScene key={heroRun} running={heroRunning} onEnded={handleHeroEnded} />
             </div>
 
             <div className="relative w-full min-w-0 max-sm:contents sm:p-10 sm:pb-[240px] lg:max-w-[560px] lg:py-6 xl:py-5">
