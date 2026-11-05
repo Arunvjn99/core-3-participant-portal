@@ -6,6 +6,7 @@ import { useEnrollmentStepNav, type EnrollmentPrimaryLabel } from '@/features/en
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { getAppDateLocale } from '@/lib/dateLocale'
 import { cn } from '@/lib/cn'
+import { PLAN_CONFIG } from '@/features/enrollment/agent/planConfig'
 import {
   Lightbulb,
   Wallet,
@@ -32,8 +33,13 @@ export default function ContributionSource() {
   const salary = data.salary
   const percent = data.contributionPercent
   const monthlyTotal = Math.round((salary * percent) / 100 / 12)
-  const matchPercent = Math.min(percent, 6)
-  const monthlyMatch = Math.round((salary * matchPercent) / 100 / 12)
+  const matchCap = PLAN_CONFIG.match.capPercent
+  const matchRate = PLAN_CONFIG.match.ratePercent
+  const matchPercent = Math.min(percent, matchCap)
+  const monthlyPay = Math.round(salary / 12)
+  /** The part of your monthly savings the employer matches (up to the cap) */
+  const monthlyMatched = Math.round((salary * matchPercent) / 100 / 12)
+  const monthlyMatch = Math.round((salary * matchPercent * matchRate) / 100 / 100 / 12)
   const monthlyPreTax = Math.round(monthlyTotal * sources.preTax / 100)
   const monthlyRoth = Math.round(monthlyTotal * sources.roth / 100)
   const monthlyAfterTax = Math.round(monthlyTotal * sources.afterTax / 100)
@@ -517,8 +523,30 @@ export default function ContributionSource() {
                     })}
                   </p>
                   <p className="mt-1 text-xs text-green-600 dark:text-green-500">
-                    {t('enrollment.source_page.match_line', { pct: matchPercent })}
+                    {t('enrollment.source_page.match_line', { rate: matchRate, pct: matchCap })}
                   </p>
+                  {/* How the match is worked out */}
+                  <dl className="mt-2.5 space-y-1.5 border-t border-green-200/80 pt-2.5 text-xs dark:border-green-800/40">
+                    <div className="flex items-center justify-between gap-2">
+                      <dt className="text-green-800/80 dark:text-green-300/80">{t('enrollment.source_page.mb_pay')}</dt>
+                      <dd className="font-semibold tabular-nums text-green-900 dark:text-green-200">${monthlyPay.toLocaleString(locale)}</dd>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <dt className="text-green-800/80 dark:text-green-300/80">{t('enrollment.source_page.mb_matched', { pct: matchPercent })}</dt>
+                      <dd className="font-semibold tabular-nums text-green-900 dark:text-green-200">${monthlyMatched.toLocaleString(locale)}</dd>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <dt className="text-green-800/80 dark:text-green-300/80">{t('enrollment.source_page.mb_rate', { rate: matchRate })}</dt>
+                      <dd className="font-semibold tabular-nums text-green-900 dark:text-green-200">+${monthlyMatch.toLocaleString(locale)}</dd>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 border-t border-green-200/80 pt-1.5 dark:border-green-800/40">
+                      <dt className="font-medium text-green-800 dark:text-green-300">{t('enrollment.source_page.mb_year')}</dt>
+                      <dd className="font-bold tabular-nums text-green-900 dark:text-green-200">${(monthlyMatch * 12).toLocaleString(locale)}</dd>
+                    </div>
+                  </dl>
+                  {percent < matchCap && (
+                    <p className="mt-2 text-xs font-medium text-amber-700 dark:text-amber-400">{t('enrollment.source_page.mb_gap', { pct: matchCap })}</p>
+                  )}
                 </div>
 
                 <div className="rounded-lg bg-gray-100 p-3 dark:bg-gray-800">

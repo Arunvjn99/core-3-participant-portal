@@ -524,7 +524,14 @@ export default function CoreEnrollment() {
                   {/* Match, auto-increase, investments */}
                   <div className="grid border-t border-slate-100 sm:grid-cols-3 sm:divide-x sm:divide-slate-100 dark:border-gray-800 dark:divide-gray-800">
                     <section className="p-5 sm:px-6">
-                      <p className={label}>{t('enrollment.core.m_match_short')}</p>
+                      <p className={cn(label, 'flex items-center gap-0.5')}>
+                        {t('enrollment.core.m_match_short')}
+                        <InfoTip
+                          side="top"
+                          label={t('enrollment.core.m_match_short')}
+                          text={t('enrollment.core.match_tip', { rate: PLAN_CONFIG.match.ratePercent, cap: cap, pay: money(salary / 12), amount: money(fullMatch / 12) })}
+                        />
+                      </p>
                       {ready ? (
                         <>
                           <p className="mt-1.5">
