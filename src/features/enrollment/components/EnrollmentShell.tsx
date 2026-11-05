@@ -32,7 +32,7 @@ export function EnrollmentShell() {
   const isQuick = location.pathname.includes('/enrollment/quick')
 
   return (
-    <div className={`flex min-h-screen flex-col dark:bg-gray-950 ${isQuick ? 'bg-[#f5f6f8]' : 'bg-[var(--surface-shell)]'}`}>
+    <div className={`flex flex-col dark:bg-gray-950 ${isQuick ? 'h-dvh overflow-hidden bg-[#f5f6f8]' : 'min-h-screen bg-[var(--surface-shell)]'}`}>
       {/* The one-click page has its own header with steps, Start over and Save & exit */}
       {!isQuick && (
         <div className="flex h-12 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 dark:border-gray-700 dark:bg-gray-900 sm:px-6">
@@ -194,7 +194,8 @@ export function EnrollmentShell() {
         </div>
       )}
 
-      <div className="flex min-h-0 flex-1 flex-col">
+      {/* One-click keeps the footer pinned in view: the page scrolls above it */}
+      <div className={`flex min-h-0 flex-1 flex-col ${isQuick ? 'overflow-y-auto overscroll-contain' : ''}`} data-quick-scroll={isQuick || undefined}>
         <AnimatedPage>
           <EnrollmentStepNavProvider>
             <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">
@@ -204,7 +205,9 @@ export function EnrollmentShell() {
         </AnimatedPage>
       </div>
 
-      <AppFooter />
+      <div className="shrink-0">
+        <AppFooter />
+      </div>
     </div>
   )
 }

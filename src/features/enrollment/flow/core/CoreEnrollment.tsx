@@ -332,7 +332,9 @@ export default function CoreEnrollment() {
       setEffective(conf.effectiveDate)
       await wait(250)
       setStage('done')
-      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' })
+      // The page scrolls inside the shell (the footer stays pinned), so scroll that, not the window
+      const scroller = document.querySelector('[data-quick-scroll]') ?? window
+      scroller.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' })
     } catch {
       markSubmit(1, 'error')
       setSubmitError(true)
@@ -678,27 +680,27 @@ export default function CoreEnrollment() {
               initial={reduce ? false : { opacity: 0, y: 10, scale: 0.8 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ delay: 0.5, type: 'spring', stiffness: 380, damping: 18 }}
-              className="relative mb-7 rounded-[18px] bg-white px-5 py-2.5 text-[17px] font-semibold text-slate-900 shadow-[0_6px_20px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-gray-900 dark:text-white dark:ring-gray-800"
+              className="relative mb-5 rounded-[18px] bg-white px-5 py-2.5 text-[16px] font-semibold text-slate-900 shadow-[0_6px_20px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-gray-900 dark:text-white dark:ring-gray-800"
             >
               {t('enrollment.core.welcome')}
               <span className="absolute -bottom-[7px] left-1/2 h-3.5 w-3.5 translate-x-1 rotate-45 rounded-[2px] bg-white ring-1 ring-slate-200/60 [clip-path:polygon(100%_0,100%_100%,0_100%)] dark:bg-gray-900 dark:ring-gray-800" aria-hidden />
             </motion.p>
             <motion.span initial={reduce ? false : { scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 240, damping: 14 }}>
               {/* Enrolled: a green tick that draws itself */}
-              <span className="relative flex h-[120px] w-[120px] items-center justify-center rounded-full bg-emerald-500 text-white shadow-[0_18px_40px_-12px_rgba(16,185,129,0.55),inset_0_1px_0_rgba(255,255,255,0.25)] ring-[10px] ring-emerald-500/15">
-                <DrawnCheck className="h-14 w-14" delay={0.25} />
+              <span className="relative flex h-[100px] w-[100px] items-center justify-center rounded-full bg-emerald-500 text-white shadow-[0_16px_36px_-12px_rgba(16,185,129,0.55),inset_0_1px_0_rgba(255,255,255,0.25)] ring-[9px] ring-emerald-500/15">
+                <DrawnCheck className="h-12 w-12" delay={0.25} />
               </span>
             </motion.span>
-            <motion.h2 tabIndex={-1} initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5, ease }} className="mt-12 text-[34px] font-extrabold leading-[1.05] tracking-[-0.04em] text-slate-900 sm:text-[44px] dark:text-white">
+            <motion.h2 tabIndex={-1} initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5, ease }} className="mt-8 text-[30px] font-extrabold leading-[1.1] tracking-[-0.035em] text-slate-900 sm:text-[40px] dark:text-white">
               {t('enrollment.core.congrats')}
             </motion.h2>
-            <motion.p initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }} className="mt-3 text-[17px] text-slate-500 dark:text-gray-400">
+            <motion.p initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }} className="mt-2.5 text-[16px] text-slate-500 dark:text-gray-400">
               {t('enrollment.core.all_set')}
             </motion.p>
 
-            <motion.dl initial={reduce ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55, duration: 0.5, ease }} className={cn(card, 'mt-7 w-full divide-y divide-slate-100 px-6 py-1 text-left dark:divide-gray-800')}>
+            <motion.dl initial={reduce ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55, duration: 0.5, ease }} className={cn(card, 'mt-6 w-full divide-y divide-slate-100 px-6 py-1 text-left dark:divide-gray-800')}>
               {summary.map((row, i) => (
-                <motion.div key={row.label} initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 + i * 0.08 }} className="flex items-center justify-between gap-4 py-4">
+                <motion.div key={row.label} initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 + i * 0.08 }} className="flex items-center justify-between gap-4 py-3.5">
                   <dt className="text-[15px] text-slate-500 dark:text-gray-400">{row.label}</dt>
                   <dd className={cn('text-right text-[16px] font-semibold', row.good ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-900 dark:text-white')}>{row.value}</dd>
                 </motion.div>
