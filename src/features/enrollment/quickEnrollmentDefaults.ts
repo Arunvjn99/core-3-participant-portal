@@ -68,7 +68,8 @@ export function buildQuickEnrollmentDefaults(draft: EnrollmentDraftData): QuickE
   }
 }
 
-const GROWTH_RATES: Record<RiskLevel, number> = {
+/** Average yearly return assumed for each investment mix. */
+export const GROWTH_RATES: Record<RiskLevel, number> = {
   conservative: 0.045,
   balanced: 0.068,
   growth: 0.082,

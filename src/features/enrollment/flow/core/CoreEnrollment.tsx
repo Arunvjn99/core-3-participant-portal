@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { AlertTriangle, ArrowRight, Check, Loader2, Lock, RotateCw } from 'lucide-react'
 import { cn } from '@/lib/cn'
@@ -14,12 +14,12 @@ import { useEnrollmentSave } from '@/core/hooks/useEnrollmentSave'
 import { useElectionsStore } from '@/features/plan/electionsStore'
 import { nextIncreaseDate } from '@/features/plan/electionsData'
 import { recommendedFunds, type RiskKey } from '../../investmentCatalog'
-import { buildQuickEnrollmentDefaults, projectBalance } from '../../quickEnrollmentDefaults'
+import { GROWTH_RATES, buildQuickEnrollmentDefaults } from '../../quickEnrollmentDefaults'
 import { useParticipantBasics } from '../../useParticipantBasics'
 import { PLAN_CONFIG, PLAN_LIMITS, employerMatch } from '../../agent/planConfig'
 import { checkEligibility, getPlanRules, submitEnrollment } from '../../agent/enrollmentService'
 import { FUND_COLORS, blendedFee, fundMeta, pause, round2, rowsFor, type Election } from './model'
-import { AgentMark, AnimatedNumber, ConfettiField, DrawnCheck, EdgeGlow, InfoTip, Mascot, Sheet, Shimmer, Sparkline } from './ui'
+import { AgentMark, AnimatedNumber, ConfettiField, DrawnCheck, EdgeGlow, InfoTip, ProjectionChart, Sheet, Shimmer } from './ui'
 
 /**
  * One-click enrollment: Core AI builds a plan from the details already on file and opens straight on it. The participant
@@ -69,6 +69,14 @@ function Bone({ className }: { className?: string }) {
   return <span className={cn('block animate-pulse rounded-lg bg-slate-100 dark:bg-gray-800', className)} aria-hidden />
 }
 
+/** Investment style shown for each risk level, in three plain words */
+const STYLE_FOR_RISK: Record<RiskKey, 'conservative' | 'moderate' | 'aggressive'> = {
+  conservative: 'conservative',
+  balanced: 'moderate',
+  growth: 'aggressive',
+  aggressive: 'aggressive',
+}
+
 export default function CoreEnrollment() {
   const { t } = useTranslation()
   const locale = getAppDateLocale()
@@ -76,12 +84,11 @@ export default function CoreEnrollment() {
   const reduce = useReducedMotion()
   const now = useNow()
   const { saveCompleteEnrollment } = useEnrollmentSave()
-  const { draft, employer, periods, birthYear, birthMonth, birthDay, age, knownSalary, salary, retireAge, years, savings } = useParticipantBasics()
+  const { employer, periods, birthYear, birthMonth, birthDay, age, knownSalary, salary, retireAge, years, savings } = useParticipantBasics()
   const planName = `${employer} ${t('enrollment.rw.plan_name')}`
 
   const money = (v: number) => `$${Math.round(v).toLocaleString(locale)}`
   const compact = (v: number) => (v >= 1_000_000 ? `$${(v / 1_000_000).toFixed(1)}M` : `$${Math.round(v / 1_000).toLocaleString(locale)}K`)
-  const level = (r: RiskKey) => t(`enrollment.investment.level_${r}`)
   const dateLong = (d: Date) => d.toLocaleDateString(locale, { month: 'long', day: 'numeric', year: 'numeric' })
 
   // ── Page state ──
@@ -100,9 +107,9 @@ export default function CoreEnrollment() {
   // ── The draft ──
   const initialElection = (): Election => ({
     unit: 'percent',
-    preTax: 6,
-    roth: 0,
-    auto: { enabled: true, cycle: 'calendar_year', sourceWise: false, amount: { preTax: 1, roth: 1 }, cap: { preTax: 10, roth: 10 } },
+    preTax: 4,
+    roth: 2,
+    auto: { enabled: true, cycle: 'plan_year', sourceWise: false, amount: { preTax: 1, roth: 1 }, cap: { preTax: 10, roth: 10 } },
     mode: 'risk_style',
     risk: 'balanced',
     ownRows: [],
@@ -111,7 +118,6 @@ export default function CoreEnrollment() {
   })
   const [election, setElection] = useState<Election>(initialElection)
   /** What Core AI first proposed, so Start over can return to it */
-  const [baseline, setBaseline] = useState<Election>(initialElection)
   const [sheet, setSheet] = useState<SheetKind>(null)
   const [showFunds, setShowFunds] = useState(false)
   /** Warns before leaving the confirmation without naming a beneficiary */
@@ -122,6 +128,26 @@ export default function CoreEnrollment() {
   const [toast, setToast] = useState<{ id: number; text: string } | null>(null)
 
   const wait = (ms: number) => pause(reduce ? 0 : ms)
+
+  /**
+   * Balance at the end of each year from today to retirement, one point per year.
+   * Each year adds your contributions and the employer match at that year's rate, then grows at the mix's average return;
+   * with auto-increase on, the rate rises by the step each plan year until it reaches the cap.
+   */
+  const projectPath = (e: Election) => {
+    const growth = GROWTH_RATES[e.risk]
+    const step = e.auto.enabled ? e.auto.amount.preTax : 0
+    const ceiling = Math.max(e.auto.cap.preTax, e.preTax + e.roth)
+    let rate = e.preTax + e.roth
+    let balance = savings
+    const out = [balance]
+    for (let y = 0; y < years; y++) {
+      balance = (balance + (salary * rate) / 100 + employerMatch(salary, rate)) * (1 + growth)
+      out.push(balance)
+      rate = Math.min(rate + step, ceiling)
+    }
+    return out
+  }
 
   // Derived, for any election
   const facts = (e: Election) => {
@@ -134,9 +160,9 @@ export default function CoreEnrollment() {
       match: employerMatch(salary, total),
       fee: blendedFee(rows),
       rowsTotal: rows.reduce((s, r) => s + r.pct, 0),
-      projected: projectBalance({ ...buildQuickEnrollmentDefaults(draft), contributionPercent: total, riskLevel: e.risk, salary, currentAge: age, retirementAge: retireAge }, savings),
+      projected: projectPath(e)[years],
       tax: e.preTax > 0 && e.roth > 0 ? t('enrollment.core.tax_mix', { pre: e.preTax, roth: e.roth }) : e.roth > 0 ? t('enrollment.core.tax_roth') : t('enrollment.core.tax_pre'),
-      invest: e.mode === 'plan_selected' ? t('enrollment.core.inv_plan') : e.mode === 'own' ? t('enrollment.core.inv_own') : t('enrollment.core.inv_risk', { level: level(e.risk) }),
+      invest: e.mode === 'plan_selected' ? t('enrollment.core.inv_plan') : e.mode === 'own' ? t('enrollment.core.inv_own') : t(`enrollment.core.style_${STYLE_FOR_RISK[e.risk]}`),
     }
   }
   const f = facts(election)
@@ -156,9 +182,7 @@ export default function CoreEnrollment() {
   ]
   const barMax = Math.max(autoTarget, cap, f.total, 1)
   const nextRate = Math.min(f.total + election.auto.amount.preTax, Math.max(election.auto.cap.preTax, f.total))
-  const series = Array.from({ length: years + 1 }, (_, i) =>
-    i === 0 ? savings : projectBalance({ ...buildQuickEnrollmentDefaults(draft), contributionPercent: f.total, riskLevel: election.risk, salary, currentAge: age, retirementAge: age + i }, savings),
-  )
+  const series = projectPath(election)
   const ready = stage !== 'working' && !problem
 
   useEffect(() => {
@@ -224,14 +248,14 @@ export default function CoreEnrollment() {
     const risk = d.riskLevel as RiskKey
     const proposed: Election = {
       ...initialElection(),
-      preTax: d.contributionPercent,
-      roth: 0,
+      // Split the rate across both sources: about two thirds pre-tax, one third Roth
+      preTax: d.contributionPercent - Math.max(1, Math.round(d.contributionPercent / 3)),
+      roth: Math.max(1, Math.round(d.contributionPercent / 3)),
       risk,
       ownRows: recommendedFunds(risk).map((x) => ({ ticker: x.ticker, pct: x.allocation })),
-      auto: { enabled: d.autoIncrease.enabled, cycle: 'calendar_year', sourceWise: false, amount: { preTax: d.autoIncrease.amount, roth: d.autoIncrease.amount }, cap: { preTax: d.autoIncrease.max, roth: d.autoIncrease.max } },
+      auto: { enabled: d.autoIncrease.enabled, cycle: 'plan_year', sourceWise: false, amount: { preTax: d.autoIncrease.amount, roth: d.autoIncrease.amount }, cap: { preTax: d.autoIncrease.max, roth: d.autoIncrease.max } },
     }
     setElection(proposed)
-    setBaseline(proposed)
     for (let i = 2; i < WORK_STEPS; i++) {
       markStep(i, 'active')
       await wait(220)
@@ -246,13 +270,6 @@ export default function CoreEnrollment() {
     void run()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  const startOver = () => {
-    setElection(baseline)
-    setConsent(false)
-    setSubmitError(false)
-    setToast({ id: Date.now(), text: t('enrollment.core.reset_toast') })
-  }
 
   // ── Approval ──
   const markSubmit = (i: number, s: StepState) => setSubmitSteps((all) => all.map((x, j) => (j === i ? s : x)))
@@ -346,11 +363,11 @@ export default function CoreEnrollment() {
           <h1 className="text-[16px] font-semibold tracking-[-0.01em] text-slate-900 dark:text-white">{t('enrollment.core.title')}</h1>
           {stage !== 'done' && (
             <div className="ml-auto flex shrink-0 items-center gap-2">
-              <button type="button" onClick={startOver} disabled={!ready || stage === 'submitting'} className="h-9 rounded-full bg-white px-3.5 text-[13px] font-semibold text-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.05)] ring-1 ring-slate-200/70 transition-colors hover:bg-slate-50 disabled:opacity-50 sm:h-10 sm:px-4 sm:text-[14px] dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-800">
-                {t('enrollment.core.start_over')}
+              <button type="button" onClick={() => navigate(`${ROUTES.PRE_ENROLLMENT_DASHBOARD}?customize=1`)} disabled={stage === 'submitting'} className="h-9 rounded-full px-3 text-[13px] font-semibold text-blue-700 transition-colors hover:bg-blue-50 disabled:opacity-50 sm:h-10 sm:px-4 sm:text-[14px] dark:text-blue-300 dark:hover:bg-blue-950/40">
+                {t('enrollment.core.customize')}
               </button>
               <button type="button" onClick={() => navigate(ROUTES.PRE_ENROLLMENT_DASHBOARD)} disabled={stage === 'submitting'} className="h-9 rounded-full bg-white px-3.5 text-[13px] font-semibold text-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.05)] ring-1 ring-slate-200/70 transition-colors hover:bg-slate-50 disabled:opacity-50 sm:h-10 sm:px-4 sm:text-[14px] dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-800">
-                {t('enrollment.core.save_exit')}
+                {t('enrollment.core.cancel')}
               </button>
             </div>
           )}
@@ -363,7 +380,7 @@ export default function CoreEnrollment() {
             {/* Title */}
             <div className="flex items-center gap-4 px-1">
               <motion.span initial={reduce ? false : { scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 320, damping: 18 }} className="rounded-full shadow-[0_10px_24px_rgba(37,99,235,0.28)]">
-                <AgentMark size={52} face working={stage === 'working' || stage === 'submitting'} />
+                <AgentMark size={52} star working={stage === 'working' || stage === 'submitting'} />
               </motion.span>
               <div className="min-w-0 flex-1">
                 <h2 className="text-[24px] font-semibold leading-tight tracking-[-0.03em] text-slate-900 sm:text-[30px] dark:text-white">
@@ -425,6 +442,13 @@ export default function CoreEnrollment() {
                               <AnimatedNumber countUp delay={0.3} value={f.total} format={(v) => `${round2(v)}%`} /> {t('enrollment.core.of_pay')}
                             </span>
                           </p>
+                          <p className="mt-1 text-[14px] text-slate-500 dark:text-gray-400">
+                            <Trans
+                              i18nKey="enrollment.core.pay_line"
+                              values={{ pay: money(salary / 12), amount: money((salary * f.total) / 100 / 12) }}
+                              components={{ b: <strong className="font-semibold text-slate-900 dark:text-white" /> }}
+                            />
+                          </p>
                           {/* How much of pay goes in, split by source */}
                           <div className="mt-3 flex h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-gray-800" role="img" aria-label={`${f.total}% ${t('enrollment.core.of_pay')}`}>
                             {sources.map((src, i) => (
@@ -472,7 +496,16 @@ export default function CoreEnrollment() {
                           </p>
                           <div className="relative mt-1 h-[72px] [&_svg]:h-[72px]">
                             <span className="absolute inset-x-0 top-1/2 border-t border-dashed border-slate-200 dark:border-gray-700" aria-hidden />
-                            <Sparkline key={`${f.total}-${election.risk}`} points={series} height={72} delay={0.6} />
+                            <ProjectionChart
+                              key={`${f.total}-${election.risk}`}
+                              points={series}
+                              startAge={age}
+                              height={72}
+                              delay={0.6}
+                              format={compact}
+                              label={t('enrollment.core.chart_label')}
+                              pointLabel={(a, value) => t('enrollment.core.chart_point', { age: a, value })}
+                            />
                           </div>
                           <div className="mt-1.5 flex justify-between text-[13px] text-slate-400">
                             <span>{t('enrollment.core.today', { age })}</span>
@@ -520,6 +553,12 @@ export default function CoreEnrollment() {
                     <section className="border-t border-slate-100 p-5 sm:border-t-0 sm:px-6 dark:border-gray-800">
                       <div className="flex items-center justify-between gap-2">
                         <p className={label}>{t('enrollment.core.row_auto')}</p>
+                        {ready && election.auto.enabled && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[12px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-400/25">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden />
+                            {t('enrollment.core.auto_enabled')}
+                          </span>
+                        )}
                       </div>
                       {ready ? (
                         <>
@@ -534,7 +573,7 @@ export default function CoreEnrollment() {
                           </p>
                           {election.auto.enabled ? (
                             <p className="mt-1 text-[14px] text-slate-500 dark:text-gray-400">
-                              {t('enrollment.core.auto_each', { amount: election.auto.amount.preTax, month: nextAuto.toLocaleDateString(locale, { month: 'long' }), year: nextAuto.getFullYear() })}
+                              {t('enrollment.core.auto_each', { amount: election.auto.amount.preTax, year: nextAuto.getFullYear() })}
                             </p>
                           ) : (
                             <p className="mt-1 text-[14px] text-slate-500 dark:text-gray-400">{t('enrollment.core.auto_off_short')}</p>
@@ -594,15 +633,16 @@ export default function CoreEnrollment() {
                         {consent && <DrawnCheck className="h-3.5 w-3.5" />}
                       </span>
                       <span className="text-[14px] leading-[1.55] text-slate-600 dark:text-gray-300">
-                        {t('enrollment.core.consent', { plan: '\u0000' }).split('\u0000').map((part, i) => (
-                          <span key={i}>
-                            {i > 0 && <strong className="font-semibold text-slate-900 dark:text-white">{planName}</strong>}
-                            {part}
-                          </span>
-                        ))}{' '}
-                        <button type="button" onClick={(e) => { e.preventDefault(); setSheet('disclosures') }} className="font-semibold text-blue-700 underline underline-offset-2 hover:text-blue-800 dark:text-blue-300">
-                          {t('enrollment.core.terms_title')}
-                        </button>
+                        <Trans
+                          i18nKey="enrollment.core.consent"
+                          values={{ plan: planName }}
+                          components={{
+                            terms: (
+                              <button type="button" onClick={(e) => { e.preventDefault(); setSheet('disclosures') }} className="font-semibold text-blue-700 underline underline-offset-2 hover:text-blue-800 dark:text-blue-300" />
+                            ),
+                            b: <strong className="font-semibold text-slate-900 dark:text-white" />,
+                          }}
+                        />
                       </span>
                     </label>
                   )}
@@ -634,7 +674,10 @@ export default function CoreEnrollment() {
               <span className="absolute -bottom-[7px] left-1/2 h-3.5 w-3.5 translate-x-1 rotate-45 rounded-[2px] bg-white ring-1 ring-slate-200/60 [clip-path:polygon(100%_0,100%_100%,0_100%)] dark:bg-gray-900 dark:ring-gray-800" aria-hidden />
             </motion.p>
             <motion.span initial={reduce ? false : { scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 240, damping: 14 }}>
-              <Mascot size={132} />
+              {/* Enrolled: a green tick that draws itself */}
+              <span className="relative flex h-[120px] w-[120px] items-center justify-center rounded-full bg-emerald-500 text-white shadow-[0_18px_40px_-12px_rgba(16,185,129,0.55),inset_0_1px_0_rgba(255,255,255,0.25)] ring-[10px] ring-emerald-500/15">
+                <DrawnCheck className="h-14 w-14" delay={0.25} />
+              </span>
             </motion.span>
             <motion.h2 tabIndex={-1} initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.5, ease }} className="mt-12 text-[34px] font-extrabold leading-[1.05] tracking-[-0.04em] text-slate-900 sm:text-[44px] dark:text-white">
               {t('enrollment.core.congrats')}

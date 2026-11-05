@@ -2,13 +2,15 @@ import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import { Bell, X } from 'lucide-react'
+import { Bell, ChevronRight, X } from 'lucide-react'
 import { useDialogA11y } from '@/lib/useDialogA11y'
 import { getAppDateLocale } from '@/lib/dateLocale'
+import { useNow } from '@/lib/useNow'
 import { SEVERITY_STYLE } from './severityStyle'
 import type { useNotifications } from './useNotifications'
 
 const ease = [0.22, 1, 0.36, 1] as const
+const DAY_MS = 86_400_000
 
 interface NotificationPanelProps {
   open: boolean
@@ -22,7 +24,18 @@ export function NotificationPanel({ open, onClose, notifications }: Notification
   const reduce = useReducedMotion()
   const ref = useDialogA11y<HTMLDivElement>(open, onClose)
   const fmtDate = (ms: number) => new Date(ms).toLocaleDateString(getAppDateLocale(), { month: 'short', day: 'numeric' })
+  const now = useNow()
+  const fmtFull = (ms: number) => new Date(ms).toLocaleDateString(getAppDateLocale(), { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
   const { items, unreadCount, isUnread, dismiss } = notifications
+  /** "Today", "Yesterday", "5 days ago"… in the app language; months past 30 days. */
+  const fmtAgo = (ms: number) => {
+    const days = Math.max(0, Math.floor((now - ms) / DAY_MS))
+    if (days < 2) return new Intl.RelativeTimeFormat(getAppDateLocale(), { numeric: 'auto' }).format(-days, 'day')
+    const rtf = new Intl.RelativeTimeFormat(getAppDateLocale(), { numeric: 'always' })
+    if (days < 30) return rtf.format(-days, 'day')
+    if (days < 365) return rtf.format(-Math.floor(days / 30), 'month')
+    return rtf.format(-Math.floor(days / 365), 'year')
+  }
 
   return createPortal(
     <AnimatePresence>
@@ -93,10 +106,11 @@ export function NotificationPanel({ open, onClose, notifications }: Notification
                     transition={{ duration: reduce ? 0 : 0.28, delay: reduce ? 0 : 0.08 + i * 0.04, ease }}
                     className={`group relative rounded-xl border transition-colors ${
                       unread ? 'border-primary/20 bg-primary/[0.04]' : 'border-border-default bg-surface-card'
-                    } hover:bg-surface-elevated`}
+                    } ${n.href ? 'hover:bg-surface-elevated' : ''}`}
                   >
-                    <Link to={n.href ?? '/transactions'} onClick={onClose} className="flex gap-3 rounded-xl p-3.5 pr-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-elevated">
+                    {n.href ? (
+                      <Link to={n.href} onClick={onClose} className="flex gap-3 rounded-xl p-3.5 pr-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                      <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-elevated`}>
                         <Icon className={`h-4 w-4 ${icon}`} aria-hidden />
                       </span>
                       <span className="min-w-0 flex-1">
@@ -105,9 +119,57 @@ export function NotificationPanel({ open, onClose, notifications }: Notification
                           <span className="block text-sm font-semibold text-text-primary">{title}</span>
                         </span>
                         {body && <span className="mt-0.5 block text-[13px] leading-snug text-text-secondary">{body}</span>}
-                        <span className="mt-1.5 block text-xs text-text-muted">{fmtDate(n.at)}</span>
+                        <time
+                          dateTime={new Date(n.at).toISOString()}
+                          className="mt-2 flex flex-wrap items-center gap-1.5 text-xs"
+                        >
+                          <span
+                            className={`rounded-full px-2 py-0.5 font-semibold first-letter:uppercase ${
+                              now - n.at < DAY_MS ? 'bg-blue-700 text-white' : 'bg-surface-elevated text-text-primary'
+                            }`}
+                            aria-hidden
+                          >
+                            {fmtAgo(n.at)}
+                          </span>
+                          <span className="font-medium text-text-secondary" aria-hidden>
+                            {fmtDate(n.at)}
+                          </span>
+                          <span className="sr-only first-letter:uppercase">{`${fmtAgo(n.at)}, ${fmtFull(n.at)}`}</span>
+                        </time>
                       </span>
-                    </Link>
+                        <ChevronRight className="absolute bottom-3.5 right-3 h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-text-primary" aria-hidden />
+                      </Link>
+                    ) : (
+                      <div className="flex gap-3 rounded-xl p-3.5 pr-10">
+                      <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-elevated`}>
+                        <Icon className={`h-4 w-4 ${icon}`} aria-hidden />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-center gap-1.5">
+                          {unread && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden />}
+                          <span className="block text-sm font-semibold text-text-primary">{title}</span>
+                        </span>
+                        {body && <span className="mt-0.5 block text-[13px] leading-snug text-text-secondary">{body}</span>}
+                        <time
+                          dateTime={new Date(n.at).toISOString()}
+                          className="mt-2 flex flex-wrap items-center gap-1.5 text-xs"
+                        >
+                          <span
+                            className={`rounded-full px-2 py-0.5 font-semibold first-letter:uppercase ${
+                              now - n.at < DAY_MS ? 'bg-blue-700 text-white' : 'bg-surface-elevated text-text-primary'
+                            }`}
+                            aria-hidden
+                          >
+                            {fmtAgo(n.at)}
+                          </span>
+                          <span className="font-medium text-text-secondary" aria-hidden>
+                            {fmtDate(n.at)}
+                          </span>
+                          <span className="sr-only first-letter:uppercase">{`${fmtAgo(n.at)}, ${fmtFull(n.at)}`}</span>
+                        </time>
+                      </span>
+                      </div>
+                    )}
                     <button
                       type="button"
                       onClick={() => dismiss(n.id)}
@@ -122,15 +184,6 @@ export function NotificationPanel({ open, onClose, notifications }: Notification
               </AnimatePresence>
             </ul>
 
-            <div className="border-t border-border-default px-4 py-3">
-              <Link
-                to="/transactions"
-                onClick={onClose}
-                className="flex h-10 items-center justify-center rounded-lg text-sm font-semibold text-primary transition-colors hover:bg-primary/5"
-              >
-                {t('nav.notifications_view_activity')}
-              </Link>
-            </div>
           </motion.div>
         </div>
       )}

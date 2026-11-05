@@ -74,6 +74,8 @@ export function AppShell() {
   const openChat = useAIStore((s) => s.openChat)
   const enrollmentStatus = useEnrollmentDraftStore((s) => s.enrollmentStatus)
   const navItems = getNavItems(enrollmentStatus === 'complete')
+  // Before enrolling there's only Dashboard (the logo) and Profile (the avatar menu), so the nav bar stays out of the way
+  const showNav = enrollmentStatus === 'complete'
   const [userDisplayName, setUserDisplayName] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
@@ -217,8 +219,8 @@ export function AppShell() {
               </Link>
             </div>
 
-            <nav className="hidden flex-1 items-center justify-center gap-0.5 md:flex">
-              {navItems.map((item) => {
+            <nav className="hidden flex-1 items-center justify-center gap-0.5 md:flex" aria-hidden={!showNav || undefined}>
+              {showNav && navItems.map((item) => {
                 const active = isNavActive(item.href, location.pathname)
                 return (
                   <Link
@@ -292,7 +294,8 @@ export function AppShell() {
                   aria-haspopup="listbox"
                 >
                   <Globe className="h-4 w-4 shrink-0" aria-hidden />
-                  <span className="min-w-0 truncate text-xs font-medium text-text-primary sm:text-sm">
+                  {/* Phones show the globe only, so the header fits; the name is still in the button's label */}
+                  <span className="hidden min-w-0 truncate text-xs font-medium text-text-primary sm:block sm:text-sm">
                     {t(`lang.${menuLang}`)}
                   </span>
                 </button>
@@ -441,7 +444,7 @@ export function AppShell() {
         {mobileMenuOpen && (
           <div className="border-t border-border-default bg-surface-card pb-3 md:hidden">
             <div className="mx-auto max-w-7xl px-4">
-              {navItems.map((item) => {
+              {showNav && navItems.map((item) => {
                 const active = isNavActive(item.href, location.pathname)
                 return (
                   <Link
@@ -458,7 +461,7 @@ export function AppShell() {
                   </Link>
                 )
               })}
-              <div className="mt-2 border-t border-border-default pt-2">
+              <div className={showNav ? 'mt-2 border-t border-border-default pt-2' : 'pt-2'}>
                 <button
                   type="button"
                   onClick={() => {

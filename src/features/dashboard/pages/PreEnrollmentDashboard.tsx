@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { AnimatePresence, motion, useInView, useReducedMotion } from 'framer-motion'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowRight, ArrowUp, ArrowUpRight, ChevronRight, GraduationCap, Pause, Play, RotateCcw, Sparkles, Zap } from 'lucide-react'
+import { ArrowRight, ArrowUp, ChevronRight, GraduationCap, Pause, Play, RotateCcw, Sparkles, Zap } from 'lucide-react'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { useAIStore } from '@/core/store/aiStore'
 import { useAuth } from '@/core/hooks/useAuth'
@@ -266,7 +266,13 @@ export function PreEnrollmentDashboard() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const reduce = useReducedMotion()
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+  // `?customize=1` (from the one-click review) opens the Customize My Plan flow straight away
+  const [isModalOpen, setIsModalOpen] = useState(() => searchParams.get('customize') === '1')
+  const closeCustomize = () => {
+    setIsModalOpen(false)
+    if (searchParams.has('customize')) setSearchParams({}, { replace: true })
+  }
   const [advisorModalOpen, setAdvisorModalOpen] = useState(false)
   const [heroPaused, setHeroPaused] = useState(false)
   const [heroEnded, setHeroEnded] = useState(false)
@@ -305,7 +311,7 @@ export function PreEnrollmentDashboard() {
     <AnimatedPage className="min-h-full">
       <EnrollmentPersonalizationModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={closeCustomize}
         onComplete={() => navigate('/enrollment/plan')}
         userName={authLoading ? 'there' : heroPillName}
       />
@@ -319,13 +325,33 @@ export function PreEnrollmentDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, ease }}
             aria-labelledby="pre-dashboard-title"
-            className="relative isolate flex min-h-[340px] overflow-hidden rounded-[24px] lg:min-h-[280px] xl:min-h-[236px] bg-[radial-gradient(90%_120%_at_0%_0%,#D9F3FF_0%,rgba(217,243,255,0)_60%),radial-gradient(80%_120%_at_100%_100%,#DDF9E3_0%,rgba(221,249,227,0)_60%),linear-gradient(#FFFFFF,#FFFFFF)] ring-1 ring-slate-200/70 lg:items-center dark:bg-[radial-gradient(90%_120%_at_0%_0%,#12305C_0%,rgba(18,48,92,0)_60%),radial-gradient(80%_120%_at_100%_100%,#123F46_0%,rgba(18,63,70,0)_60%),linear-gradient(#0B1436,#0B1436)] dark:ring-white/10"
+            className="relative isolate flex min-h-[340px] overflow-hidden max-sm:flex-col rounded-[24px] lg:min-h-[280px] xl:min-h-[236px] bg-[radial-gradient(90%_120%_at_0%_0%,#D9F3FF_0%,rgba(217,243,255,0)_60%),radial-gradient(80%_120%_at_100%_100%,#DDF9E3_0%,rgba(221,249,227,0)_60%),linear-gradient(#FFFFFF,#FFFFFF)] ring-1 ring-slate-200/70 lg:items-center dark:bg-[radial-gradient(90%_120%_at_0%_0%,#12305C_0%,rgba(18,48,92,0)_60%),radial-gradient(80%_120%_at_100%_100%,#123F46_0%,rgba(18,63,70,0)_60%),linear-gradient(#0B1436,#0B1436)] dark:ring-white/10"
           >
-            <div className="pointer-events-none absolute inset-x-3 bottom-3 -z-10 h-[170px] sm:h-[220px] lg:inset-y-3 lg:left-auto lg:right-4 lg:h-auto lg:w-[calc(100%-570px)]">
+            {/* The story: under the headline and above the buttons on phones, behind the copy on larger screens */}
+            <div className="pointer-events-none absolute inset-x-3 bottom-3 -z-10 h-[170px] max-sm:relative max-sm:inset-auto max-sm:order-2 max-sm:mx-3 max-sm:mt-4 sm:h-[220px] lg:inset-y-3 lg:left-auto lg:right-4 lg:h-auto lg:w-[calc(100%-570px)]">
               <HeroRideScene key={heroRun} running={heroRunning && !heroPaused} onEnded={handleHeroEnded} />
+              {!reduce && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (heroEnded) {
+                      setHeroEnded(false)
+                      setHeroPaused(false)
+                      setHeroRun((run) => run + 1)
+                    } else {
+                      setHeroPaused((paused) => !paused)
+                    }
+                  }}
+                  aria-label={t(heroEnded ? 'pre_dashboard.replay_animation' : heroPaused ? 'pre_dashboard.play_animation' : 'pre_dashboard.pause_animation')}
+                  className={`pointer-events-auto absolute bottom-0 right-0 flex max-sm:bottom-1 max-sm:right-1 h-9 w-9 items-center justify-center rounded-full bg-white/85 text-slate-700 shadow-[0_6px_14px_-8px_rgba(11,21,51,0.4)] ring-1 ring-slate-200 transition-colors hover:bg-white ${bannerFocus} dark:bg-slate-900/85 dark:text-slate-100 dark:ring-white/15 dark:hover:bg-slate-900`}
+                >
+                  {heroEnded ? <RotateCcw className="h-3.5 w-3.5" aria-hidden /> : heroPaused ? <Play className="h-3.5 w-3.5" aria-hidden /> : <Pause className="h-3.5 w-3.5" aria-hidden />}
+                </button>
+              )}
             </div>
 
-            <div className="relative w-full min-w-0 p-5 pb-[190px] sm:p-10 sm:pb-[240px] lg:max-w-[560px] lg:py-6 xl:py-5">
+            <div className="relative w-full min-w-0 max-sm:contents sm:p-10 sm:pb-[240px] lg:max-w-[560px] lg:py-6 xl:py-5">
+              <div className="max-sm:order-1 max-sm:px-5 max-sm:pt-5">
               <p className="text-[14px] font-medium text-slate-700 dark:text-slate-300">
                 {heroGreetingName ? t(heroGreetingKeys.withName, { name: heroGreetingName }) : t(heroGreetingKeys.generic)}
               </p>
@@ -334,8 +360,9 @@ export function PreEnrollmentDashboard() {
                 {' '}
                 <span className="text-primary dark:text-blue-300">{t('pre_dashboard.title_accent')}</span>
               </h1>
+              </div>
 
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="mt-6 flex flex-col gap-3 max-sm:order-3 max-sm:mt-4 max-sm:px-5 max-sm:pb-5 sm:flex-row sm:items-center">
                 {/* Primary: one-click enrollment */}
                 <button
                   type="button"
@@ -365,24 +392,6 @@ export function PreEnrollmentDashboard() {
               </div>
             </div>
 
-            {!reduce && (
-              <button
-                type="button"
-                onClick={() => {
-                  if (heroEnded) {
-                    setHeroEnded(false)
-                    setHeroPaused(false)
-                    setHeroRun((run) => run + 1)
-                  } else {
-                    setHeroPaused((paused) => !paused)
-                  }
-                }}
-                aria-label={t(heroEnded ? 'pre_dashboard.replay_animation' : heroPaused ? 'pre_dashboard.play_animation' : 'pre_dashboard.pause_animation')}
-                className={`absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/85 text-slate-700 shadow-[0_6px_14px_-8px_rgba(11,21,51,0.4)] ring-1 ring-slate-200 transition-colors hover:bg-white ${bannerFocus} dark:bg-slate-900/85 dark:text-slate-100 dark:ring-white/15 dark:hover:bg-slate-900`}
-              >
-                {heroEnded ? <RotateCcw className="h-3.5 w-3.5" aria-hidden /> : heroPaused ? <Play className="h-3.5 w-3.5" aria-hidden /> : <Pause className="h-3.5 w-3.5" aria-hidden />}
-              </button>
-            )}
           </motion.section>
 
           {/* Why enroll now, ranked: the one-click setup leads, Ask Core AI sits beside it, two quick lessons follow, then an advisor */}
@@ -394,45 +403,42 @@ export function PreEnrollmentDashboard() {
 
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)]">
               {/* Enrich financial learning: the lead card, opens Enrich in a new tab */}
-              <Reveal className="group relative flex min-h-[180px] overflow-hidden rounded-[20px] bg-[linear-gradient(135deg,#112B4F_0%,#1B3F2A_55%,#3F6B0A_100%)] p-5 pb-6 text-left ring-1 ring-white/10 transition-shadow hover:shadow-[0_24px_48px_-24px_rgba(63,107,10,0.75)] md:col-span-2 xl:col-span-3">
-                {/* Enrich's look: a fresh-green glow and a dotted green edge */}
-                <span className="pointer-events-none absolute -bottom-20 right-6 h-52 w-80 rounded-full bg-[#8DC63F] opacity-35 blur-[80px] transition-opacity group-hover:opacity-50" aria-hidden />
-                <span
-                  className="pointer-events-none absolute inset-x-0 bottom-0 h-2.5 bg-[#508309] [background-image:radial-gradient(circle,#8DC63F_1.6px,transparent_2px),radial-gradient(circle,#DDEEC5_1.2px,transparent_1.6px)] [background-position:0_0,5px_5px] [background-size:10px_10px]"
-                  aria-hidden
-                />
+              <Reveal className="group relative isolate flex min-h-[180px] overflow-hidden rounded-[20px] bg-[radial-gradient(90%_120%_at_0%_0%,#D9F3FF_0%,rgba(217,243,255,0)_60%),radial-gradient(70%_130%_at_100%_100%,#DCE1FB_0%,rgba(220,225,251,0)_65%),linear-gradient(#F8F9FE,#F8F9FE)] p-5 pb-6 text-left ring-1 ring-slate-200/70 transition-shadow hover:shadow-[0_24px_48px_-28px_rgba(37,99,235,0.45)] md:col-span-2 xl:col-span-3 dark:bg-[radial-gradient(90%_120%_at_0%_0%,#12305C_0%,rgba(18,48,92,0)_60%),radial-gradient(70%_130%_at_100%_100%,#262F86_0%,rgba(38,47,134,0)_65%),linear-gradient(#0B1436,#0B1436)] dark:ring-white/10">
+                {/* The coin art's periwinkle, glowing behind it so the image and card share one light */}
+                <span className="pointer-events-none absolute -right-10 top-1/2 -z-10 h-64 w-80 -translate-y-1/2 rounded-full bg-[#8C9BFF] opacity-25 blur-[70px] transition-opacity group-hover:opacity-40 dark:bg-[#5B6BFF] dark:opacity-35" aria-hidden />
                 {/* Left: what it is and the way in */}
                 <div className="relative z-10 flex max-w-[52%] flex-1 flex-col items-start">
                   <span className="flex items-center gap-2.5">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#A6D664] via-[#8DC63F] to-[#508309] text-[#112B4F] shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_8px_16px_rgba(0,0,0,0.35)]" aria-hidden>
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_16px_-6px_rgba(37,99,235,0.6)]" aria-hidden>
                       <GraduationCap className="h-[18px] w-[18px]" />
                     </span>
-                    <h3 className="text-[16px] font-bold text-white">
+                    <h3 className="text-[16px] font-bold text-slate-900 dark:text-white">
                       <a
                         href={ENRICH_URL}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={t('pre_dashboard.enrich_link_label')}
-                        className="after:absolute after:inset-0 after:z-20 after:rounded-[20px] focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-white"
+                        className="after:absolute after:inset-0 after:z-20 after:rounded-[20px] focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-blue-500"
                       >
                         {t('pre_dashboard.enrich_title')}
                       </a>
                     </h3>
                   </span>
-                  <p className="mt-3 max-w-[340px] text-[13px] leading-relaxed text-white/90">{t('pre_dashboard.enrich_desc')}</p>
-                  <span className="mt-auto inline-flex h-9 items-center gap-1.5 rounded-md bg-[#DDEEC5] px-4 text-[13px] font-semibold text-[#112B4F] shadow-[0_8px_20px_-10px_rgba(0,0,0,0.6)] transition-colors group-hover:bg-[#F4FFE4]" aria-hidden>
+                  <p className="mt-3 max-w-[340px] text-[13px] leading-relaxed text-slate-600 dark:text-slate-300">{t('pre_dashboard.enrich_desc')}</p>
+                  {/* Same button as Start chatting on the Ask Core AI card */}
+                  <span className="mt-auto inline-flex h-10 items-center gap-1 rounded-full bg-primary px-4 text-sm font-semibold text-white shadow-[0_8px_20px_-10px_rgba(11,21,51,0.35)] dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)]" aria-hidden>
                     {t('pre_dashboard.enrich_cta')}
-                    <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
                   </span>
                 </div>
 
-                {/* Right: the money machine, running past the card's top, right and bottom edges and fading in on the left */}
+                {/* Right: the coin on the steps, its backdrop removed so it sits straight on the card; the left and the bright top-right corner fade into the card */}
                 <img
-                  src="/media/enrich-machine.webp"
+                  src="/media/enrich-coin.png"
                   alt=""
-                  width={342}
-                  height={188}
-                  className="pointer-events-none absolute -inset-y-1 -right-2 hidden h-[calc(100%+0.5rem)] w-[342px] max-w-none object-cover object-[center_42%] transition-transform duration-700 [mask-image:linear-gradient(to_right,transparent_0%,black_38%)] group-hover:scale-[1.05] motion-reduce:transition-none sm:block"
+                  width={300}
+                  height={180}
+                  className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[300px] max-w-none object-cover object-[center_8%] transition-transform duration-700 [mask-composite:intersect] [mask-image:linear-gradient(to_right,transparent_0%,black_30%),radial-gradient(60%_55%_at_100%_0%,transparent_0%,transparent_30%,black_95%)] [-webkit-mask-composite:source-in] group-hover:scale-[1.05] motion-reduce:transition-none sm:block"
                   aria-hidden
                 />
               </Reveal>

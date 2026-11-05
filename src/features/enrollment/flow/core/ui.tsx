@@ -12,9 +12,10 @@ import { clamp, round2 } from './model'
  */
 
 /** The agent's mark. While it works, the gradient turns slowly. With `face`, it has two eyes that blink now and then. */
-export function AgentMark({ size = 28, working = false, face = false }: { size?: number; working?: boolean; face?: boolean }) {
+export function AgentMark({ size = 28, working = false, face = false, star = false }: { size?: number; working?: boolean; face?: boolean; star?: boolean }) {
   const reduce = useReducedMotion()
   const eye = { width: Math.max(2, size * 0.09), height: size * 0.2 }
+  if (star) return <CoreAIStarMark size={size} working={working} />
   return (
     <span className="relative inline-flex shrink-0 overflow-hidden rounded-full shadow-[0_1px_2px_rgba(15,23,42,0.12),0_0_0_1px_rgba(255,255,255,0.9)]" style={{ width: size, height: size }} aria-hidden>
       <motion.span
@@ -38,6 +39,36 @@ export function AgentMark({ size = 28, working = false, face = false }: { size?:
           <path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1L5 10.5l5.1-1.9L12 3.5z" fill="white" />
         </svg>
       )}
+    </span>
+  )
+}
+
+/** Core AI's two-point star (the one on the Ask CORE AI button), drawn sharp at any size on a white disc. */
+function CoreAIStarMark({ size, working }: { size: number; working: boolean }) {
+  const reduce = useReducedMotion()
+  const gid = useId().replace(/:/g, '')
+  return (
+    <span
+      className="relative inline-flex shrink-0 items-center justify-center rounded-full bg-white shadow-[0_6px_18px_-6px_rgba(37,99,235,0.45),0_0_0_1px_rgba(148,163,184,0.25)] dark:bg-slate-900 dark:shadow-[0_6px_18px_-6px_rgba(56,189,248,0.4),0_0_0_1px_rgba(255,255,255,0.12)]"
+      style={{ width: size, height: size }}
+      aria-hidden
+    >
+      <motion.svg
+        viewBox="0 0 24 24"
+        style={{ width: size * 0.62, height: size * 0.62 }}
+        animate={working && !reduce ? { rotate: [0, 12, -6, 0], scale: [1, 1.08, 0.96, 1] } : { rotate: 0, scale: 1 }}
+        transition={working && !reduce ? { duration: 2.2, ease: 'easeInOut', repeat: Infinity } : { duration: 0.4 }}
+      >
+        <defs>
+          <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#22d3ee" />
+            <stop offset="55%" stopColor="#6366f1" />
+            <stop offset="100%" stopColor="#a855f7" />
+          </linearGradient>
+        </defs>
+        <path d="M10 4.5Q11.44 12.06 19 13.5Q11.44 14.94 10 22.5Q8.56 14.94 1 13.5Q8.56 12.06 10 4.5Z" fill={`url(#${gid})`} />
+        <path d="M19 1Q19.64 4.36 23 5Q19.64 5.64 19 9Q18.36 5.64 15 5Q18.36 4.36 19 1Z" fill={`url(#${gid})`} />
+      </motion.svg>
     </span>
   )
 }
@@ -386,7 +417,7 @@ export function Sheet({ open, onClose, title, subtitle, children, footer, wide =
 }
 
 /** A soft area chart that draws itself in. */
-export function Sparkline({ points, height = 64, delay = 0 }: { points: number[]; height?: number; delay?: number }) {
+export function Sparkline({ points, height = 64, delay = 0, endDot = true }: { points: number[]; height?: number; delay?: number; endDot?: boolean }) {
   const reduce = useReducedMotion()
   const gid = useId().replace(/:/g, '')
   if (points.length < 2) return null
@@ -406,8 +437,91 @@ export function Sparkline({ points, height = 64, delay = 0 }: { points: number[]
       </defs>
       <motion.path d={area} fill={`url(#${gid})`} initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: delay + 0.5, duration: 0.6 }} />
       <motion.path d={line} fill="none" stroke="#2563eb" strokeWidth={2} vectorEffect="non-scaling-stroke" strokeLinecap="round" initial={reduce ? false : { pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay, duration: 1.2, ease: [0.22, 1, 0.36, 1] }} />
-      <motion.circle cx={ex} cy={ey} r={4} fill="#2563eb" stroke="white" strokeWidth={2} vectorEffect="non-scaling-stroke" initial={reduce ? false : { scale: 0 }} animate={{ scale: 1 }} transition={{ delay: delay + 1.1, type: 'spring', stiffness: 400, damping: 18 }} />
+      {endDot && <motion.circle cx={ex} cy={ey} r={4} fill="#2563eb" stroke="white" strokeWidth={2} vectorEffect="non-scaling-stroke" initial={reduce ? false : { scale: 0 }} animate={{ scale: 1 }} transition={{ delay: delay + 1.1, type: 'spring', stiffness: 400, damping: 18 }} />}
     </svg>
+  )
+}
+
+/**
+ * Projection chart you can explore: hover, drag or use the arrow keys to read the balance at any age.
+ * Points are one per year, starting at `startAge`.
+ */
+export function ProjectionChart({ points, startAge, height = 72, delay = 0, format, label, pointLabel }: {
+  points: number[]
+  startAge: number
+  height?: number
+  delay?: number
+  format: (v: number) => string
+  label: string
+  pointLabel: (age: number, value: string) => string
+}) {
+  const reduce = useReducedMotion()
+  const [active, setActive] = useState<number | null>(null)
+  const boxRef = useRef<HTMLDivElement>(null)
+  if (points.length < 2) return null
+  const last = points.length - 1
+  const max = Math.max(...points) || 1
+  const xPct = (i: number) => (i / last) * 100
+  const yPx = (v: number) => height - 4 - (v / max) * (height - 10)
+  const pick = (clientX: number) => {
+    const box = boxRef.current?.getBoundingClientRect()
+    if (!box || box.width === 0) return
+    setActive(clamp(Math.round(((clientX - box.left) / box.width) * last), 0, last))
+  }
+  const onKey = (e: React.KeyboardEvent) => {
+    const cur = active ?? last
+    const next = e.key === 'ArrowLeft' ? cur - 1 : e.key === 'ArrowRight' ? cur + 1 : e.key === 'Home' ? 0 : e.key === 'End' ? last : null
+    if (next === null) return
+    e.preventDefault()
+    setActive(clamp(next, 0, last))
+  }
+  const i = active
+  const text = i === null ? '' : pointLabel(startAge + i, format(points[i]))
+  return (
+    <div
+      ref={boxRef}
+      role="slider"
+      tabIndex={0}
+      aria-label={label}
+      aria-valuemin={startAge}
+      aria-valuemax={startAge + last}
+      aria-valuenow={startAge + (i ?? last)}
+      aria-valuetext={pointLabel(startAge + (i ?? last), format(points[i ?? last]))}
+      onPointerMove={(e) => pick(e.clientX)}
+      onPointerDown={(e) => pick(e.clientX)}
+      onPointerLeave={() => setActive(null)}
+      onKeyDown={onKey}
+      onBlur={() => setActive(null)}
+      className="relative h-full w-full cursor-crosshair touch-none rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
+    >
+      <Sparkline points={points} height={height} delay={delay} endDot={false} />
+      {/* Round markers drawn in HTML: the stretched SVG would squash them */}
+      <motion.span
+        className="pointer-events-none absolute h-2.5 w-2.5 rounded-full border-2 border-white bg-blue-600 dark:border-gray-900"
+        style={{ left: '100%', top: yPx(points[last]), x: '-50%', y: '-50%' }}
+        initial={reduce ? false : { scale: 0 }}
+        animate={{ scale: i === null ? 1 : 0 }}
+        transition={{ delay: i === null ? delay + 1.1 : 0, type: 'spring', stiffness: 400, damping: 18 }}
+        aria-hidden
+      />
+      {i !== null && (
+        <>
+          <span className="pointer-events-none absolute inset-y-0 w-px bg-blue-600/40" style={{ left: `${xPct(i)}%` }} aria-hidden />
+          <span
+            className="pointer-events-none absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-blue-600 shadow dark:border-gray-900"
+            style={{ left: `${xPct(i)}%`, top: yPx(points[i]) }}
+            aria-hidden
+          />
+          <span
+            className="pointer-events-none absolute whitespace-nowrap rounded-lg bg-slate-900 px-2.5 py-1 text-[12px] font-semibold text-white shadow-lg dark:bg-white dark:text-slate-900"
+            style={{ left: `${xPct(i)}%`, top: yPx(points[i]) < height / 2 ? yPx(points[i]) + 10 : yPx(points[i]) - 34, transform: `translateX(${i / last > 0.75 ? '-100%' : i / last < 0.25 ? '0' : '-50%'})` }}
+            aria-hidden
+          >
+            {text}
+          </span>
+        </>
+      )}
+    </div>
   )
 }
 

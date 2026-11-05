@@ -6,11 +6,11 @@ import { cn } from '@/lib/cn'
 import { AgentMark, DrawnCheck } from '@/features/enrollment/flow/core/ui'
 
 const ease = [0.22, 1, 0.36, 1] as const
-/** Slow in, slow out: the column glides rather than jumps */
-const glide = [0.65, 0, 0.35, 1] as const
-const GLIDE_S = 1.2
+/** Quick start, soft landing: the column moves promptly and settles gently */
+const glide = [0.32, 0.72, 0, 1] as const
+const GLIDE_S = 0.8
 /** How long a card rests in focus before the column moves up */
-const HOLD_MS = 4000
+const HOLD_MS = 2800
 /** Card height + gap: one step of the column */
 const CARD_H = 276
 const GAP = 16
@@ -60,7 +60,7 @@ function GrowthChart({ live, reduce }: { live: boolean; reduce: boolean }) {
       {[0.25, 0.5, 0.75].map((f) => (
         <line key={f} x1="0" x2={W} y1={H * f} y2={H * f} className="stroke-slate-200 dark:stroke-white/10" strokeDasharray="3 4" strokeWidth="1" />
       ))}
-      <motion.path d={area} fill={`url(#fill-${gid})`} initial={false} animate={{ opacity: show ? 1 : 0 }} transition={{ delay: show && !reduce ? 1 : 0, duration: 0.6 }} />
+      <motion.path d={area} fill={`url(#fill-${gid})`} initial={false} animate={{ opacity: show ? 1 : 0 }} transition={{ delay: show && !reduce ? 0.6 : 0, duration: 0.4 }} />
       <motion.path
         d={line}
         fill="none"
@@ -69,11 +69,11 @@ function GrowthChart({ live, reduce }: { live: boolean; reduce: boolean }) {
         strokeLinecap="round"
         initial={false}
         animate={{ pathLength: show ? 1 : 0, opacity: show ? 1 : 0 }}
-        transition={{ delay: show && !reduce ? 0.7 : 0, duration: reduce ? 0 : 1.1, ease: glide, opacity: { delay: show && !reduce ? 0.7 : 0, duration: 0.2 } }}
+        transition={{ delay: show && !reduce ? 0.35 : 0, duration: reduce ? 0 : 0.8, ease: glide, opacity: { delay: show && !reduce ? 0.35 : 0, duration: 0.15 } }}
       />
-      <motion.circle cx={ex} cy={ey} r="4" className="fill-blue-600 dark:fill-blue-400" initial={false} animate={{ opacity: show ? 1 : 0, scale: show ? 1 : 0.4 }} transition={{ delay: show && !reduce ? 1.7 : 0, duration: 0.3 }} />
+      <motion.circle cx={ex} cy={ey} r="4" className="fill-blue-600 dark:fill-blue-400" initial={false} animate={{ opacity: show ? 1 : 0, scale: show ? 1 : 0.4 }} transition={{ delay: show && !reduce ? 1.1 : 0, duration: 0.25 }} />
       {show && !reduce && (
-        <motion.circle cx={ex} cy={ey} r="4" className="fill-blue-500/40" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} initial={{ scale: 1, opacity: 0 }} animate={{ scale: [1, 2.8], opacity: [0.6, 0] }} transition={{ delay: 1.9, duration: 1.4, repeat: Infinity }} />
+        <motion.circle cx={ex} cy={ey} r="4" className="fill-blue-500/40" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} initial={{ scale: 1, opacity: 0 }} animate={{ scale: [1, 2.8], opacity: [0.6, 0] }} transition={{ delay: 1.3, duration: 1.4, repeat: Infinity }} />
       )}
     </svg>
   )
@@ -115,7 +115,7 @@ function Visual({ k, live, reduce }: { k: FeatureKey; live: boolean; reduce: boo
             style={{ opacity: 0.4 + i * 0.12 }}
             initial={false}
             animate={{ height: live || reduce ? `${30 + i * 14}%` : '18%' }}
-            transition={{ delay: live ? 0.7 + i * 0.07 : 0, duration: 0.5, ease }}
+            transition={{ delay: live ? 0.35 + i * 0.06 : 0, duration: 0.4, ease }}
           />
         ))}
       </div>
@@ -127,7 +127,7 @@ function Visual({ k, live, reduce }: { k: FeatureKey; live: boolean; reduce: boo
       {(['s4_step1', 's4_step2', 's4_step3'] as const).map((s, i) => (
         <li key={s} className="flex items-center gap-1">
           <span className={cn('flex h-4 w-4 items-center justify-center rounded-full text-white transition-colors', live ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600')}>
-            {live ? <DrawnCheck className="h-3 w-3" delay={0.7 + i * 0.2} /> : null}
+            {live ? <DrawnCheck className="h-3 w-3" delay={0.4 + i * 0.15} /> : null}
           </span>
           {t(`carousel.${s}`)}
         </li>
@@ -147,7 +147,7 @@ function FeatureCard({ k, Icon, tag, focus, reduce }: { k: FeatureKey; Icon: Luc
         className="pointer-events-none absolute inset-0 rounded-[24px] bg-white ring-1 ring-slate-200/70 dark:bg-slate-900 dark:ring-white/10"
         initial={false}
         animate={{ opacity: focus ? 1 : 0 }}
-        transition={{ duration: reduce ? 0 : GLIDE_S, ease: glide }}
+        transition={{ duration: reduce ? 0 : GLIDE_S * 0.75, ease: 'easeOut' }}
         aria-hidden
       />
       <div className="relative flex items-center justify-between gap-3">
@@ -176,7 +176,13 @@ function FeatureColumn() {
   const reduce = !!useReducedMotion()
   /** Ever-increasing position; the card in focus is FEATURES[n % length] */
   const [n, setN] = useState(0)
-  const [paused, setPaused] = useState(false)
+  /** Rests while the browser tab is in the background, so it doesn't race ahead when you come back */
+  const [paused, setPaused] = useState(() => typeof document !== 'undefined' && document.hidden)
+  useEffect(() => {
+    const onVis = () => setPaused(document.hidden)
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
+  }, [])
 
   useEffect(() => {
     if (paused || reduce) return
@@ -191,8 +197,6 @@ function FeatureColumn() {
   return (
     <div
       className="relative h-full w-full"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
       role="region"
       aria-roledescription="carousel"
       aria-label={t('carousel.label')}
