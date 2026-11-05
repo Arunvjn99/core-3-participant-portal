@@ -178,7 +178,6 @@ export default function CoreEnrollment() {
   const sources = [
     { key: 'preTax', label: t('enrollment.core.src_pre'), pct: election.preTax, bar: 'bg-blue-600' },
     { key: 'roth', label: t('enrollment.core.src_roth'), pct: election.roth, bar: 'bg-indigo-400' },
-    { key: 'afterTax', label: t('enrollment.core.src_after'), pct: 0, bar: 'bg-sky-300' },
   ]
   const barMax = Math.max(autoTarget, cap, f.total, 1)
   const nextRate = Math.min(f.total + election.auto.amount.preTax, Math.max(election.auto.cap.preTax, f.total))
@@ -365,7 +364,7 @@ export default function CoreEnrollment() {
       {/* Where they are in enrollment */}
       <header className="sticky top-0 z-30 bg-[#f5f6f8]/75 backdrop-blur-xl dark:bg-gray-950/80">
         <div className="mx-auto flex h-12 max-w-[1120px] items-center gap-3 px-4 sm:px-6">
-          <h1 className="text-[19px] font-semibold tracking-[-0.01em] text-slate-900 dark:text-white">{t('enrollment.core.title')}</h1>
+          <h1 className="text-[22px] font-bold tracking-[-0.015em] text-slate-900 dark:text-white">{t('enrollment.core.title')}</h1>
         </div>
       </header>
 
@@ -450,7 +449,7 @@ export default function CoreEnrollment() {
                               <motion.span key={src.key} initial={reduce ? false : { width: 0 }} animate={{ width: `${(src.pct / barMax) * 100}%` }} transition={{ delay: 0.35 + i * 0.1, duration: 0.7, ease }} className={cn('h-full', src.bar)} />
                             ))}
                           </div>
-                          <ul className="mt-3 grid grid-cols-3 gap-2">
+                          <ul className="mt-3 grid grid-cols-2 gap-2">
                             {sources.map((src) => (
                               <li key={src.key} className="rounded-xl bg-slate-50 px-3 py-2 dark:bg-gray-800/60">
                                 <span className="flex items-center gap-1.5 text-[12px] font-medium text-slate-500 dark:text-gray-400">
@@ -661,13 +660,10 @@ export default function CoreEnrollment() {
                   </motion.button>
                 </motion.div>
 
-                {/* Leave, or take the guided route instead */}
-                <div className="flex items-center justify-between gap-3">
+                {/* Leave without enrolling */}
+                <div className="flex items-center">
                   <button type="button" onClick={() => navigate(ROUTES.PRE_ENROLLMENT_DASHBOARD)} disabled={stage === 'submitting'} className="h-10 rounded-full bg-white px-5 text-[14px] font-semibold text-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.05)] ring-1 ring-slate-200/70 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:opacity-50 dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-800 dark:hover:bg-gray-800">
                     {t('enrollment.core.cancel')}
-                  </button>
-                  <button type="button" onClick={() => navigate(`${ROUTES.PRE_ENROLLMENT_DASHBOARD}?customize=1`)} disabled={stage === 'submitting'} className="h-10 rounded-full px-5 text-[14px] font-semibold text-blue-700 ring-1 ring-blue-200 transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:opacity-50 dark:text-blue-300 dark:ring-blue-400/30 dark:hover:bg-blue-950/40">
-                    {t('enrollment.core.customize')}
                   </button>
                 </div>
               </>
