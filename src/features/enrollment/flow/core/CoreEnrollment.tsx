@@ -2,25 +2,24 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { AlertTriangle, ArrowRight, Check, Loader2, Lock, PieChart, RotateCw, SlidersHorizontal } from 'lucide-react'
+import { AlertTriangle, ArrowRight, Check, Loader2, Lock, RotateCw } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { LEGAL, ROUTES } from '@/lib/constants'
 import { getAppDateLocale } from '@/lib/dateLocale'
 import { useNow } from '@/lib/useNow'
+import { useDialogA11y } from '@/lib/useDialogA11y'
 import { LegalHrefLink } from '@/features/legal/components/LegalHrefLink'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { useEnrollmentSave } from '@/core/hooks/useEnrollmentSave'
 import { useElectionsStore } from '@/features/plan/electionsStore'
 import { nextIncreaseDate } from '@/features/plan/electionsData'
-import { PlanFundsTable } from '@/features/plan/PlanFundsTable'
 import { recommendedFunds, type RiskKey } from '../../investmentCatalog'
 import { buildQuickEnrollmentDefaults, projectBalance } from '../../quickEnrollmentDefaults'
 import { useParticipantBasics } from '../../useParticipantBasics'
 import { PLAN_CONFIG, PLAN_LIMITS, employerMatch } from '../../agent/planConfig'
 import { checkEligibility, getPlanRules, submitEnrollment } from '../../agent/enrollmentService'
-import { AutoIncreaseEditor, ContributionEditor, InvestmentsEditor } from './editors'
-import { blendedFee, pause, round2, rowsFor, sameElection, type Election } from './model'
-import { AgentMark, AnimatedNumber, ConfettiField, DrawnCheck, EdgeGlow, InfoTip, Mascot, RingGauge, Sheet, Shimmer, Sparkline, Switch } from './ui'
+import { FUND_COLORS, blendedFee, fundMeta, pause, round2, rowsFor, type Election } from './model'
+import { AgentMark, AnimatedNumber, ConfettiField, DrawnCheck, EdgeGlow, InfoTip, Mascot, Sheet, Shimmer, Sparkline } from './ui'
 
 /**
  * One-click enrollment: Core AI builds a plan from the details already on file and opens straight on it. The participant
@@ -70,15 +69,6 @@ function Bone({ className }: { className?: string }) {
   return <span className={cn('block animate-pulse rounded-lg bg-slate-100 dark:bg-gray-800', className)} aria-hidden />
 }
 
-/** A text button in the card's accent colour, for Edit and similar. */
-function LinkButton({ children, onClick, label }: { children: React.ReactNode; onClick: () => void; label?: string }) {
-  return (
-    <button type="button" onClick={onClick} aria-label={label} className="rounded-md text-[14px] font-semibold text-blue-700 transition-colors hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-blue-300">
-      {children}
-    </button>
-  )
-}
-
 export default function CoreEnrollment() {
   const { t } = useTranslation()
   const locale = getAppDateLocale()
@@ -101,7 +91,6 @@ export default function CoreEnrollment() {
   const [submitSteps, setSubmitSteps] = useState<StepState[]>(Array(SUBMIT_STEPS).fill('pending'))
   const [submitError, setSubmitError] = useState(false)
   const [effective, setEffective] = useState<Date | null>(null)
-  const [confirmation, setConfirmation] = useState<string | null>(null)
   const rulesAttempt = useRef(0)
   const started = useRef(false)
   const planRef = useRef<HTMLDivElement>(null)
@@ -124,8 +113,10 @@ export default function CoreEnrollment() {
   /** What Core AI first proposed, so Start over can return to it */
   const [baseline, setBaseline] = useState<Election>(initialElection)
   const [sheet, setSheet] = useState<SheetKind>(null)
-  const [staged, setStaged] = useState<Election>(initialElection)
   const [showFunds, setShowFunds] = useState(false)
+  /** Warns before leaving the confirmation without naming a beneficiary */
+  const [beneWarn, setBeneWarn] = useState(false)
+  const beneRef = useDialogA11y<HTMLDivElement>(beneWarn, () => setBeneWarn(false))
   const [consent, setConsent] = useState(false)
   /** A short confirmation after an edit or a reset; it clears itself */
   const [toast, setToast] = useState<{ id: number; text: string } | null>(null)
@@ -149,6 +140,7 @@ export default function CoreEnrollment() {
     }
   }
   const f = facts(election)
+  const funds = f.rows.slice(0, 5)
   const cap = PLAN_CONFIG.match.capPercent
   const fullMatch = employerMatch(salary, cap)
   const rateError = f.total < PLAN_LIMITS.rate[0] || f.total > PLAN_LIMITS.rate[1]
@@ -156,6 +148,14 @@ export default function CoreEnrollment() {
   const canApprove = consent && !rateError && !fundsError && stage === 'review'
   const nextAuto = nextIncreaseDate(election.auto.cycle, now, now)
   const autoTarget = election.auto.enabled ? Math.max(election.auto.cap.preTax, f.total) : f.total
+  /** Where the contribution goes, by source; the bar is scaled to the auto-increase target */
+  const sources = [
+    { key: 'preTax', label: t('enrollment.core.src_pre'), pct: election.preTax, bar: 'bg-blue-600' },
+    { key: 'roth', label: t('enrollment.core.src_roth'), pct: election.roth, bar: 'bg-indigo-400' },
+    { key: 'afterTax', label: t('enrollment.core.src_after'), pct: 0, bar: 'bg-sky-300' },
+  ]
+  const barMax = Math.max(autoTarget, cap, f.total, 1)
+  const nextRate = Math.min(f.total + election.auto.amount.preTax, Math.max(election.auto.cap.preTax, f.total))
   const series = Array.from({ length: years + 1 }, (_, i) =>
     i === 0 ? savings : projectBalance({ ...buildQuickEnrollmentDefaults(draft), contributionPercent: f.total, riskLevel: election.risk, salary, currentAge: age, retirementAge: age + i }, savings),
   )
@@ -247,30 +247,12 @@ export default function CoreEnrollment() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // ── Edits ──
-  const openSheet = (k: Exclude<SheetKind, null>) => {
-    setStaged(election)
-    setSheet(k)
-  }
-  const commit = (next: Election) => {
-    if (sameElection(next, election)) return
-    setElection(next)
-    setToast({ id: Date.now(), text: t('enrollment.core.updated') })
-    setConsent(false)
-    setSubmitError(false)
-  }
-  const applySheet = () => {
-    commit(staged)
-    setSheet(null)
-  }
   const startOver = () => {
     setElection(baseline)
     setConsent(false)
     setSubmitError(false)
     setToast({ id: Date.now(), text: t('enrollment.core.reset_toast') })
   }
-  const stagedFacts = facts(staged)
-  const stagedInvalid = sheet === 'contribution' ? stagedFacts.total < PLAN_LIMITS.rate[0] || stagedFacts.total > PLAN_LIMITS.rate[1] : sheet === 'invest' ? stagedFacts.rowsTotal !== 100 : false
 
   // ── Approval ──
   const markSubmit = (i: number, s: StepState) => setSubmitSteps((all) => all.map((x, j) => (j === i ? s : x)))
@@ -328,7 +310,6 @@ export default function CoreEnrollment() {
       await wait(350)
       markSubmit(2, 'done')
       setEffective(conf.effectiveDate)
-      setConfirmation(conf.confirmationId)
       await wait(250)
       setStage('done')
       window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' })
@@ -342,35 +323,13 @@ export default function CoreEnrollment() {
   const workSteps = ['s1', 's2', 's3', 's4', 's5', 's6'].map((k, i) => ({ label: t(`enrollment.core.${k}_ing`), state: steps[i] }))
   const submitLog = ['u1', 'u2', 'u3'].map((k, i) => ({ label: t(`enrollment.core.${k}_ing`), state: submitSteps[i] }))
 
-  const flow: { key: string; label: string; state: 'done' | 'current' | 'next' }[] = [
-    { key: 'details', label: t('enrollment.core.step_details'), state: 'done' },
-    { key: 'plan', label: t('enrollment.core.step_plan'), state: stage === 'done' ? 'done' : 'current' },
-    { key: 'enrolled', label: t('enrollment.core.step_enrolled'), state: stage === 'done' ? 'current' : 'next' },
-  ]
-  // What they enrolled in, for the confirmation and the downloadable summary
+  // What they enrolled in, for the confirmation
   const summary: { label: string; value: string; good?: boolean }[] = [
     { label: t('enrollment.core.m_save'), value: `${f.total}% · ${money(f.perCheck)}${t(periods === 12 ? 'enrollment.core.unit_month' : 'enrollment.core.unit_paycheck')}` },
-    { label: t('enrollment.core.m_match_short'), value: `+${money(f.match)}${t('enrollment.core.unit_year')}`, good: true },
+    { label: t('enrollment.core.m_match_short'), value: `+${money(f.match / 12)}${t('enrollment.core.unit_month')}`, good: true },
     { label: t('enrollment.core.invested_in'), value: f.invest },
     ...(effective ? [{ label: t('enrollment.core.first_contribution'), value: dateLong(effective) }] : []),
   ]
-  const downloadSummary = () => {
-    const lines = [
-      t('enrollment.core.summary_title'),
-      planName,
-      '',
-      ...summary.map((r) => `${r.label}: ${r.value}`),
-      `${t('enrollment.core.row_auto')}: ${election.auto.enabled ? t('enrollment.core.auto_short', { amount: election.auto.amount.preTax, max: election.auto.cap.preTax }) : t('enrollment.core.auto_off_short')}`,
-      ...(confirmation ? [`${t('enrollment.core.confirmation')}: ${confirmation}`] : []),
-      `${t('enrollment.core.summary_date')}: ${dateLong(new Date())}`,
-    ]
-    const url = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' }))
-    const link = document.createElement('a')
-    link.href = url
-    link.download = 'enrollment-summary.txt'
-    link.click()
-    URL.revokeObjectURL(url)
-  }
 
   const card = 'rounded-[24px] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_16px_40px_rgba(15,23,42,0.06)] ring-1 ring-slate-200/70 dark:bg-gray-900 dark:ring-gray-800'
   const label = 'text-[14px] font-medium text-slate-500 dark:text-gray-400'
@@ -385,22 +344,6 @@ export default function CoreEnrollment() {
       <header className="sticky top-0 z-30 bg-[#f5f6f8]/75 backdrop-blur-xl dark:bg-gray-950/80">
         <div className="mx-auto flex h-16 max-w-[1120px] items-center gap-3 px-4 sm:px-6">
           <h1 className="text-[16px] font-semibold tracking-[-0.01em] text-slate-900 dark:text-white">{t('enrollment.core.title')}</h1>
-          <ol className="hidden min-w-0 items-center gap-1.5 sm:flex">
-            {flow.map((s) => (
-              <li
-                key={s.key}
-                aria-current={s.state === 'current' ? 'step' : undefined}
-                className={cn(
-                  'inline-flex h-8 items-center gap-1 whitespace-nowrap rounded-full px-3 text-[13px] font-medium transition-colors',
-                  s.state === 'current' && 'bg-slate-900 text-white dark:bg-white dark:text-slate-900',
-                  s.state === 'done' && 'hidden bg-emerald-50 text-emerald-700 sm:inline-flex dark:bg-emerald-950/40 dark:text-emerald-300',
-                  s.state === 'next' && 'hidden bg-white text-slate-500 ring-1 ring-slate-200/70 sm:inline-flex dark:bg-gray-900 dark:text-gray-400 dark:ring-gray-800',
-                )}
-              >
-                {s.label}
-              </li>
-            ))}
-          </ol>
           {stage !== 'done' && (
             <div className="ml-auto flex shrink-0 items-center gap-2">
               <button type="button" onClick={startOver} disabled={!ready || stage === 'submitting'} className="h-9 rounded-full bg-white px-3.5 text-[13px] font-semibold text-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.05)] ring-1 ring-slate-200/70 transition-colors hover:bg-slate-50 disabled:opacity-50 sm:h-10 sm:px-4 sm:text-[14px] dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-800">
@@ -436,13 +379,9 @@ export default function CoreEnrollment() {
                   )}
                 </h2>
                 <div className="mt-0.5 text-[15px] text-slate-500 dark:text-gray-400">
-                  {stage === 'working' && !problem ? <LiveLine steps={workSteps} /> : <p className="truncate">{`${planName} · ${t('enrollment.core.review_enroll')}`}</p>}
+                  {stage === 'working' && !problem ? <LiveLine steps={workSteps} /> : <p className="truncate"><strong className="font-semibold text-slate-900 dark:text-white">{planName}</strong>{` · ${t('enrollment.core.review_enroll')}`}</p>}
                 </div>
               </div>
-              <span className="hidden h-9 shrink-0 items-center gap-2 rounded-full bg-white px-3.5 text-[14px] font-medium text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.05)] ring-1 ring-slate-200/70 sm:inline-flex dark:bg-gray-900 dark:text-gray-200 dark:ring-gray-800">
-                <span className="h-2 w-2 rounded-full bg-amber-500" />
-                {t('enrollment.core.doc_draft')}
-              </span>
             </div>
 
             {problem === 'ineligible' && (
@@ -472,39 +411,46 @@ export default function CoreEnrollment() {
                     <section className="p-5 sm:p-6">
                       <div className="flex items-center justify-between">
                         <p className={label}>{t('enrollment.core.m_save')}</p>
-                        {ready && stage === 'review' && <LinkButton onClick={() => openSheet('contribution')}>{t('enrollment.core.edit')}</LinkButton>}
                       </div>
-                      <div className="mt-3 flex items-center gap-5 sm:gap-7">
-                        {ready ? (
-                          <RingGauge fraction={f.total / Math.max(autoTarget, cap, 1)} size={124} delay={0.3}>
-                            <span className="text-[30px] font-semibold tracking-[-0.03em] text-blue-900 dark:text-blue-200">
-                              <AnimatedNumber countUp delay={0.3} value={f.total} format={(v) => `${round2(v)}%`} />
+                      {ready ? (
+                        <>
+                          <p className="mt-1.5 flex flex-wrap items-baseline gap-x-2">
+                            <span className="whitespace-nowrap">
+                              <span className="text-[34px] font-semibold tracking-[-0.03em] text-slate-900 sm:text-[40px] dark:text-white">
+                                <AnimatedNumber countUp delay={0.35} value={f.perCheck} format={money} />
+                              </span>
+                              <span className="ml-1 text-[16px] text-slate-400">{t('enrollment.core.per_paycheck')}</span>
                             </span>
-                            <span className="mt-1 text-[12px] text-slate-400">{t('enrollment.core.of_pay')}</span>
-                          </RingGauge>
-                        ) : (
-                          <Bone className="h-[124px] w-[124px] rounded-full" />
-                        )}
-                        <div className="min-w-0">
-                          {ready ? (
-                            <>
-                              <p className="whitespace-nowrap">
-                                <span className="text-[34px] font-semibold tracking-[-0.03em] text-slate-900 sm:text-[40px] dark:text-white">
-                                  <AnimatedNumber countUp delay={0.35} value={f.perCheck} format={money} />
+                            <span className="text-[15px] font-semibold text-blue-900 dark:text-blue-200">
+                              <AnimatedNumber countUp delay={0.3} value={f.total} format={(v) => `${round2(v)}%`} /> {t('enrollment.core.of_pay')}
+                            </span>
+                          </p>
+                          {/* How much of pay goes in, split by source */}
+                          <div className="mt-3 flex h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-gray-800" role="img" aria-label={`${f.total}% ${t('enrollment.core.of_pay')}`}>
+                            {sources.map((src, i) => (
+                              <motion.span key={src.key} initial={reduce ? false : { width: 0 }} animate={{ width: `${(src.pct / barMax) * 100}%` }} transition={{ delay: 0.35 + i * 0.1, duration: 0.7, ease }} className={cn('h-full', src.bar)} />
+                            ))}
+                          </div>
+                          <ul className="mt-3 grid grid-cols-3 gap-2">
+                            {sources.map((src) => (
+                              <li key={src.key} className="rounded-xl bg-slate-50 px-3 py-2 dark:bg-gray-800/60">
+                                <span className="flex items-center gap-1.5 text-[12px] font-medium text-slate-500 dark:text-gray-400">
+                                  <span className={cn('h-2 w-2 shrink-0 rounded-full', src.bar)} aria-hidden />
+                                  <span className="truncate">{src.label}</span>
                                 </span>
-                                <span className="ml-1 text-[16px] text-slate-400">{t('enrollment.core.per_paycheck')}</span>
-                              </p>
-                              <p className="mt-0.5 text-[15px] text-slate-600 dark:text-gray-300">{`${f.total}% ${f.tax}`}</p>
-                              {rateError && <p role="alert" className="mt-1 text-[12px] font-medium text-red-600">{t('enrollment.feed.err_rate', { min: PLAN_LIMITS.rate[0], max: PLAN_LIMITS.rate[1], total: f.total })}</p>}
-                            </>
-                          ) : (
-                            <div className="space-y-2.5">
-                              <Bone className="h-9 w-36" />
-                              <Bone className="h-4 w-24" />
-                            </div>
-                          )}
+                                <span className={cn('mt-0.5 block text-[16px] font-semibold tabular-nums', src.pct > 0 ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-gray-500')}>{`${src.pct}%`}</span>
+                              </li>
+                            ))}
+                          </ul>
+                          {rateError && <p role="alert" className="mt-1 text-[12px] font-medium text-red-600">{t('enrollment.feed.err_rate', { min: PLAN_LIMITS.rate[0], max: PLAN_LIMITS.rate[1], total: f.total })}</p>}
+                        </>
+                      ) : (
+                        <div className="mt-3 space-y-3">
+                          <Bone className="h-10 w-48" />
+                          <Bone className="h-2.5 w-full" />
+                          <Bone className="h-14 w-full" />
                         </div>
-                      </div>
+                      )}
                     </section>
 
                     {/* Projected */}
@@ -550,9 +496,9 @@ export default function CoreEnrollment() {
                         <>
                           <p className="mt-1.5">
                             <span className="text-[24px] font-semibold tracking-[-0.02em] text-slate-900 dark:text-white">
-                              <AnimatedNumber countUp delay={0.5} value={f.match} format={money} />
+                              <AnimatedNumber countUp delay={0.5} value={f.match / 12} format={money} />
                             </span>
-                            <span className="ml-1 text-[15px] text-slate-400">{t('enrollment.core.per_year')}</span>
+                            <span className="ml-1 text-[15px] text-slate-400">{t('enrollment.core.per_month')}</span>
                           </p>
                           {f.match >= fullMatch ? (
                             <p className="mt-1 flex items-center gap-1 text-[14px] font-medium text-emerald-700 dark:text-emerald-400">
@@ -560,7 +506,7 @@ export default function CoreEnrollment() {
                               {t('enrollment.core.m_match_full')}
                             </p>
                           ) : (
-                            <p className="mt-1 text-[14px] font-medium text-amber-700 dark:text-amber-400">{t('enrollment.core.m_match_gap', { amount: money(fullMatch - f.match) })}</p>
+                            <p className="mt-1 text-[14px] font-medium text-amber-700 dark:text-amber-400">{t('enrollment.core.m_match_gap', { amount: `${money((fullMatch - f.match) / 12)}${t('enrollment.core.unit_month')}` })}</p>
                           )}
                         </>
                       ) : (
@@ -574,7 +520,6 @@ export default function CoreEnrollment() {
                     <section className="border-t border-slate-100 p-5 sm:border-t-0 sm:px-6 dark:border-gray-800">
                       <div className="flex items-center justify-between gap-2">
                         <p className={label}>{t('enrollment.core.row_auto')}</p>
-                        {ready && <Switch checked={election.auto.enabled} disabled={stage !== 'review'} onChange={(v) => commit({ ...election, auto: { ...election.auto, enabled: v } })} label={t('enrollment.core.row_auto')} />}
                       </div>
                       {ready ? (
                         <>
@@ -583,14 +528,14 @@ export default function CoreEnrollment() {
                             {election.auto.enabled && (
                               <>
                                 <ArrowRight className="h-5 w-5" strokeWidth={2.5} aria-hidden />
-                                {`${election.auto.cap.preTax}%`}
+                                {`${nextRate}%`}
                               </>
                             )}
                           </p>
                           {election.auto.enabled ? (
-                            <button type="button" onClick={() => openSheet('auto')} disabled={stage !== 'review'} className="mt-1 text-left text-[14px] text-slate-500 underline-offset-2 transition-colors hover:text-blue-700 hover:underline disabled:no-underline dark:text-gray-400">
+                            <p className="mt-1 text-[14px] text-slate-500 dark:text-gray-400">
                               {t('enrollment.core.auto_each', { amount: election.auto.amount.preTax, month: nextAuto.toLocaleDateString(locale, { month: 'long' }), year: nextAuto.getFullYear() })}
-                            </button>
+                            </p>
                           ) : (
                             <p className="mt-1 text-[14px] text-slate-500 dark:text-gray-400">{t('enrollment.core.auto_off_short')}</p>
                           )}
@@ -606,14 +551,15 @@ export default function CoreEnrollment() {
                     <section className="border-t border-slate-100 p-5 sm:border-t-0 sm:px-6 dark:border-gray-800">
                       <div className="flex items-center justify-between gap-2">
                         <p className={label}>{t('enrollment.core.row_invest')}</p>
-                        {ready && stage === 'review' && <LinkButton onClick={() => openSheet('invest')}>{t('enrollment.core.edit')}</LinkButton>}
                       </div>
                       {ready ? (
                         <>
                           <p className="mt-1.5 truncate text-[22px] font-semibold tracking-[-0.02em] text-slate-900 dark:text-white">{f.invest}</p>
                           <p className="mt-1 text-[14px] text-slate-500 dark:text-gray-400">
                             {t('enrollment.core.fee', { fee: f.fee.toFixed(2) })} ·{' '}
-                            <LinkButton onClick={() => { setStaged(election); setShowFunds(true) }}>{t('enrollment.core.funds_n', { count: f.rows.length })}</LinkButton>
+                            <button type="button" onClick={() => setShowFunds(true)} className="rounded-md font-semibold text-blue-700 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-blue-300">
+                              {t('enrollment.core.funds_n', { count: funds.length })}
+                            </button>
                           </p>
                           {fundsError && <p role="alert" className="mt-1 text-[12px] font-medium text-red-600">{t('enrollment.feed.err_funds', { total: f.rowsTotal })}</p>}
                         </>
@@ -626,25 +572,6 @@ export default function CoreEnrollment() {
                     </section>
                   </div>
 
-                  {/* Where the investment comes from (the plan's default, not a recommendation), and the way to change it */}
-                  {ready && election.mode === 'risk_style' && (
-                    <motion.div initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="relative flex flex-col gap-3 overflow-hidden border-t border-slate-100 bg-gradient-to-r from-blue-50/80 via-indigo-50/40 to-white px-5 py-4 sm:flex-row sm:items-center sm:px-6 dark:border-gray-800 dark:from-blue-950/30 dark:via-indigo-950/20 dark:to-gray-900">
-                      {!reduce && <motion.span className="pointer-events-none absolute inset-y-0 w-24 bg-gradient-to-r from-transparent via-white/70 to-transparent" initial={{ x: '-30%' }} animate={{ x: '1100%' }} transition={{ delay: 1, duration: 1.6, ease: 'easeInOut' }} aria-hidden />}
-                      <span className="relative flex items-center gap-3 sm:flex-1">
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-blue-600 shadow-[0_1px_2px_rgba(37,99,235,0.15)] ring-1 ring-blue-100 dark:bg-gray-900 dark:ring-blue-900">
-                          <PieChart className="h-4 w-4" aria-hidden />
-                        </span>
-                        <span className="text-[15px] leading-[1.5] text-slate-600 dark:text-gray-300">
-                          <strong className="font-semibold text-slate-900 dark:text-white">{t('enrollment.core.assume_title', { level: level(election.risk) })}</strong>
-                          {t('enrollment.core.picked_reason', { years })}
-                        </span>
-                      </span>
-                      <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={() => openSheet('invest')} disabled={stage !== 'review'} className="relative inline-flex h-10 shrink-0 items-center justify-center gap-1.5 self-start rounded-full bg-white px-4 text-[14px] font-semibold text-blue-700 shadow-[0_1px_2px_rgba(15,23,42,0.06)] ring-1 ring-blue-200 transition-colors hover:bg-blue-600 hover:text-white hover:ring-blue-600 sm:self-auto dark:bg-gray-900 dark:text-blue-300">
-                        <SlidersHorizontal className="h-4 w-4" aria-hidden />
-                        {t('enrollment.core.adjust_risk')}
-                      </motion.button>
-                    </motion.div>
-                  )}
                 </motion.article>
 
                 {submitError && stage === 'review' && (
@@ -667,10 +594,14 @@ export default function CoreEnrollment() {
                         {consent && <DrawnCheck className="h-3.5 w-3.5" />}
                       </span>
                       <span className="text-[14px] leading-[1.55] text-slate-600 dark:text-gray-300">
-                        {t('enrollment.core.consent', { plan: planName })}
-                        <br />
-                        <button type="button" onClick={(e) => { e.preventDefault(); setSheet('disclosures') }} className="font-semibold text-blue-700 underline-offset-2 hover:underline dark:text-blue-300">
-                          {t('enrollment.core.read_disclosures', { n: PLAN_CONFIG.disclosures.length })}
+                        {t('enrollment.core.consent', { plan: '\u0000' }).split('\u0000').map((part, i) => (
+                          <span key={i}>
+                            {i > 0 && <strong className="font-semibold text-slate-900 dark:text-white">{planName}</strong>}
+                            {part}
+                          </span>
+                        ))}{' '}
+                        <button type="button" onClick={(e) => { e.preventDefault(); setSheet('disclosures') }} className="font-semibold text-blue-700 underline underline-offset-2 hover:text-blue-800 dark:text-blue-300">
+                          {t('enrollment.core.terms_title')}
                         </button>
                       </span>
                     </label>
@@ -725,14 +656,11 @@ export default function CoreEnrollment() {
               <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={() => navigate('/profile?section=beneficiary')} className="h-14 rounded-2xl bg-blue-600 px-8 text-[17px] font-semibold text-white shadow-[0_10px_24px_rgba(37,99,235,0.3),inset_0_1px_0_rgba(255,255,255,0.15)] transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
                 {t('enrollment.core.add_beneficiaries')}
               </motion.button>
-              <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={downloadSummary} className="h-14 rounded-2xl bg-white px-8 text-[17px] font-semibold text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.05)] ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-gray-900 dark:text-white dark:ring-gray-700 dark:hover:bg-gray-800">
-                {t('enrollment.core.download_summary')}
+              <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={() => setBeneWarn(true)} className="inline-flex h-14 items-center justify-center gap-1.5 rounded-2xl bg-white px-8 text-[17px] font-semibold text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.05)] ring-1 ring-slate-200 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:bg-gray-900 dark:text-white dark:ring-gray-700 dark:hover:bg-gray-800">
+                {t('enrollment.core.to_dashboard')}
+                <ArrowRight className="h-4 w-4" aria-hidden />
               </motion.button>
             </motion.div>
-            <motion.button type="button" initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }} onClick={() => navigate('/dashboard')} className="mt-5 inline-flex items-center gap-1.5 text-[14px] font-medium text-slate-500 transition-colors hover:text-slate-900 dark:text-gray-400 dark:hover:text-white">
-              {t('enrollment.core.to_dashboard')}
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </motion.button>
           </div>
         )}
       </main>
@@ -753,25 +681,62 @@ export default function CoreEnrollment() {
 
       <EdgeGlow active={stage === 'working' || stage === 'submitting'} />
 
-      {/* Focused editors */}
-      <Sheet
-        open={sheet === 'contribution' || sheet === 'auto' || sheet === 'invest'}
-        onClose={() => setSheet(null)}
-        title={sheet === 'contribution' ? t('enrollment.core.sh_rate') : sheet === 'auto' ? t('enrollment.core.sh_auto') : t('enrollment.core.sh_invest')}
-        subtitle={t('enrollment.core.sh_sub')}
-        footer={
-          <>
-            <button type="button" onClick={() => setSheet(null)} className="h-9 rounded-lg px-3.5 text-[14px] font-medium text-slate-600 hover:bg-slate-100 dark:text-gray-300 dark:hover:bg-gray-800">{t('enrollment.core.cancel')}</button>
-            <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={applySheet} disabled={stagedInvalid} className="h-9 rounded-lg bg-slate-900 px-4 text-[14px] font-medium text-white hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 dark:bg-white dark:text-slate-900">{t('enrollment.core.apply')}</motion.button>
-          </>
-        }
-      >
-        {sheet === 'contribution' && <ContributionEditor value={staged} onChange={setStaged} ctx={{ salary, periods, locale, now }} />}
-        {sheet === 'auto' && <AutoIncreaseEditor value={staged} onChange={setStaged} ctx={{ salary, periods, locale, now }} />}
-        {sheet === 'invest' && <InvestmentsEditor value={staged} onChange={setStaged} onViewAll={() => setShowFunds(true)} />}
+
+      {/* Beneficiary reminder before leaving for the dashboard */}
+      <AnimatePresence>
+        {beneWarn && (
+          <div className="fixed inset-0 z-[90] flex items-center justify-center p-4">
+            <motion.div className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduce ? 0 : 0.2 }} onClick={() => setBeneWarn(false)} aria-hidden />
+            <motion.div
+              ref={beneRef}
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="bene-warn-title"
+              aria-describedby="bene-warn-body"
+              initial={reduce ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={reduce ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.98 }}
+              transition={{ duration: reduce ? 0 : 0.25, ease }}
+              className="relative w-full max-w-[420px] rounded-[24px] bg-white p-6 text-left shadow-[0_24px_60px_-20px_rgba(15,23,42,0.45)] ring-1 ring-slate-200/70 dark:bg-gray-900 dark:ring-gray-800"
+            >
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-amber-50 text-amber-600 ring-1 ring-amber-100 dark:bg-amber-950/40 dark:text-amber-400 dark:ring-amber-900">
+                <AlertTriangle className="h-5 w-5" aria-hidden />
+              </span>
+              <h2 id="bene-warn-title" className="mt-4 text-[19px] font-semibold tracking-[-0.01em] text-slate-900 dark:text-white">{t('enrollment.core.bene_warn_title')}</h2>
+              <p id="bene-warn-body" className="mt-1.5 text-[15px] leading-[1.55] text-slate-600 dark:text-gray-300">{t('enrollment.core.bene_warn_body')}</p>
+              <div className="mt-6 flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end">
+                <button type="button" onClick={() => navigate('/dashboard')} className="h-11 rounded-xl px-4 text-[15px] font-semibold text-slate-600 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-gray-300 dark:hover:bg-gray-800">
+                  {t('enrollment.core.bene_warn_skip')}
+                </button>
+                <button type="button" onClick={() => navigate('/profile?section=beneficiary')} className="h-11 rounded-xl bg-blue-600 px-5 text-[15px] font-semibold text-white shadow-[0_8px_20px_rgba(37,99,235,0.25)] transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
+                  {t('enrollment.core.add_beneficiaries')}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* The funds the money goes into, view only */}
+      <Sheet open={showFunds} onClose={() => setShowFunds(false)} title={t('enrollment.core.funds_title')} subtitle={`${f.invest} · ${t('enrollment.core.fee', { fee: f.fee.toFixed(2) })}`}>
+        <ul className="-mt-2 divide-y divide-slate-100 dark:divide-gray-800">
+          {funds.map((r, i) => {
+            const meta = fundMeta(r.ticker)
+            return (
+              <motion.li key={r.ticker} initial={reduce ? false : { opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + i * 0.05, duration: 0.3, ease }} className="flex items-center gap-3 py-3.5">
+                <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: FUND_COLORS[i] }} aria-hidden />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[15px] font-medium text-slate-900 dark:text-white">{meta?.name ?? r.ticker}</span>
+                  <span className="block text-[13px] text-slate-500 dark:text-gray-400">{`${r.ticker}${meta ? ` · ${meta.assetClass} · ${t('enrollment.core.fee', { fee: parseFloat(meta.expense).toFixed(2) })}` : ''}`}</span>
+                </span>
+                <span className="shrink-0 text-[16px] font-semibold tabular-nums text-slate-900 dark:text-white">{`${r.pct}%`}</span>
+              </motion.li>
+            )
+          })}
+        </ul>
       </Sheet>
 
-      <Sheet open={sheet === 'disclosures'} onClose={() => setSheet(null)} title={t('enrollment.core.disclosures')} subtitle={planName}>
+      <Sheet open={sheet === 'disclosures'} onClose={() => setSheet(null)} title={t('enrollment.core.terms_title')} subtitle={planName}>
         <ul className="space-y-5">
           {PLAN_CONFIG.disclosures.map((id) => (
             <li key={id}>
@@ -792,12 +757,6 @@ export default function CoreEnrollment() {
         </ul>
       </Sheet>
 
-      {/* The plan's full fund list, on top of whichever editor opened it */}
-      <Sheet open={showFunds} onClose={() => setShowFunds(false)} wide stacked title={t('plan.inv.plan_investments')} subtitle={t('enrollment.core.funds_sub')}>
-        <div className="-mx-6 overflow-x-auto px-6">
-          <PlanFundsTable showHeading={false} includeSdb={staged.sdb || election.sdb} />
-        </div>
-      </Sheet>
     </div>
   )
 }

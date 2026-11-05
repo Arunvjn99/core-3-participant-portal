@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation } from 'react-router-dom'
 import { cn } from '@/lib/cn'
+import { useFooterLift } from '@/lib/useFooterLift'
 import { useAIStore } from '@/core/store/aiStore'
 import { useFeedbackUiStore } from '@/core/store/feedbackUiStore'
 import { CoreAIPanel } from '@/features/ai/components/CoreAIPanel'
@@ -25,6 +26,8 @@ export function GlobalAskCoreAILayer() {
 
   const [portalReady, setPortalReady] = useState(false)
   useEffect(() => setPortalReady(true), [])
+  // Rise above the footer when it scrolls into view, instead of sitting on it
+  const footerLift = useFooterLift()
 
   // Do not mount any AI UI on auth pages
   if (AUTH_PATHS.test(location.pathname)) return null
@@ -43,9 +46,10 @@ export function GlobalAskCoreAILayer() {
       onClick={openChat}
       className={cn(
         'fixed left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-[9999px] pl-1.5 pr-5 py-1.5 text-sm font-semibold transition-all hover:scale-[1.04] active:scale-[0.97]',
-        enrollmentStepFlow ? 'bottom-6 max-sm:!bottom-20' : 'bottom-6',
+        enrollmentStepFlow ? 'bottom-[max(1.5rem,calc(var(--footer-lift,0px)+0.75rem))] max-sm:!bottom-[max(5rem,calc(var(--footer-lift,0px)+0.75rem))]' : 'bottom-[max(1.5rem,calc(var(--footer-lift,0px)+0.75rem))]',
       )}
       style={{
+        ['--footer-lift' as string]: `${footerLift}px`,
         background: 'linear-gradient(135deg, #1e40af 0%, #2563eb 100%)',
         boxShadow: '0 4px 24px rgba(37,99,235,0.55), 0 0 0 1px rgba(37,99,235,0.3)',
         color: '#ffffff',

@@ -16,6 +16,7 @@ import { AuthLayout } from './layouts/AuthLayout'
 import { AppShell } from './layouts/AppShell'
 import { ValidatedVersionRoute } from './guards/ValidatedVersionRoute'
 import { ProtectedRoute } from '../core/auth/ProtectedRoute'
+import { useAuth } from '../core/hooks/useAuth'
 import { EnrollmentShell } from '../features/enrollment/components/EnrollmentShell'
 import EnrollmentManagement from '../features/enrollment/pages/EnrollmentManagement'
 import PlanDetail from '../features/enrollment/pages/PlanDetail'
@@ -175,9 +176,12 @@ function PostEnrollmentDashboardGate() {
 
 // ─── Router ──────────────────────────────────────────────────────────────────
 
-/** In the local demo bypass there is nothing to sign in to, so auth screens go straight to the app. */
-const skipIfDemo = (page: React.ReactNode) =>
-  ENV.LOCAL_DEMO_BYPASS ? <Navigate to={ROUTES.DASHBOARD} replace /> : page
+/** In the local demo bypass, a signed-in demo participant skips the auth screens; after a log-out they show as usual. */
+function DemoAuthGate({ page }: { page: React.ReactNode }) {
+  const { user } = useAuth()
+  return ENV.LOCAL_DEMO_BYPASS && user ? <Navigate to={ROUTES.DASHBOARD} replace /> : <>{page}</>
+}
+const skipIfDemo = (page: React.ReactNode) => <DemoAuthGate page={page} />
 
 export const router = createBrowserRouter([
   {

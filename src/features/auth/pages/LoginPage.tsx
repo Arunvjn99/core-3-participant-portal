@@ -3,7 +3,8 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/core/supabase'
-import { LEGAL, ROUTES } from '@/lib/constants'
+import { useAuth } from '@/core/hooks/useAuth'
+import { ENV, LEGAL, ROUTES } from '@/lib/constants'
 import { LegalHrefLink } from '@/features/legal/components/LegalHrefLink'
 import AuthLayout from '../components/AuthLayout'
 import CoreLogo from '@/components/ui/CoreLogo'
@@ -18,6 +19,11 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const { signInDemo } = useAuth()
+  const continueDemo = () => {
+    signInDemo()
+    navigate(ROUTES.DASHBOARD)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,6 +32,7 @@ export default function LoginPage() {
 
     if (!supabase) {
       // Demo mode — go straight to dashboard
+      signInDemo()
       navigate(ROUTES.DASHBOARD)
       return
     }
@@ -147,6 +154,15 @@ export default function LoginPage() {
                   t('auth.login')
                 )}
               </button>
+              {ENV.LOCAL_DEMO_BYPASS && (
+                <button
+                  type="button"
+                  onClick={continueDemo}
+                  className="w-full rounded-xl border border-gray-200 bg-white py-3 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800"
+                >
+                  {t('auth.continue_local')}
+                </button>
+              )}
             </form>
 
             {/* Help */}

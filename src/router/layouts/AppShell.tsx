@@ -26,17 +26,15 @@ import { useUser } from '@/core/hooks/useUser'
 import { useTheme } from '@/core/hooks/useTheme'
 import { useAIStore } from '@/core/store/aiStore'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
-import { useBrandTheme } from '@/core/theme/BrandThemeContext'
 import AppFooter from '@/features/dashboard/components/AppFooter'
 import { supabase } from '@/core/supabase'
 import { useNotifications } from '@/features/notifications/useNotifications'
-import { SEVERITY_STYLE } from '@/features/notifications/severityStyle'
-import { getAppDateLocale } from '@/lib/dateLocale'
+import { NotificationPanel } from '@/features/notifications/NotificationPanel'
 import { ROUTES } from '@/lib/constants'
 import CoreLogo from '@/components/ui/CoreLogo'
 
 function getNavItems(isEnrolled: boolean) {
-  return [
+  const items = [
     {
       labelKey: isEnrolled ? 'nav.post_enrollment_dashboard' : 'nav.pre_enrollment_dashboard',
       href: isEnrolled ? ROUTES.POST_ENROLLMENT_DASHBOARD : ROUTES.PRE_ENROLLMENT_DASHBOARD,
@@ -52,6 +50,8 @@ function getNavItems(isEnrolled: boolean) {
     { labelKey: 'nav.documents', href: '/documents', icon: FileText },
     { labelKey: 'nav.profile', href: '/profile', icon: User },
   ]
+  // Before enrolling, a first-time user only needs their dashboard and profile
+  return isEnrolled ? items : items.filter((i) => i.href === ROUTES.PRE_ENROLLMENT_DASHBOARD || i.href === '/profile')
 }
 
 function isNavActive(href: string, pathname: string): boolean {
@@ -64,7 +64,6 @@ function isNavActive(href: string, pathname: string): boolean {
 }
 
 export function AppShell() {
-  const { theme } = useBrandTheme()
   const { signOut, user } = useAuth()
   const { profile } = useUser()
   const { resolvedMode, setMode } = useTheme()
@@ -82,10 +81,8 @@ export function AppShell() {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const notifications = useNotifications()
   const hasUnreadNotifications = notifications.unreadCount > 0
-  const fmtNotifDate = (ms: number) => new Date(ms).toLocaleDateString(getAppDateLocale(), { month: 'short', day: 'numeric' })
   const userMenuRef = useRef<HTMLDivElement>(null)
   const langMenuRef = useRef<HTMLDivElement>(null)
-  const notificationsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     async function loadDisplayName() {
@@ -198,17 +195,6 @@ export function AppShell() {
   }, [userMenuOpen, langMenuOpen, notificationsOpen])
 
   useEffect(() => {
-    if (!notificationsOpen) return
-    const onClick = (e: MouseEvent) => {
-      if (notificationsRef.current && !notificationsRef.current.contains(e.target as Node)) {
-        setNotificationsOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', onClick)
-    return () => document.removeEventListener('mousedown', onClick)
-  }, [notificationsOpen])
-
-  useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
@@ -225,27 +211,10 @@ export function AppShell() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-14 items-center justify-between gap-4">
             <div className="flex min-w-0 shrink-0 items-center gap-2.5">
-              {/* Before login → CORE logo. After login → employer logo or initial fallback. */}
-              {!user ? (
-                /* Unauthenticated: always show CORE logo */
-                <CoreLogo className="h-8 w-auto max-w-[100px] object-contain" />
-              ) : theme.companyLogo ? (
-                /* Authenticated with company logo */
-                <img
-                  src={theme.companyLogo}
-                  alt={theme.companyName}
-                  className="h-8 w-auto max-w-[120px] object-contain"
-                  onError={(e) => { e.currentTarget.style.display = 'none' }}
-                />
-              ) : (
-                /* Authenticated but no logo — initial-letter badge */
-                <div
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white"
-                  style={{ backgroundColor: 'var(--brand-primary)' }}
-                >
-                  {theme.companyName.charAt(0).toUpperCase()}
-                </div>
-              )}
+              {/* Placeholder logo until the real brand mark is supplied */}
+              <Link to={user ? navItems[0].href : ROUTES.LOGIN} aria-label={t(navItems[0].labelKey)} className="flex items-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                <CoreLogo className="h-8 w-auto" />
+              </Link>
             </div>
 
             <nav className="hidden flex-1 items-center justify-center gap-0.5 md:flex">
@@ -286,15 +255,11 @@ export function AppShell() {
               >
                 {resolvedMode === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </button>
-              <div className="relative" ref={notificationsRef}>
+              <div className="relative">
                 <button
                   type="button"
                   onClick={() => {
-                    setNotificationsOpen((prev) => {
-                      const next = !prev
-                      if (next) notifications.markAllRead()
-                      return next
-                    })
+                    setNotificationsOpen(true)
                     setLangMenuOpen(false)
                     setUserMenuOpen(false)
                   }}
@@ -312,50 +277,6 @@ export function AppShell() {
                     />
                   )}
                 </button>
-                {notificationsOpen && (
-                  <div
-                    role="dialog"
-                    aria-label={t('nav.notifications_title')}
-                    className="absolute right-0 top-full z-[60] mt-2 w-[min(100vw-2rem,20rem)] overflow-hidden rounded-xl border border-border-default bg-surface-card shadow-dropdown"
-                  >
-                    <div className="border-b border-border-default px-4 py-3">
-                      <p className="text-sm font-semibold text-text-primary">{t('nav.notifications_title')}</p>
-                    </div>
-                    <ul className="max-h-[min(60vh,16rem)] divide-y divide-border-default overflow-y-auto">
-                      {notifications.items.length === 0 && (
-                        <li className="px-4 py-6 text-center text-xs text-text-muted">{t('alerts.empty')}</li>
-                      )}
-                      {notifications.items.map((n) => {
-                        const { title, body } = n.render(t, fmtNotifDate)
-                        const { icon, Icon } = SEVERITY_STYLE[n.severity]
-                        return (
-                          <li key={n.id}>
-                            <Link
-                              to={n.href ?? '/transactions'}
-                              className="flex gap-2.5 px-4 py-3 transition-colors hover:bg-surface-elevated"
-                              onClick={() => setNotificationsOpen(false)}
-                            >
-                              <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${icon}`} aria-hidden />
-                              <span className="min-w-0">
-                                <span className="block text-sm font-medium text-text-primary">{title}</span>
-                                {body && <span className="mt-0.5 block text-xs leading-snug text-text-secondary">{body}</span>}
-                              </span>
-                            </Link>
-                          </li>
-                        )
-                      })}
-                    </ul>
-                    <div className="border-t border-border-default px-3 py-2">
-                      <Link
-                        to="/transactions"
-                        className="block rounded-lg px-2 py-2 text-center text-sm font-semibold text-primary hover:bg-primary/5"
-                        onClick={() => setNotificationsOpen(false)}
-                      >
-                        {t('nav.notifications_view_activity')}
-                      </Link>
-                    </div>
-                  </div>
-                )}
               </div>
               <div className="relative" ref={langMenuRef}>
                 <button
@@ -554,6 +475,15 @@ export function AppShell() {
           </div>
         )}
       </header>
+
+      <NotificationPanel
+        open={notificationsOpen}
+        onClose={() => {
+          setNotificationsOpen(false)
+          notifications.markAllRead()
+        }}
+        notifications={notifications}
+      />
 
       <div className="flex min-h-0 flex-1 flex-col overflow-auto bg-surface-page">
           <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col px-4 pb-6 pt-4 sm:px-6 lg:px-8">
