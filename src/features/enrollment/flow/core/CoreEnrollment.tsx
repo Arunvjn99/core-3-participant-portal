@@ -201,7 +201,10 @@ export default function CoreEnrollment() {
       // The visible height divided by the zoom in effect gives the natural height
       const natural = el.getBoundingClientRect().height / (parseFloat(getComputedStyle(el).zoom) || 1)
       const top = document.querySelector('header.sticky')?.getBoundingClientRect().bottom ?? 0
-      const available = window.innerHeight - Math.max(top, 0) - 32
+      const footers = document.getElementsByTagName('footer')
+      const footerH = footers.length ? footers[footers.length - 1].getBoundingClientRect().height : 0
+      // Leave room for the footer so it shows without scrolling
+      const available = window.innerHeight - Math.max(top, 0) - footerH - 48
       // Phones scroll naturally; only wider screens are fitted
       const next = window.innerWidth < 640 ? 1 : Math.round(Math.max(0.82, Math.min(1, available / natural)) * 100) / 100
       if (next !== current) {
@@ -352,29 +355,19 @@ export default function CoreEnrollment() {
   const label = 'text-[14px] font-medium text-slate-500 dark:text-gray-400'
 
   return (
-    <div className="relative -mx-4 -my-6 min-h-[calc(100vh-3rem)] sm:-mx-6">
+    <div className="relative -mx-4 -my-6 sm:-mx-6">
       {/* Ambient light */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[460px] bg-[radial-gradient(70%_70%_at_50%_0%,rgba(37,99,235,0.09),transparent_70%)]" aria-hidden />
       {stage === 'done' && <ConfettiField />}
 
       {/* Where they are in enrollment */}
       <header className="sticky top-0 z-30 bg-[#f5f6f8]/75 backdrop-blur-xl dark:bg-gray-950/80">
-        <div className="mx-auto flex h-16 max-w-[1120px] items-center gap-3 px-4 sm:px-6">
-          <h1 className="text-[16px] font-semibold tracking-[-0.01em] text-slate-900 dark:text-white">{t('enrollment.core.title')}</h1>
-          {stage !== 'done' && (
-            <div className="ml-auto flex shrink-0 items-center gap-2">
-              <button type="button" onClick={() => navigate(`${ROUTES.PRE_ENROLLMENT_DASHBOARD}?customize=1`)} disabled={stage === 'submitting'} className="h-9 rounded-full px-3 text-[13px] font-semibold text-blue-700 transition-colors hover:bg-blue-50 disabled:opacity-50 sm:h-10 sm:px-4 sm:text-[14px] dark:text-blue-300 dark:hover:bg-blue-950/40">
-                {t('enrollment.core.customize')}
-              </button>
-              <button type="button" onClick={() => navigate(ROUTES.PRE_ENROLLMENT_DASHBOARD)} disabled={stage === 'submitting'} className="h-9 rounded-full bg-white px-3.5 text-[13px] font-semibold text-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.05)] ring-1 ring-slate-200/70 transition-colors hover:bg-slate-50 disabled:opacity-50 sm:h-10 sm:px-4 sm:text-[14px] dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-800">
-                {t('enrollment.core.cancel')}
-              </button>
-            </div>
-          )}
+        <div className="mx-auto flex h-12 max-w-[1120px] items-center gap-3 px-4 sm:px-6">
+          <h1 className="text-[19px] font-semibold tracking-[-0.01em] text-slate-900 dark:text-white">{t('enrollment.core.title')}</h1>
         </div>
       </header>
 
-      <main className="relative mx-auto max-w-[900px] px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
+      <main className="relative mx-auto max-w-[900px] px-4 pb-6 pt-6 sm:px-6">
         {showPlan ? (
           <div ref={planRef} style={fit < 1 ? { zoom: fit } : undefined} className="space-y-4">
             {/* Title */}
@@ -665,6 +658,16 @@ export default function CoreEnrollment() {
                     {stage === 'submitting' ? t('enrollment.core.approving') : submitError ? t('enrollment.core.try_again') : t('enrollment.core.approve')}
                   </motion.button>
                 </motion.div>
+
+                {/* Leave, or take the guided route instead */}
+                <div className="flex items-center justify-between gap-3">
+                  <button type="button" onClick={() => navigate(ROUTES.PRE_ENROLLMENT_DASHBOARD)} disabled={stage === 'submitting'} className="h-10 rounded-full bg-white px-5 text-[14px] font-semibold text-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.05)] ring-1 ring-slate-200/70 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:opacity-50 dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-800 dark:hover:bg-gray-800">
+                    {t('enrollment.core.cancel')}
+                  </button>
+                  <button type="button" onClick={() => navigate(`${ROUTES.PRE_ENROLLMENT_DASHBOARD}?customize=1`)} disabled={stage === 'submitting'} className="h-10 rounded-full px-5 text-[14px] font-semibold text-blue-700 ring-1 ring-blue-200 transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:opacity-50 dark:text-blue-300 dark:ring-blue-400/30 dark:hover:bg-blue-950/40">
+                    {t('enrollment.core.customize')}
+                  </button>
+                </div>
               </>
             )}
           </div>

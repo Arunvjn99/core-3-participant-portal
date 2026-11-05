@@ -8,13 +8,14 @@ import { AgentMark, DrawnCheck } from '@/features/enrollment/flow/core/ui'
 const ease = [0.22, 1, 0.36, 1] as const
 /** Quick start, soft landing: the column moves promptly and settles gently */
 const glide = [0.32, 0.72, 0, 1] as const
-const GLIDE_S = 0.8
-/** How long a card rests in focus before the column moves up */
-const HOLD_MS = 2800
-/** Card height + gap: one step of the column */
+const GLIDE_S = 0.6
+/** How long a card rests in focus before the column moves down */
+const HOLD_MS = 3200
+/** Card height */
 const CARD_H = 276
-const GAP = 16
-const STEP = CARD_H + GAP
+/** Crossfade between cards: long enough to be gentle, short enough not to drag */
+const FADE_S = 0.7
+const soft = [0.4, 0, 0.2, 1] as const
 
 type FeatureKey = 's1' | 's2' | 's3' | 's4'
 const FEATURES: { key: FeatureKey; Icon: LucideIcon; tag: boolean }[] = [
@@ -169,12 +170,12 @@ function FeatureCard({ k, Icon, tag, focus, reduce }: { k: FeatureKey; Icon: Luc
   )
 }
 
-// ─── The column: steps up one card at a time, the middle card in focus ───────
+// ─── The column: steps down one card at a time (new cards enter from the top), the middle card in focus ───────
 
 function FeatureColumn() {
   const { t } = useTranslation()
   const reduce = !!useReducedMotion()
-  /** Ever-increasing position; the card in focus is FEATURES[n % length] */
+  /** Which feature is showing; the cards take turns in one place rather than sliding past */
   const [n, setN] = useState(0)
   /** Rests while the browser tab is in the background, so it doesn't race ahead when you come back */
   const [paused, setPaused] = useState(() => typeof document !== 'undefined' && document.hidden)
@@ -191,39 +192,36 @@ function FeatureColumn() {
   }, [n, paused, reduce])
 
   const len = FEATURES.length
-  const at = (pos: number) => FEATURES[((pos % len) + len) % len]
-  const visible = [-2, -1, 0, 1, 2].map((d) => n + d)
+  const i = n % len
+  const f = FEATURES[i]
 
   return (
-    <div
-      className="relative h-full w-full"
-      role="region"
-      aria-roledescription="carousel"
-      aria-label={t('carousel.label')}
-    >
-      <p className="sr-only" aria-live="polite">{t(`carousel.${at(n).key}_card_title`)}</p>
-      <div className="absolute inset-0 [mask-image:linear-gradient(to_bottom,transparent_0%,black_22%,black_78%,transparent_100%)]">
+    <div className="relative flex h-full w-full items-center justify-center" role="region" aria-roledescription="carousel" aria-label={t('carousel.label')}>
+      <p className="sr-only" aria-live="polite">{t(`carousel.${f.key}_card_title`)}</p>
+      <div className="relative w-[min(390px,86%)]" style={{ height: CARD_H }}>
+        {/* A still deck behind the card for depth; it never moves, so the eye stays on the card */}
+        <span className="absolute inset-x-6 -bottom-4 top-4 rounded-[24px] bg-white/35 ring-1 ring-white/50 dark:bg-white/[0.03] dark:ring-white/10" aria-hidden />
+        <span className="absolute inset-x-3 -bottom-2 top-2 rounded-[24px] bg-white/50 ring-1 ring-white/60 dark:bg-white/[0.05] dark:ring-white/10" aria-hidden />
         <AnimatePresence initial={false}>
-          {visible.map((pos) => {
-            const f = at(pos)
-            const d = pos - n
-            const focus = d === 0
-            return (
-              <motion.div
-                  key={pos}
-                  className="absolute inset-x-0 top-1/2 mx-auto w-[min(390px,86%)]"
-                  style={{ height: CARD_H, marginTop: -CARD_H / 2, willChange: 'transform, opacity' }}
-                  initial={{ y: 3 * STEP, opacity: 0, scale: 0.9 }}
-                  animate={{ y: d * STEP, opacity: focus ? 1 : Math.abs(d) === 1 ? 0.6 : 0.25, scale: focus ? 1 : 0.93 }}
-                  exit={{ y: -3 * STEP, opacity: 0, scale: 0.9 }}
-                  transition={{ duration: reduce ? 0 : GLIDE_S, ease: glide }}
-                  aria-hidden={!focus}
-                >
-                  <FeatureCard k={f.key} Icon={f.Icon} tag={f.tag} focus={focus} reduce={reduce} />
-                </motion.div>
-            )
-          })}
+          <motion.div
+            key={n}
+            className="absolute inset-0"
+            style={{ willChange: 'transform, opacity' }}
+            // In from just above, out just below: a short, soft top-to-bottom drift
+            initial={reduce ? { opacity: 0 } : { opacity: 0, y: -14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduce ? { opacity: 0 } : { opacity: 0, y: 14 }}
+            transition={{ duration: reduce ? 0 : FADE_S, ease: soft }}
+          >
+            <FeatureCard k={f.key} Icon={f.Icon} tag={f.tag} focus reduce={reduce} />
+          </motion.div>
         </AnimatePresence>
+      </div>
+      {/* Where you are in the set */}
+      <div className="absolute right-5 top-1/2 flex -translate-y-1/2 flex-col gap-2" aria-hidden>
+        {FEATURES.map((x, j) => (
+          <span key={x.key} className={cn('w-1.5 rounded-full transition-all duration-500', j === i ? 'h-5 bg-blue-600 dark:bg-blue-400' : 'h-1.5 bg-slate-400/40 dark:bg-white/25')} />
+        ))}
       </div>
     </div>
   )
