@@ -51,16 +51,9 @@ export default function Contribution() {
   const locale = getAppDateLocale()
   const [compareMode, setCompareMode] = useState(false)
   const [comparePercent, setComparePercent] = useState(12)
-  const [percentInput, setPercentInput] = useState(String(data.contributionPercent))
-  const [dollarInput, setDollarInput] = useState(String(Math.round((data.salary * data.contributionPercent) / 100)))
   const gradientId = useId()
   const percent = data.contributionPercent
   const salary = data.salary
-
-  useEffect(() => {
-    setPercentInput(String(data.contributionPercent))
-    setDollarInput(String(Math.round((data.salary * data.contributionPercent) / 100)))
-  }, [data.contributionPercent, data.salary])
 
   const monthlyPaycheck = Math.round(salary / 12)
   const monthlyContribution = Math.round((salary * percent) / 100 / 12)
@@ -74,15 +67,26 @@ export default function Contribution() {
   const comparisonData = generateProjectionData(comparePercent, salary)
   const comparisonTotal = comparisonData[comparisonData.length - 1]?.value || 0
   const difference = comparisonTotal - projectedTotal
-  const onePercentIncrease = generateProjectionData(percent + 1, salary)
-  const onePercentImpact = (onePercentIncrease[onePercentIncrease.length - 1]?.value || 0) - projectedTotal
+  // Dollars per paycheck for the chosen percent. Assume 26 pays/year (biweekly)
+  // until the recordkeeper API returns the real pay frequency.
+  const annualContribution = Math.round((salary * percent) / 100)
+  const perPaycheck = Math.round(annualContribution / 26)
+  const payFreqLabel = t('enrollment.contribution_page.freq_biweekly')
+  // Match-gap pro-tip: dollars the participant leaves on the table by not
+  // reaching the full match. Hides once at or above the match threshold.
+  const FULL_MATCH_PCT = 6
+  const belowMatch = percent < FULL_MATCH_PCT
+  const matchGapAnnual = Math.max(0, Math.round((salary * (FULL_MATCH_PCT - percent)) / 100))
 
+  // Quick-select presets: three plain percents and a "get the full match"
+  // tile. "Start/Strong/Fast" labels are gone — they don't say what the
+  // participant actually gets.
   const quickOptions = useMemo(
     () => [
-      { label: t('enrollment.contribution_page.opt_4'), value: 4, icon: null as string | null },
-      { label: t('enrollment.contribution_page.opt_6'), value: 6, icon: '✅' },
-      { label: t('enrollment.contribution_page.opt_10'), value: 10, icon: null as string | null },
-      { label: t('enrollment.contribution_page.opt_15'), value: 15, icon: '🚀' },
+      { label: t('enrollment.contribution_page.opt_4'), value: 4 },
+      { label: t('enrollment.contribution_page.opt_6'), value: 6, highlight: true },
+      { label: t('enrollment.contribution_page.opt_10'), value: 10 },
+      { label: t('enrollment.contribution_page.opt_15'), value: 15 },
     ],
     [t],
   )
@@ -90,35 +94,10 @@ export default function Contribution() {
   const adjustPercent = (delta: number) => {
     const newValue = Math.max(1, Math.min(25, percent + delta))
     updateData({ contributionPercent: newValue })
-    setPercentInput(String(newValue))
-    setDollarInput(String(Math.round((salary * newValue) / 100)))
-  }
-
-  const handlePercentInput = (value: string) => {
-    setPercentInput(value)
-    const num = parseFloat(value)
-    if (!isNaN(num) && num >= 1 && num <= 25) {
-      updateData({ contributionPercent: Math.round(num) })
-      setDollarInput(String(Math.round((salary * num) / 100)))
-    }
-  }
-
-  const handleDollarInput = (value: string) => {
-    setDollarInput(value)
-    const num = parseFloat(value.replace(/,/g, ''))
-    if (!isNaN(num) && salary > 0) {
-      const calc = Math.round((num / salary) * 100)
-      if (calc >= 1 && calc <= 25) {
-        updateData({ contributionPercent: calc })
-        setPercentInput(String(calc))
-      }
-    }
   }
 
   const handleQuick = (value: number) => {
     updateData({ contributionPercent: value })
-    setPercentInput(String(value))
-    setDollarInput(String(Math.round((salary * value) / 100)))
   }
 
   useEffect(() => {
@@ -187,39 +166,16 @@ export default function Contribution() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  {t('enrollment.contribution_page.percentage')}
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    min={1}
-                    max={25}
-                    step={0.5}
-                    value={percentInput}
-                    onChange={(e) => handlePercentInput(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-medium text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-400">%</span>
-                </div>
-              </div>
-              <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  {t('enrollment.contribution_page.annual_dollar')}
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-400">$</span>
-                  <input
-                    type="text"
-                    value={dollarInput}
-                    onChange={(e) => handleDollarInput(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-7 pr-3 text-sm font-medium text-gray-900 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                  />
-                </div>
-              </div>
-            </div>
+            {/* The percent above is the single source of truth. Dollars are
+                derived from pay frequency, not re-entered. */}
+            <p className="text-center text-sm text-gray-600 dark:text-gray-300">
+              <span className="font-semibold text-gray-900 dark:text-white">
+                ${perPaycheck.toLocaleString(locale)}
+              </span>{' '}
+              <span className="text-gray-500 dark:text-gray-400">
+                every {payFreqLabel} · ${monthlyContribution.toLocaleString(locale)}/mo · ${annualContribution.toLocaleString(locale)}/yr
+              </span>
+            </p>
 
             <div>
               <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
@@ -234,11 +190,12 @@ export default function Contribution() {
                     className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all ${
                       percent === opt.value
                         ? 'brand-bg text-white shadow-md'
-                        : 'bg-gray-100 text-gray-600 hover:scale-105 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
+                        : opt.highlight
+                          ? 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-300 dark:ring-emerald-800/40 dark:hover:bg-emerald-900/40'
+                          : 'bg-gray-100 text-gray-600 hover:scale-105 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
                     }`}
                   >
                     {opt.label}
-                    {opt.icon ? ` ${opt.icon}` : ''}
                   </button>
                 ))}
               </div>
@@ -253,8 +210,6 @@ export default function Contribution() {
                 onChange={(e) => {
                   const v = Number(e.target.value)
                   updateData({ contributionPercent: v })
-                  setPercentInput(String(v))
-                  setDollarInput(String(Math.round((salary * v) / 100)))
                 }}
                 className="h-2.5 w-full cursor-pointer appearance-none rounded-full"
                 style={{
@@ -267,21 +222,24 @@ export default function Contribution() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-purple-200/50 bg-gradient-to-br from-purple-50 to-purple-100/30 p-3.5 dark:border-purple-800/40 dark:from-purple-950/30 dark:to-purple-900/10">
-              <div className="flex items-start gap-2">
-                <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-purple-600 dark:text-purple-400" />
-                <div>
-                  <p className="mb-1 text-xs font-bold text-purple-900 dark:text-purple-300">
-                    {t('enrollment.contribution_page.pro_tip')}
-                  </p>
-                  <p className="text-xs leading-relaxed text-purple-700 dark:text-purple-400">
-                    {t('enrollment.contribution_page.pro_tip_body', {
-                      amount: `$${onePercentImpact.toLocaleString(locale)}`,
-                    })}
-                  </p>
+            {belowMatch && (
+              <div className="rounded-xl border border-purple-200/50 bg-gradient-to-br from-purple-50 to-purple-100/30 p-3.5 dark:border-purple-800/40 dark:from-purple-950/30 dark:to-purple-900/10">
+                <div className="flex items-start gap-2">
+                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-purple-600 dark:text-purple-400" />
+                  <div>
+                    <p className="mb-1 text-xs font-bold text-purple-900 dark:text-purple-300">
+                      {t('enrollment.contribution_page.pro_tip')}
+                    </p>
+                    <p className="text-xs leading-relaxed text-purple-700 dark:text-purple-400">
+                      {t('enrollment.contribution_page.pro_tip_body', {
+                        matchPct: FULL_MATCH_PCT,
+                        amount: `$${matchGapAnnual.toLocaleString(locale)}`,
+                      })}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="space-y-5 rounded-2xl border border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-900 sm:p-6">
