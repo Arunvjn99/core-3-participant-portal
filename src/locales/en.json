@@ -374,8 +374,10 @@
       "compare_vs": "with {{compare}}% vs {{current}}%"
     },
     "source_page": {
-      "title": "How do you want to pay taxes?",
-      "subtitle": "Choose when you want to pay taxes on your savings.",
+      "title": "Do you want to pay taxes now or later?",
+      "subtitle": "Pre-tax lowers taxes today. Roth is tax-free in retirement. Split your contribution between them however you like.",
+      "reset_default": "Reset to plan default",
+      "whats_difference": "What's the difference? ↓",
       "banner": "You're contributing {{pct}}% (${{amount}}/month)",
       "default_badge": "Default",
       "plan_default_title": "Plan Default",
@@ -384,7 +386,7 @@
       "roth_pct": "Roth ({{pct}}%)",
       "default_footer": "Your employer's default allocation balances tax benefits.",
       "select_plan_default": "Select Plan Default",
-      "your_tax_strategy": "Your Tax Strategy",
+      "your_tax_strategy": "Your contribution allocation",
       "total_allocation": "Total allocation: 100%",
       "customize_badge": "Customize",
       "pre_tax": "Pre-Tax",
