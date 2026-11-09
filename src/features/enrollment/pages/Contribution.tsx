@@ -14,7 +14,6 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
-  ReferenceLine,
 } from 'recharts'
 
 function generateProjectionData(percent: number, salary: number) {
@@ -57,13 +56,9 @@ export default function Contribution() {
 
   const monthlyPaycheck = Math.round(salary / 12)
   const monthlyContribution = Math.round((salary * percent) / 100 / 12)
-  const matchPercent = Math.min(percent, 6)
-  const monthlyMatch = Math.round((salary * matchPercent) / 100 / 12)
   const projectionData = generateProjectionData(percent, salary)
   const projectedTotal = projectionData[projectionData.length - 1]?.value || 0
   const monthlyRetirementIncome = Math.round((projectedTotal * 0.04) / 12)
-  const recommendedPercent = 12
-  const progressPercentage = Math.min((percent / recommendedPercent) * 100, 100)
   const comparisonData = generateProjectionData(comparePercent, salary)
   const comparisonTotal = comparisonData[comparisonData.length - 1]?.value || 0
   const difference = comparisonTotal - projectedTotal
@@ -243,62 +238,30 @@ export default function Contribution() {
           </div>
 
           <div className="space-y-5 rounded-2xl border border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-900 sm:p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                  {t('enrollment.contribution_page.projection_title')}
-                </h3>
-                <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                  {t('enrollment.contribution_page.projection_sub')}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-bold text-green-700 dark:text-green-400">
-                  {t('enrollment.contribution_page.on_track', { pct: Math.round(progressPercentage) })}
-                </p>
-                <div className="mt-1 h-1.5 w-28 overflow-hidden rounded-full bg-green-100 dark:bg-green-900/40">
-                  <div className="h-full rounded-full bg-green-600 transition-all duration-300" style={{ width: `${progressPercentage}%` }} />
-                </div>
-              </div>
+            {/* No "on track" chip: we don't know the target yet. The Monthly
+                Impact tile is gone too — the per-paycheck dollars already
+                live on the left column of this step. */}
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                {t('enrollment.contribution_page.projection_title')}
+              </h3>
+              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                {t('enrollment.contribution_page.projection_sub')}
+              </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-xl border border-green-200/50 bg-gradient-to-br from-green-50 to-green-100/30 p-4 dark:border-green-800/40 dark:from-green-950/30 dark:to-green-900/10">
-                <p className="text-center text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  {t('enrollment.contribution_page.projected_age', { age: personalization.retirementAge })}
-                </p>
-                <p className="mt-1 text-center text-3xl font-extrabold leading-none text-green-700 dark:text-green-400">
-                  ${(projectedTotal / 1000000).toFixed(1)}M
-                </p>
-                <p className="mt-1.5 text-center text-xs font-medium text-green-600 dark:text-green-500">
-                  {t('enrollment.contribution_page.per_mo', {
-                    amount: `$${monthlyRetirementIncome.toLocaleString(locale)}`,
-                  })}
-                </p>
-              </div>
-              <div className="space-y-2.5 rounded-xl border border-blue-100/50 bg-gradient-to-br from-blue-50/50 to-transparent p-4 dark:border-blue-900/30 dark:from-blue-950/20">
-                <p className="text-center text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white">
-                  {t('enrollment.contribution_page.monthly_impact')}
-                </p>
-                <div className="space-y-2">
-                  <div>
-                    <p className="text-center text-xs text-gray-500 dark:text-gray-400">
-                      {t('enrollment.contribution_page.you_contribute')}
-                    </p>
-                    <p className="mt-0.5 text-center text-base font-bold text-gray-900 dark:text-white">
-                      ${monthlyContribution.toLocaleString(locale)}
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-green-200/50 bg-green-50 p-2 dark:border-green-800/40 dark:bg-green-950/30">
-                    <p className="text-center text-xs font-semibold text-green-700 dark:text-green-400">
-                      {t('enrollment.contribution_page.employer_adds')}
-                    </p>
-                    <p className="mt-0.5 text-center text-base font-bold text-green-700 dark:text-green-400">
-                      +${monthlyMatch.toLocaleString(locale)}
-                    </p>
-                  </div>
-                </div>
-              </div>
+            <div className="rounded-xl border border-green-200/50 bg-gradient-to-br from-green-50 to-green-100/30 p-5 dark:border-green-800/40 dark:from-green-950/30 dark:to-green-900/10">
+              <p className="text-center text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                {t('enrollment.contribution_page.projected_age', { age: personalization.retirementAge })}
+              </p>
+              <p className="mt-1 text-center text-4xl font-extrabold leading-none text-green-700 dark:text-green-400">
+                ${(projectedTotal / 1000000).toFixed(1)}M
+              </p>
+              <p className="mt-1.5 text-center text-xs font-medium text-green-600 dark:text-green-500">
+                {t('enrollment.contribution_page.per_mo', {
+                  amount: `$${monthlyRetirementIncome.toLocaleString(locale)}`,
+                })}
+              </p>
             </div>
 
             <div className="h-56 rounded-xl border border-blue-100/50 bg-gradient-to-br from-blue-50/30 to-transparent p-3 dark:border-blue-900/20 dark:from-blue-950/10 sm:h-64">
@@ -330,42 +293,25 @@ export default function Contribution() {
                         return [`$${v.toLocaleString(locale)}`, t('enrollment.contribution_page.chart_total')]
                       if (name === 'contributions')
                         return [`$${v.toLocaleString(locale)}`, t('enrollment.contribution_page.chart_contrib')]
-                      if (name === 'marketGain')
-                        return [`$${v.toLocaleString(locale)}`, t('enrollment.contribution_page.chart_gains')]
                       return [value, name]
                     }}
                     contentStyle={{ borderRadius: 12, fontSize: 11, border: '1px solid var(--border-default)', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
                   />
-                  <ReferenceLine
-                    y={projectedTotal * 0.75}
-                    stroke="var(--chart-green)"
-                    strokeDasharray="5 5"
-                    strokeWidth={2}
-                    label={{
-                      value: t('enrollment.contribution_page.chart_target'),
-                      position: 'insideTopRight',
-                      fill: 'var(--chart-green)',
-                      fontSize: 10,
-                      fontWeight: 600,
-                    }}
-                  />
+                  {/* Two lines: Total savings and the viewer's own contributions.
+                      Market Gains is just the gap between them, so it added noise
+                      as a third series. The Target reference line is gone too —
+                      there is no target set at this step. */}
                   <Area type="monotone" dataKey="contributions" stroke="var(--text-muted)" fill="transparent" strokeWidth={2} strokeDasharray="5 5" />
-                  <Area type="monotone" dataKey="marketGain" stroke="var(--chart-green)" fill={`url(#${gradientId}-market)`} strokeWidth={2} stackId="1" />
                   <Area type="monotone" dataKey="value" stroke="var(--chart-blue)" fill={`url(#${gradientId})`} strokeWidth={3} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-4">
-              {[
-                { color: 'brand-bg', label: t('enrollment.contribution_page.chart_total') },
-                { color: 'bg-green-600', label: t('enrollment.contribution_page.chart_gains') },
-              ].map(({ color, label }) => (
-                <div key={label} className="flex items-center gap-1.5">
-                  <div className={`h-3 w-3 rounded-full ${color}`} />
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{label}</p>
-                </div>
-              ))}
+              <div className="flex items-center gap-1.5">
+                <div className="h-3 w-3 rounded-full brand-bg" />
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t('enrollment.contribution_page.chart_total')}</p>
+              </div>
               <div className="flex items-center gap-1.5">
                 <div className="h-0.5 w-3 border-t-2 border-dashed border-slate-500" />
                 <p className="text-xs text-gray-500 dark:text-gray-400">
