@@ -449,6 +449,8 @@
       "close": "Cerrar",
       "title": "El aumento automático está desactivado",
       "body": "Tu aporte al {{plan}} se mantendrá en {{rate}}%. Puedes activar el aumento automático en cualquier momento desde la configuración de tu plan.",
+      "info_label": "Para referencia",
+      "info_body": "Activar el aumento automático podría sumar alrededor de {{amount}} a tus ahorros para la jubilación en 10 años.",
       "keep_off": "Mantener desactivado",
       "turn_on": "Activarlo",
       "plan_traditional": "401(k) tradicional",

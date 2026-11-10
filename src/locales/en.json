@@ -450,6 +450,8 @@
       "close": "Close",
       "title": "Auto-increase is off",
       "body": "Your {{plan}} contribution will stay at {{rate}}%. You can turn auto-increase on anytime from your plan settings.",
+      "info_label": "For context",
+      "info_body": "Turning auto-increase on could add about {{amount}} to your retirement savings over 10 years.",
       "keep_off": "Keep it off",
       "turn_on": "Turn it on",
       "plan_traditional": "Traditional 401(k)",

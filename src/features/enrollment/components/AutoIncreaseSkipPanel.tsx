@@ -1,9 +1,12 @@
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
+import { X, Info } from 'lucide-react'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
+import { getAppDateLocale } from '@/lib/dateLocale'
 
 export interface AutoIncreaseSkipPanelProps {
-  /** @deprecated kept for prop-compat with callers; no longer displayed. */
+  /** Dollars auto-increase would add over 10 years — the "with" projection
+   *  minus the "without" projection. Shown as a neutral For-context line,
+   *  not a loss-framed tile. Omitted or <= 0: the context line is hidden. */
   missedSavingsAmount?: number
   /** User chose to turn auto-increase on after all. */
   onReconsider: () => void
@@ -18,23 +21,26 @@ export interface AutoIncreaseSkipPanelProps {
  * Neutral confirmation for skipping auto-increase. The earlier version
  * framed the choice as a mistake ("Potential Missed Savings — you will be
  * losing $61,322") and put "Reconsider Auto Increase" as the primary
- * button, with "skip this step" reduced to an underlined tap target. That
- * read as pressure, so this panel treats skipping as a plain choice: one
- * clear line of what will happen, two equal buttons, no loss tile.
+ * button. This panel keeps the dollar figure but as a For-context line in
+ * a neutral tile, and treats skipping as a plain choice: one line of what
+ * will happen, two equal-weight buttons, no loss framing.
  */
 export function AutoIncreaseSkipPanel({
+  missedSavingsAmount,
   onReconsider,
   onContinueWithout,
   onDismiss,
   showDismissButton = false,
 }: AutoIncreaseSkipPanelProps) {
   const { t } = useTranslation()
+  const locale = getAppDateLocale()
   const { data } = useEnrollment()
   const planLabel =
     data.plan === 'traditional'
       ? t('enrollment.auto_increase_skip.plan_traditional')
       : t('enrollment.auto_increase_skip.plan_roth')
   const rate = data.contributionPercent
+  const showContext = typeof missedSavingsAmount === 'number' && missedSavingsAmount > 0
 
   return (
     <div className="relative flex w-full flex-col">
@@ -66,9 +72,31 @@ export function AutoIncreaseSkipPanel({
         </p>
       </div>
 
-      {/* Two equal-weight choices, side by side. "Keep it off" is primary
-          because that is the choice the viewer has already made; "Turn it
-          on" is a plain outlined button, not a pushy one. */}
+      {/* For-context tile: a neutral note, not a loss alert. Only shows
+          when we actually have a number to quote. */}
+      {showContext && (
+        <div
+          className="mt-5 rounded-xl border border-gray-200 bg-gray-50 p-3.5 text-left dark:border-gray-700 dark:bg-gray-800/60"
+          role="note"
+        >
+          <div className="flex gap-2.5">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" aria-hidden />
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                {t('enrollment.auto_increase_skip.info_label')}
+              </p>
+              <p className="mt-1 text-sm leading-relaxed text-gray-700 dark:text-gray-200">
+                {t('enrollment.auto_increase_skip.info_body', {
+                  amount: `$${missedSavingsAmount.toLocaleString(locale)}`,
+                })}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Two equal-weight choices. "Keep it off" is primary because it's
+          the choice the viewer has already made; "Turn it on" is plain. */}
       <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-center">
         <button
           type="button"
