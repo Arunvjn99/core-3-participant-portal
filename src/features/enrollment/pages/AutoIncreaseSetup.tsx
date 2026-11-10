@@ -21,6 +21,9 @@ export default function AutoIncreaseSetup() {
   const [increaseAmount, setIncreaseAmount] = useState(data.autoIncreaseAmount)
   const [maxContribution, setMaxContribution] = useState(Math.min(data.autoIncreaseMax, 15))
   const [incrementCycle, setIncrementCycle] = useState<IncrementCycle>('calendar')
+  // Growth timeline shows every year, which gets long fast. Default to key
+  // milestones (Now, Y1, midpoint, final) and let people open the full list.
+  const [showAllRows, setShowAllRows] = useState(false)
 
   const currentPercent = data.contributionPercent
   const salary = data.salary
@@ -73,6 +76,23 @@ export default function AutoIncreaseSetup() {
     }
     return rows
   }, [currentPercent, increaseAmount, maxContribution, salary, yearsToMax, incrementCycle, locale])
+
+  // Collapsed growth timeline: 4 informative rows instead of every year.
+  // first + Y1 (shows the cadence), the midpoint (shows the arc), and the
+  // final row where the max is reached. Short runs (<=4) stay as-is.
+  const timelineHighlights = useMemo(() => {
+    if (yearByYearData.length <= 4) return yearByYearData
+    const first = yearByYearData[0]
+    const second = yearByYearData[1]
+    const last = yearByYearData[yearByYearData.length - 1]
+    const mid = yearByYearData[Math.floor(yearByYearData.length / 2)]
+    const seen = new Set<number>()
+    return [first, second, mid, last].filter((row) => {
+      if (!row || seen.has(row.year)) return false
+      seen.add(row.year)
+      return true
+    })
+  }, [yearByYearData])
 
   const financialImpact = useMemo(() => {
     const yearsToRetirement = personalization.retirementAge - personalization.currentAge
@@ -409,40 +429,32 @@ export default function AutoIncreaseSetup() {
               {increaseAmount > 0 && financialImpact.difference > 0 && (
                 <>
                   <div className="border-t border-gray-100 dark:border-gray-800" />
-                  <div className="space-y-3 px-5 py-4">
+                  {/* Savings Impact as a single row: Without / With stacked
+                      vertically so the two figures compare cleanly, and the
+                      "Could add" delta as one sentence below. No tiles,
+                      no heavy backgrounds. */}
+                  <div className="space-y-2.5 px-5 py-4">
                     <p className="text-gray-900 dark:text-white" style={{ fontSize: '0.82rem', fontWeight: 600 }}>
                       {t('enrollment.auto_increase_setup.savings_impact')}
                     </p>
-                    <div className="grid grid-cols-2 gap-2.5">
-                      <div className="rounded-xl bg-gray-50 px-3 py-3 text-center dark:bg-gray-800">
-                        <p
-                          className="mb-0.5 text-gray-400 dark:text-gray-500"
-                          style={{ fontSize: '0.6rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}
-                        >
-                          {t('enrollment.auto_increase_setup.without')}
-                        </p>
-                        <p className="tabular-nums text-gray-600 dark:text-gray-400" style={{ fontSize: '1.1rem', fontWeight: 700 }}>
-                          {formatCurrency(financialImpact.withoutIncrease)}
-                        </p>
-                      </div>
-                      <div className="rounded-xl border border-green-200 bg-green-50 px-3 py-3 text-center dark:border-green-800/40 dark:bg-green-950/30">
-                        <p
-                          className="mb-0.5 text-green-700 dark:text-green-400"
-                          style={{ fontSize: '0.6rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}
-                        >
-                          {t('enrollment.auto_increase_setup.with_increases')}
-                        </p>
-                        <p className="tabular-nums text-green-700 dark:text-green-400" style={{ fontSize: '1.1rem', fontWeight: 700 }}>
-                          {formatCurrency(financialImpact.withIncrease)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2 rounded-xl border border-green-100 bg-green-50 px-3.5 py-2.5 dark:border-green-900/40 dark:bg-green-950/30">
-                      <DollarSign className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
-                      <p className="text-green-800 dark:text-green-400" style={{ fontSize: '0.78rem' }}>
-                        {t('enrollment.auto_increase_setup.could_add', { amount: formatCurrency(financialImpact.difference) })}
-                      </p>
-                    </div>
+                    <dl className="grid grid-cols-2 gap-x-6 gap-y-0.5">
+                      <dt className="text-gray-500 dark:text-gray-400" style={{ fontSize: '0.7rem' }}>
+                        {t('enrollment.auto_increase_setup.without')}
+                      </dt>
+                      <dt className="text-right text-green-700 dark:text-green-400" style={{ fontSize: '0.7rem', fontWeight: 600 }}>
+                        {t('enrollment.auto_increase_setup.with_increases')}
+                      </dt>
+                      <dd className="tabular-nums text-gray-700 dark:text-gray-200" style={{ fontSize: '1.1rem', fontWeight: 700 }}>
+                        {formatCurrency(financialImpact.withoutIncrease)}
+                      </dd>
+                      <dd className="text-right tabular-nums text-green-700 dark:text-green-400" style={{ fontSize: '1.1rem', fontWeight: 700 }}>
+                        {formatCurrency(financialImpact.withIncrease)}
+                      </dd>
+                    </dl>
+                    <p className="flex items-start gap-1.5 pt-1 text-green-700 dark:text-green-400" style={{ fontSize: '0.75rem' }}>
+                      <DollarSign className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+                      <span>{t('enrollment.auto_increase_setup.could_add', { amount: formatCurrency(financialImpact.difference) })}</span>
+                    </p>
                   </div>
                 </>
               )}
@@ -451,9 +463,23 @@ export default function AutoIncreaseSetup() {
                 <>
                   <div className="border-t border-gray-100 dark:border-gray-800" />
                   <div className="px-4 py-3">
-                    <h3 className="mb-3 text-gray-900 dark:text-white" style={{ fontSize: '0.85rem', fontWeight: 700 }}>
-                      {t('enrollment.auto_increase_setup.growth_timeline')}
-                    </h3>
+                    <div className="mb-3 flex items-center justify-between gap-2">
+                      <h3 className="text-gray-900 dark:text-white" style={{ fontSize: '0.85rem', fontWeight: 700 }}>
+                        {t('enrollment.auto_increase_setup.growth_timeline')}
+                      </h3>
+                      {yearByYearData.length > 4 && (
+                        <button
+                          type="button"
+                          onClick={() => setShowAllRows((v) => !v)}
+                          className="text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400"
+                          style={{ fontSize: '0.72rem', fontWeight: 500 }}
+                        >
+                          {showAllRows
+                            ? t('enrollment.auto_increase_setup.show_milestones', 'Show milestones only')
+                            : t('enrollment.auto_increase_setup.show_all_rows', 'Show all years')}
+                        </button>
+                      )}
+                    </div>
                     <div className="-mx-4 overflow-x-auto">
                       <table className="w-full">
                         <thead className="border-b border-gray-200 dark:border-gray-700">
@@ -470,7 +496,7 @@ export default function AutoIncreaseSetup() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                          {yearByYearData.map((row, idx) => (
+                          {(showAllRows ? yearByYearData : timelineHighlights).map((row, idx) => (
                             <tr
                               key={idx}
                               className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${row.percent === maxContribution ? 'bg-purple-50 dark:bg-purple-950/20' : ''}`}
