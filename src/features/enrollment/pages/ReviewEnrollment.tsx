@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
@@ -11,7 +11,71 @@ import { LEGAL } from '@/lib/constants'
 import { getAppDateLocale } from '@/lib/dateLocale'
 import { LegalHrefLink } from '@/features/legal/components/LegalHrefLink'
 import { useEnrollmentStepNav, type EnrollmentPrimaryLabel } from '@/features/enrollment/components/EnrollmentStepNavContext'
-import { Edit3, DollarSign, Briefcase, TrendingUp, Clock, Sparkles, ExternalLink } from 'lucide-react'
+import { Edit3, Sparkles, ExternalLink, ChevronDown } from 'lucide-react'
+
+/** Collapsed-by-default Details row. Holds the per-year contribution and
+ *  match numbers, the assumed return and the horizon. */
+function ReviewDetails({
+  annualContribution,
+  employerContribution,
+  yearsToRetirement,
+  retirementAge,
+  growthRate,
+  locale,
+}: {
+  annualContribution: number
+  employerContribution: number
+  yearsToRetirement: number
+  retirementAge: number
+  growthRate: number
+  locale: string
+}) {
+  const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
+  const rows: { label: string; value: string }[] = [
+    {
+      label: t('enrollment.review_page.stat_contrib'),
+      value: `$${annualContribution.toLocaleString(locale)} ${t('enrollment.review_page.per_year')}`,
+    },
+    {
+      label: t('enrollment.review_page.stat_match'),
+      value: `$${employerContribution.toLocaleString(locale)} ${t('enrollment.review_page.per_year')}`,
+    },
+    {
+      label: t('enrollment.review_page.stat_growth'),
+      value: `~${(growthRate * 100).toFixed(0)}% ${t('enrollment.review_page.growth_assumption_suffix')}`,
+    },
+    {
+      label: t('enrollment.review_page.stat_horizon'),
+      value: t('enrollment.review_page.stat_horizon_full', { years: yearsToRetirement, age: retirementAge }),
+    },
+  ]
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between px-5 py-3 text-left"
+        aria-expanded={open}
+      >
+        <span className="text-gray-700 dark:text-gray-200" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+          {t('enrollment.review_page.details_title')}
+        </span>
+        <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
+      </button>
+      {open && (
+        <ul className="divide-y divide-gray-100 border-t border-gray-100 px-5 dark:divide-gray-800 dark:border-gray-800">
+          {rows.map((row) => (
+            <li key={row.label} className="flex items-center justify-between gap-3 py-2.5">
+              <span className="text-gray-500 dark:text-gray-400" style={{ fontSize: '0.78rem' }}>{row.label}</span>
+              <span className="text-gray-900 dark:text-white tabular-nums" style={{ fontSize: '0.82rem', fontWeight: 500 }}>{row.value}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
 
 export default function ReviewEnrollment() {
   const { t } = useTranslation()
@@ -28,8 +92,12 @@ export default function ReviewEnrollment() {
   const employerContribution = Math.round((data.salary * matchPercent) / 100)
   const totalAnnual = annualContribution + employerContribution
 
-  const growthRates: Record<string, number> = { conservative: 0.045, balanced: 0.068, growth: 0.082, aggressive: 0.095 }
-  const growthRate = growthRates[data.riskLevel] || 0.068
+  // Reconcile with the Contribution step, which explicitly tells participants
+  // the projection assumes 7% annual return. The old risk-based rate here
+  // (4.5% to 9.5% depending on risk level) meant the "Projected" number on
+  // Review could differ from the number the participant just saw, for no
+  // reason they would understand.
+  const growthRate = 0.07
 
   let projectedBalance = personalization.currentSavings
   for (let i = 0; i < yearsToRetirement; i++) {
@@ -41,8 +109,6 @@ export default function ReviewEnrollment() {
     if (val >= 1_000) return `$${Math.round(val / 1_000).toLocaleString(locale)}K`
     return `$${Math.round(val).toLocaleString(locale)}`
   }
-
-  const riskWord = t(`enrollment.review_page.risk_${data.riskLevel}`)
 
   const sourcesParts: string[] = []
   if (data.contributionSources.preTax > 0) {
@@ -146,7 +212,9 @@ export default function ReviewEnrollment() {
           </p>
         </div>
 
-        {/* Hero — light blue */}
+        {/* Projection hero — one headline number. The per-year contribution,
+            match and horizon figures live inside the Details expander below
+            so they're not shown twice on the same page. */}
         <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 border border-blue-200 p-6 dark:from-blue-950/40 dark:to-indigo-950/40 dark:border-blue-800/50">
           <p className="text-blue-600 dark:text-blue-400" style={{ fontSize: '0.75rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {t('enrollment.review_page.projected_label')}
@@ -157,83 +225,50 @@ export default function ReviewEnrollment() {
           <p className="mt-0.5 text-gray-500 dark:text-gray-400" style={{ fontSize: '0.75rem' }}>
             {t('enrollment.review_page.projected_note', { years: yearsToRetirement })}
           </p>
-
-          <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
-            {(
-              [
-                {
-                  Icon: DollarSign,
-                  labelKey: 'stat_contrib' as const,
-                  value: `$${annualContribution.toLocaleString(locale)}`,
-                  sub: t('enrollment.review_page.per_year'),
-                },
-                {
-                  Icon: Briefcase,
-                  labelKey: 'stat_match' as const,
-                  value: `$${employerContribution.toLocaleString(locale)}`,
-                  sub: t('enrollment.review_page.per_year'),
-                },
-                {
-                  Icon: TrendingUp,
-                  labelKey: 'stat_growth' as const,
-                  value: `~${(growthRate * 100).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`,
-                  sub: t('enrollment.review_page.stat_growth_sub', { risk: riskWord }),
-                },
-                {
-                  Icon: Clock,
-                  labelKey: 'stat_horizon' as const,
-                  value: t('enrollment.review_page.stat_horizon_years', { years: yearsToRetirement }),
-                  sub: t('enrollment.review_page.stat_horizon_sub', { age: personalization.retirementAge }),
-                },
-              ] as const
-            ).map(({ Icon, labelKey, value, sub }) => (
-              <div key={labelKey} className="rounded-xl bg-white/70 border border-blue-200 px-3.5 py-3 dark:bg-blue-900/20 dark:border-blue-700/50">
-                <div className="mb-1 flex items-center gap-1.5">
-                  <Icon className="h-3 w-3 text-blue-500 dark:text-blue-400" />
-                  <span className="text-blue-600 dark:text-blue-400" style={{ fontSize: '0.62rem', fontWeight: 500 }}>
-                    {t(`enrollment.review_page.${labelKey}`)}
-                  </span>
-                </div>
-                <p className="text-gray-900 dark:text-white" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{value}</p>
-                <p className="text-gray-500 dark:text-gray-400" style={{ fontSize: '0.6rem' }}>
-                  {sub}
-                </p>
-              </div>
-            ))}
-          </div>
         </div>
 
-        {/* Plan Summary Grid */}
-        <div>
+        {/* Plan summary — a plain label → value list, not a card grid.
+            Each row links back to its step so the viewer can go fix something
+            without scrolling to find an edit button. */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
           <p className="mb-3 text-gray-900 dark:text-white" style={{ fontSize: '0.95rem', fontWeight: 600 }}>
             {t('enrollment.review_page.setup_title')}
           </p>
-          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-3">
+          <ul className="divide-y divide-gray-100 dark:divide-gray-800">
             {planSections.map((section) => (
-              <div
-                key={section.labelKey}
-                className="group flex flex-col justify-between rounded-xl border border-gray-200 bg-white px-4 py-3.5 dark:border-gray-700 dark:bg-gray-900"
-              >
-                <div>
-                  <p className="text-gray-400 dark:text-gray-500" style={{ fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <li key={section.labelKey} className="flex items-start justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
+                <div className="min-w-0">
+                  <p className="text-gray-500 dark:text-gray-400" style={{ fontSize: '0.78rem' }}>
                     {t(`enrollment.review_page.${section.labelKey}`)}
                   </p>
-                  <p className="mt-1 text-gray-900 dark:text-white" style={{ fontSize: '0.82rem', fontWeight: 500 }}>
+                  <p className="mt-0.5 break-words text-gray-900 dark:text-white tabular-nums" style={{ fontSize: '0.88rem', fontWeight: 600 }}>
                     {section.value}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => navigate(section.editPath)}
-                  className="mt-2.5 flex items-center gap-1 self-start text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                  style={{ fontSize: '0.7rem', fontWeight: 500 }}
+                  className="shrink-0 inline-flex items-center gap-1 pt-1 text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                  style={{ fontSize: '0.75rem', fontWeight: 500 }}
+                  aria-label={`${t('enrollment.edit')} ${t(`enrollment.review_page.${section.labelKey}`)}`}
                 >
                   <Edit3 className="h-3 w-3" /> {t('enrollment.edit')}
                 </button>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
+
+        {/* Details · assumptions · what happens next — the per-year dollar
+            numbers and horizon, pulled out of the hero. Collapsed by default. */}
+        <ReviewDetails
+          annualContribution={annualContribution}
+          employerContribution={employerContribution}
+          yearsToRetirement={yearsToRetirement}
+          retirementAge={personalization.retirementAge}
+          growthRate={growthRate}
+          locale={locale}
+        />
 
         {/* Confidence Banner */}
         <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-3.5 dark:border-amber-800/40 dark:bg-amber-950/30">
