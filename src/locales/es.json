@@ -446,17 +446,13 @@
       "impact_banner": "Automatic increases could add {{amount}} over 10 years."
     },
     "auto_increase_skip": {
-      "close": "Close",
-      "title": "No Auto Increase Configured",
-      "body": "Your {{plan}} contribution rate will stay at {{rate}}%. You can always enable auto increase later from your plan settings.",
-      "alert_title": "Potential Missed Savings",
-      "alert_body": "By skipping, you will be losing {{amount}} in potential retirement savings over 10 years.",
-      "reconsider": "Reconsider Auto Increase",
-      "tap_here": "Tap",
-      "here": "here",
-      "skip_step": "to skip this step",
-      "plan_traditional": "Traditional 401(k)",
-      "plan_roth": "Roth 401(k)"
+      "close": "Cerrar",
+      "title": "El aumento automático está desactivado",
+      "body": "Tu aporte al {{plan}} se mantendrá en {{rate}}%. Puedes activar el aumento automático en cualquier momento desde la configuración de tu plan.",
+      "keep_off": "Mantener desactivado",
+      "turn_on": "Activarlo",
+      "plan_traditional": "401(k) tradicional",
+      "plan_roth": "401(k) Roth"
     },
     "auto_increase_setup": {
       "tooltip_today": "Today",

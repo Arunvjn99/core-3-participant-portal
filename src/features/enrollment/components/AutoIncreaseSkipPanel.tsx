@@ -1,28 +1,34 @@
 import { useTranslation } from 'react-i18next'
-import { ArrowRight, Pause, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
-import { getAppDateLocale } from '@/lib/dateLocale'
 
 export interface AutoIncreaseSkipPanelProps {
-  /** Difference (with − without auto increase), shown in the alert */
-  missedSavingsAmount: number
+  /** @deprecated kept for prop-compat with callers; no longer displayed. */
+  missedSavingsAmount?: number
+  /** User chose to turn auto-increase on after all. */
   onReconsider: () => void
+  /** User confirmed they want to continue without auto-increase. */
   onContinueWithout: () => void
   /** Optional dismiss (e.g. modal backdrop / close control) */
   onDismiss?: () => void
   showDismissButton?: boolean
 }
 
+/**
+ * Neutral confirmation for skipping auto-increase. The earlier version
+ * framed the choice as a mistake ("Potential Missed Savings — you will be
+ * losing $61,322") and put "Reconsider Auto Increase" as the primary
+ * button, with "skip this step" reduced to an underlined tap target. That
+ * read as pressure, so this panel treats skipping as a plain choice: one
+ * clear line of what will happen, two equal buttons, no loss tile.
+ */
 export function AutoIncreaseSkipPanel({
-  missedSavingsAmount,
   onReconsider,
   onContinueWithout,
   onDismiss,
   showDismissButton = false,
 }: AutoIncreaseSkipPanelProps) {
   const { t } = useTranslation()
-  const locale = getAppDateLocale()
-  const missed = missedSavingsAmount.toLocaleString(locale)
   const { data } = useEnrollment()
   const planLabel =
     data.plan === 'traditional'
@@ -36,19 +42,18 @@ export function AutoIncreaseSkipPanel({
         <button
           type="button"
           onClick={onDismiss}
-          className="absolute right-0 top-0 z-10 shrink-0 rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/50 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+          className="absolute right-0 top-0 z-10 shrink-0 rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 dark:hover:bg-gray-800 dark:hover:text-gray-200"
           aria-label={t('enrollment.auto_increase_skip.close')}
         >
           <X className="h-5 w-5" aria-hidden />
         </button>
       )}
 
-      {/* Confirmation copy: symmetric horizontal padding when close is shown so text stays optically centered */}
       <div
         className={`flex flex-col items-center text-center ${showDismissButton ? 'px-10 sm:px-11' : ''}`}
       >
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800">
-          <Pause className="h-6 w-6 text-gray-500 dark:text-gray-400" strokeWidth={2.25} aria-hidden />
+          <X className="h-6 w-6 text-gray-500 dark:text-gray-400" strokeWidth={2.25} aria-hidden />
         </div>
         <h2
           id="auto-increase-skip-title"
@@ -61,47 +66,24 @@ export function AutoIncreaseSkipPanel({
         </p>
       </div>
 
-      <div
-        className="mt-6 rounded-xl border border-red-200/90 bg-red-50 p-4 text-left dark:border-red-900/50 dark:bg-red-950/35"
-        role="alert"
-        aria-labelledby="auto-increase-skip-alert-title"
-      >
-        <div className="flex gap-3">
-          <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center self-start rounded-full bg-red-200/80 text-xs font-bold leading-none text-red-700 dark:bg-red-900/80 dark:text-red-200">
-            ×
-          </span>
-          <div className="min-w-0 flex-1">
-            <p id="auto-increase-skip-alert-title" className="text-sm font-bold text-red-800 dark:text-red-200">
-              {t('enrollment.auto_increase_skip.alert_title')}
-            </p>
-            <p className="mt-2 text-sm leading-relaxed text-red-700 dark:text-red-200/95">
-              {t('enrollment.auto_increase_skip.alert_body', { amount: `$${missed}` })}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-6 flex flex-col gap-4">
+      {/* Two equal-weight choices, side by side. "Keep it off" is primary
+          because that is the choice the viewer has already made; "Turn it
+          on" is a plain outlined button, not a pushy one. */}
+      <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-center">
         <button
           type="button"
           onClick={onReconsider}
-          className="btn-brand flex w-full min-h-[48px] items-center justify-center gap-2 rounded-xl py-3.5 text-sm active:scale-[0.99]"
+          className="min-h-[48px] rounded-xl border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50 active:scale-[0.99] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800"
         >
-          {t('enrollment.auto_increase_skip.reconsider')}
-          <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+          {t('enrollment.auto_increase_skip.turn_on')}
         </button>
-
-        <p className="text-center text-sm leading-normal text-gray-500 dark:text-gray-400">
-          {t('enrollment.auto_increase_skip.tap_here')}{' '}
-          <button
-            type="button"
-            onClick={onContinueWithout}
-            className="font-medium text-gray-600 underline decoration-gray-400 underline-offset-2 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-          >
-            {t('enrollment.auto_increase_skip.here')}
-          </button>{' '}
-          {t('enrollment.auto_increase_skip.skip_step')}
-        </p>
+        <button
+          type="button"
+          onClick={onContinueWithout}
+          className="btn-brand min-h-[48px] rounded-xl px-6 py-3 text-sm font-semibold active:scale-[0.99]"
+        >
+          {t('enrollment.auto_increase_skip.keep_off')}
+        </button>
       </div>
     </div>
   )
