@@ -503,11 +503,44 @@ function InvestmentStrategy() {
               </div>
             </div>
 
-            {/* Managed Account — a peer of Plan Default, shown only when the
-                plan actually offers it (PLAN_CONFIG.managedAccount.available).
-                Pros manage the allocation and rebalance, for a fee. Slotted
-                between Plan Default and Customize so it reads as a parallel
-                choice, not a feature buried in another option. */}
+            {/* Customize Portfolio — 40% */}
+            <div className="bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-purple-950/20 dark:via-gray-900 dark:to-blue-950/20 border border-purple-200 dark:border-purple-800/40 rounded-2xl p-6 flex flex-col shadow-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shrink-0">
+                  <Settings className="w-5 h-5 text-white" />
+                </div>
+                <div className="px-2.5 py-1 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/40 dark:to-blue-900/40 border border-purple-200 dark:border-purple-800/40 rounded-md">
+                  <p className="text-purple-700 dark:text-purple-400" style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('enrollment.investment.advanced_user')}</p>
+                </div>
+              </div>
+              <h3 className="text-gray-900 dark:text-white mb-2" style={{ fontSize: '1rem', fontWeight: 700 }}>{t('enrollment.investment.customize_title')}</h3>
+              <p className="text-gray-700 dark:text-gray-300 mb-3" style={{ fontSize: '0.82rem', lineHeight: 1.6 }}>{t('enrollment.investment.customize_sub')}</p>
+              <p className="text-gray-800 dark:text-gray-200 mb-4 flex-1" style={{ fontSize: '0.82rem', lineHeight: 1.5, fontWeight: 500 }}>{t('enrollment.investment.customize_for')}</p>
+              {customAllocations ? (
+                <div
+                  className="pointer-events-none flex w-full min-h-[2.75rem] items-center justify-center gap-2 rounded-xl border-2 border-purple-500 bg-purple-50 py-2.5 px-6 text-purple-800 dark:border-purple-500 dark:bg-purple-950/40 dark:text-purple-200"
+                  role="status"
+                  style={{ fontSize: '0.85rem', fontWeight: 600 }}
+                >
+                  <Check className="h-4 w-4 shrink-0 text-purple-600 dark:text-purple-400" aria-hidden />
+                  {t('enrollment.investment.selected_custom')}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowBuildPortfolioModal(true)}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-purple-300 py-2.5 px-6 text-purple-700 transition-all hover:border-purple-400 hover:bg-purple-50 active:scale-[0.98] dark:border-purple-600 dark:text-purple-400 dark:hover:bg-purple-950/30"
+                  style={{ fontSize: '0.85rem', fontWeight: 600 }}
+                >
+                  {t('enrollment.investment.customize_cta')} <ArrowRight className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Managed Account — the third peer tile, after Plan Default and
+                Customize. Only shown when the plan offers it
+                (PLAN_CONFIG.managedAccount.available). Pros manage the
+                allocation and rebalance, for a fee. */}
             {PLAN_CONFIG.managedAccount.available && (
               <div className="bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-emerald-950/20 dark:via-gray-900 dark:to-teal-950/20 border border-emerald-200 dark:border-emerald-800/40 rounded-2xl p-6 flex flex-col shadow-sm">
                 <div className="flex items-center gap-3 mb-3">
@@ -544,40 +577,6 @@ function InvestmentStrategy() {
                 </button>
               </div>
             )}
-
-            {/* Customize Portfolio — 40% */}
-            <div className="bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-purple-950/20 dark:via-gray-900 dark:to-blue-950/20 border border-purple-200 dark:border-purple-800/40 rounded-2xl p-6 flex flex-col shadow-sm">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shrink-0">
-                  <Settings className="w-5 h-5 text-white" />
-                </div>
-                <div className="px-2.5 py-1 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/40 dark:to-blue-900/40 border border-purple-200 dark:border-purple-800/40 rounded-md">
-                  <p className="text-purple-700 dark:text-purple-400" style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('enrollment.investment.advanced_user')}</p>
-                </div>
-              </div>
-              <h3 className="text-gray-900 dark:text-white mb-2" style={{ fontSize: '1rem', fontWeight: 700 }}>{t('enrollment.investment.customize_title')}</h3>
-              <p className="text-gray-700 dark:text-gray-300 mb-3" style={{ fontSize: '0.82rem', lineHeight: 1.6 }}>{t('enrollment.investment.customize_sub')}</p>
-              <p className="text-gray-800 dark:text-gray-200 mb-4 flex-1" style={{ fontSize: '0.82rem', lineHeight: 1.5, fontWeight: 500 }}>{t('enrollment.investment.customize_for')}</p>
-              {customAllocations ? (
-                <div
-                  className="pointer-events-none flex w-full min-h-[2.75rem] items-center justify-center gap-2 rounded-xl border-2 border-purple-500 bg-purple-50 py-2.5 px-6 text-purple-800 dark:border-purple-500 dark:bg-purple-950/40 dark:text-purple-200"
-                  role="status"
-                  style={{ fontSize: '0.85rem', fontWeight: 600 }}
-                >
-                  <Check className="h-4 w-4 shrink-0 text-purple-600 dark:text-purple-400" aria-hidden />
-                  {t('enrollment.investment.selected_custom')}
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setShowBuildPortfolioModal(true)}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-purple-300 py-2.5 px-6 text-purple-700 transition-all hover:border-purple-400 hover:bg-purple-50 active:scale-[0.98] dark:border-purple-600 dark:text-purple-400 dark:hover:bg-purple-950/30"
-                  style={{ fontSize: '0.85rem', fontWeight: 600 }}
-                >
-                  {t('enrollment.investment.customize_cta')} <ArrowRight className="h-4 w-4" />
-                </button>
-              )}
-            </div>
           </div>
 
           {/* ── Advisor Card ── */}
