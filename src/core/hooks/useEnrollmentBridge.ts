@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { useUser } from '@/core/hooks/useUser'
+import { startingSavings } from '@/features/enrollment/enrollmentMath'
 
 export interface EnrollmentFormData {
   plan: 'traditional' | 'roth' | null
@@ -11,6 +12,8 @@ export interface EnrollmentFormData {
   autoIncreaseMax: number
   riskLevel: 'conservative' | 'balanced' | 'growth' | 'aggressive'
   useRecommendedPortfolio: boolean
+  /** Fund ticker → percent when the participant built their own mix; null for the plan default */
+  customAllocation: Record<string, number> | null
   agreedToTerms: boolean
   salary: number
   companyPlans: ('traditional' | 'roth')[]
@@ -36,7 +39,7 @@ export function useEnrollment() {
       retirementAge: d?.personalization?.retirementAge ?? 65,
       currentAge: d?.personalization?.currentAge ?? 35,
       retirementLocation: d?.personalization?.selectedLocation ?? '',
-      currentSavings: d?.personalization?.savingsAmount ?? 0,
+      currentSavings: startingSavings(d?.personalization?.savingsAmount),
       investmentComfort: 'balanced',
       wizardCompleted: true,
     }
@@ -57,6 +60,7 @@ export function useEnrollment() {
       autoIncreaseMax: d?.autoIncrease?.max ?? 15,
       riskLevel: (d?.investment?.riskLevel ?? 'balanced') as EnrollmentFormData['riskLevel'],
       useRecommendedPortfolio: d?.investment?.useRecommended ?? true,
+      customAllocation: d?.investment?.customAllocation ?? null,
       agreedToTerms: d?.review?.agreed ?? false,
       salary: d?.savings?.salary ?? d?.personalization?.salary ?? 85000,
       companyPlans: ['traditional', 'roth'] as ('traditional' | 'roth')[],
@@ -111,12 +115,13 @@ export function useEnrollment() {
         max: updates.autoIncreaseMax ?? current.max ?? 15,
       })
     }
-    if (updates.riskLevel !== undefined || updates.useRecommendedPortfolio !== undefined) {
+    if (updates.riskLevel !== undefined || updates.useRecommendedPortfolio !== undefined || updates.customAllocation !== undefined) {
       const current = draftData.investment ?? {}
       mergeDraftSection('investment', {
         ...current,
         riskLevel: updates.riskLevel ?? current.riskLevel ?? 'balanced',
         useRecommended: updates.useRecommendedPortfolio ?? current.useRecommended ?? true,
+        customAllocation: updates.customAllocation === undefined ? current.customAllocation : (updates.customAllocation ?? undefined),
       })
     }
     if (updates.salary !== undefined) {

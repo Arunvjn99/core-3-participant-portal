@@ -35,6 +35,7 @@ import { ChatTopBar } from '../agent/ChatTopBar'
 import { QUESTIONS, missingQuestions, type WizardQuestion } from '../agent/wizardQuestions'
 import { ReviewDialog } from '../agent/ReviewDialog'
 import { PLAN_CONFIG, PLAN_LIMITS, employerMatch } from '../agent/planConfig'
+import { startingSavings } from '../enrollmentMath'
 import { ProfileSummary } from '../agent/ProfileSummary'
 import {
   buildQuickEnrollmentDefaults,
@@ -359,7 +360,7 @@ export default function QuickEnrollment() {
   const mixIdx = MIX_STOPS.reduce((best, m, i) => (Math.abs(m.preTax - split.preTax) < Math.abs(MIX_STOPS[best].preTax - split.preTax) ? i : best), 0)
   const customMix = taxMode === 'mix' && !MIX_STOPS.some((m) => m.preTax === split.preTax)
   const chooseTaxMode = (m: TaxMode) => setSplit(m === 'pretax' ? { preTax: 100, roth: 0 } : m === 'roth' ? { preTax: 0, roth: 100 } : MIX_STOPS[1])
-  const projected = projectBalance(current, draft.personalization?.savingsAmount ?? 0)
+  const projected = projectBalance(current, startingSavings(draft.personalization?.savingsAmount))
 
   const money = (v: number) => `$${Math.round(v).toLocaleString(locale)}`
   const compact = (v: number) =>

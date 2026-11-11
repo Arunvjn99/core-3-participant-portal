@@ -6,6 +6,9 @@ import { useEnrollmentStepNav, type EnrollmentPrimaryLabel } from '@/features/en
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { getAppDateLocale } from '@/lib/dateLocale'
+import { getGrowthRate } from '@/lib/retirementCalculations'
+import { projectBalance } from '@/features/enrollment/enrollmentMath'
+import { PLAN_CONFIG } from '@/features/enrollment/agent/planConfig'
 import { TrendingUp, Calendar, Target, DollarSign, Info } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
@@ -18,8 +21,13 @@ export default function AutoIncreaseSetup() {
   const { setStepNav } = useEnrollmentStepNav()
   const { data, updateData, personalization } = useEnrollment()
 
-  const [increaseAmount, setIncreaseAmount] = useState(data.autoIncreaseAmount)
-  const [maxContribution, setMaxContribution] = useState(Math.min(data.autoIncreaseMax, 15))
+  // Plan rules: whole-point increases and a stop-at cap, both within the plan's allowed ranges
+  const [amountMin, amountMax] = PLAN_CONFIG.autoIncrease.amount
+  const [capMin, capMax] = PLAN_CONFIG.autoIncrease.cap
+  const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, Math.round(v)))
+  const [increaseAmount, setIncreaseAmount] = useState(() => clamp(data.autoIncreaseAmount, amountMin, amountMax))
+  const [maxContribution, setMaxContribution] = useState(() => clamp(data.autoIncreaseMax, capMin, capMax))
+  const amountFill = ((increaseAmount - amountMin) / (amountMax - amountMin)) * 100
   const [incrementCycle, setIncrementCycle] = useState<IncrementCycle>('calendar')
   // Growth timeline shows every year, which gets long fast. Default to key
   // milestones (Now, Y1, midpoint, final) and let people open the full list.
@@ -27,6 +35,8 @@ export default function AutoIncreaseSetup() {
 
   const currentPercent = data.contributionPercent
   const salary = data.salary
+  // Chart height fits the highest rate shown, in steps of 5%
+  const chartTop = Math.max(20, Math.ceil(Math.max(currentPercent, maxContribution) / 5) * 5)
   const gradientId = useId().replace(/:/g, '_') + '_autoInc'
   const currentMonthlyContribution = Math.round((salary * currentPercent) / 100 / 12)
 
@@ -52,30 +62,32 @@ export default function AutoIncreaseSetup() {
       ? 0
       : Math.ceil((maxContribution - currentPercent) / increaseAmount)
 
+  // Today's rate, then one row per increase up to and including the year the maximum is reached
   const yearByYearData = useMemo(() => {
-    if (increaseAmount === 0 || currentPercent >= maxContribution) return []
-    const rows: { year: number; percent: number; annual: number; date: string }[] = []
+    if (increaseAmount <= 0 || currentPercent >= maxContribution) return []
+    const today = new Date()
+    // First increase: next Jan 1 (calendar), next Apr 1 (plan year), or one year after enrolling (anniversary)
+    const firstIncrease =
+      incrementCycle === 'participant'
+        ? new Date(today.getFullYear() + 1, today.getMonth(), today.getDate())
+        : (() => {
+            const d = new Date(today.getFullYear(), incrementCycle === 'calendar' ? 0 : 3, 1)
+            if (d <= today) d.setFullYear(d.getFullYear() + 1)
+            return d
+          })()
+    const format = (d: Date) => d.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
+    const rows: { year: number; percent: number; annual: number; date: string }[] = [
+      { year: 0, percent: currentPercent, annual: Math.round((salary * currentPercent) / 100), date: format(today) },
+    ]
     let pct = currentPercent
-    let yr = 0
-    const getNextDate = (yearOffset: number) => {
-      const today = new Date()
-      if (incrementCycle === 'calendar') return new Date(today.getFullYear() + yearOffset, 0, 1)
-      if (incrementCycle === 'plan') return new Date(today.getFullYear() + yearOffset, 3, 1)
-      return new Date(today.getFullYear() + yearOffset, 7, 15)
-    }
-    while (pct < maxContribution && yr <= yearsToMax) {
-      const annual = Math.round((salary * pct) / 100)
-      rows.push({
-        year: yr,
-        percent: Math.round(pct * 10) / 10,
-        annual,
-        date: getNextDate(yr).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' }),
-      })
-      if (pct < maxContribution) pct = Math.min(pct + increaseAmount, maxContribution)
-      yr++
+    for (let n = 1; pct < maxContribution; n++) {
+      pct = Math.min(pct + increaseAmount, maxContribution)
+      const date = new Date(firstIncrease)
+      date.setFullYear(firstIncrease.getFullYear() + n - 1)
+      rows.push({ year: n, percent: Math.round(pct * 10) / 10, annual: Math.round((salary * pct) / 100), date: format(date) })
     }
     return rows
-  }, [currentPercent, increaseAmount, maxContribution, salary, yearsToMax, incrementCycle, locale])
+  }, [currentPercent, increaseAmount, maxContribution, salary, incrementCycle, locale])
 
   // Collapsed growth timeline: 4 informative rows instead of every year.
   // first + Y1 (shows the cadence), the midpoint (shows the arc), and the
@@ -95,23 +107,18 @@ export default function AutoIncreaseSetup() {
   }, [yearByYearData])
 
   const financialImpact = useMemo(() => {
-    const yearsToRetirement = personalization.retirementAge - personalization.currentAge
-    const growthRates: Record<string, number> = { conservative: 0.045, balanced: 0.068, growth: 0.082, aggressive: 0.095 }
-    const growthRate = growthRates[data.riskLevel] || 0.068
-    let balanceFixed = personalization.currentSavings
-    for (let y = 0; y < yearsToRetirement; y++) {
-      balanceFixed =
-        (balanceFixed + (currentPercent / 100) * salary + (Math.min(currentPercent, 6) / 100) * salary) * (1 + growthRate)
+    const base = {
+      startingBalance: personalization.currentSavings,
+      salary,
+      ratePercent: currentPercent,
+      sources: data.contributionSources,
+      years: personalization.retirementAge - personalization.currentAge,
+      growthRate: getGrowthRate(data.riskLevel),
     }
-    let balanceAuto = personalization.currentSavings
-    let autoPct = currentPercent
-    for (let y = 0; y < yearsToRetirement; y++) {
-      balanceAuto =
-        (balanceAuto + (autoPct / 100) * salary + (Math.min(autoPct, 6) / 100) * salary) * (1 + growthRate)
-      autoPct = Math.min(autoPct + increaseAmount, maxContribution)
-    }
+    const balanceFixed = projectBalance(base)
+    const balanceAuto = projectBalance({ ...base, autoIncrease: { amount: increaseAmount, max: maxContribution } })
     return { withoutIncrease: balanceFixed, withIncrease: balanceAuto, difference: balanceAuto - balanceFixed }
-  }, [currentPercent, increaseAmount, maxContribution, salary, data.riskLevel, personalization])
+  }, [currentPercent, increaseAmount, maxContribution, salary, data.riskLevel, data.contributionSources, personalization])
 
   const formatCurrency = (val: number) => {
     if (val >= 1_000_000) return `$${(val / 1_000_000).toFixed(2)}M`
@@ -281,25 +288,25 @@ export default function AutoIncreaseSetup() {
                   <div className="mt-2">
                     <div className="mb-1 flex items-center justify-between">
                       <span className="text-gray-400 dark:text-gray-600" style={{ fontSize: '0.65rem' }}>
-                        0%
+                        {amountMin}%
                       </span>
                       <span className="tabular-nums text-blue-600 dark:text-blue-400" style={{ fontSize: '0.9rem', fontWeight: 700 }}>
                         {t('enrollment.auto_increase_setup.per_cycle', { v: increaseAmount })}
                       </span>
                       <span className="text-gray-400 dark:text-gray-600" style={{ fontSize: '0.65rem' }}>
-                        3%
+                        {amountMax}%
                       </span>
                     </div>
                     <input
                       type="range"
-                      min={0}
-                      max={3}
-                      step={0.5}
+                      min={amountMin}
+                      max={amountMax}
+                      step={1}
                       value={increaseAmount}
-                      onChange={(e) => setIncreaseAmount(parseFloat(e.target.value))}
+                      onChange={(e) => setIncreaseAmount(parseInt(e.target.value, 10))}
                       className="h-2 w-full cursor-pointer appearance-none rounded-full"
                       style={{
-                        background: `linear-gradient(to right, var(--color-primary) 0%, var(--color-primary) ${(increaseAmount / 3) * 100}%, var(--slider-track) ${(increaseAmount / 3) * 100}%, var(--slider-track) 100%)`,
+                        background: `linear-gradient(to right, var(--color-primary) 0%, var(--color-primary) ${amountFill}%, var(--slider-track) ${amountFill}%, var(--slider-track) 100%)`,
                       }}
                     />
                   </div>
@@ -340,25 +347,25 @@ export default function AutoIncreaseSetup() {
                   <div className="mt-4">
                     <div className="mb-1.5 flex items-center justify-between">
                       <span className="text-gray-400 dark:text-gray-600" style={{ fontSize: '0.7rem' }}>
-                        10%
+                        {capMin}%
                       </span>
                       <span className="tabular-nums text-purple-600 dark:text-purple-400" style={{ fontSize: '1rem', fontWeight: 700 }}>
                         {maxContribution}%
                       </span>
                       <span className="text-gray-400 dark:text-gray-600" style={{ fontSize: '0.7rem' }}>
-                        15%
+                        {capMax}%
                       </span>
                     </div>
                     <input
                       type="range"
-                      min={10}
-                      max={15}
+                      min={capMin}
+                      max={capMax}
                       step={1}
                       value={maxContribution}
                       onChange={(e) => setMaxContribution(parseInt(e.target.value, 10))}
                       className="h-2 w-full cursor-pointer appearance-none rounded-full"
                       style={{
-                        background: `linear-gradient(to right, var(--accent-purple) 0%, var(--accent-purple) ${((maxContribution - 10) / 5) * 100}%, var(--slider-track) ${((maxContribution - 10) / 5) * 100}%, var(--slider-track) 100%)`,
+                        background: `linear-gradient(to right, var(--accent-purple) 0%, var(--accent-purple) ${((maxContribution - capMin) / (capMax - capMin)) * 100}%, var(--slider-track) ${((maxContribution - capMin) / (capMax - capMin)) * 100}%, var(--slider-track) 100%)`,
                       }}
                     />
                   </div>
@@ -394,7 +401,7 @@ export default function AutoIncreaseSetup() {
                       tickLine={false}
                       axisLine={false}
                       tickFormatter={(v) => `${v}%`}
-                      domain={[0, 20]}
+                      domain={[0, chartTop]}
                     />
                     <Tooltip content={<CustomTooltip />} />
                     <Area

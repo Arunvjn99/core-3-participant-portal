@@ -20,10 +20,6 @@ export interface PlanConfig {
   match: { ratePercent: number; capPercent: number }
   contribution: { min: number; max: number }
   autoIncrease: { amount: readonly [number, number]; cap: readonly [number, number]; default: { enabled: boolean; amount: number; max: number } }
-  /** Managed-account service the plan offers (pros manage the allocation
-   *  and rebalance for the participant, for a fee). The Investments step
-   *  shows this as its own peer choice when `available` is true. */
-  managedAccount: { available: boolean; providerKey?: string; feeBps?: number }
   /** Employer match vesting, years of service to 100% (0 = immediate) */
   vestingYears: number
   /** Ordered disclosures the participant reviews before consenting */
@@ -39,8 +35,6 @@ export const PLAN_CONFIG: PlanConfig = {
   match: { ratePercent: 100, capPercent: 6 },
   contribution: { min: 1, max: 25 },
   autoIncrease: { amount: [1, 3], cap: [10, 15], default: { enabled: true, amount: 1, max: 10 } },
-  // On by default for this sample plan so the tile renders; flip to false to hide.
-  managedAccount: { available: true, providerKey: 'core_managed', feeBps: 35 },
   vestingYears: 0,
   disclosures: ['plan_terms', 'fees', 'investment_risk', 'default_investment', 'auto_increase', 'not_advice'],
 }

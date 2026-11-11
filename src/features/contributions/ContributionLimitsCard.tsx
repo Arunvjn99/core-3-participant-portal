@@ -15,7 +15,7 @@ export function ContributionLimitsCard() {
     : t('contributionLimits.status_projected', { amount: money(r.projectedYearEnd), unused: money(r.employeeLimit - r.projectedYearEnd) })
 
   return (
-    <div className="rounded-[12px] border border-border-default bg-surface-card p-5 shadow-card">
+    <div className="rounded-[20px] bg-surface-card p-5 shadow-[0_12px_32px_-28px_rgba(11,21,51,0.45)] ring-1 ring-slate-200/70 dark:ring-white/10">
       <div className="mb-4 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Gauge className="h-4 w-4 text-primary" aria-hidden />
@@ -68,7 +68,7 @@ export function ContributionLimitsCard() {
       )}
 
       {r.match.gapPercent > 0 && (
-        <div className="mt-4 flex gap-3 rounded-[12px] border border-status-warning/30 bg-status-warning-bg p-3.5">
+        <div className="mt-4 flex gap-3 rounded-2xl border border-status-warning/30 bg-status-warning-bg p-3.5">
           <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-status-warning" aria-hidden />
           <div className="min-w-0 flex-1">
             <p className="text-[13px] font-bold text-text-primary">

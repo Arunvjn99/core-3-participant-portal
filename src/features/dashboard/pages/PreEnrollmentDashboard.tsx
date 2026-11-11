@@ -2,7 +2,7 @@ import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { AnimatePresence, motion, useInView, useReducedMotion } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowRight, ArrowUp, ChevronRight, GraduationCap, Sparkles, Zap } from 'lucide-react'
+import { ArrowRight, ArrowUp, BookOpen, ChevronRight, GraduationCap, HandCoins, Receipt, Sparkles, Zap } from 'lucide-react'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { useAIStore } from '@/core/store/aiStore'
 import { useAuth } from '@/core/hooks/useAuth'
@@ -224,39 +224,55 @@ function AskCoreAiCard({ turns, onStart }: { turns: ChatTurn[]; onStart: () => v
 }
 
 // ─── Talk to an Advisor ──────────────────────────────────────────────────────
-/** A slim strip: a real advisor's face, shown as available, beside the one button. */
-function AdvisorCard({ onMeet }: { onMeet: () => void }) {
+/** One short item in the plan widget: an icon, a title and a single line. */
+function PlanItem({ icon, title, line, children }: { icon: React.ReactNode; title: string; line: string; children?: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-3 py-3 md:px-4 md:py-0">
+      {icon}
+      <div className="min-w-0">
+        <h4 className="text-[14px] font-bold leading-tight text-text-primary">{title}</h4>
+        <p className="mt-1 text-[13px] leading-snug text-slate-600 dark:text-slate-300">{line}</p>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+/** The plan widget's advisor item: a real advisor's face, shown as available, and a light link. */
+function AdvisorItem({ onMeet }: { onMeet: () => void }) {
   const { t } = useTranslation()
   const { ref, reduce, running, hold } = useCardMotion<HTMLDivElement>()
 
   return (
-    <div ref={ref} {...hold} className="group relative flex h-full flex-col rounded-[20px] bg-slate-100 px-5 py-3.5 text-left dark:bg-slate-900 dark:ring-1 dark:ring-white/10">
-      <h3 className="text-[15px] font-bold text-text-primary">{t('advisor.title')}</h3>
-      <p className="mt-1 text-[13px] leading-snug text-slate-600 dark:text-slate-300">{t('pre_dashboard.advisor_note')}</p>
-      <div className="mt-auto flex items-center justify-between gap-3 pt-3">
+    <div ref={ref} {...hold} className="group/advisor relative">
+      <PlanItem
+        icon={
+          <span className="relative h-9 w-9 shrink-0" aria-hidden>
+            <img
+              src="/media/advisor-avatar.png"
+              alt=""
+              width={36}
+              height={36}
+              className="h-9 w-9 rounded-full object-cover ring-2 ring-white shadow-[0_6px_16px_-8px_rgba(11,21,51,0.5)] dark:ring-slate-900"
+            />
+            <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-white dark:bg-slate-900">
+              {running && !reduce && <motion.span className="absolute h-3 w-3 rounded-full bg-emerald-400" animate={{ scale: [1, 1.8], opacity: [0.6, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: 'easeOut' }} />}
+              <span className="relative h-2 w-2 rounded-full bg-emerald-500" />
+            </span>
+          </span>
+        }
+        title={t('advisor.title')}
+        line={t('pre_dashboard.plan_advisor_line')}
+      >
         <button
           type="button"
           onClick={onMeet}
-          className={`inline-flex h-10 shrink-0 items-center gap-1 self-start rounded-full bg-white px-4 text-sm font-semibold text-slate-900 shadow-[0_8px_20px_-12px_rgba(11,21,51,0.35)] ring-1 ring-slate-200 dark:bg-slate-800 dark:text-white dark:ring-white/15 ${stretchedAction}`}
+          className={`mt-1.5 inline-flex items-center gap-0.5 text-[13px] font-semibold text-primary dark:text-blue-300 ${stretchedAction}`}
         >
           {t('advisor.meet_expert')}
-          <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+          <ChevronRight className="h-4 w-4 transition-transform group-hover/advisor:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
         </button>
-        {/* A real person, available now */}
-        <span className="relative h-10 w-10 shrink-0" aria-hidden>
-          <img
-            src="/media/advisor-avatar.png"
-            alt=""
-            width={40}
-            height={40}
-            className="h-10 w-10 rounded-full object-cover ring-2 ring-white shadow-[0_6px_16px_-8px_rgba(11,21,51,0.5)] dark:ring-slate-900"
-          />
-          <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white dark:bg-slate-900">
-            {running && !reduce && <motion.span className="absolute h-3.5 w-3.5 rounded-full bg-emerald-400" animate={{ scale: [1, 1.8], opacity: [0.6, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: 'easeOut' }} />}
-            <span className="relative h-2.5 w-2.5 rounded-full bg-emerald-500" />
-          </span>
-        </span>
-      </div>
+      </PlanItem>
     </div>
   )
 }
@@ -326,7 +342,7 @@ export function PreEnrollmentDashboard() {
       />
 
       <div className="bg-surface-page font-sans text-text-primary">
-        <div className="mx-auto flex max-w-[1280px] flex-col gap-10 px-4 pb-12 pt-6 sm:px-6 lg:gap-8 lg:px-8 lg:pb-12 lg:pt-7">
+        <div className="mx-auto flex max-w-[1280px] flex-col gap-10 px-4 pb-12 pt-6 sm:px-6 lg:gap-8 lg:px-8 lg:pb-12 lg:pt-7 xl:gap-6 xl:pb-0 xl:pt-5">
           {/* Banner: one message and one action, beside the story of bills paid and the road ahead */}
           <motion.section
             ref={heroRef}
@@ -387,14 +403,14 @@ export function PreEnrollmentDashboard() {
 
           {/* Why enroll now, ranked: the one-click setup leads, Ask Core AI sits beside it, two quick lessons follow, then an advisor */}
           <section aria-labelledby="pre-dashboard-why">
-            <div className="mb-5">
+            <div className="mb-5 xl:mb-4">
               <h2 id="pre-dashboard-why" className="text-[22px] font-bold leading-tight text-text-primary">{t('pre_dashboard.why_title')}</h2>
               <p className="mt-1 text-[14px] leading-relaxed text-text-secondary md:whitespace-nowrap">{t('pre_dashboard.why_sub')}</p>
             </div>
 
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)]">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)]">
               {/* Enrich financial learning: the lead card, opens Enrich in a new tab */}
-              <Reveal className="group relative isolate flex min-h-[180px] overflow-hidden rounded-[20px] bg-[radial-gradient(90%_120%_at_0%_0%,#D9F3FF_0%,rgba(217,243,255,0)_60%),radial-gradient(70%_130%_at_100%_100%,#DCE1FB_0%,rgba(220,225,251,0)_65%),linear-gradient(#F8F9FE,#F8F9FE)] p-5 pb-6 text-left ring-1 ring-slate-200/70 transition-shadow hover:shadow-[0_24px_48px_-28px_rgba(37,99,235,0.45)] md:col-span-2 xl:col-span-3 dark:bg-[radial-gradient(90%_120%_at_0%_0%,#12305C_0%,rgba(18,48,92,0)_60%),radial-gradient(70%_130%_at_100%_100%,#262F86_0%,rgba(38,47,134,0)_65%),linear-gradient(#0B1436,#0B1436)] dark:ring-white/10">
+              <Reveal className="group relative isolate flex min-h-[180px] overflow-hidden rounded-[20px] bg-[radial-gradient(90%_120%_at_0%_0%,#D9F3FF_0%,rgba(217,243,255,0)_60%),radial-gradient(70%_130%_at_100%_100%,#DCE1FB_0%,rgba(220,225,251,0)_65%),linear-gradient(#F8F9FE,#F8F9FE)] p-5 pb-6 text-left ring-1 ring-slate-200/70 xl:min-h-[164px] xl:pb-5 transition-shadow hover:shadow-[0_24px_48px_-28px_rgba(37,99,235,0.45)] md:col-span-2 xl:col-span-3 dark:bg-[radial-gradient(90%_120%_at_0%_0%,#12305C_0%,rgba(18,48,92,0)_60%),radial-gradient(70%_130%_at_100%_100%,#262F86_0%,rgba(38,47,134,0)_65%),linear-gradient(#0B1436,#0B1436)] dark:ring-white/10">
                 {/* The coin art's periwinkle, glowing behind it so the image and card share one light */}
                 <span className="pointer-events-none absolute -right-10 top-1/2 -z-10 h-64 w-80 -translate-y-1/2 rounded-full bg-[#8C9BFF] opacity-25 blur-[70px] transition-opacity group-hover:opacity-40 dark:bg-[#5B6BFF] dark:opacity-35" aria-hidden />
                 {/* Left: what it is and the way in */}
@@ -435,38 +451,41 @@ export function PreEnrollmentDashboard() {
               </Reveal>
 
               {/* Ask Core AI: the second feature, a tall column so the chat is always in view */}
-              <Reveal delay={0.06} className="md:col-span-2 lg:col-span-1 lg:col-start-3 lg:row-span-3 lg:row-start-1 xl:col-start-4 xl:row-span-2">
+              <Reveal delay={0.06} className="md:col-span-2 lg:col-span-1 lg:col-start-3 lg:row-span-2 lg:row-start-1 xl:col-start-4 xl:row-span-2">
                 <AskCoreAiCard turns={chatTurns} onStart={openChat} />
               </Reveal>
 
-              {/* Employer match: a quick lesson */}
-              <Reveal delay={0.1} className="relative flex min-h-[144px] flex-col overflow-hidden rounded-[20px] bg-[linear-gradient(180deg,#ECFDF5_0%,#F7FDFA_100%)] px-5 py-3.5 text-left ring-1 ring-emerald-100 dark:bg-[linear-gradient(180deg,rgba(16,185,129,0.12)_0%,rgba(15,23,42,1)_100%)] dark:ring-emerald-400/15">
-                <h3 className="text-[15px] font-bold text-text-primary">{t('pre_dashboard.match_title')}</h3>
-                <p className="mt-1 text-[13px] leading-normal text-slate-600 dark:text-slate-300">{t('pre_dashboard.match_desc', { you: '$1', employer: dollarsPerDollar, cap })}</p>
-                <div className="mt-auto flex items-center justify-between gap-3 pt-2">
-                  <span className="inline-flex whitespace-nowrap rounded-full bg-white px-3 py-1 text-[12px] font-medium text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-200 dark:ring-emerald-400/20">
-                    {PLAN_CONFIG.vestingYears === 0 ? t('pre_dashboard.chip_vest_now') : t('pre_dashboard.chip_vest_years', { years: PLAN_CONFIG.vestingYears })}
+              {/* Plan widget: the two things worth knowing before you enroll, and a person to ask */}
+              <Reveal delay={0.08} className="relative isolate overflow-hidden rounded-[20px] bg-[radial-gradient(70%_120%_at_0%_0%,#E3F7EC_0%,rgba(227,247,236,0)_60%),radial-gradient(60%_120%_at_100%_0%,#FFF3DC_0%,rgba(255,243,220,0)_60%),linear-gradient(#F8F9FE,#F8F9FE)] p-5 text-left ring-1 ring-slate-200/70 md:col-span-2 xl:col-span-3 dark:bg-[radial-gradient(70%_120%_at_0%_0%,rgba(16,185,129,0.16)_0%,rgba(16,185,129,0)_60%),radial-gradient(60%_120%_at_100%_0%,rgba(245,158,11,0.14)_0%,rgba(245,158,11,0)_60%),linear-gradient(#0B1436,#0B1436)] dark:ring-white/10">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_16px_-6px_rgba(5,150,105,0.55)]" aria-hidden>
+                    <BookOpen className="h-[18px] w-[18px]" />
                   </span>
-                  <span className="flex shrink-0 items-center" aria-hidden>
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[13px] font-bold text-slate-900 shadow-[0_8px_16px_-10px_rgba(11,21,51,0.4)] ring-1 ring-emerald-100 dark:bg-slate-800 dark:text-white dark:ring-white/10">$1</span>
-                    <span className="z-10 -mx-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-[12px] font-bold text-white">+</span>
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-[13px] font-bold text-white shadow-[0_8px_16px_-10px_rgba(37,99,235,0.7)]">{dollarsPerDollar}</span>
-                  </span>
+                  <h3 className="text-[16px] font-bold text-slate-900 dark:text-white">{t('pre_dashboard.learn_more_heading')}</h3>
                 </div>
-              </Reveal>
 
-              {/* Tax: a quick lesson */}
-              <Reveal delay={0.14} className="relative flex min-h-[144px] flex-col overflow-hidden rounded-[20px] bg-[linear-gradient(180deg,#FFF7EB_0%,#FFFCF7_100%)] px-5 py-3.5 text-left ring-1 ring-amber-100 dark:bg-[linear-gradient(180deg,rgba(245,158,11,0.12)_0%,rgba(15,23,42,1)_100%)] dark:ring-amber-400/15">
-                <h3 className="text-[15px] font-bold text-text-primary">{t('pre_dashboard.tax_title')}</h3>
-                <p className="mt-1 text-[13px] leading-normal text-slate-600 dark:text-slate-300">{t('pre_dashboard.tax_desc')}</p>
-                <div className="mt-auto pt-2">
-                  <span className="inline-flex rounded-full bg-white px-3 py-1 text-[12px] font-bold text-amber-800 ring-1 ring-amber-200 dark:bg-amber-500/15 dark:text-amber-200 dark:ring-amber-400/20">{t('pre_dashboard.tax_chip')}</span>
+                {/* Three short items in one row on wider screens, stacked on phones */}
+                <div className="mt-4 grid grid-cols-1 divide-y divide-slate-200/80 rounded-2xl bg-white/80 px-4 py-1 shadow-[0_10px_24px_-20px_rgba(11,21,51,0.4)] ring-1 ring-slate-200/60 md:grid-cols-3 md:divide-x md:divide-y-0 md:px-0 md:py-4 dark:divide-white/10 dark:bg-white/5 dark:ring-white/10">
+                  <PlanItem
+                    icon={
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/20" aria-hidden>
+                        <HandCoins className="h-[18px] w-[18px]" />
+                      </span>
+                    }
+                    title={t('pre_dashboard.plan_match_title')}
+                    line={t('pre_dashboard.plan_match_line', { you: '$1', employer: dollarsPerDollar, cap })}
+                  />
+                  <PlanItem
+                    icon={
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-600 ring-1 ring-amber-100 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-400/20" aria-hidden>
+                        <Receipt className="h-[18px] w-[18px]" />
+                      </span>
+                    }
+                    title={t('pre_dashboard.tax_title')}
+                    line={t('pre_dashboard.plan_tax_line')}
+                  />
+                  <AdvisorItem onMeet={() => setAdvisorModalOpen(true)} />
                 </div>
-              </Reveal>
-
-              {/* Talk to an Advisor: a slim strip, for when people want a person */}
-              <Reveal delay={0.18} className="md:col-span-2 xl:col-span-1">
-                <AdvisorCard onMeet={() => setAdvisorModalOpen(true)} />
               </Reveal>
             </div>
           </section>

@@ -1,6 +1,6 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Check } from 'lucide-react'
 import { AnimatedPage } from '../../../design-system/motion/AnimatedPage'
 import { ENROLLMENT_STEPS, getStepByPath } from '../enrollmentSteps'
 import AppFooter from '@/features/dashboard/components/AppFooter'
@@ -10,7 +10,86 @@ import { ROUTES } from '@/lib/constants'
 /** Steps shown in the progress UI (excludes success / confirmation-only step). */
 const STEPPER_STEPS = ENROLLMENT_STEPS.filter((s) => s.step <= 7)
 
-const brandRing = { boxShadow: '0 0 0 4px var(--brand-primary-ring)' }
+/**
+ * Progress through the enrollment steps. Wide screens: a row of step chips joined by a progress line, where finished
+ * steps can be clicked to go back. Phones: a progress ring with the current step and the next one.
+ */
+function EnrollmentStepper({ activeStep, onGoTo }: { activeStep: number; onGoTo: (path: string) => void }) {
+  const { t } = useTranslation()
+  const total = STEPPER_STEPS.length
+  const label = (i: number) => (STEPPER_STEPS[i] ? t(`enrollment.steps.${STEPPER_STEPS[i].key}.label`) : '')
+  const stepOf = t('flows.step_of', { current: activeStep, total })
+  // Ring for phones: circumference of r=18
+  const ring = 2 * Math.PI * 18
+  const done = Math.min(activeStep, total) / total
+
+  return (
+    <nav aria-label={stepOf} className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+      {/* Wide screens */}
+      <div className="mx-auto hidden max-w-5xl px-4 py-3 sm:px-6 md:block">
+        <ol className="flex items-center">
+          {STEPPER_STEPS.map((step, i) => {
+            const n = i + 1
+            const isDone = n < activeStep
+            const isCurrent = n === activeStep
+            // Numbers and checks only; the step name lives in the tooltip and screen-reader label
+            const chip = isDone ? <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden /> : <span aria-hidden>{n}</span>
+            const chipClass = `flex shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors ${
+              isCurrent
+                ? 'h-8 w-8 bg-primary text-white shadow-[0_0_0_4px_rgba(37,99,235,0.15),0_6px_16px_-8px_rgba(37,99,235,0.7)] dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)] dark:shadow-[0_0_0_4px_rgba(96,165,250,0.18)]'
+                : isDone
+                  ? 'h-7 w-7 bg-primary text-white hover:opacity-90 dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)]'
+                  : 'h-7 w-7 text-gray-400 ring-1 ring-inset ring-gray-300 dark:text-gray-500 dark:ring-gray-600'
+            }`
+            return (
+              <li key={step.key} className={`flex items-center ${i < total - 1 ? 'flex-1' : ''}`} aria-current={isCurrent ? 'step' : undefined}>
+                {isDone ? (
+                  <button type="button" onClick={() => onGoTo(step.path)} className={chipClass} title={label(i)} aria-label={`${label(i)}: ${t('enrollment.shell.step_done')}`}>
+                    {chip}
+                  </button>
+                ) : (
+                  <span className={chipClass} title={label(i)} aria-label={label(i)}>
+                    {chip}
+                  </span>
+                )}
+                {i < total - 1 && (
+                  <span
+                    className={`mx-1.5 h-0.5 min-w-3 flex-1 rounded-full ${isDone ? 'bg-primary' : 'bg-gray-200 dark:bg-gray-700'}`}
+                    aria-hidden
+                  />
+                )}
+              </li>
+            )
+          })}
+        </ol>
+      </div>
+
+      {/* Phones */}
+      <div className="flex items-center gap-3 px-4 py-2.5 md:hidden">
+        <span className="relative h-11 w-11 shrink-0" aria-hidden>
+          <svg viewBox="0 0 44 44" className="h-11 w-11 -rotate-90">
+            <circle cx="22" cy="22" r="18" fill="none" strokeWidth="4" className="stroke-gray-200 dark:stroke-gray-700" />
+            <circle
+              cx="22"
+              cy="22"
+              r="18"
+              fill="none"
+              strokeWidth="4"
+              strokeLinecap="round"
+              className="stroke-primary transition-[stroke-dashoffset] duration-500 motion-reduce:transition-none"
+              strokeDasharray={ring}
+              strokeDashoffset={ring * (1 - done)}
+            />
+          </svg>
+          <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-gray-900 dark:text-white">
+            {activeStep}/{total}
+          </span>
+        </span>
+        <p className="text-sm font-semibold text-gray-900 dark:text-white">{stepOf}</p>
+      </div>
+    </nav>
+  )
+}
 
 export function EnrollmentShell() {
   const { t } = useTranslation()
@@ -68,130 +147,7 @@ export function EnrollmentShell() {
       )}
 
       {showStepper && (
-        <div className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
-          <div className="hidden px-4 py-3 sm:px-6 md:block">
-            <div className="mx-auto max-w-5xl">
-              <p className="mb-2.5 text-xs text-gray-400 dark:text-gray-500">
-                {t('flows.step_of', { current: activeStep, total: STEPPER_STEPS.length })}
-              </p>
-              <div className="flex items-start gap-1">
-                {STEPPER_STEPS.map((step, i) => {
-                  const stepNum = i + 1
-                  const isCompleted = stepNum < activeStep
-                  const isCurrent = stepNum === activeStep
-                  return (
-                    <div key={step.key} className="flex flex-1 flex-col items-center gap-1.5">
-                      <div className="flex w-full items-center gap-0.5">
-                        <div
-                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-all ${
-                            isCompleted || isCurrent
-                              ? 'text-white'
-                              : 'bg-gray-200 text-gray-400 dark:bg-gray-700 dark:text-gray-500'
-                          }`}
-                          style={
-                            isCompleted
-                              ? { backgroundColor: 'var(--brand-primary)' }
-                              : isCurrent
-                                ? { backgroundColor: 'var(--brand-primary)', ...brandRing }
-                                : undefined
-                          }
-                        >
-                          {isCompleted ? (
-                            <svg className="h-3 w-3" viewBox="0 0 12 12" fill="none">
-                              <path
-                                d="M2 6l3 3 5-5"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          ) : (
-                            stepNum
-                          )}
-                        </div>
-                        {i < STEPPER_STEPS.length - 1 && (
-                          <div
-                            className={`mx-1 h-0.5 flex-1 rounded-full transition-colors ${
-                              isCompleted ? '' : 'bg-gray-200 dark:bg-gray-700'
-                            }`}
-                            style={
-                              isCompleted ? { backgroundColor: 'var(--brand-primary)' } : undefined
-                            }
-                          />
-                        )}
-                      </div>
-                      <span
-                        className={`text-center text-xs leading-tight transition-colors ${
-                          isCurrent
-                            ? 'font-semibold brand-text'
-                            : isCompleted
-                              ? 'text-gray-600 dark:text-gray-400'
-                              : 'text-gray-400 dark:text-gray-600'
-                        }`}
-                        style={{ fontSize: '0.68rem' }}
-                      >
-                        {t(`enrollment.steps.${step.key}.label`)}
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </div>
-
-          <div className="px-4 py-3 md:hidden">
-            <div className="mb-2 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div
-                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                  style={{ backgroundColor: 'var(--brand-primary)' }}
-                >
-                  {activeStep}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold leading-tight text-gray-900 dark:text-white">
-                    {STEPPER_STEPS[activeStep - 1] ? t(`enrollment.steps.${STEPPER_STEPS[activeStep - 1].key}.label`) : ''}
-                  </p>
-                  <p className="text-gray-400 dark:text-gray-500" style={{ fontSize: '0.7rem' }}>
-                    {t('flows.step_of', { current: activeStep, total: STEPPER_STEPS.length })}
-                  </p>
-                </div>
-              </div>
-              {activeStep < STEPPER_STEPS.length && (
-                <p className="text-gray-400 dark:text-gray-500" style={{ fontSize: '0.72rem' }}>
-                  {t('enrollment.shell.next_step', {
-                    step: STEPPER_STEPS[activeStep] ? t(`enrollment.steps.${STEPPER_STEPS[activeStep].key}.label`) : '',
-                  })}
-                </p>
-              )}
-            </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-              <div
-                className="brand-progress h-full rounded-full transition-all duration-500"
-                style={{ width: `${(activeStep / STEPPER_STEPS.length) * 100}%` }}
-              />
-            </div>
-            <div className="mt-2 flex items-center gap-1">
-              {STEPPER_STEPS.map((_, i) => {
-                const sn = i + 1
-                return (
-                  <div
-                    key={i}
-                    className={`h-1 rounded-full transition-all duration-300 ${
-                      sn < activeStep || sn === activeStep ? '' : 'bg-gray-200 dark:bg-gray-700'
-                    } ${sn === activeStep ? 'flex-[2]' : 'flex-1'}`}
-                    style={
-                      sn < activeStep || sn === activeStep
-                        ? { backgroundColor: 'var(--brand-primary)' }
-                        : undefined
-                    }
-                  />
-                )
-              })}
-            </div>
-          </div>
-        </div>
+        <EnrollmentStepper activeStep={activeStep} onGoTo={(path) => navigate(`/enrollment/${path}`)} />
       )}
 
       {/* One-click keeps the footer pinned in view: the page scrolls above it */}

@@ -23,6 +23,8 @@ export interface Deferral {
   unit: Unit
   preTax: number
   roth: number
+  /** After-tax (non-Roth) rate chosen at enrollment; not matched */
+  afterTax?: number
   usePlanRate: boolean
 }
 

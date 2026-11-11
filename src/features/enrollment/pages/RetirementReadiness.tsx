@@ -16,7 +16,8 @@ import {
   Globe,
 } from 'lucide-react'
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { getGrowthRate, projectBalanceConstantAnnualContributions, type RiskLevel } from '@/lib/retirementCalculations'
+import { getGrowthRate, type RiskLevel } from '@/lib/retirementCalculations'
+import { annualEmployerMatch, projectBalance, retirementIncome } from '@/features/enrollment/enrollmentMath'
 import { useEnrollmentStepNav, type EnrollmentPrimaryLabel } from '@/features/enrollment/components/EnrollmentStepNavContext'
 
 /* ─── Types ─── */
@@ -216,7 +217,7 @@ function ConfirmationModal({
               <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800/50">
                 <span className="text-sm text-gray-500 dark:text-gray-400">{t('enrollment.readiness.additional_annual')}</span>
                 <span className="text-sm font-bold tabular-nums text-blue-600 dark:text-blue-400">
-                  +${suggestion.additionalAnnualSavings.toLocaleString(locale)}
+                  {suggestion.additionalAnnualSavings > 0 ? `+$${suggestion.additionalAnnualSavings.toLocaleString(locale)}` : '—'}
                 </span>
               </div>
 
@@ -277,38 +278,39 @@ function RetirementReadiness() {
 
   const yearsToRetirement = Math.max(1, personalization.retirementAge - personalization.currentAge)
 
-  const computeScore = (contribPct: number, autoInc: boolean, riskLevel: string) => {
-    const contribScore = contribPct * 5
-    const autoIncScore = autoInc ? 12 : 0
-    const timeScore = Math.min(yearsToRetirement * 0.8, 20)
-    const savingsBonus = Math.min(personalization.currentSavings / 10000, 10)
-    const riskBonus = riskLevel === 'growth' ? 3 : riskLevel === 'aggressive' ? 5 : 0
-    return Math.min(Math.round(contribScore + autoIncScore + timeScore + savingsBonus + riskBonus), 100)
-  }
-
-  const score = computeScore(data.contributionPercent, data.autoIncrease, data.riskLevel)
-
-  const matchPercent = Math.min(data.contributionPercent, 6)
   const annualContribution = Math.round((data.salary * data.contributionPercent) / 100)
-  const employerContribution = Math.round((data.salary * matchPercent) / 100)
+  const employerContribution = annualEmployerMatch(data.salary, data.contributionPercent, data.contributionSources)
+  const currentAutoIncrease = data.autoIncrease ? { amount: data.autoIncreaseAmount, max: data.autoIncreaseMax } : null
+  /** Same projection as Review and the Auto Increase step, for any contribution rate, auto-increase or growth rate */
+  const project = (ratePercent: number, autoIncrease: { amount: number; max: number } | null, rate: number) =>
+    projectBalance({
+      startingBalance: personalization.currentSavings,
+      salary: data.salary,
+      ratePercent,
+      sources: data.contributionSources,
+      years: yearsToRetirement,
+      growthRate: rate,
+      autoIncrease,
+    })
 
   const growthRate = getGrowthRate(data.riskLevel)
 
-  // Annual Funding Summary data
-  const retirementIncomeGoal = Math.round(data.salary * 0.8)
-  const totalAnnualContributions = annualContribution + employerContribution
-  const annualSavingsGap = Math.max(0, retirementIncomeGoal - totalAnnualContributions)
+  /** Readiness score: % of the retirement income goal covered by savings income plus Social Security */
+  const computeScore = (contribPct: number, autoInc: boolean, riskLevel: string) =>
+    retirementIncome(
+      project(contribPct, autoInc ? { amount: data.autoIncreaseAmount, max: data.autoIncreaseMax } : null, getGrowthRate(riskLevel as RiskLevel)),
+      yearsToRetirement,
+      data.salary,
+    ).readinessPct
 
-  const projectedBalance = projectBalanceConstantAnnualContributions(
-    personalization.currentSavings,
-    annualContribution,
-    employerContribution,
-    yearsToRetirement,
-    growthRate,
-  )
+  const projectedBalance = project(data.contributionPercent, currentAutoIncrease, growthRate)
+  const score = computeScore(data.contributionPercent, data.autoIncrease, data.riskLevel)
+
+  // Annual Funding Summary: yearly income goal vs. projected yearly income, both in today's dollars
+  const income = retirementIncome(projectedBalance, yearsToRetirement, data.salary)
 
   const formatCurrency = (val: number) => {
-    if (val >= 1_000_000) return `$${(val / 1_000_000).toFixed(1)}M`
+    if (val >= 1_000_000) return `$${(val / 1_000_000).toFixed(2)}M`
     if (val >= 1_000) return `$${Math.round(val / 1_000).toLocaleString(locale)}K`
     return `$${Math.round(val).toLocaleString(locale)}`
   }
@@ -329,15 +331,9 @@ function RetirementReadiness() {
   const boostedContrib = data.contributionPercent + boostPct
   if (boostedContrib <= 25 && !appliedChanges.includes('boost-contribution')) {
     const boostedAnnual = Math.round((data.salary * boostedContrib) / 100)
-    const boostedMatch = Math.round((data.salary * Math.min(boostedContrib, 6)) / 100)
+    const boostedMatch = annualEmployerMatch(data.salary, boostedContrib, data.contributionSources)
     const boostedScore = computeScore(boostedContrib, data.autoIncrease, data.riskLevel)
-    const boostedBalance = projectBalanceConstantAnnualContributions(
-      personalization.currentSavings,
-      boostedAnnual,
-      boostedMatch,
-      yearsToRetirement,
-      growthRate,
-    )
+    const boostedBalance = project(boostedContrib, currentAutoIncrease, growthRate)
     const additionalPerYear = boostedAnnual + boostedMatch - annualContribution - employerContribution
 
     suggestions.push({
@@ -361,18 +357,19 @@ function RetirementReadiness() {
 
   if (!data.autoIncrease && !appliedChanges.includes('enable-auto-increase')) {
     const autoIncScore = computeScore(data.contributionPercent, true, data.riskLevel)
-    const avgExtraContrib = Math.round(
-      (data.salary *
-        Math.min(data.autoIncreaseAmount * (yearsToRetirement / 2), data.autoIncreaseMax - data.contributionPercent)) /
-        100,
-    )
-    const autoIncBalance = projectBalanceConstantAnnualContributions(
-      personalization.currentSavings,
-      annualContribution + avgExtraContrib,
-      employerContribution,
-      yearsToRetirement,
-      growthRate,
-    )
+    const autoIncBalance = project(data.contributionPercent, { amount: data.autoIncreaseAmount, max: data.autoIncreaseMax }, growthRate)
+    // Average extra saved per year (you plus any extra match) across the years to retirement
+    let extraTotal = 0
+    let autoRate = data.contributionPercent
+    const autoCeiling = Math.max(data.autoIncreaseMax, data.contributionPercent)
+    for (let y = 0; y < yearsToRetirement; y++) {
+      extraTotal +=
+        (data.salary * (autoRate - data.contributionPercent)) / 100 +
+        annualEmployerMatch(data.salary, autoRate, data.contributionSources) -
+        employerContribution
+      autoRate = Math.min(autoRate + data.autoIncreaseAmount, autoCeiling)
+    }
+    const avgExtraContrib = yearsToRetirement > 0 ? Math.round(extraTotal / yearsToRetirement) : 0
 
     suggestions.push({
       id: 'enable-auto-increase',
@@ -401,14 +398,9 @@ function RetirementReadiness() {
   if (nextRiskLevel && !appliedChanges.includes('upgrade-strategy')) {
     const nextRate = getGrowthRate(nextRiskLevel as RiskLevel)
     const upgradeScore = computeScore(data.contributionPercent, data.autoIncrease, nextRiskLevel)
-    const upgradeBalance = projectBalanceConstantAnnualContributions(
-      personalization.currentSavings,
-      annualContribution,
-      employerContribution,
-      yearsToRetirement,
-      nextRate,
-    )
-    const extraBalancePerYear = Math.round((upgradeBalance - projectedBalance) / yearsToRetirement)
+    const upgradeBalance = project(data.contributionPercent, currentAutoIncrease, nextRate)
+    // Switching investments doesn't change what you save each year; only the balance grows differently
+    const extraBalancePerYear = 0
 
     suggestions.push({
       id: 'upgrade-strategy',
@@ -494,7 +486,7 @@ function RetirementReadiness() {
                   <div className="h-full rounded-full bg-gray-500 dark:bg-gray-400" style={{ width: '65%' }} />
                 </div>
                 <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                  {t('enrollment.readiness.target')} <span className="font-semibold">65</span>
+                  {t('enrollment.readiness.target')} <span className="font-semibold">100%</span>
                 </span>
               </div>
             </div>
@@ -550,7 +542,7 @@ function RetirementReadiness() {
                   </span>
                 </div>
                 <span className="text-gray-900 dark:text-white font-semibold tabular-nums" style={{ fontSize: '0.85rem' }}>
-                  ${retirementIncomeGoal.toLocaleString(locale)}.00
+                  ${income.goal.toLocaleString(locale)}
                 </span>
               </div>
               {/* Current Annual Contributions */}
@@ -562,7 +554,7 @@ function RetirementReadiness() {
                   </span>
                 </div>
                 <span className="text-blue-600 dark:text-blue-400 font-semibold tabular-nums" style={{ fontSize: '0.85rem' }}>
-                  ${totalAnnualContributions.toLocaleString(locale)}
+                  ${income.total.toLocaleString(locale)}
                 </span>
               </div>
               {/* Annual Savings Gap */}
@@ -574,7 +566,7 @@ function RetirementReadiness() {
                   </span>
                 </div>
                 <span className="text-red-600 dark:text-red-400 font-semibold tabular-nums" style={{ fontSize: '0.85rem' }}>
-                  ${annualSavingsGap.toLocaleString(locale)}.00
+                  ${income.gap.toLocaleString(locale)}
                 </span>
               </div>
             </div>
@@ -670,7 +662,9 @@ function RetirementReadiness() {
                               <div>
                                 <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{t('enrollment.readiness.savings_col')}</p>
                                 <p className="mt-0.5 text-sm font-bold tabular-nums text-blue-600 dark:text-blue-400">
-                                  {t('enrollment.readiness.savings_yr', { amount: suggestion.additionalAnnualSavings.toLocaleString(locale) })}
+                                  {suggestion.additionalAnnualSavings > 0
+                                    ? t('enrollment.readiness.savings_yr', { amount: suggestion.additionalAnnualSavings.toLocaleString(locale) })
+                                    : '—'}
                                 </p>
                               </div>
                               <div>

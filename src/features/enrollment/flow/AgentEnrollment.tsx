@@ -17,6 +17,7 @@ import { useProfileStore } from '@/features/profile/profileStore'
 import { recommendedFunds } from '../investmentCatalog'
 import { ageFromBirth, buildQuickEnrollmentDefaults, projectBalance } from '../quickEnrollmentDefaults'
 import { PLAN_CONFIG, PLAN_LIMITS, employerMatch } from '../agent/planConfig'
+import { startingSavings } from '../enrollmentMath'
 import { checkEligibility, getPlanRules, submitEnrollment, type EnrollmentConfirmation } from '../agent/enrollmentService'
 import { missingQuestions } from '../agent/wizardQuestions'
 import { parseAgentCommand } from '../agent/intents'
@@ -126,7 +127,7 @@ export default function AgentEnrollment() {
     retirementAge: p.retirementAge ?? 65,
     location: p.selectedLocation ?? '',
     salary: knownSalary ?? 0,
-    savings: p.savingsAmount ?? 0,
+    savings: startingSavings(p.savingsAmount),
     risk: p.riskTolerance ?? 'balanced',
     tax: knownTax ?? 'pretax',
   }))

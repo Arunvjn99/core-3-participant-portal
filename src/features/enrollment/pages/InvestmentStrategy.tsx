@@ -24,10 +24,11 @@ import {
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useEnrollmentStepNav, type EnrollmentPrimaryLabel } from '@/features/enrollment/components/EnrollmentStepNavContext'
-import { PLAN_CONFIG } from '@/features/enrollment/agent/planConfig'
 
 /* ─── Types ─── */
-import { allocations, fundCatalog, type AllocationEntry, type SourceFundAllocation } from '../investmentCatalog'
+import { allocations, fundCatalog, recommendedFunds, type SourceFundAllocation } from '../investmentCatalog'
+import { splitWhole } from '../enrollmentMath'
+import { getGrowthRate } from '@/lib/retirementCalculations'
 type SourceKey = 'roth' | 'preTax' | 'afterTax'
 interface PerSourceAllocations { sameForAll: boolean; unified: SourceFundAllocation[]; sources: Record<SourceKey, SourceFundAllocation[]> }
 
@@ -40,13 +41,17 @@ const sourceBgColors: Record<SourceKey, string> = { roth: 'bg-purple-50', preTax
 /* ─── Static Data ─── */
 const riskLevelKeys = ['conservative', 'balanced', 'growth', 'aggressive'] as const
 
-function buildFundsFromRecommended(alloc: AllocationEntry[]): SourceFundAllocation[] {
-  return fundCatalog.map((fund) => {
-    const matched = alloc.find((cat) => cat.funds.some((f) => f.ticker === fund.ticker))
-    if (!matched) return null
-    return { ...fund, allocation: Math.round(matched.value / matched.funds.length) }
-  }).filter((f): f is SourceFundAllocation => f !== null)
+/** A saved ticker → percent mix as editable fund rows. */
+function fundsFromAllocation(map: Record<string, number>): SourceFundAllocation[] {
+  return fundCatalog.filter((f) => (map[f.ticker] ?? 0) > 0).map((f) => ({ ...f, allocation: map[f.ticker] }))
 }
+
+function allocationMap(funds: SourceFundAllocation[]): Record<string, number> {
+  return Object.fromEntries(funds.filter((f) => f.allocation > 0).map((f) => [f.ticker, f.allocation]))
+}
+
+/** Plan-default risk shown as a word and as filled dots out of five */
+const riskDots: Record<(typeof riskLevelKeys)[number], number> = { conservative: 2, balanced: 3, growth: 4, aggressive: 5 }
 
 function getSourceTotal(funds: SourceFundAllocation[]) {
   return funds.reduce((s, f) => s + f.allocation, 0)
@@ -57,10 +62,12 @@ type ComputedRiskKey = 'conservative' | 'balanced' | 'growth' | 'aggressive' | '
 function computeRiskLevel(funds: SourceFundAllocation[]): { riskKey: ComputedRiskKey; color: string } {
   const total = funds.reduce((s, f) => s + f.allocation, 0)
   if (total === 0) return { riskKey: 'not_set', color: 'text-gray-400' }
-  const eq = funds.filter((f) => f.assetClass === 'Equity' || f.assetClass === 'International').reduce((s, f) => s + f.allocation, 0)
-  if (eq >= 70) return { riskKey: 'aggressive', color: 'text-red-600' }
-  if (eq >= 50) return { riskKey: 'growth', color: 'text-orange-600' }
-  if (eq >= 30) return { riskKey: 'balanced', color: 'text-blue-600' }
+  // Stock share (US + international) as a percent of the mix. Cut-offs sit between the plan's own
+  // portfolios (conservative 40%, balanced 60%, growth 70%) so each one is labelled as itself.
+  const eq = (funds.filter((f) => f.assetClass === 'Equity' || f.assetClass === 'International').reduce((s, f) => s + f.allocation, 0) / total) * 100
+  if (eq >= 80) return { riskKey: 'aggressive', color: 'text-red-600' }
+  if (eq >= 65) return { riskKey: 'growth', color: 'text-orange-600' }
+  if (eq >= 50) return { riskKey: 'balanced', color: 'text-blue-600' }
   return { riskKey: 'conservative', color: 'text-green-600' }
 }
 
@@ -315,18 +322,36 @@ function InvestmentStrategy() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { setStepNav } = useEnrollmentStepNav()
-  const { data, updateData } = useEnrollment()
+  const { data, updateData, personalization } = useEnrollment()
   const [showRiskEditor, setShowRiskEditor] = useState(false)
   const [showCustomizeModal, setShowCustomizeModal] = useState(false)
   const [showBuildPortfolioModal, setShowBuildPortfolioModal] = useState(false)
   const [editingSource, setEditingSource] = useState<SourceKey | null>(null)
   const [modalInitialTab, setModalInitialTab] = useState<SourceKey>('preTax')
-  const [customAllocations, setCustomAllocations] = useState<PerSourceAllocations | null>(null)
+  // One custom mix applies to every source; restored from the draft when coming back to this step
+  const [customAllocations, setCustomAllocations] = useState<PerSourceAllocations | null>(() => {
+    if (!data.customAllocation) return null
+    const funds = fundsFromAllocation(data.customAllocation)
+    return { sameForAll: true, unified: funds, sources: { roth: funds, preTax: funds, afterTax: funds } }
+  })
   const [hasConfirmedPlanDefault, setHasConfirmedPlanDefault] = useState(false)
   const [inlineAllocs, setInlineAllocs] = useState<PerSourceAllocations | null>(null)
 
   const currentAllocation = allocations[data.riskLevel] ?? allocations['balanced']
-  const defaultFunds = buildFundsFromRecommended(currentAllocation)
+  const defaultFunds = recommendedFunds(data.riskLevel)
+  // Plan-default card facts, from the same growth rate the projections use
+  const growthPct = Math.round(getGrowthRate(data.riskLevel) * 1000) / 10
+  const yearsToRetirement = personalization.retirementAge - personalization.currentAge
+
+  /** Saves a custom mix with the risk level it works out to, so projections use the matching growth rate */
+  const persistCustom = (allocs: PerSourceAllocations) => {
+    const { riskKey } = computeRiskLevel(allocs.unified)
+    updateData({
+      customAllocation: allocationMap(allocs.unified),
+      useRecommendedPortfolio: false,
+      ...(riskKey !== 'not_set' ? { riskLevel: riskKey } : {}),
+    })
+  }
 
   const activeSources: SourceKey[] = []
   if (data.contributionSources.roth > 0) activeSources.push('roth')
@@ -337,18 +362,21 @@ function InvestmentStrategy() {
   const allSources: SourceKey[] = ['roth', 'preTax', 'afterTax']
   const inactiveSources = allSources.filter((s) => !activeSources.includes(s) && (s !== 'afterTax' || data.supportsAfterTax))
 
-  const getFundsForSource = (src: SourceKey) => {
-    if (!customAllocations) return defaultFunds
-    if (customAllocations.sameForAll) return customAllocations.unified
-    return customAllocations.sources[src]
-  }
+  // The editor builds one mix for all sources, so every source card shows that mix
+  const getFundsForSource = () => customAllocations ? customAllocations.unified : defaultFunds
   const isSourceCustomized = () => !!customAllocations
-  const monthlyTotal = (data.salary * data.contributionPercent) / 100 / 12
-  const getMonthlyForSource = (src: SourceKey) => monthlyTotal * (data.contributionSources[src] / 100)
+  // Same whole-dollar split as the Source step, so the amounts match there
+  const monthlyTotal = Math.round((data.salary * data.contributionPercent) / 100 / 12)
+  const [monthlyPreTax, monthlyRoth, monthlyAfterTax] = splitWhole(monthlyTotal, [data.contributionSources.preTax, data.contributionSources.roth, data.contributionSources.afterTax])
+  const monthlyBySource: Record<SourceKey, number> = { preTax: monthlyPreTax, roth: monthlyRoth, afterTax: monthlyAfterTax }
+  const getMonthlyForSource = (src: SourceKey) => monthlyBySource[src]
 
+  // Whatever the cards show is what gets saved
   const handleNext = useCallback(() => {
-    updateData({ useRecommendedPortfolio: !customAllocations })
+    if (customAllocations) persistCustom(customAllocations)
+    else updateData({ useRecommendedPortfolio: true, customAllocation: null })
     navigate('/enrollment/readiness')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updateData, customAllocations, navigate])
 
   useEffect(() => {
@@ -363,7 +391,7 @@ function InvestmentStrategy() {
 
   const handleOpenCustomize = (sourceKey: SourceKey) => {
     const initial: PerSourceAllocations = customAllocations || {
-      sameForAll: activeSources.length === 1,
+      sameForAll: true,
       unified: defaultFunds.map((f) => ({ ...f })),
       sources: { roth: defaultFunds.map((f) => ({ ...f })), preTax: defaultFunds.map((f) => ({ ...f })), afterTax: defaultFunds.map((f) => ({ ...f })) },
     }
@@ -371,13 +399,13 @@ function InvestmentStrategy() {
     else { setCustomAllocations(initial); setModalInitialTab(sourceKey); setShowCustomizeModal(true) }
   }
 
-  const handleSaveCustom = (allocs: PerSourceAllocations) => { setCustomAllocations(allocs); setShowCustomizeModal(false) }
-  const handleSaveInline = () => { if (inlineAllocs) setCustomAllocations(inlineAllocs); setEditingSource(null) }
+  const handleSaveCustom = (allocs: PerSourceAllocations) => { setCustomAllocations(allocs); persistCustom(allocs); setShowCustomizeModal(false) }
+  const handleSaveInline = () => { if (inlineAllocs) { setCustomAllocations(inlineAllocs); persistCustom(inlineAllocs) } setEditingSource(null) }
   const handleCloseInline = () => { setEditingSource(null); setInlineAllocs(null) }
 
   const confirmPlanDefaultChoice = useCallback(() => {
     setHasConfirmedPlanDefault(true)
-    updateData({ useRecommendedPortfolio: true })
+    updateData({ useRecommendedPortfolio: true, customAllocation: null })
   }, [updateData])
 
   const handleSelectPlanDefault = useCallback(() => {
@@ -387,7 +415,7 @@ function InvestmentStrategy() {
     setEditingSource(null)
     setInlineAllocs(null)
     setHasConfirmedPlanDefault(true)
-    updateData({ useRecommendedPortfolio: true })
+    updateData({ useRecommendedPortfolio: true, customAllocation: null })
   }, [updateData])
 
   return (
@@ -424,7 +452,7 @@ function InvestmentStrategy() {
               <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
                 <div className="grid grid-cols-4 gap-2.5">
                   {riskLevelKeys.map((levelKey) => (
-                    <button type="button" key={levelKey} onClick={() => { updateData({ riskLevel: levelKey }); setShowRiskEditor(false); setCustomAllocations(null) }} className={`p-3 rounded-xl border-2 transition-all text-center ${data.riskLevel === levelKey ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300'}`}>
+                    <button type="button" key={levelKey} onClick={() => { updateData({ riskLevel: levelKey, customAllocation: null, useRecommendedPortfolio: true }); setShowRiskEditor(false); setCustomAllocations(null) }} className={`p-3 rounded-xl border-2 transition-all text-center ${data.riskLevel === levelKey ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-gray-300'}`}>
                       <p className={data.riskLevel === levelKey ? 'text-blue-700' : 'text-gray-900 dark:text-white'} style={{ fontWeight: 600, fontSize: '0.85rem' }}>{t(`enrollment.investment.level_${levelKey}`)}</p>
                       <p className="text-gray-500 mt-0.5" style={{ fontSize: '0.72rem' }}>{t(`enrollment.investment.level_desc_${levelKey}`)}</p>
                     </button>
@@ -435,7 +463,7 @@ function InvestmentStrategy() {
           </div>
 
           {/* ── 60/40 Grid ── */}
-          <div className={`grid grid-cols-1 gap-4 ${PLAN_CONFIG.managedAccount.available ? 'lg:grid-cols-3' : 'lg:grid-cols-2'}`}>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {/* Plan Default Investment — 60% */}
             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
               <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:gap-6">
@@ -449,13 +477,17 @@ function InvestmentStrategy() {
                   <p className="text-gray-600 dark:text-gray-400 mt-1" style={{ fontSize: '0.8rem' }}>{t('enrollment.investment.plan_default_sub')}</p>
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg px-4 py-3 space-y-1.5 shrink-0">
-                  <div className="flex items-center gap-3"><span className="text-gray-600 dark:text-gray-400" style={{ fontSize: '0.75rem' }}>{t('enrollment.investment.return_label')}</span><span className="text-gray-900 dark:text-white" style={{ fontSize: '0.75rem', fontWeight: 600 }}>{t('enrollment.investment.return_value')}</span></div>
+                  <div className="flex items-center gap-3"><span className="text-gray-600 dark:text-gray-400" style={{ fontSize: '0.75rem' }}>{t('enrollment.investment.return_label')}</span><span className="text-gray-900 dark:text-white" style={{ fontSize: '0.75rem', fontWeight: 600 }}>{t('enrollment.investment.return_value', { rate: growthPct })}</span></div>
                   <div className="flex items-center gap-3"><span className="text-gray-600 dark:text-gray-400" style={{ fontSize: '0.75rem' }}>{t('enrollment.investment.risk_label')}</span>
-                    <div className="flex items-center gap-1.5"><span className="text-gray-900 dark:text-white" style={{ fontSize: '0.75rem', fontWeight: 600 }}>{t('enrollment.investment.risk_low')}</span>
-                      <div className="flex gap-0.5"><span className="w-1.5 h-1.5 rounded-full bg-gray-900 dark:bg-gray-100" /><span className="w-1.5 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700" /><span className="w-1.5 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700" /><span className="w-1.5 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700" /><span className="w-1.5 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700" /></div>
+                    <div className="flex items-center gap-1.5"><span className="text-gray-900 dark:text-white" style={{ fontSize: '0.75rem', fontWeight: 600 }}>{t(`enrollment.investment.risk_word_${data.riskLevel}`)}</span>
+                      <div className="flex gap-0.5" aria-hidden>
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <span key={n} className={`w-1.5 h-1.5 rounded-full ${n <= riskDots[data.riskLevel] ? 'bg-gray-900 dark:bg-gray-100' : 'bg-gray-200 dark:bg-gray-700'}`} />
+                        ))}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3"><span className="text-gray-600 dark:text-gray-400" style={{ fontSize: '0.75rem' }}>{t('enrollment.investment.timeline_label')}</span><span className="text-gray-900 dark:text-white" style={{ fontSize: '0.75rem', fontWeight: 600 }}>{t('enrollment.investment.timeline_value')}</span></div>
+                  <div className="flex items-center gap-3"><span className="text-gray-600 dark:text-gray-400" style={{ fontSize: '0.75rem' }}>{t('enrollment.investment.timeline_label')}</span><span className="text-gray-900 dark:text-white" style={{ fontSize: '0.75rem', fontWeight: 600 }}>{t('enrollment.investment.timeline_value', { years: yearsToRetirement })}</span></div>
                 </div>
               </div>
               <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-4">
@@ -470,7 +502,7 @@ function InvestmentStrategy() {
               </div>
               <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 rounded-xl p-3">
                 <p className="text-blue-900 dark:text-blue-300 mb-1" style={{ fontSize: '0.78rem', fontWeight: 600 }}>{t('enrollment.investment.why_title')}</p>
-                <p className="text-blue-800 dark:text-blue-400" style={{ fontSize: '0.75rem', lineHeight: 1.5 }}>{t('enrollment.investment.why_body')}</p>
+                <p className="text-blue-800 dark:text-blue-400" style={{ fontSize: '0.75rem', lineHeight: 1.5 }}>{t('enrollment.investment.why_body', { desc: t(`enrollment.investment.level_desc_${data.riskLevel}`), years: yearsToRetirement })}</p>
               </div>
               <div className="mt-4">
                 {customAllocations ? (
@@ -536,47 +568,6 @@ function InvestmentStrategy() {
                 </button>
               )}
             </div>
-
-            {/* Managed Account — the third peer tile, after Plan Default and
-                Customize. Only shown when the plan offers it
-                (PLAN_CONFIG.managedAccount.available). Pros manage the
-                allocation and rebalance, for a fee. */}
-            {PLAN_CONFIG.managedAccount.available && (
-              <div className="bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-emerald-950/20 dark:via-gray-900 dark:to-teal-950/20 border border-emerald-200 dark:border-emerald-800/40 rounded-2xl p-6 flex flex-col shadow-sm">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shrink-0">
-                    <Gauge className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="px-2.5 py-1 bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/40 border border-emerald-200 dark:border-emerald-800/40 rounded-md">
-                    <p className="text-emerald-700 dark:text-emerald-400" style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      {t('enrollment.investment.managed_badge', 'Pro-managed')}
-                    </p>
-                  </div>
-                </div>
-                <h3 className="text-gray-900 dark:text-white mb-2" style={{ fontSize: '1rem', fontWeight: 700 }}>
-                  {t('enrollment.investment.managed_title', 'Managed account')}
-                </h3>
-                <p className="text-gray-700 dark:text-gray-300 mb-3" style={{ fontSize: '0.82rem', lineHeight: 1.6 }}>
-                  {t('enrollment.investment.managed_sub', 'Pros manage your allocation and rebalance it for you.')}
-                </p>
-                <p className="text-gray-800 dark:text-gray-200 mb-4 flex-1" style={{ fontSize: '0.82rem', lineHeight: 1.5, fontWeight: 500 }}>
-                  {t('enrollment.investment.managed_fee', 'Fee: {{bps}} bps per year of the managed balance.', { bps: PLAN_CONFIG.managedAccount.feeBps ?? 35 })}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    // Record that the participant opted into the managed
-                    // account; the record-keeper handles the actual allocation.
-                    updateData({ useRecommendedPortfolio: false })
-                    navigate('/enrollment/readiness')
-                  }}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-emerald-300 py-2.5 px-6 text-emerald-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 active:scale-[0.98] dark:border-emerald-600 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
-                  style={{ fontSize: '0.85rem', fontWeight: 600 }}
-                >
-                  {t('enrollment.investment.managed_cta', 'Use managed account')} <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
-            )}
           </div>
 
           {/* ── Advisor Card ── */}
@@ -640,7 +631,7 @@ function InvestmentStrategy() {
                 <div className={`${editingSource ? 'md:w-2/5' : 'w-full'} border-r border-gray-200 dark:border-gray-700 overflow-y-auto px-6 py-5 transition-all`}>
                   <p className="text-gray-900 dark:text-white mb-4" style={{ fontSize: '0.95rem', fontWeight: 600 }}>{t('enrollment.investment.sources_heading')}</p>
                   <div className="space-y-3">
-                    {activeSources.map((src) => <SourceCard key={src} sourceKey={src} monthlyAmount={getMonthlyForSource(src)} funds={getFundsForSource(src)} isCustomized={isSourceCustomized()} onEditPortfolio={() => handleOpenCustomize(src)} />)}
+                    {activeSources.map((src) => <SourceCard key={src} sourceKey={src} monthlyAmount={getMonthlyForSource(src)} funds={getFundsForSource()} isCustomized={isSourceCustomized()} onEditPortfolio={() => handleOpenCustomize(src)} />)}
                     {inactiveSources.map((src) => <InactiveSourceCard key={src} sourceKey={src} />)}
                   </div>
                 </div>

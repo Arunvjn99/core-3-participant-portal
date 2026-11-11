@@ -24,7 +24,7 @@ export function NotificationBanner() {
         const { box, icon, Icon } = SEVERITY_STYLE[n.severity]
         const { title, body } = n.render(t, fmt)
         return (
-          <div key={n.id} role={n.severity === 'action' ? 'alert' : 'status'} className={cn('flex items-start gap-3 rounded-[12px] border p-3.5', box)}>
+          <div key={n.id} role={n.severity === 'action' ? 'alert' : 'status'} className={cn('flex items-start gap-3 rounded-2xl border p-3.5', box)}>
             <Icon className={cn('mt-0.5 h-4 w-4 shrink-0', icon)} aria-hidden />
             <div className="min-w-0 flex-1">
               <p className="text-[13px] font-bold text-text-primary">{title}</p>

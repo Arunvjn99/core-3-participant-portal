@@ -6,6 +6,7 @@ import { getAppDateLocale } from '@/lib/dateLocale'
 import { ALL_US_STATES } from '@/lib/usStates'
 import { useEnrollmentDraftStore, type PersonalizationDraftData } from '@/core/store/enrollmentDraftStore'
 import { ageFromBirth } from '../quickEnrollmentDefaults'
+import { startingSavings } from '../enrollmentMath'
 import { AgentMessage, Rich, UserReply } from './AgentChat'
 import { QUESTIONS, type WizardQuestion } from './wizardQuestions'
 
@@ -83,7 +84,7 @@ export function ChatQuestions({
   const [retireAge, setRetireAge] = useState(p.retirementAge ?? 65)
   const [location, setLocation] = useState(p.selectedLocation ?? '')
   const [salary, setSalary] = useState(draftData.savings?.salary ?? p.salary ?? 0)
-  const [savings, setSavings] = useState(p.savingsAmount ?? 0)
+  const [savings, setSavings] = useState(startingSavings(p.savingsAmount))
   const [risk, setRisk] = useState<Risk>(p.riskTolerance ?? 'balanced')
 
   const asked = questions.length ? questions : QUESTIONS

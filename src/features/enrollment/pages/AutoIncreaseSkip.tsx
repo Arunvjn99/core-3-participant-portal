@@ -3,12 +3,24 @@ import { useEnrollment } from '@/core/hooks/useEnrollment'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { AutoIncreaseSkipPanel } from '@/features/enrollment/components/AutoIncreaseSkipPanel'
+import { compareAutoIncrease } from '@/features/enrollment/enrollmentMath'
+import { getGrowthRate } from '@/lib/retirementCalculations'
 
 export default function AutoIncreaseSkip() {
   const navigate = useNavigate()
-  const { updateData } = useEnrollment()
+  const { data, updateData, personalization } = useEnrollment()
 
-  const missedSavingsAmount = 185943 - 124621
+  const { difference: missedSavingsAmount } = compareAutoIncrease(
+    {
+      startingBalance: personalization.currentSavings,
+      salary: data.salary,
+      ratePercent: data.contributionPercent,
+      sources: data.contributionSources,
+      years: 10,
+      growthRate: getGrowthRate(data.riskLevel),
+    },
+    { amount: data.autoIncreaseAmount, max: data.autoIncreaseMax },
+  )
 
   const handleReconsider = () => {
     updateData({ autoIncrease: true })

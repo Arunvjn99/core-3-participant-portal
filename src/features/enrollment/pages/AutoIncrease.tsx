@@ -8,18 +8,32 @@ import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { AutoIncreaseSkipPanel } from '@/features/enrollment/components/AutoIncreaseSkipPanel'
 import { ArrowRight, TrendingUp, Minus } from 'lucide-react'
+import { compareAutoIncrease } from '@/features/enrollment/enrollmentMath'
+import { getGrowthRate } from '@/lib/retirementCalculations'
 
 export default function AutoIncrease() {
   const { t } = useTranslation()
   const locale = getAppDateLocale()
   const navigate = useNavigate()
   const { setStepNav } = useEnrollmentStepNav()
-  const { data, updateData } = useEnrollment()
+  const { data, updateData, personalization } = useEnrollment()
   const [showSkipModal, setShowSkipModal] = useState(false)
 
-  const fixedProjection = 124621
-  const autoProjection = 185943
-  const difference = autoProjection - fixedProjection
+  const {
+    fixed: fixedProjection,
+    withIncrease: autoProjection,
+    difference,
+  } = compareAutoIncrease(
+    {
+      startingBalance: personalization.currentSavings,
+      salary: data.salary,
+      ratePercent: data.contributionPercent,
+      sources: data.contributionSources,
+      years: 10,
+      growthRate: getGrowthRate(data.riskLevel),
+    },
+    { amount: data.autoIncreaseAmount, max: data.autoIncreaseMax },
+  )
 
   const handleSelect = (autoIncrease: boolean) => {
     updateData({ autoIncrease })
@@ -117,7 +131,7 @@ export default function AutoIncrease() {
               <h3 className="text-gray-900 dark:text-white">{t('enrollment.auto_increase_page.enable_title')}</h3>
             </div>
             <p className="text-gray-500 dark:text-gray-400" style={{ fontSize: '0.85rem' }}>
-              {t('enrollment.auto_increase_page.enable_body')}
+              {t('enrollment.auto_increase_page.enable_body', { amt: data.autoIncreaseAmount, max: data.autoIncreaseMax })}
             </p>
             <div className="mt-4 flex-1">
               <p className="text-gray-400 dark:text-gray-500" style={{ fontSize: '0.75rem' }}>

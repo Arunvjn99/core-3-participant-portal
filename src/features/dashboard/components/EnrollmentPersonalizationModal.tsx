@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
+import { ACCOUNT_BALANCE } from '@/features/enrollment/enrollmentMath'
 import { ALL_US_STATES, POPULAR_LOCATIONS } from '@/lib/usStates'
 
 function getAgeInsight(retirementAge: number, _currentAge: number, yearsUntilRetirement: number) {
@@ -149,7 +150,8 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
   const [locationSearch, setLocationSearch] = useState('')
   const [selectedLocation, setSelectedLocation] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const [savingsAmount, setSavingsAmount] = useState('')
+  // Starts at the 401(k) account balance, the same figure Account Summary shows
+  const [savingsAmount, setSavingsAmount] = useState(() => ACCOUNT_BALANCE.toLocaleString())
   const [riskTolerance, setRiskTolerance] = useState<string>('balanced')
 
   const [birthMonth, setBirthMonth] = useState('January')

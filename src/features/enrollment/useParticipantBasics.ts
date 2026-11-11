@@ -2,6 +2,7 @@ import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { PERIODS } from '@/features/plan/electionsData'
 import { useProfileStore } from '@/features/profile/profileStore'
 import { ageFromBirth } from './quickEnrollmentDefaults'
+import { startingSavings } from './enrollmentMath'
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
@@ -32,6 +33,6 @@ export function useParticipantBasics() {
     salary: knownSalary || 85_000,
     retireAge,
     years: retireAge - age,
-    savings: p.savingsAmount ?? 0,
+    savings: startingSavings(p.savingsAmount),
   }
 }

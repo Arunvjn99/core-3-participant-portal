@@ -12,6 +12,7 @@ interface EnrollmentValues {
   /** In `unit`: percent of pay, or dollars per paycheck */
   preTaxRate: number
   rothRate: number
+  afterTaxRate?: number
   unit?: Unit
   autoIncrease?: { enabled: boolean; amount: number; max: number }
   /** Full auto-increase election (cycle, per-source amounts). Takes precedence over `autoIncrease`. */
@@ -97,7 +98,7 @@ export const useElectionsStore = create<ElectionsState>()(
           const unit = v.unit ?? 'percent'
           const history: HistoryEntry[] = [
             { id: uid(), at: now, change: 'enrollment', params: {}, by: 'participant' },
-            { id: uid(), at: now, change: 'deferral', params: { unit, pre: v.preTaxRate, roth: v.rothRate }, by: 'participant' },
+            { id: uid(), at: now, change: 'deferral', params: { unit, pre: v.preTaxRate, roth: v.rothRate, ...(v.afterTaxRate ? { after: v.afterTaxRate } : {}) }, by: 'participant' },
           ]
           if (v.sdbOptedIn) history.push({ id: uid(), at: now, change: 'sdb', params: { on: true }, by: 'participant' })
           if (v.autoRebalance) history.push({ id: uid(), at: now, change: 'rebalance', params: { on: true }, by: 'participant' })
@@ -105,7 +106,7 @@ export const useElectionsStore = create<ElectionsState>()(
             optedOut: false,
             enrolledAt: now,
             seeded: true,
-            deferral: { unit, preTax: v.preTaxRate, roth: v.rothRate, usePlanRate: false },
+            deferral: { unit, preTax: v.preTaxRate, roth: v.rothRate, afterTax: v.afterTaxRate ?? 0, usePlanRate: false },
             autoIncrease: v.autoIncreaseFull
               ? v.autoIncreaseFull
               : ai
