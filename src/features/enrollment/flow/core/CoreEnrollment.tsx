@@ -1,8 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useBlocker, useNavigate } from 'react-router-dom'
 import { Trans, useTranslation } from 'react-i18next'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { AlertTriangle, ArrowRight, Check, Landmark, Loader2, Lock, Pencil, RotateCcw, RotateCw } from 'lucide-react'
+import { AlertTriangle, ArrowRight, Check, FileText, Landmark, Loader2, Lock, Pencil, Printer, RotateCcw, RotateCw } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { LEGAL, ROUTES } from '@/lib/constants'
 import { getAppDateLocale } from '@/lib/dateLocale'
@@ -31,7 +32,7 @@ import { AutoIncreaseEditor, ContributionEditor, InvestmentsEditor } from './edi
 type Stage = 'working' | 'review' | 'submitting' | 'done'
 type StepState = 'pending' | 'active' | 'done' | 'error'
 type EditKind = 'contribution' | 'auto' | 'invest'
-type SheetKind = EditKind | 'disclosures' | null
+type SheetKind = EditKind | 'disclosures' | 'summary' | null
 
 /** Whether one part of the plan differs between two elections: what the card's Edited tags and the change count compare */
 function partChanged(kind: EditKind, a: Election, b: Election): boolean {
@@ -293,32 +294,34 @@ export default function CoreEnrollment() {
 
   // Keep the whole plan on one screen: if it's taller than the window, scale it down a little
   const showPlan = stage !== 'done'
+  const planReady = stage !== 'working'
   useLayoutEffect(() => {
     const el = planRef.current
     if (!showPlan || !el) return
-    let current = parseFloat(getComputedStyle(el).zoom) || 1
+    /**
+     * The scale is decided once the plan has loaded, and again only when the window's own width or height changes.
+     * Nothing reacts to the plan changing its own height: scaling rewraps lines and resizes the chart, which changes that
+     * height, and reacting to it made the scale flip (98% and 100%) several times a second, so the whole plan shook.
+     */
+    let lastSize = ''
     const measure = () => {
+      const size = `${window.innerWidth}x${window.innerHeight}`
+      if (size === lastSize) return
+      lastSize = size
       // The visible height divided by the zoom in effect gives the natural height
       const natural = el.getBoundingClientRect().height / (parseFloat(getComputedStyle(el).zoom) || 1)
       const top = document.querySelector('header.sticky')?.getBoundingClientRect().bottom ?? 0
       // The footer sits below the page, so only the window's own height counts
       const available = window.innerHeight - Math.max(top, 0) - 48
-      // Phones scroll naturally; only wider screens are fitted
-      const next = window.innerWidth < 640 ? 1 : Math.round(Math.max(0.82, Math.min(1, available / natural)) * 100) / 100
-      if (next !== current) {
-        current = next
-        setFit(next)
-      }
+      // Phones scroll naturally; only wider screens are fitted. A plan within 2% of fitting is left at full size.
+      const ratio = available / natural
+      const next = window.innerWidth < 640 || ratio >= 0.98 ? 1 : Math.round(Math.max(0.82, ratio) * 100) / 100
+      setFit(next)
     }
     measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(el)
     window.addEventListener('resize', measure)
-    return () => {
-      ro.disconnect()
-      window.removeEventListener('resize', measure)
-    }
-  }, [showPlan])
+    return () => window.removeEventListener('resize', measure)
+  }, [showPlan, planReady])
 
   // ── The work: build the plan from what's on file ──
   const markStep = (i: number, s: StepState) => setSteps((all) => all.map((x, j) => (j === i ? s : x)))
@@ -486,6 +489,143 @@ export default function CoreEnrollment() {
     </span>
   )
 
+  // ── Full summary: everything in the plan in one place, optional; it can be printed or saved as a PDF ──
+  const yesNo = (v: boolean) => t(v ? 'common.yes' : 'common.no')
+  const sumRow = (label: string, value: React.ReactNode) => (
+    <div className="flex items-start justify-between gap-4 py-2.5">
+      <dt className="text-[13px] text-slate-600 dark:text-gray-300">{label}</dt>
+      <dd className="text-right text-[14px] font-semibold tabular-nums text-slate-900 dark:text-white">{value}</dd>
+    </div>
+  )
+  const sumSection = (title: string, children: React.ReactNode) => (
+    <section className="break-inside-avoid">
+      <h3 className="text-[12px] font-semibold uppercase tracking-[0.08em] text-slate-600 dark:text-gray-300">{title}</h3>
+      <div className="mt-1">{children}</div>
+    </section>
+  )
+  const summaryBody = (
+    <div className="space-y-6">
+      {sumSection(
+        t('enrollment.core.plan_label'),
+        <dl className="divide-y divide-slate-100 dark:divide-gray-800">
+          {sumRow(t('enrollment.core.plan_label'), planName)}
+          {sumRow(t('enrollment.core.plan_type'), t(PLAN_CONFIG.plan.nameKey))}
+          {sumRow(t('enrollment.core.sum_plan_id'), PLAN_CONFIG.plan.planId)}
+          {sumRow(t('enrollment.core.sum_employer'), employer)}
+        </dl>,
+      )}
+      {sumSection(
+        t('enrollment.core.sheet_contribution'),
+        <>
+          <dl className="divide-y divide-slate-100 dark:divide-gray-800">
+            {sumRow(t('enrollment.core.ed.total'), `${f.total}%`)}
+            {sumRow(t('enrollment.core.sum_per_paycheck'), money(f.perCheck))}
+            {sumRow(t('enrollment.core.sum_per_month'), money((salary * f.total) / 100 / 12))}
+            {sumRow(t('enrollment.core.sum_per_year'), money((salary * f.total) / 100))}
+          </dl>
+          <table className="mt-2 w-full text-left text-[13px]">
+            <thead>
+              <tr className="border-b border-slate-200 text-slate-600 dark:border-gray-700 dark:text-gray-300">
+                <th scope="col" className="py-2 font-medium">{t('enrollment.core.sum_source')}</th>
+                <th scope="col" className="py-2 text-right font-medium">{t('enrollment.core.sum_rate')}</th>
+                <th scope="col" className="py-2 text-right font-medium">{t('enrollment.core.sum_per_paycheck')}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-gray-800">
+              {sources.map((src) => (
+                <tr key={src.key}>
+                  <th scope="row" className="py-2 font-medium text-slate-900 dark:text-white">{src.label}</th>
+                  <td className="py-2 text-right tabular-nums text-slate-900 dark:text-white">{`${src.pct}%`}</td>
+                  <td className="py-2 text-right tabular-nums text-slate-900 dark:text-white">{money((salary * src.pct) / 100 / periods)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>,
+      )}
+      {sumSection(
+        t('enrollment.core.m_match_short'),
+        <>
+          <p className="py-2 text-[13px] leading-[1.5] text-slate-600 dark:text-gray-300">{t('enrollment.core.match_tip_intro', { per: matchPer, cap })}</p>
+          <dl className="divide-y divide-slate-100 dark:divide-gray-800">
+            {sumRow(t('enrollment.core.sum_per_month'), `+${money(f.match / 12)}`)}
+            {sumRow(t('enrollment.core.sum_per_year'), `+${money(f.match)}`)}
+            {sumRow(
+              t('enrollment.core.sum_status'),
+              f.match >= fullMatch ? t('enrollment.core.m_match_full') : t('enrollment.core.m_match_gap', { amount: `${money((fullMatch - f.match) / 12)}${t('enrollment.core.unit_month')}` }),
+            )}
+          </dl>
+        </>,
+      )}
+      {sumSection(
+        t('enrollment.core.row_auto'),
+        <dl className="divide-y divide-slate-100 dark:divide-gray-800">
+          {sumRow(t('enrollment.core.sum_status'), election.auto.enabled ? t('enrollment.core.auto_enabled') : t('enrollment.core.auto_off_short'))}
+          {election.auto.enabled && (
+            <>
+              {sumRow(t('enrollment.core.ed.raise_by'), `+${election.auto.amount.preTax}%`)}
+              {sumRow(t('enrollment.core.ed.stop_at'), `${election.auto.cap.preTax}%`)}
+              {sumRow(t('plan.def.cycle'), t(`enrollment.core.ed.cycle_${election.auto.cycle}`))}
+              {sumRow(t('enrollment.core.sum_next_increase'), dateLong(nextAuto))}
+            </>
+          )}
+        </dl>,
+      )}
+      {sumSection(
+        t('enrollment.core.sheet_invest'),
+        <>
+          <dl className="divide-y divide-slate-100 dark:divide-gray-800">
+            {sumRow(t('enrollment.core.row_invest'), f.invest)}
+            {sumRow(t('enrollment.core.ed.approach'), t(election.mode === 'own' ? 'enrollment.core.ed.mode_own' : election.mode === 'plan_selected' ? 'enrollment.core.ed.mode_plan' : 'enrollment.core.ed.mode_risk'))}
+            {sumRow(t('plan.inv.auto_rebalance'), yesNo(election.autoRebalance))}
+            {sumRow(t('plan.inv.sdb'), yesNo(election.sdb))}
+          </dl>
+          <table className="mt-2 w-full text-left text-[13px]">
+            <caption className="sr-only">{t('enrollment.core.ed.funds')}</caption>
+            <thead>
+              <tr className="border-b border-slate-200 text-slate-600 dark:border-gray-700 dark:text-gray-300">
+                <th scope="col" className="py-2 font-medium">{t('enrollment.core.ed.funds')}</th>
+                <th scope="col" className="py-2 text-right font-medium">%</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-gray-800">
+              {f.rows.map((r) => {
+                const meta = fundMeta(r.ticker)
+                return (
+                  <tr key={r.ticker}>
+                    <th scope="row" className="py-2 font-normal">
+                      <span className="block font-medium text-slate-900 dark:text-white">{meta?.name ?? r.ticker}</span>
+                      <span className="block text-[12px] text-slate-600 dark:text-gray-300">{`${r.ticker}${meta ? ` · ${meta.assetClass}` : ''}`}</span>
+                    </th>
+                    <td className="py-2 text-right align-top font-semibold tabular-nums text-slate-900 dark:text-white">{`${r.pct}%`}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </>,
+      )}
+      {sumSection(
+        t('enrollment.core.m_proj', { age: retireAge }),
+        <dl className="divide-y divide-slate-100 dark:divide-gray-800">
+          {sumRow(t('enrollment.core.m_proj', { age: retireAge }), money(f.projected))}
+          {sumRow(t('enrollment.core.sum_assumes'), `${t('enrollment.core.not_guaranteed')} · ${t('enrollment.core.proj_basis', { rate: growthPct })}`)}
+        </dl>,
+      )}
+      <p className="text-[12px] leading-[1.5] text-slate-600 dark:text-gray-300">{t('enrollment.core.sum_footnote')}</p>
+    </div>
+  )
+  /** Prints only the summary: everything else on the page is hidden while the print dialog is open */
+  const printSummary = () => {
+    document.body.classList.add('print-summary')
+    const done = () => {
+      document.body.classList.remove('print-summary')
+      window.removeEventListener('afterprint', done)
+    }
+    window.addEventListener('afterprint', done)
+    window.print()
+  }
+
   /** Edit on a row: opens that part's panel */
   const editButton = (kind: EditKind, what: string) =>
     canEdit ? (
@@ -590,9 +730,20 @@ export default function CoreEnrollment() {
                     <p className="min-w-0 flex-1 basis-[180px] truncate text-[17px] font-semibold tracking-[-0.01em] text-slate-900 dark:text-white">{planName}</p>
                     {/* Plan type: beside the name on wider screens, under it on narrow ones */}
                     <span className="inline-flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-slate-600 dark:text-gray-300">
-                      <span className="text-slate-400 dark:text-gray-500">{t('enrollment.core.plan_type')}</span>
+                      <span className="text-slate-500 dark:text-gray-400">{t('enrollment.core.plan_type')}</span>
                       <span className="font-semibold text-slate-900 dark:text-white">{t(PLAN_CONFIG.plan.nameKey)}</span>
                     </span>
+                    {/* Optional: every detail in one place, to check or print; enrolling doesn't need it */}
+                    {ready && (
+                      <button
+                        type="button"
+                        onClick={() => setSheet('summary')}
+                        className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[13px] font-semibold text-blue-700 ring-1 ring-inset ring-blue-200 transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-blue-300 dark:ring-blue-400/30 dark:hover:bg-blue-500/10"
+                      >
+                        <FileText className="h-3.5 w-3.5" aria-hidden />
+                        {t('enrollment.core.summary_open')}
+                      </button>
+                    )}
                   </div>
 
                   <div className="grid md:grid-cols-[1.05fr_1fr]">
@@ -1033,6 +1184,36 @@ export default function CoreEnrollment() {
           })}
         </ul>
       </Sheet>
+
+      {/* Full summary, view and print; closing it returns to the plan */}
+      <Sheet
+        open={sheet === 'summary'}
+        onClose={() => setSheet(null)}
+        title={t('enrollment.core.summary_title')}
+        subtitle={t('enrollment.core.summary_sub')}
+        footer={
+          <>
+            <button type="button" onClick={() => setSheet(null)} className="inline-flex h-10 items-center rounded-full bg-white px-5 text-[14px] font-semibold text-slate-900 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-gray-900 dark:text-white dark:ring-gray-700 dark:hover:bg-gray-800">
+              {t('enrollment.core.close')}
+            </button>
+            <button type="button" onClick={printSummary} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-blue-600 px-5 text-[14px] font-semibold text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
+              <Printer className="h-4 w-4" aria-hidden />
+              {t('enrollment.core.summary_print')}
+            </button>
+          </>
+        }
+      >
+        {summaryBody}
+      </Sheet>
+      {ready &&
+        createPortal(
+          <div data-print-summary className="hidden">
+            <h1 className="text-[22px] font-bold">{t('enrollment.core.summary_title')}</h1>
+            <p className="mb-6 mt-1 text-[13px]">{`${planName} · ${t('enrollment.core.sum_prepared', { date: dateLong(new Date(now)) })}`}</p>
+            {summaryBody}
+          </div>,
+          document.body,
+        )}
 
       {/* Edit panels: changes show on the card as they are made; Done keeps them, Cancel puts back what was there */}
       <Sheet preview open={sheet === 'contribution'} onClose={cancelEdit} title={t('enrollment.core.sheet_contribution')} subtitle={t('enrollment.core.sheet_sub')} footer={editFooter('contribution', rateError)}>
