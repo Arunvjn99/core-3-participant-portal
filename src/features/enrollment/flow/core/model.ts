@@ -23,7 +23,15 @@ export const AUTO_AMOUNTS = [1, 2, 3]
 export const AUTO_CAPS = [10, 12, 15]
 
 /** One distinct colour per fund position, so allocations stay readable however many funds there are. */
-export const FUND_COLORS = ['#2563eb', '#0ea5e9', '#6366f1', '#14b8a6', '#f59e0b', '#a855f7', '#ec4899', '#64748b', '#22c55e', '#f97316']
+/**
+ * Fund colours, in a fixed order (a fund keeps its colour wherever it appears). The first five pass the colour-blind
+ * separation and normal-vision checks next to each other; dark mode uses deeper steps of the same hues so they sit in
+ * the readable band on the dark surface. Light-mode teal, amber and sky are faint on white, so a fund is always named
+ * beside its colour (legend rows or a table), never shown by colour alone.
+ */
+export const FUND_COLORS = ['#2563eb', '#14b8a6', '#6366f1', '#f59e0b', '#0ea5e9', '#a855f7', '#ec4899', '#64748b', '#22c55e', '#f97316']
+export const FUND_COLORS_DARK = ['#3b82f6', '#0d9488', '#6366f1', '#d97706', '#0284c7', '#a855f7', '#ec4899', '#64748b', '#22c55e', '#f97316']
+export const fundColor = (i: number, dark = false) => (dark ? FUND_COLORS_DARK : FUND_COLORS)[i % FUND_COLORS.length]
 
 export const round2 = (n: number) => Math.round(n * 100) / 100
 export const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))

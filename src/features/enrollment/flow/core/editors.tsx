@@ -6,7 +6,8 @@ import { cn } from '@/lib/cn'
 import { CYCLES, PLAN_RULES, nextIncreaseDate, type InvestMode } from '@/features/plan/electionsData'
 import { fundCatalog } from '../../investmentCatalog'
 import { PLAN_CONFIG, PLAN_LIMITS, employerMatch } from '../../agent/planConfig'
-import { AUTO_AMOUNTS, AUTO_CAPS, FUND_COLORS, RISKS, clamp, fundMeta, round2, rowsFor, type Election } from './model'
+import { AUTO_AMOUNTS, AUTO_CAPS, RISKS, clamp, fundColor, fundMeta, round2, rowsFor, type Election } from './model'
+import { useTheme } from '@/core/hooks/useTheme'
 import { InfoTip, Pills, Segmented, Stepper, Switch } from './ui'
 
 interface Ctx {
@@ -219,6 +220,7 @@ export function AutoIncreaseEditor({ value, onChange, ctx }: { value: Election; 
 // ── Investments ──
 export function InvestmentsEditor({ value, onChange, onViewAll }: { value: Election; onChange: (e: Election) => void; onViewAll: () => void }) {
   const { t } = useTranslation()
+  const isDark = useTheme().resolvedMode === 'dark'
   const [query, setQuery] = useState('')
   const rows = rowsFor(value)
   const total = rows.reduce((s, r) => s + r.pct, 0)
@@ -267,7 +269,7 @@ export function InvestmentsEditor({ value, onChange, onViewAll }: { value: Elect
             const meta = fundMeta(r.ticker)
             return (
               <li key={r.ticker} className="flex items-center gap-3 px-3.5 py-2.5">
-                <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: FUND_COLORS[i % FUND_COLORS.length] }} aria-hidden />
+                <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: fundColor(i, isDark) }} aria-hidden />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[13px] font-medium text-slate-900 dark:text-white">{meta?.name ?? r.ticker}</span>
                   <span className="text-[12px] text-slate-500">{r.ticker}{meta ? ` · ${meta.assetClass}` : ''}</span>

@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useBlocker, useNavigate } from 'react-router-dom'
 import { Trans, useTranslation } from 'react-i18next'
@@ -12,6 +12,7 @@ import { useDialogA11y } from '@/lib/useDialogA11y'
 import { LegalHrefLink } from '@/features/legal/components/LegalHrefLink'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { useEnrollmentSave } from '@/core/hooks/useEnrollmentSave'
+import { useTheme } from '@/core/hooks/useTheme'
 import { useElectionsStore } from '@/features/plan/electionsStore'
 import { nextIncreaseDate } from '@/features/plan/electionsData'
 import { recommendedFunds, type RiskKey } from '../../investmentCatalog'
@@ -19,7 +20,7 @@ import { GROWTH_RATES, buildQuickEnrollmentDefaults } from '../../quickEnrollmen
 import { useParticipantBasics } from '../../useParticipantBasics'
 import { PLAN_CONFIG, PLAN_LIMITS, employerMatch } from '../../agent/planConfig'
 import { checkEligibility, getPlanRules, submitEnrollment } from '../../agent/enrollmentService'
-import { FUND_COLORS, blendedFee, fundMeta, pause, round2, rowsFor, type Election } from './model'
+import { blendedFee, fundColor, fundMeta, pause, round2, rowsFor, type Election } from './model'
 import { AgentMark, AnimatedNumber, ConfettiField, DrawnCheck, EdgeGlow, InfoTip, ProjectionChart, Sheet, Shimmer } from './ui'
 import { AutoIncreaseEditor, ContributionEditor, InvestmentsEditor } from './editors'
 
@@ -93,6 +94,7 @@ export default function CoreEnrollment() {
   const locale = getAppDateLocale()
   const navigate = useNavigate()
   const reduce = useReducedMotion()
+  const isDark = useTheme().resolvedMode === 'dark'
   const now = useNow()
   const { saveCompleteEnrollment } = useEnrollmentSave()
   const { employer, periods, birthYear, birthMonth, birthDay, age, knownSalary, salary, retireAge, years, savings } = useParticipantBasics()
@@ -112,8 +114,6 @@ export default function CoreEnrollment() {
   const rulesAttempt = useRef(0)
   const started = useRef(false)
   const planRef = useRef<HTMLDivElement>(null)
-  /** How much the plan is scaled so all of it fits the window (1 = natural size) */
-  const [fit, setFit] = useState(1)
 
   // ── The draft ──
   const initialElection = (): Election => ({
@@ -279,6 +279,7 @@ export default function CoreEnrollment() {
   // Leaving with unsaved edits (Cancel, browser back, a link) asks first; closing the tab gets the browser's own prompt
   const blocker = useBlocker(({ currentLocation, nextLocation }) => !leaving.current && stage === 'review' && changeCount > 0 && currentLocation.pathname !== nextLocation.pathname)
   const discardRef = useDialogA11y<HTMLDivElement>(blocker.state === 'blocked', () => blocker.reset?.())
+  const summaryRef = useDialogA11y<HTMLDivElement>(sheet === 'summary', () => setSheet(null))
   useEffect(() => {
     if (stage !== 'review' || changeCount === 0) return
     const warn = (e: BeforeUnloadEvent) => e.preventDefault()
@@ -292,36 +293,9 @@ export default function CoreEnrollment() {
     return () => window.clearTimeout(id)
   }, [toast])
 
-  // Keep the whole plan on one screen: if it's taller than the window, scale it down a little
+  // The plan shows at its natural size and the page scrolls. (It used to shrink itself with CSS zoom to fit the window,
+  // but uneven zoom made text blurry, and recalculating it made the whole plan jump.)
   const showPlan = stage !== 'done'
-  const planReady = stage !== 'working'
-  useLayoutEffect(() => {
-    const el = planRef.current
-    if (!showPlan || !el) return
-    /**
-     * The scale is decided once the plan has loaded, and again only when the window's own width or height changes.
-     * Nothing reacts to the plan changing its own height: scaling rewraps lines and resizes the chart, which changes that
-     * height, and reacting to it made the scale flip (98% and 100%) several times a second, so the whole plan shook.
-     */
-    let lastSize = ''
-    const measure = () => {
-      const size = `${window.innerWidth}x${window.innerHeight}`
-      if (size === lastSize) return
-      lastSize = size
-      // The visible height divided by the zoom in effect gives the natural height
-      const natural = el.getBoundingClientRect().height / (parseFloat(getComputedStyle(el).zoom) || 1)
-      const top = document.querySelector('header.sticky')?.getBoundingClientRect().bottom ?? 0
-      // The footer sits below the page, so only the window's own height counts
-      const available = window.innerHeight - Math.max(top, 0) - 48
-      // Phones scroll naturally; only wider screens are fitted. A plan within 2% of fitting is left at full size.
-      const ratio = available / natural
-      const next = window.innerWidth < 640 || ratio >= 0.98 ? 1 : Math.round(Math.max(0.82, ratio) * 100) / 100
-      setFit(next)
-    }
-    measure()
-    window.addEventListener('resize', measure)
-    return () => window.removeEventListener('resize', measure)
-  }, [showPlan, planReady])
 
   // ── The work: build the plan from what's on file ──
   const markStep = (i: number, s: StepState) => setSteps((all) => all.map((x, j) => (j === i ? s : x)))
@@ -489,131 +463,281 @@ export default function CoreEnrollment() {
     </span>
   )
 
-  // ── Full summary: everything in the plan in one place, optional; it can be printed or saved as a PDF ──
+  // ── Full summary: a one-page form document (like the PDF a plan sends), optional; it can be printed or saved as a PDF.
+  //    It is always dark ink on white paper, in the app's dark mode too, because it is a document. ──
   const yesNo = (v: boolean) => t(v ? 'common.yes' : 'common.no')
-  const sumRow = (label: string, value: React.ReactNode) => (
-    <div className="flex items-start justify-between gap-4 py-2.5">
-      <dt className="text-[13px] text-slate-600 dark:text-gray-300">{label}</dt>
-      <dd className="text-right text-[14px] font-semibold tabular-nums text-slate-900 dark:text-white">{value}</dd>
+  /** One boxed field of the form: a small label over its value */
+  const sumField = (label: string, value: React.ReactNode, wide = false) => (
+    <div className={cn('border-b border-r border-slate-300 px-3 py-2', wide && 'col-span-2 sm:col-span-3')}>
+      <dt className="text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-500">{label}</dt>
+      <dd className="mt-0.5 text-[13px] font-semibold tabular-nums text-slate-900">{value}</dd>
     </div>
   )
-  const sumSection = (title: string, children: React.ReactNode) => (
+  const sumFields = (children: React.ReactNode) => <dl className="grid grid-cols-2 border-l border-slate-300 sm:grid-cols-3">{children}</dl>
+  /** A numbered part of the form: a shaded title bar, then its fields */
+  const sumSection = (n: number, title: string, children: React.ReactNode) => (
     <section className="break-inside-avoid">
-      <h3 className="text-[12px] font-semibold uppercase tracking-[0.08em] text-slate-600 dark:text-gray-300">{title}</h3>
-      <div className="mt-1">{children}</div>
+      <h3 className="flex items-center gap-2 border border-slate-300 bg-slate-100 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-slate-800">
+        <span className="tabular-nums">{n}.</span>
+        {title}
+      </h3>
+      {children}
     </section>
   )
-  const summaryBody = (
-    <div className="space-y-6">
-      {sumSection(
-        t('enrollment.core.plan_label'),
-        <dl className="divide-y divide-slate-100 dark:divide-gray-800">
-          {sumRow(t('enrollment.core.plan_label'), planName)}
-          {sumRow(t('enrollment.core.plan_type'), t(PLAN_CONFIG.plan.nameKey))}
-          {sumRow(t('enrollment.core.sum_plan_id'), PLAN_CONFIG.plan.planId)}
-          {sumRow(t('enrollment.core.sum_employer'), employer)}
-        </dl>,
-      )}
-      {sumSection(
-        t('enrollment.core.sheet_contribution'),
-        <>
-          <dl className="divide-y divide-slate-100 dark:divide-gray-800">
-            {sumRow(t('enrollment.core.ed.total'), `${f.total}%`)}
-            {sumRow(t('enrollment.core.sum_per_paycheck'), money(f.perCheck))}
-            {sumRow(t('enrollment.core.sum_per_month'), money((salary * f.total) / 100 / 12))}
-            {sumRow(t('enrollment.core.sum_per_year'), money((salary * f.total) / 100))}
-          </dl>
-          <table className="mt-2 w-full text-left text-[13px]">
-            <thead>
-              <tr className="border-b border-slate-200 text-slate-600 dark:border-gray-700 dark:text-gray-300">
-                <th scope="col" className="py-2 font-medium">{t('enrollment.core.sum_source')}</th>
-                <th scope="col" className="py-2 text-right font-medium">{t('enrollment.core.sum_rate')}</th>
-                <th scope="col" className="py-2 text-right font-medium">{t('enrollment.core.sum_per_paycheck')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-gray-800">
-              {sources.map((src) => (
-                <tr key={src.key}>
-                  <th scope="row" className="py-2 font-medium text-slate-900 dark:text-white">{src.label}</th>
-                  <td className="py-2 text-right tabular-nums text-slate-900 dark:text-white">{`${src.pct}%`}</td>
-                  <td className="py-2 text-right tabular-nums text-slate-900 dark:text-white">{money((salary * src.pct) / 100 / periods)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </>,
-      )}
-      {sumSection(
-        t('enrollment.core.m_match_short'),
-        <>
-          <p className="py-2 text-[13px] leading-[1.5] text-slate-600 dark:text-gray-300">{t('enrollment.core.match_tip_intro', { per: matchPer, cap })}</p>
-          <dl className="divide-y divide-slate-100 dark:divide-gray-800">
-            {sumRow(t('enrollment.core.sum_per_month'), `+${money(f.match / 12)}`)}
-            {sumRow(t('enrollment.core.sum_per_year'), `+${money(f.match)}`)}
-            {sumRow(
-              t('enrollment.core.sum_status'),
-              f.match >= fullMatch ? t('enrollment.core.m_match_full') : t('enrollment.core.m_match_gap', { amount: `${money((fullMatch - f.match) / 12)}${t('enrollment.core.unit_month')}` }),
+  /** A note across the full width of a section */
+  const sumNote = (text: string) => <p className="border-x border-b border-slate-300 px-3 py-2 text-[12px] leading-[1.5] text-slate-700">{text}</p>
+  // The detail behind the summary: what goes in, where it goes, and how the plan changes over the years
+  const perYear = (pct: number) => (salary * pct) / 100
+  const monthlyIn = (salary * f.total) / 100 / 12
+  const autoSchedule = (() => {
+    if (!election.auto.enabled) return []
+    const rows: { year: number; rate: number }[] = []
+    const ceiling = Math.max(election.auto.cap.preTax, deferral)
+    let rate = deferral
+    let year = nextAuto.getFullYear()
+    while (rate < ceiling && rows.length < 12) {
+      rate = Math.min(round2(rate + election.auto.amount.preTax), ceiling)
+      rows.push({ year, rate: round2(rate + election.afterTax) })
+      year += 1
+    }
+    return rows
+  })()
+  const byAssetClass = Object.entries(
+    f.rows.reduce<Record<string, number>>((acc, r) => {
+      const cls = fundMeta(r.ticker)?.assetClass ?? r.ticker
+      acc[cls] = (acc[cls] ?? 0) + r.pct
+      return acc
+    }, {}),
+  ).sort((x, y) => y[1] - x[1])
+  // Ruled tables, as on a printed form
+  const sumTable = 'w-full border-collapse text-left text-[12px]'
+  const sumTh = 'border border-slate-300 bg-slate-50 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-500'
+  const sumTd = 'border border-slate-300 px-3 py-1.5 tabular-nums text-slate-900'
+  const preparedOn = dateLong(new Date(now))
+  const summaryDoc = (
+    <article aria-labelledby="sum-doc-title" className="mx-auto w-full max-w-[816px] bg-white px-5 py-6 text-slate-900 sm:px-12 sm:py-12">
+      {/* Letterhead */}
+      <header className="flex flex-wrap items-start justify-between gap-4 border-b-2 border-slate-900 pb-4">
+        <div className="min-w-0">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-blue-700">{employer}</p>
+          <h2 id="sum-doc-title" className="mt-1 text-[22px] font-bold leading-tight">{t('enrollment.core.summary_title')}</h2>
+          <p className="mt-0.5 text-[13px] text-slate-700">{planName}</p>
+        </div>
+        <dl className="grid grid-cols-[auto_auto] gap-x-3 gap-y-0.5 text-[11px]">
+          <dt className="text-slate-500">{t('enrollment.core.sum_plan_id')}</dt>
+          <dd className="text-right font-semibold">{PLAN_CONFIG.plan.planId}</dd>
+          <dt className="text-slate-500">{t('enrollment.core.sum_prepared_label')}</dt>
+          <dd className="text-right font-semibold">{preparedOn}</dd>
+        </dl>
+      </header>
+
+      <div className="mt-6 space-y-5">
+        {sumSection(1, t('enrollment.core.plan_label'), sumFields(
+          <>
+            {sumField(t('enrollment.core.plan_label'), planName)}
+            {sumField(t('enrollment.core.plan_type'), t(PLAN_CONFIG.plan.nameKey))}
+            {sumField(t('enrollment.core.sum_employer'), employer)}
+          </>,
+        ))}
+
+        {sumSection(2, t('enrollment.core.sum_based_on'), sumFields(
+          <>
+            {sumField(t('enrollment.core.sum_salary'), money(salary))}
+            {sumField(t('enrollment.core.sum_paychecks'), t('enrollment.core.sum_paychecks_value', { count: periods }))}
+            {sumField(t('enrollment.core.sum_savings'), money(savings))}
+            {sumField(t('enrollment.core.sum_age'), t('enrollment.core.sum_age_value', { age }))}
+            {sumField(t('enrollment.core.sum_retire_age'), t('enrollment.core.sum_age_value', { age: retireAge }))}
+            {sumField(t('enrollment.core.sum_years'), t('enrollment.core.sum_years_value', { count: years }))}
+          </>,
+        ))}
+
+        {sumSection(3, t('enrollment.core.sheet_contribution'), (
+          <>
+            {sumFields(
+              <>
+                {sumField(t('enrollment.core.ed.total'), `${f.total}%`)}
+                {sumField(t('enrollment.core.sum_per_paycheck'), money(f.perCheck))}
+                {sumField(t('enrollment.core.sum_per_year'), money(perYear(f.total)))}
+              </>,
             )}
-          </dl>
-        </>,
-      )}
-      {sumSection(
-        t('enrollment.core.row_auto'),
-        <dl className="divide-y divide-slate-100 dark:divide-gray-800">
-          {sumRow(t('enrollment.core.sum_status'), election.auto.enabled ? t('enrollment.core.auto_enabled') : t('enrollment.core.auto_off_short'))}
-          {election.auto.enabled && (
-            <>
-              {sumRow(t('enrollment.core.ed.raise_by'), `+${election.auto.amount.preTax}%`)}
-              {sumRow(t('enrollment.core.ed.stop_at'), `${election.auto.cap.preTax}%`)}
-              {sumRow(t('plan.def.cycle'), t(`enrollment.core.ed.cycle_${election.auto.cycle}`))}
-              {sumRow(t('enrollment.core.sum_next_increase'), dateLong(nextAuto))}
-            </>
-          )}
-        </dl>,
-      )}
-      {sumSection(
-        t('enrollment.core.sheet_invest'),
-        <>
-          <dl className="divide-y divide-slate-100 dark:divide-gray-800">
-            {sumRow(t('enrollment.core.row_invest'), f.invest)}
-            {sumRow(t('enrollment.core.ed.approach'), t(election.mode === 'own' ? 'enrollment.core.ed.mode_own' : election.mode === 'plan_selected' ? 'enrollment.core.ed.mode_plan' : 'enrollment.core.ed.mode_risk'))}
-            {sumRow(t('plan.inv.auto_rebalance'), yesNo(election.autoRebalance))}
-            {sumRow(t('plan.inv.sdb'), yesNo(election.sdb))}
-          </dl>
-          <table className="mt-2 w-full text-left text-[13px]">
-            <caption className="sr-only">{t('enrollment.core.ed.funds')}</caption>
-            <thead>
-              <tr className="border-b border-slate-200 text-slate-600 dark:border-gray-700 dark:text-gray-300">
-                <th scope="col" className="py-2 font-medium">{t('enrollment.core.ed.funds')}</th>
-                <th scope="col" className="py-2 text-right font-medium">%</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-gray-800">
-              {f.rows.map((r) => {
-                const meta = fundMeta(r.ticker)
-                return (
-                  <tr key={r.ticker}>
-                    <th scope="row" className="py-2 font-normal">
-                      <span className="block font-medium text-slate-900 dark:text-white">{meta?.name ?? r.ticker}</span>
-                      <span className="block text-[12px] text-slate-600 dark:text-gray-300">{`${r.ticker}${meta ? ` · ${meta.assetClass}` : ''}`}</span>
+            <table className={sumTable}>
+              <caption className="sr-only">{t('enrollment.core.sum_by_source')}</caption>
+              <thead>
+                <tr>
+                  <th scope="col" className={sumTh}>{t('enrollment.core.sum_source')}</th>
+                  <th scope="col" className={cn(sumTh, 'text-right')}>{t('enrollment.core.sum_rate')}</th>
+                  <th scope="col" className={cn(sumTh, 'text-right')}>{t('enrollment.core.sum_per_paycheck')}</th>
+                  <th scope="col" className={cn(sumTh, 'text-right')}>{t('enrollment.core.sum_per_year')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sources.map((src) => (
+                  <tr key={src.key}>
+                    <th scope="row" className={cn(sumTd, 'font-normal')}>
+                      <span className="block font-semibold">{src.label}</span>
+                      <span className="block text-[11px] text-slate-600">{t(`enrollment.core.src_tip_${src.key}`)}</span>
                     </th>
-                    <td className="py-2 text-right align-top font-semibold tabular-nums text-slate-900 dark:text-white">{`${r.pct}%`}</td>
+                    <td className={cn(sumTd, 'text-right align-top')}>{`${src.pct}%`}</td>
+                    <td className={cn(sumTd, 'text-right align-top')}>{money((salary * src.pct) / 100 / periods)}</td>
+                    <td className={cn(sumTd, 'text-right align-top')}>{money(perYear(src.pct))}</td>
                   </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </>,
-      )}
-      {sumSection(
-        t('enrollment.core.m_proj', { age: retireAge }),
-        <dl className="divide-y divide-slate-100 dark:divide-gray-800">
-          {sumRow(t('enrollment.core.m_proj', { age: retireAge }), money(f.projected))}
-          {sumRow(t('enrollment.core.sum_assumes'), `${t('enrollment.core.not_guaranteed')} · ${t('enrollment.core.proj_basis', { rate: growthPct })}`)}
-        </dl>,
-      )}
-      <p className="text-[12px] leading-[1.5] text-slate-600 dark:text-gray-300">{t('enrollment.core.sum_footnote')}</p>
-    </div>
+                ))}
+              </tbody>
+            </table>
+          </>
+        ))}
+
+        {sumSection(4, t('enrollment.core.m_match_short'), (
+          <>
+            {sumNote(t('enrollment.core.match_tip_intro', { per: matchPer, cap }))}
+            {sumFields(
+              <>
+                {sumField(t('enrollment.core.sum_matched_rate'), `${Math.min(deferral, cap)}% / ${cap}%`)}
+                {sumField(t('enrollment.core.sum_per_month'), `+${money(f.match / 12)}`)}
+                {sumField(t('enrollment.core.sum_per_year'), `+${money(f.match)}`)}
+                {sumField(
+                  t('enrollment.core.sum_status'),
+                  f.match >= fullMatch ? t('enrollment.core.m_match_full') : t('enrollment.core.m_match_gap', { amount: `${money((fullMatch - f.match) / 12)}${t('enrollment.core.unit_month')}` }),
+                )}
+                {sumField(t('enrollment.core.sum_total_in'), `${money(monthlyIn + f.match / 12)}${t('enrollment.core.unit_month')}`, true)}
+              </>,
+            )}
+          </>
+        ))}
+
+        {sumSection(5, t('enrollment.core.row_auto'), (
+          <>
+            {sumFields(
+              <>
+                {sumField(t('enrollment.core.sum_status'), election.auto.enabled ? t('enrollment.core.auto_enabled') : t('enrollment.core.auto_off_short'))}
+                {election.auto.enabled && (
+                  <>
+                    {sumField(t('enrollment.core.ed.raise_by'), `+${election.auto.amount.preTax}%`)}
+                    {sumField(t('enrollment.core.ed.stop_at'), `${election.auto.cap.preTax}%`)}
+                    {sumField(t('plan.def.cycle'), t(`enrollment.core.ed.cycle_${election.auto.cycle}`))}
+                    {sumField(t('enrollment.core.sum_next_increase'), dateLong(nextAuto))}
+                  </>
+                )}
+              </>,
+            )}
+            {autoSchedule.length > 0 && (
+              <table className={sumTable}>
+                <caption className="sr-only">{t('enrollment.core.sum_schedule')}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col" className={sumTh}>{t('enrollment.core.sum_year')}</th>
+                    <th scope="col" className={cn(sumTh, 'text-right')}>{t('enrollment.core.sum_your_rate')}</th>
+                    <th scope="col" className={cn(sumTh, 'text-right')}>{t('enrollment.core.sum_per_paycheck')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {autoSchedule.map((row) => (
+                    <tr key={row.year}>
+                      <th scope="row" className={cn(sumTd, 'font-semibold')}>{row.year}</th>
+                      <td className={cn(sumTd, 'text-right')}>{`${row.rate}%`}</td>
+                      <td className={cn(sumTd, 'text-right')}>{money((salary * row.rate) / 100 / periods)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            {autoSchedule.length > 0 && election.afterTax > 0 && sumNote(t('enrollment.core.sum_schedule_note', { after: election.afterTax, cap: election.auto.cap.preTax }))}
+          </>
+        ))}
+
+        {sumSection(6, t('enrollment.core.sheet_invest'), (
+          <>
+            {sumFields(
+              <>
+                {sumField(t('enrollment.core.row_invest'), f.invest)}
+                {sumField(t('enrollment.core.ed.approach'), t(election.mode === 'own' ? 'enrollment.core.ed.mode_own' : election.mode === 'plan_selected' ? 'enrollment.core.ed.mode_plan' : 'enrollment.core.ed.mode_risk'))}
+                {sumField(t('enrollment.core.sum_growth'), `${growthPct}%`)}
+                {sumField(t('plan.inv.auto_rebalance'), yesNo(election.autoRebalance))}
+                {sumField(t('plan.inv.sdb'), yesNo(election.sdb), true)}
+              </>,
+            )}
+            {sumNote(t('enrollment.core.invest_tip'))}
+            {/* The split across funds: one thin bar, then the funds named with their colours, so nothing relies on colour alone */}
+            <div className="border-x border-b border-slate-300 px-3 py-3">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-500">{t('enrollment.core.sum_allocation')}</p>
+              <div className="mt-2 flex h-3 w-full gap-[2px] overflow-hidden rounded-full" role="img" aria-label={`${t('enrollment.core.sum_allocation')}: ${f.rows.map((r) => `${fundMeta(r.ticker)?.name ?? r.ticker} ${r.pct}%`).join(', ')}`}>
+                {f.rows.filter((r) => r.pct > 0).map((r) => (
+                  <span
+                    key={r.ticker}
+                    data-print-fill
+                    title={`${fundMeta(r.ticker)?.name ?? r.ticker}: ${r.pct}%`}
+                    className="h-full first:rounded-l-full last:rounded-r-full"
+                    style={{ width: `${r.pct}%`, backgroundColor: fundColor(f.rows.indexOf(r)), minWidth: 4 }}
+                    aria-hidden
+                  />
+                ))}
+              </div>
+            </div>
+            <table className={sumTable}>
+              <caption className="sr-only">{t('enrollment.core.ed.funds')}</caption>
+              <thead>
+                <tr>
+                  <th scope="col" className={sumTh}>{t('enrollment.core.ed.funds')}</th>
+                  <th scope="col" className={cn(sumTh, 'text-right')}>%</th>
+                  <th scope="col" className={cn(sumTh, 'text-right')}>{t('enrollment.core.sum_per_month_all')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {f.rows.map((r, i) => {
+                  const meta = fundMeta(r.ticker)
+                  return (
+                    <tr key={r.ticker}>
+                      <th scope="row" className={cn(sumTd, 'font-normal')}>
+                        <span className="flex items-start gap-2">
+                          <span data-print-fill className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: fundColor(i) }} aria-hidden />
+                          <span className="min-w-0">
+                            <span className="block font-semibold">{meta?.name ?? r.ticker}</span>
+                            <span className="block text-[11px] text-slate-600">{`${r.ticker}${meta ? ` · ${meta.assetClass}` : ''}`}</span>
+                          </span>
+                        </span>
+                      </th>
+                      <td className={cn(sumTd, 'text-right align-top font-semibold')}>{`${r.pct}%`}</td>
+                      <td className={cn(sumTd, 'text-right align-top')}>{money(((monthlyIn + f.match / 12) * r.pct) / 100)}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+            <table className={cn(sumTable, 'mt-2')}>
+              <caption className="sr-only">{t('enrollment.core.sum_by_type')}</caption>
+              <thead>
+                <tr>
+                  <th scope="col" className={sumTh}>{t('enrollment.core.sum_by_type')}</th>
+                  <th scope="col" className={cn(sumTh, 'text-right')}>%</th>
+                </tr>
+              </thead>
+              <tbody>
+                {byAssetClass.map(([cls, pct]) => (
+                  <tr key={cls}>
+                    <th scope="row" className={cn(sumTd, 'font-semibold')}>{cls}</th>
+                    <td className={cn(sumTd, 'text-right')}>{`${pct}%`}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        ))}
+
+        {sumSection(7, t('enrollment.core.m_proj', { age: retireAge }), sumFields(
+          <>
+            {sumField(t('enrollment.core.m_proj', { age: retireAge }), money(f.projected))}
+            {sumField(t('enrollment.core.sum_savings'), money(savings))}
+            {sumField(t('enrollment.core.sum_years'), t('enrollment.core.sum_years_value', { count: years }))}
+            {sumField(t('enrollment.core.sum_assumes'), `${t('enrollment.core.not_guaranteed')} · ${t('enrollment.core.proj_basis', { rate: growthPct })}`, true)}
+          </>,
+        ))}
+      </div>
+
+      <footer className="mt-8 border-t border-slate-300 pt-3 text-[11px] leading-[1.5] text-slate-600">
+        <p>{t('enrollment.core.sum_footnote')}</p>
+        <p className="mt-1">{`${planName} · ${PLAN_CONFIG.plan.planId} · ${t('enrollment.core.sum_prepared', { date: preparedOn })}`}</p>
+      </footer>
+    </article>
   )
   /** Prints only the summary: everything else on the page is hidden while the print dialog is open */
   const printSummary = () => {
@@ -671,7 +795,7 @@ export default function CoreEnrollment() {
 
       <main className="relative mx-auto max-w-[1040px] px-4 pb-6 pt-6 sm:px-6">
         {showPlan ? (
-          <div ref={planRef} style={fit < 1 ? { zoom: fit } : undefined} className="space-y-4">
+          <div ref={planRef} className="space-y-4">
             {/* Title */}
             <div className="flex items-center gap-4 px-1">
               <motion.span initial={reduce ? false : { scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 320, damping: 18 }} className="rounded-full shadow-[0_10px_24px_rgba(37,99,235,0.28)]">
@@ -1173,7 +1297,7 @@ export default function CoreEnrollment() {
             const meta = fundMeta(r.ticker)
             return (
               <motion.li key={r.ticker} initial={reduce ? false : { opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + i * 0.05, duration: 0.3, ease }} className="flex items-center gap-3 py-3.5">
-                <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: FUND_COLORS[i] }} aria-hidden />
+                <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: fundColor(i, isDark) }} aria-hidden />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[15px] font-medium text-slate-900 dark:text-white">{meta?.name ?? r.ticker}</span>
                   <span className="block text-[13px] text-slate-500 dark:text-gray-400">{`${r.ticker}${meta ? ` · ${meta.assetClass}` : ''}`}</span>
@@ -1185,32 +1309,47 @@ export default function CoreEnrollment() {
         </ul>
       </Sheet>
 
-      {/* Full summary, view and print; closing it returns to the plan */}
-      <Sheet
-        open={sheet === 'summary'}
-        onClose={() => setSheet(null)}
-        title={t('enrollment.core.summary_title')}
-        subtitle={t('enrollment.core.summary_sub')}
-        footer={
-          <>
-            <button type="button" onClick={() => setSheet(null)} className="inline-flex h-10 items-center rounded-full bg-white px-5 text-[14px] font-semibold text-slate-900 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-gray-900 dark:text-white dark:ring-gray-700 dark:hover:bg-gray-800">
-              {t('enrollment.core.close')}
-            </button>
-            <button type="button" onClick={printSummary} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-blue-600 px-5 text-[14px] font-semibold text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
-              <Printer className="h-4 w-4" aria-hidden />
-              {t('enrollment.core.summary_print')}
-            </button>
-          </>
-        }
-      >
-        {summaryBody}
-      </Sheet>
+      {/* Full summary as a document preview: a sheet of paper on a dim backdrop, with Close and Print or save as PDF above it */}
+      <AnimatePresence>
+        {sheet === 'summary' && (
+          <motion.div
+            className="fixed inset-0 z-[90] flex flex-col bg-slate-900/70 backdrop-blur-[2px]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: reduce ? 0 : 0.18 }}
+          >
+            <div ref={summaryRef} role="dialog" aria-modal="true" aria-labelledby="sum-doc-title" className="flex min-h-0 flex-1 flex-col">
+              <div className="flex shrink-0 items-center justify-between gap-3 border-b border-white/10 bg-slate-900 px-4 py-3 text-white sm:px-6">
+                <p className="min-w-0 truncate text-[14px] font-semibold">{t('enrollment.core.summary_title')}</p>
+                <div className="flex shrink-0 items-center gap-2">
+                  <button type="button" onClick={() => setSheet(null)} className="inline-flex h-9 items-center rounded-full px-4 text-[14px] font-semibold text-white ring-1 ring-white/25 transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+                    {t('enrollment.core.close')}
+                  </button>
+                  <button type="button" onClick={printSummary} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-white px-4 text-[14px] font-semibold text-slate-900 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">
+                    <Printer className="h-4 w-4" aria-hidden />
+                    {t('enrollment.core.summary_print')}
+                  </button>
+                </div>
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto px-3 py-6 sm:px-6 sm:py-10" onClick={(e) => e.target === e.currentTarget && setSheet(null)}>
+                <motion.div
+                  initial={reduce ? false : { opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, ease }}
+                  className="mx-auto w-full max-w-[816px] shadow-[0_24px_60px_-20px_rgba(0,0,0,0.6)]"
+                >
+                  {summaryDoc}
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {ready &&
         createPortal(
           <div data-print-summary className="hidden">
-            <h1 className="text-[22px] font-bold">{t('enrollment.core.summary_title')}</h1>
-            <p className="mb-6 mt-1 text-[13px]">{`${planName} · ${t('enrollment.core.sum_prepared', { date: dateLong(new Date(now)) })}`}</p>
-            {summaryBody}
+            {summaryDoc}
           </div>,
           document.body,
         )}

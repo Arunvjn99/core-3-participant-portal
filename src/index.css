@@ -442,11 +442,21 @@ html[data-theme="dark"] [style*="linear-gradient"][style*="#DBEAFE"] {
   }
   body.print-summary [data-print-summary] {
     display: block !important;
-    padding: 24px;
   }
-  body.print-summary [data-print-summary] * {
+  body.print-summary [data-print-summary] article {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+  @page {
+    margin: 16mm;
+  }
+  body.print-summary [data-print-summary] *:not([data-print-fill]) {
     color: #0f172a !important;
     background: transparent !important;
     border-color: #e2e8f0 !important;
+  }
+  body.print-summary [data-print-fill] {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

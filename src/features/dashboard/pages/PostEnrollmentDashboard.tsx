@@ -46,7 +46,8 @@ import { useOutsideAssetsStore } from '@/features/outside-assets/outsideAssetsSt
 import { useNextBestActions, type DoneActionId, type NextActionId } from '@/features/dashboard/useNextBestActions'
 import { InfoTip } from '@/features/enrollment/flow/core/ui'
 import { PLAN_CONFIG } from '@/features/enrollment/agent/planConfig'
-import { ASSET_SLICES, formatMoney, summarize, type AssetSlice } from '@/features/outside-assets/summary'
+import { ASSET_SLICES, accountName, formatMoney, summarize, type AssetSlice } from '@/features/outside-assets/summary'
+import { useProfileStore } from '@/features/profile/profileStore'
 
 const ease = [0.22, 1, 0.36, 1] as const
 
@@ -324,6 +325,81 @@ function MatchGapTip({ label, from, to, youMore, employerMore, yearly }: { label
   )
 }
 
+/** Old 401(k)s and traditional IRAs can be rolled into this plan; a Roth IRA cannot */
+const ROLLABLE_TYPES = ['retirement_401k', 'ira'] as const
+const ROLLOVER_DISMISS_KEY = 'rollover_prompt_dismissed'
+
+/**
+ * "Do you want to roll over your funds?" at the top of the overview. When accounts added under All your accounts
+ * hold money that could come into this plan, it names the amount and the accounts; otherwise it is a general
+ * invitation. "Not now" hides it on this device.
+ */
+function RolloverPrompt() {
+  const { t } = useTranslation()
+  const locale = getAppDateLocale()
+  const accounts = useOutsideAssetsStore((s) => s.accounts)
+  const employer = useProfileStore((s) => s.employment.employer)
+  const [dismissed, setDismissed] = React.useState(() => {
+    try {
+      return localStorage.getItem(ROLLOVER_DISMISS_KEY) === '1'
+    } catch {
+      return false
+    }
+  })
+  if (dismissed) return null
+
+  const rollable = accounts.filter((a) => (ROLLABLE_TYPES as readonly string[]).includes(a.type) && a.balance > 0)
+  const total = rollable.reduce((sum, a) => sum + a.balance, 0)
+  const plan = t('enrollment.rw.plan_name', { employer })
+  const dismiss = () => {
+    setDismissed(true)
+    try {
+      localStorage.setItem(ROLLOVER_DISMISS_KEY, '1')
+    } catch {
+      /* private mode: it simply shows again next visit */
+    }
+  }
+
+  return (
+    <section
+      aria-labelledby="rollover-title"
+      className="mb-5 flex flex-col gap-4 rounded-[20px] bg-[linear-gradient(180deg,#EAF2FF_0%,#F6F9FF_100%)] p-5 ring-1 ring-blue-100 sm:flex-row sm:items-center dark:bg-[linear-gradient(180deg,rgba(59,130,246,0.16)_0%,rgba(15,23,42,1)_100%)] dark:ring-blue-400/20"
+    >
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-primary shadow-[0_1px_2px_rgba(11,21,51,0.06)] ring-1 ring-blue-100 dark:bg-white/10 dark:text-blue-300 dark:ring-white/10" aria-hidden>
+        <ArrowLeftRight className="h-5 w-5" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <h2 id="rollover-title" className="text-[16px] font-bold leading-tight text-text-primary">{t('postDashboard.rollover_title')}</h2>
+        <p className="mt-1 text-[14px] leading-snug text-slate-700 dark:text-slate-300">
+          {rollable.length > 0 ? (
+            <Trans
+              i18nKey="postDashboard.rollover_body_known"
+              count={rollable.length}
+              values={{ amount: formatMoney(total, locale), names: rollable.map((a) => accountName(a, t)).join(', '), plan }}
+              components={{ b: <span className="font-semibold text-text-primary" /> }}
+            />
+          ) : (
+            t('postDashboard.rollover_body_generic', { plan })
+          )}
+        </p>
+      </div>
+      <div className="flex shrink-0 flex-wrap items-center gap-2">
+        <Link to="/transactions/rollover" className={`group ${PILL_SECONDARY} h-10 px-5 text-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary`}>
+          {t('postDashboard.rollover_cta')}
+          <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+        </Link>
+        <button
+          type="button"
+          onClick={dismiss}
+          className="inline-flex h-10 items-center rounded-full px-4 text-[14px] font-semibold text-slate-700 transition-colors hover:bg-white/70 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white"
+        >
+          {t('postDashboard.rollover_later')}
+        </button>
+      </div>
+    </section>
+  )
+}
+
 export default function PostEnrollmentDashboard() {
   const { t } = useTranslation()
   const { resolvedMode } = useTheme()
@@ -502,6 +578,9 @@ export default function PostEnrollmentDashboard() {
             <h1 className="text-[28px] font-bold leading-tight text-[#0B1533] dark:text-white">{t('dashboard.overview')}</h1>
             <p className="mt-1 text-[15px] leading-snug text-text-secondary">{t('dashboard.overview_sub')}</p>
           </header>
+
+          {/* First thing on the page: an offer to bring money from an old plan or IRA into this one */}
+          <RolloverPrompt />
 
           <NotificationBanner />
 
