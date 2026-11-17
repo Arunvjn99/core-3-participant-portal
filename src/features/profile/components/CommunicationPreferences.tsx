@@ -45,7 +45,7 @@ export function CommunicationPreferences() {
 
   return (
     <div>
-      <p className="mb-1 text-sm font-semibold text-text-primary">{t('comms.title')}</p>
+      <p className="mb-1 text-[18px] font-bold leading-tight text-text-primary">{t('comms.title')}</p>
       <p className="mb-4 text-xs text-text-secondary">
         {t('comms.sent_to', { email, phone })}{' '}
         <Link to="/profile?section=personal" className="font-semibold text-primary hover:underline dark:text-blue-300">{t('comms.change_contact')}</Link>

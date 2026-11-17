@@ -37,7 +37,7 @@ export function ClassificationPanel() {
         ))}
       </div>
 
-      <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">{t('profile.d.current')}</h3>
+      <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-secondary">{t('profile.d.current')}</h3>
       <ReadGrid cols={3}>
         <ReadField label={t('profile.d.type')}>{active.label}</ReadField>
         <ReadField label={t('profile.d.code')}>{active.current.code}</ReadField>
@@ -46,7 +46,7 @@ export function ClassificationPanel() {
         <ReadField label={t('profile.d.end_date')}>{fmt(active.current.end)}</ReadField>
       </ReadGrid>
 
-      <h3 className="mb-3 mt-6 text-sm font-semibold text-gray-700 dark:text-gray-300">{t('profile.d.history')}</h3>
+      <h3 className="mb-3 mt-6 border-t border-slate-200/80 pt-5 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-secondary dark:border-white/10">{t('profile.d.history')}</h3>
       <div className="overflow-x-auto rounded-lg border border-gray-100 dark:border-gray-800">
         <table className="w-full min-w-[28rem] text-left text-sm">
           <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500 dark:bg-gray-800/60 dark:text-gray-400">

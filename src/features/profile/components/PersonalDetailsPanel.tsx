@@ -94,7 +94,7 @@ export function PersonalDetailsPanel() {
   if (!editing) {
     return (
       <ProfileCard title={t('profile.d.personal_title')} onEdit={startEdit} saved={saved}>
-        <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">{t('profile.d.about_you')}</h3>
+        <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-secondary">{t('profile.d.about_you')}</h3>
         <ReadGrid>
           <ReadField label={t('profile.d.name')}>{fullName}</ReadField>
           <ReadField label={t('profile.d.gender')}>{t(`profile.d.gender_${personal.gender}`)}</ReadField>
@@ -118,7 +118,7 @@ export function PersonalDetailsPanel() {
           </ReadField>
         </ReadGrid>
 
-        <h3 className="mb-3 mt-6 text-sm font-semibold text-gray-700 dark:text-gray-300">{t('profile.d.contact')}</h3>
+        <h3 className="mb-3 mt-6 border-t border-slate-200/80 pt-5 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-secondary dark:border-white/10">{t('profile.d.contact')}</h3>
         <ReadGrid>
           <ReadField label={t('profile.d.email')}>{personal.email}</ReadField>
           <ReadField label={t('profile.d.phone')}>{`${personal.phoneCode} ${personal.phone}`}</ReadField>
@@ -148,7 +148,7 @@ export function PersonalDetailsPanel() {
   return (
     <ProfileCard title={t('profile.d.personal_title')} editing>
       <form onSubmit={(e) => void submit(e)} noValidate>
-        <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">{t('profile.d.about_you')}</h3>
+        <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-secondary">{t('profile.d.about_you')}</h3>
         <div className="grid gap-4 sm:grid-cols-3">
           <Input id="pd-first" label={`${t('profile.d.first_name')} *`} value={draft.firstName} onChange={(e) => set('firstName', e.target.value)} autoComplete="given-name" {...inv('firstName')} />
           <Input id="pd-middle" label={t('profile.d.middle_name')} value={draft.middleName} onChange={(e) => set('middleName', e.target.value)} autoComplete="additional-name" />
@@ -169,7 +169,7 @@ export function PersonalDetailsPanel() {
           />
         </div>
 
-        <h3 className="mb-3 mt-6 text-sm font-semibold text-gray-700 dark:text-gray-300">{t('profile.d.contact')}</h3>
+        <h3 className="mb-3 mt-6 border-t border-slate-200/80 pt-5 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-secondary dark:border-white/10">{t('profile.d.contact')}</h3>
         <div className="grid gap-4 sm:grid-cols-2">
           <Input id="pd-email" type="email" label={`${t('profile.d.email')} *`} value={draft.email} onChange={(e) => set('email', e.target.value)} autoComplete="email" {...inv('email')} />
           <div />

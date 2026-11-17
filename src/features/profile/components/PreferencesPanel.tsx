@@ -82,10 +82,11 @@ export function PreferencesPanel() {
   const isThemeModified = sessionCompanyId !== null && sessionCompanyId !== ''
 
   return (
-    <div className="flex max-w-lg flex-col gap-6">
-      {/* Language */}
+    <div className="flex flex-col gap-5">
+      {/* Language and light/dark theme, side by side in one card */}
+      <section className="grid gap-5 sm:grid-cols-2 rounded-[20px] bg-surface-card p-5 shadow-[0_12px_32px_-28px_rgba(11,21,51,0.45)] ring-1 ring-slate-200/70 sm:p-6 dark:ring-white/10">
       <div>
-        <p className="mb-3 text-sm font-semibold text-text-primary">{t('profile.preferences_editor.language')}</p>
+        <p className="mb-3 text-[18px] font-bold leading-tight text-text-primary">{t('profile.preferences_editor.language')}</p>
         <Select
           options={languageOptions}
           value={resolvedLang}
@@ -96,7 +97,7 @@ export function PreferencesPanel() {
 
       {/* Light/dark theme */}
       <div>
-        <p className="mb-3 text-sm font-semibold text-text-primary">{t('profile.preferences_editor.theme')}</p>
+        <p className="mb-3 text-[18px] font-bold leading-tight text-text-primary">{t('profile.preferences_editor.theme')}</p>
         <Select
           options={themeOptions}
           value={mode}
@@ -104,12 +105,13 @@ export function PreferencesPanel() {
           label={t('profile.preferences_editor.color_theme')}
         />
       </div>
+      </section>
 
       {/* Portal brand theme */}
-      <div>
+      <section className="rounded-[20px] bg-surface-card p-5 shadow-[0_12px_32px_-28px_rgba(11,21,51,0.45)] ring-1 ring-slate-200/70 sm:p-6 dark:ring-white/10">
         <div className="mb-3 flex items-center gap-2">
           <Palette className="h-4 w-4 text-text-secondary" />
-          <p className="text-sm font-semibold text-text-primary">Portal Theme</p>
+          <p className="text-[18px] font-bold leading-tight text-text-primary">Portal Theme</p>
           {isThemeModified && (
             <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
               Custom
@@ -182,9 +184,11 @@ export function PreferencesPanel() {
             )}
           </div>
         )}
-      </div>
+      </section>
 
-      <CommunicationPreferences />
+      <section className="rounded-[20px] bg-surface-card p-5 shadow-[0_12px_32px_-28px_rgba(11,21,51,0.45)] ring-1 ring-slate-200/70 sm:p-6 dark:ring-white/10">
+        <CommunicationPreferences />
+      </section>
     </div>
   )
 }

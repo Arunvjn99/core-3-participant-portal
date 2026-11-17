@@ -640,17 +640,19 @@ export default function PostEnrollmentDashboard() {
                 </span>
               </div>
 
-              {/* One suggestion worked out from the participant's numbers; the whole panel opens the place to act on it */}
+              {/* One tip worked out from the participant's numbers, on one line; the whole panel opens the place to act on it */}
               <Link
                 to={readinessTip.href}
-                className={`group flex items-center gap-3 rounded-2xl p-3 ring-1 transition-shadow hover:shadow-[0_4px_12px_-6px_rgba(11,21,51,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${band.panel}`}
+                title={t(`postDashboard.${readinessTip.key}`, readinessTip.values).replace(/<\/?b>/g, '')}
+                className={`group flex items-center gap-2 rounded-2xl px-3.5 py-2.5 ring-1 transition-shadow hover:shadow-[0_4px_12px_-6px_rgba(11,21,51,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${band.panel}`}
               >
-                <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white shadow-[0_1px_2px_rgba(11,21,51,0.06)] dark:bg-white/10 ${band.accent}`} aria-hidden>
-                  <Lightbulb className="h-[18px] w-[18px]" />
-                </span>
                 <span className="min-w-0 flex-1">
-                  <span className={`block text-[10px] font-semibold uppercase tracking-[0.08em] ${band.accent}`}>{t('postDashboard.tip_label')}</span>
-                  <span className="mt-0.5 block text-[13px] leading-snug text-text-secondary">
+                  <span className={`flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.08em] ${band.accent}`}>
+                    <Lightbulb className="h-3 w-3" aria-hidden />
+                    {t('postDashboard.tip_label')}
+                  </span>
+                  {/* One line: the tips are written short, and anything longer is cut with an ellipsis (the full text is the panel's title) */}
+                  <span className="mt-0.5 block truncate text-[13px] text-text-secondary">
                     <Trans i18nKey={`postDashboard.${readinessTip.key}`} values={readinessTip.values} components={{ b: <span className="font-semibold text-text-primary" /> }} />
                   </span>
                 </span>

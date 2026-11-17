@@ -772,7 +772,7 @@ export default function CoreEnrollment() {
                             <span className="ml-1 text-[15px] text-slate-400">{t('enrollment.core.per_month')}</span>
                           </p>
                           {f.match >= fullMatch ? (
-                            <p className="mt-1 flex items-center gap-1 text-[14px] font-medium text-emerald-700 dark:text-emerald-400">
+                            <p className="mt-1 flex items-center gap-1 text-[14px] font-medium text-emerald-800 dark:text-emerald-300">
                               <Check className="h-4 w-4" strokeWidth={2.5} aria-hidden />
                               {t('enrollment.core.m_match_full')}
                             </p>
@@ -805,15 +805,17 @@ export default function CoreEnrollment() {
                               <>
                                 <ArrowRight className="h-5 w-5" strokeWidth={2.5} aria-hidden />
                                 {`${nextRate}%`}
-                                <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[12px] font-semibold tracking-normal text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-400/25">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden />
-                                  {t('enrollment.core.auto_enabled')}
-                                </span>
                               </>
                             )}
                           </p>
+                          {/* Status leads the detail line, so the figures above stay clean */}
                           {election.auto.enabled ? (
-                            <p className="mt-1 text-[14px] text-slate-500 dark:text-gray-400">
+                            <p className="mt-1 flex flex-wrap items-center gap-x-1.5 text-[14px] text-slate-500 dark:text-gray-400">
+                              <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-800 dark:text-emerald-300">
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" aria-hidden />
+                                {t('enrollment.core.auto_enabled')}
+                              </span>
+                              <span aria-hidden>·</span>
                               {t('enrollment.core.auto_each', { amount: election.auto.amount.preTax, year: nextAuto.getFullYear() })}
                             </p>
                           ) : (

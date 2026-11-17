@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { motion } from 'framer-motion'
-import { Shield, ChevronRight, AlertCircle } from 'lucide-react'
+import { motion, useReducedMotion } from 'framer-motion'
+import { Shield, ChevronRight, AlertCircle, ArrowRight } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import { getAppDateLocale } from '@/lib/dateLocale'
 import { useElectionsStore } from '@/features/plan/electionsStore'
 
@@ -50,115 +51,102 @@ function formatCurrency(amount: number, locale: string) {
   }).format(amount)
 }
 
+/** The pre-enrollment dashboard's pieces: card surface, the solid pill, the white pill and a focus ring everything shares */
+const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900'
+const CARD = 'rounded-[20px] bg-surface-card shadow-[0_12px_32px_-28px_rgba(11,21,51,0.45)] ring-1 ring-slate-200/70 dark:ring-white/10'
+const PILL_PRIMARY = `inline-flex h-11 items-center justify-center gap-1.5 rounded-full bg-primary px-5 text-[14px] font-semibold text-white shadow-[0_6px_14px_-8px_rgba(37,99,235,0.5)] transition-[filter,transform] hover:brightness-110 active:scale-[0.98] motion-reduce:active:scale-100 dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)] ${FOCUS}`
+const PILL_SECONDARY = `inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-white px-4 text-[14px] font-semibold text-slate-900 shadow-[0_2px_6px_-3px_rgba(11,21,51,0.12)] ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-white/5 dark:text-white dark:ring-white/15 dark:hover:bg-white/10 ${FOCUS}`
+const TEXT_LINK = `inline-flex min-h-10 items-center gap-1 rounded-md text-[14px] font-semibold text-primary underline-offset-2 hover:underline dark:text-blue-300 ${FOCUS}`
+
+/** Status pill: a dot and the word, in colours that stay readable on both themes */
 function StatusBadge({ status }: { status: PlanStatus }) {
   const { t } = useTranslation()
-  const styles: Record<PlanStatus, { labelKey: string; bg: string; text: string }> = {
-    enrolled: {
-      labelKey: 'status_enrolled',
-      bg: 'bg-[var(--color-primary)] dark:bg-blue-600',
-      text: 'text-white',
-    },
-    eligible: {
-      labelKey: 'status_eligible',
-      bg: 'bg-[var(--status-success-bg)] dark:bg-emerald-950/40',
-      text: 'text-[var(--status-success)] dark:text-emerald-400',
-    },
-    ineligible: {
-      labelKey: 'status_ineligible',
-      bg: 'bg-[var(--surface-elevated)] dark:bg-gray-800',
-      text: 'text-[var(--text-muted)] dark:text-gray-500',
-    },
-    opted_out: {
-      labelKey: 'status_opted_out',
-      bg: 'bg-amber-100 dark:bg-amber-950/40',
-      text: 'text-amber-800 dark:text-amber-300',
-    },
+  const styles: Record<PlanStatus, { labelKey: string; pill: string; dot: string }> = {
+    enrolled: { labelKey: 'status_enrolled', pill: 'bg-blue-50 text-blue-800 ring-blue-200 dark:bg-blue-500/15 dark:text-blue-200 dark:ring-blue-400/30', dot: 'bg-blue-600 dark:bg-blue-300' },
+    eligible: { labelKey: 'status_eligible', pill: 'bg-emerald-50 text-emerald-800 ring-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-200 dark:ring-emerald-400/30', dot: 'bg-emerald-600 dark:bg-emerald-300' },
+    ineligible: { labelKey: 'status_ineligible', pill: 'bg-slate-100 text-slate-700 ring-slate-200 dark:bg-white/10 dark:text-slate-200 dark:ring-white/15', dot: 'bg-slate-500 dark:bg-slate-300' },
+    opted_out: { labelKey: 'status_opted_out', pill: 'bg-amber-50 text-amber-800 ring-amber-200 dark:bg-amber-500/15 dark:text-amber-200 dark:ring-amber-400/30', dot: 'bg-amber-600 dark:bg-amber-300' },
   }
   const s = styles[status]
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${s.bg} ${s.text}`}>
+    <span className={cn('inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold ring-1 ring-inset', s.pill)}>
+      <span className={cn('h-1.5 w-1.5 rounded-full', s.dot)} aria-hidden />
       {t(`enrollment.manage_page.${s.labelKey}`)}
     </span>
   )
 }
 
-function PlanCard({ plan }: { plan: Plan & { name: string; balanceChange?: string; description?: string; ineligibleReason?: string } }) {
+function PlanCard({ plan, index }: { plan: Plan & { name: string; balanceChange?: string; description?: string; ineligibleReason?: string }; index: number }) {
   const { t } = useTranslation()
   const locale = getAppDateLocale()
   const navigate = useNavigate()
+  const reduce = useReducedMotion()
   const isEnrolled = plan.status === 'enrolled'
   const isEligible = plan.status === 'eligible'
   const isIneligible = plan.status === 'ineligible'
   const isOptedOut = plan.status === 'opted_out'
+  const titleId = `plan-${plan.id}-title`
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
+    <motion.article
+      aria-labelledby={titleId}
+      initial={reduce ? false : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`rounded-2xl border bg-[var(--surface-card)] p-6 transition-shadow ${
-        isIneligible
-          ? 'border-[var(--border-default)] opacity-75 dark:border-gray-700'
-          : 'border-[var(--border-default)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-card)] dark:border-gray-700'
-      }`}
+      transition={{ duration: 0.35, delay: reduce ? 0 : index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+      className={cn(
+        CARD,
+        'flex h-full flex-col p-5 sm:p-6',
+        // The plan you're in gets the soft blue wash from the dashboard; the others stay plain white
+        isEnrolled && 'bg-[linear-gradient(180deg,#EAF2FF_0%,#F6F9FF_100%)] ring-blue-100 dark:bg-[linear-gradient(180deg,rgba(59,130,246,0.16)_0%,rgba(15,23,42,1)_100%)] dark:ring-blue-400/20',
+      )}
     >
-      <div className="mb-4 flex items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="text-lg font-bold text-[var(--text-primary)]">{plan.name}</h3>
-          <p className="mt-0.5 text-xs font-medium text-[var(--text-muted)]">
-            {t('enrollment.manage_page.plan_id', { id: plan.planId })}
-          </p>
+          <h2 id={titleId} className="text-[18px] font-bold leading-tight text-text-primary">{plan.name}</h2>
+          <p className="mt-1 text-[12px] font-medium text-slate-600 dark:text-slate-300">{t('enrollment.manage_page.plan_id', { id: plan.planId })}</p>
         </div>
         <StatusBadge status={plan.status} />
       </div>
 
       {isEnrolled && plan.balance != null && (
         <>
-          <div className="mb-5 rounded-xl border border-[var(--border-default)] px-5 py-4 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-[var(--text-secondary)]">{t('enrollment.manage_page.current_balance')}</span>
-              <span className="text-2xl font-extrabold tracking-tight text-[var(--text-primary)]">
-                {formatCurrency(plan.balance, locale)}
-              </span>
-            </div>
-            {plan.balanceChange && (
-              <p className="mt-1 text-right text-xs font-medium text-[var(--status-success)]">
-                {plan.balanceChange}
-              </p>
-            )}
+          {/* Balance straight on the card, no box inside the box */}
+          <div className="mt-5 flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
+            <span className="text-[14px] font-medium text-slate-600 dark:text-slate-300">{t('enrollment.manage_page.current_balance')}</span>
+            <span className="text-right">
+              <span className="block text-[28px] font-bold leading-none tracking-tight tabular-nums text-text-primary">{formatCurrency(plan.balance, locale)}</span>
+              {plan.balanceChange && <span className="mt-1.5 block text-[13px] font-semibold text-emerald-800 dark:text-emerald-300">{plan.balanceChange}</span>}
+            </span>
           </div>
-          <button
-            type="button"
-            onClick={() => navigate(`/enrollment/manage/${plan.id}`)}
-            className="btn-brand flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all active:scale-[0.98]"
-          >
-            {t('enrollment.manage_page.manage_plan')} <ChevronRight className="h-4 w-4" />
-          </button>
+          <div className="mt-auto pt-5">
+            <button type="button" onClick={() => navigate(`/enrollment/manage/${plan.id}`)} className={cn(PILL_PRIMARY, 'w-full')}>
+              {t('enrollment.manage_page.manage_plan')}
+              <ChevronRight className="h-4 w-4" aria-hidden />
+            </button>
+          </div>
         </>
       )}
 
       {isEligible && (
         <>
-          <p className="mb-5 text-sm leading-relaxed text-[var(--text-secondary)]">
-            {plan.description}
-          </p>
-          <button
-            type="button"
-            onClick={() => navigate('/enrollment/plan')}
-            className="text-sm font-semibold text-[var(--color-primary)] transition-colors hover:underline dark:text-blue-400"
-          >
-            {t('enrollment.manage_page.start_enrolment')}
-          </button>
+          <p className="mt-4 text-[14px] leading-relaxed text-text-secondary">{plan.description}</p>
+          <div className="mt-auto pt-5">
+            <button type="button" onClick={() => navigate('/enrollment/plan')} className={PILL_SECONDARY}>
+              {t('enrollment.manage_page.start_enrolment')}
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </button>
+          </div>
         </>
       )}
 
       {isOptedOut && (
         <>
-          <p className="mb-5 text-sm leading-relaxed text-[var(--text-secondary)]">{t('enrollment.manage_page.opted_out_message')}</p>
-          <div className="flex flex-wrap items-center gap-4">
-            <button type="button" onClick={() => navigate('/enrollment/quick')} className="btn-brand rounded-xl px-5 py-2.5 text-sm font-semibold">
+          <p className="mt-4 text-[14px] leading-relaxed text-text-secondary">{t('enrollment.manage_page.opted_out_message')}</p>
+          <div className="mt-auto flex flex-wrap items-center gap-3 pt-5">
+            <button type="button" onClick={() => navigate('/enrollment/quick')} className={PILL_PRIMARY}>
               {t('enrollment.manage_page.reenroll')}
             </button>
-            <button type="button" onClick={() => navigate(`/enrollment/manage/${plan.id}`)} className="text-sm font-semibold text-[var(--color-primary)] hover:underline dark:text-blue-400">
+            <button type="button" onClick={() => navigate(`/enrollment/manage/${plan.id}`)} className={PILL_SECONDARY}>
               {t('enrollment.manage_page.manage_plan')}
             </button>
           </div>
@@ -167,22 +155,20 @@ function PlanCard({ plan }: { plan: Plan & { name: string; balanceChange?: strin
 
       {isIneligible && (
         <>
-          <div className="flex items-start gap-2.5 rounded-xl bg-[var(--surface-elevated)] p-3.5 dark:bg-gray-800">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--text-muted)]" />
-            <p className="text-xs leading-relaxed text-[var(--text-muted)]">
-              {plan.ineligibleReason}
-            </p>
+          {/* Full-strength text: the card is not faded, so the reason stays readable */}
+          <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-slate-50 p-3.5 ring-1 ring-slate-200/70 dark:bg-white/5 dark:ring-white/10">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-slate-500 dark:text-slate-400" aria-hidden />
+            <p className="text-[13px] leading-relaxed text-text-secondary">{plan.ineligibleReason}</p>
           </div>
-          <button
-            type="button"
-            onClick={() => navigate('/enrollment/plan')}
-            className="mt-4 text-sm font-semibold text-[var(--color-primary)] hover:underline dark:text-blue-400"
-          >
-            {t('enrollment.manage_page.provide_in_advance')}
-          </button>
+          <div className="mt-auto pt-4">
+            <button type="button" onClick={() => navigate('/enrollment/plan')} className={TEXT_LINK}>
+              {t('enrollment.manage_page.provide_in_advance')}
+              <ChevronRight className="h-4 w-4" aria-hidden />
+            </button>
+          </div>
         </>
       )}
-    </motion.div>
+    </motion.article>
   )
 }
 
@@ -224,54 +210,57 @@ export default function EnrollmentManagement() {
   ]
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
-      <div className="mb-8">
-        <div className="mb-2 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-primary-subtle)] dark:bg-blue-950/40">
-            <Shield className="h-5 w-5 text-[var(--color-primary)] dark:text-blue-400" />
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] sm:text-3xl">
-            {t('enrollment.manage_page.title')}
-          </h1>
+    <div className="mx-auto w-full max-w-[1040px] px-4 py-6 sm:px-6 lg:py-7">
+      {/* Page title in the dashboard's type: plain on the page, no card */}
+      <header className="mb-5">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-primary ring-1 ring-blue-100 dark:bg-blue-500/15 dark:text-blue-300 dark:ring-blue-400/20" aria-hidden>
+            <Shield className="h-5 w-5" />
+          </span>
+          <h1 className="text-[28px] font-bold leading-tight text-[#0B1533] dark:text-white">{t('enrollment.manage_page.title')}</h1>
         </div>
-        <p className="text-sm text-[var(--text-secondary)] sm:text-base">
-          {t('enrollment.manage_page.subtitle')}
-        </p>
-      </div>
+        <p className="mt-1 text-[15px] leading-snug text-text-secondary">{t('enrollment.manage_page.subtitle')}</p>
+      </header>
 
-      <div className="mb-6 flex flex-wrap gap-2">
-        {filterTabs.map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            onClick={() => setFilter(tab.key)}
-            className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition-all ${
-              filter === tab.key
-                ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-white shadow-sm dark:border-blue-500 dark:bg-blue-600'
-                : 'border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:bg-[var(--surface-elevated)] dark:border-gray-700 dark:bg-gray-900 dark:hover:border-gray-600'
-            }`}
-          >
-            {t(`enrollment.manage_page.${tab.labelKey}`)}
-            <span
-              className={`inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold ${
-                filter === tab.key
-                  ? 'bg-white/20 text-white'
-                  : 'bg-[var(--surface-elevated)] text-[var(--text-muted)] dark:bg-gray-800'
-              }`}
+      {/* Filters: toggle buttons that say which one is on; the row scrolls sideways on narrow screens instead of wrapping */}
+      <div role="group" aria-label={t('enrollment.manage_page.title')} className="-mx-4 mb-5 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
+        {filterTabs.map((tab) => {
+          const on = filter === tab.key
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              aria-pressed={on}
+              onClick={() => setFilter(tab.key)}
+              className={cn(
+                'inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-[14px] font-semibold transition-colors',
+                FOCUS,
+                on
+                  ? 'bg-[#0B1533] text-white shadow-[0_6px_14px_-8px_rgba(11,21,51,0.5)] dark:bg-white dark:text-[#0B1533]'
+                  : 'bg-surface-card text-text-secondary ring-1 ring-slate-200 hover:bg-slate-50 hover:text-text-primary dark:ring-white/15 dark:hover:bg-white/5',
+              )}
             >
-              {counts[tab.key].toLocaleString(getAppDateLocale())}
-            </span>
-          </button>
-        ))}
+              {t(`enrollment.manage_page.${tab.labelKey}`)}
+              <span
+                className={cn(
+                  'inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-bold tabular-nums',
+                  on ? 'bg-white/20 text-white dark:bg-[#0B1533]/10 dark:text-[#0B1533]' : 'bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-slate-200',
+                )}
+              >
+                {counts[tab.key].toLocaleString(getAppDateLocale())}
+              </span>
+            </button>
+          )
+        })}
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        {filtered.map((plan) => (
-          <PlanCard key={plan.id} plan={plan} />
+      <div className="grid gap-5 md:grid-cols-2">
+        {filtered.map((plan, i) => (
+          <PlanCard key={plan.id} plan={plan} index={i} />
         ))}
         {filtered.length === 0 && (
-          <div className="col-span-full flex items-center justify-center rounded-2xl border border-dashed border-[var(--border-default)] py-16 dark:border-gray-700">
-            <p className="text-sm text-[var(--text-muted)]">{t('enrollment.manage_page.empty_filter')}</p>
+          <div className="col-span-full flex items-center justify-center rounded-[20px] border border-dashed border-slate-300 py-16 dark:border-white/15">
+            <p className="text-[14px] text-text-secondary">{t('enrollment.manage_page.empty_filter')}</p>
           </div>
         )}
       </div>
