@@ -310,7 +310,7 @@ export function Stepper({ value, onChange, min, max, step = 1, label, prefix, su
 }
 
 /** A short explanation on hover, focus or tap. */
-export function InfoTip({ label, text, side = 'top', wide = false }: { label: string; text: React.ReactNode; side?: 'top' | 'bottom'; /** Room for a small table */ wide?: boolean }) {
+export function InfoTip({ label, text, side = 'top', wide = false, align = 'center' }: { label: string; text: React.ReactNode; side?: 'top' | 'bottom'; /** Room for a small table */ wide?: boolean; /** 'end' lines the tooltip's right edge up with the icon, for icons near a card's right edge */ align?: 'center' | 'end' }) {
   const [open, setOpen] = useState(false)
   return (
     <span className="group relative inline-flex align-middle" onMouseLeave={() => setOpen(false)}>
@@ -329,7 +329,7 @@ export function InfoTip({ label, text, side = 'top', wide = false }: { label: st
         className={cn(
           'pointer-events-none absolute z-30 rounded-lg bg-slate-900 px-3 py-2 text-left text-[12px] font-normal leading-[1.5] text-white shadow-xl group-hover:block group-focus-within:block dark:bg-gray-800',
           // A wide tooltip opens rightward from about the start of its label, so a card's edge doesn't cut it off; a narrow one centres on the icon
-          wide ? '-left-28 w-[300px]' : 'left-1/2 w-64 -translate-x-1/2',
+          wide ? '-left-28 w-[300px]' : align === 'end' ? '-right-2 w-64' : 'left-1/2 w-64 -translate-x-1/2',
           side === 'top' ? 'bottom-full mb-2' : 'top-full mt-2',
           open ? 'block' : 'hidden',
         )}
@@ -341,7 +341,7 @@ export function InfoTip({ label, text, side = 'top', wide = false }: { label: st
 }
 
 /** A side panel on wide screens and a bottom sheet on phones, for focused edits. */
-export function Sheet({ open, onClose, title, subtitle, children, footer, wide = false, stacked = false }: { open: boolean; onClose: () => void; title: string; subtitle?: string; children: React.ReactNode; footer?: React.ReactNode; wide?: boolean; stacked?: boolean }) {
+export function Sheet({ open, onClose, title, subtitle, children, footer, wide = false, stacked = false, preview = false }: { open: boolean; onClose: () => void; title: string; subtitle?: string; children: React.ReactNode; footer?: React.ReactNode; wide?: boolean; stacked?: boolean; /** A light, unblurred backdrop, so the page behind stays readable while it updates live */ preview?: boolean }) {
   const { t } = useTranslation()
   const reduce = useReducedMotion()
   const panel = useRef<HTMLDivElement>(null)
@@ -387,7 +387,7 @@ export function Sheet({ open, onClose, title, subtitle, children, footer, wide =
     <AnimatePresence>
       {open && (
         <motion.div className={cn('fixed inset-0 flex items-end justify-end sm:items-stretch', stacked ? 'z-[80]' : 'z-[70]')} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
-          <button type="button" aria-label={t('enrollment.core.close')} onClick={onClose} className="absolute inset-0 cursor-default bg-slate-900/25 backdrop-blur-[2px]" />
+          <button type="button" aria-label={t('enrollment.core.close')} onClick={onClose} className={cn('absolute inset-0 cursor-default', preview ? 'bg-slate-900/10' : 'bg-slate-900/25 backdrop-blur-[2px]')} />
           <motion.div
             ref={panel}
             role="dialog"

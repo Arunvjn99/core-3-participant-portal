@@ -16,12 +16,16 @@ export interface NextAction {
   values?: Record<string, string>
 }
 
+/** Things the participant has already settled, shown as done once the to-do list runs short. */
+export type DoneActionId = 'beneficiary' | 'full_match' | 'verify_bank' | 'verify_address' | 'auto_increase' | 'link_accounts'
+
 /**
  * The participant's next best actions, most important first, worked out from their own record:
  * beneficiaries, employer match, verification status, auto-increase and linked accounts.
- * Each rule adds an action only while it still applies, so the list shrinks as things get done.
+ * Each rule adds an action only while it still applies, so the list shrinks as things get done;
+ * the settled ones come back in `done`.
  */
-export function useNextBestActions(): NextAction[] {
+export function useNextBestActions(): { pending: NextAction[]; done: DoneActionId[] } {
   const { data } = useEnrollment()
   const limits = useContributionLimits()
   const beneficiaries = useProfileStore((s) => s.beneficiaries)
@@ -34,6 +38,7 @@ export function useNextBestActions(): NextAction[] {
 
   return useMemo(() => {
     const actions: NextAction[] = []
+    const done: DoneActionId[] = []
 
     if (beneficiaries.length === 0) {
       actions.push({ id: 'add_beneficiary', href: '/profile?section=beneficiary&add=1', required: true })
@@ -42,18 +47,23 @@ export function useNextBestActions(): NextAction[] {
     } else {
       const consentNeeded = personal.maritalStatus === 'married' && beneficiaries.some((b) => b.type === 'primary' && b.relationship !== 'spouse' && b.share > 0)
       if (consentNeeded && consent.status !== 'completed') actions.push({ id: 'spouse_consent', href: '/profile?section=beneficiary', required: true })
+      else done.push('beneficiary')
     }
 
     if (limits.match.gapPercent > 0) {
       actions.push({ id: 'full_match', href: '/enrollment/contribution', values: { amount: `$${limits.match.missedAnnual.toLocaleString()}` } })
-    }
+    } else done.push('full_match')
     if (bank.status !== 'verified') actions.push({ id: 'verify_bank', href: '/profile?section=bank' })
+    else done.push('verify_bank')
     if (addressKey(personal) !== addressVerifiedFor) actions.push({ id: 'verify_address', href: '/profile?section=personal' })
+    else done.push('verify_address')
     if (!data.autoIncrease) actions.push({ id: 'auto_increase', href: '/enrollment/auto-increase' })
+    else done.push('auto_increase')
     if (linkedCount === 0) actions.push({ id: 'link_accounts', href: '/outside-assets' })
+    else done.push('link_accounts')
 
     // Always something useful to do, even when every item above is settled
     actions.push({ id: 'review_risk', href: '/investments' })
-    return actions
+    return { pending: actions, done }
   }, [beneficiaries, designation, personal, consent, limits, bank, addressVerifiedFor, data.autoIncrease, linkedCount])
 }

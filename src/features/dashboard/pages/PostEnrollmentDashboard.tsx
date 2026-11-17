@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
+import React, { useId, useMemo } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useTheme } from '@/core/hooks/useTheme'
@@ -12,7 +12,6 @@ import {
   RefreshCcw,
   Calendar,
   PieChart,
-  Target,
   CreditCard,
   CheckSquare,
   User,
@@ -29,24 +28,100 @@ import {
   Landmark,
   Link2,
   GraduationCap,
-  PiggyBank,
   Check,
+  ShieldCheck,
+  Calculator,
+  Lightbulb,
 } from 'lucide-react'
-import { ResponsiveContainer, RadialBarChart, RadialBar, PolarAngleAxis } from 'recharts'
 import { NotificationBanner } from '@/features/notifications/NotificationBanner'
 import { useContributionLimits } from '@/features/contributions/useContributionLimits'
 import { PremiumBalanceChart } from '@/features/dashboard/components/PremiumBalanceChart'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
 import { useElectionsStore } from '@/features/plan/electionsStore'
 import { PLANS, allHoldings, byAssetClass, weightedReturn } from '@/features/portfolio/portfolioData'
-import { annualEmployerMatch, missedEmployerMatch, projectBalance, retirementIncome } from '@/features/enrollment/enrollmentMath'
+import { ASSUMED_INFLATION, annualEmployerMatch, missedEmployerMatch, projectBalance, retirementIncome } from '@/features/enrollment/enrollmentMath'
 import { getGrowthRate } from '@/lib/retirementCalculations'
 import { getAppDateLocale } from '@/lib/dateLocale'
 import { useOutsideAssetsStore } from '@/features/outside-assets/outsideAssetsStore'
-import { useNextBestActions, type NextActionId } from '@/features/dashboard/useNextBestActions'
-import { formatMoney, summarize } from '@/features/outside-assets/summary'
+import { useNextBestActions, type DoneActionId, type NextActionId } from '@/features/dashboard/useNextBestActions'
+import { InfoTip } from '@/features/enrollment/flow/core/ui'
+import { PLAN_CONFIG } from '@/features/enrollment/agent/planConfig'
+import { ASSET_SLICES, formatMoney, summarize, type AssetSlice } from '@/features/outside-assets/summary'
 
 const ease = [0.22, 1, 0.36, 1] as const
+
+/**
+ * Readiness bands: above 70 is on track (green), 50 to 70 needs attention (amber), under 50 is off track (red). Each has soft ring shades (close together, so a full ring
+ * shows no visible join at the top), a faint track and its status pill.
+ */
+const READINESS_BANDS = {
+  good: {
+    labelKey: 'dashboard.onTrack',
+    ring: ['#8FD5A9', '#72C796', '#5DBA86'],
+    track: { light: 'rgba(77,175,122,0.13)', dark: 'rgba(111,199,147,0.16)' },
+    pill: 'bg-status-success-bg text-status-success',
+    panel: 'bg-emerald-50/60 ring-emerald-100/80 dark:bg-emerald-500/10 dark:ring-emerald-400/15',
+    accent: 'text-emerald-600 dark:text-emerald-300',
+    dot: 'bg-status-success',
+  },
+  fair: {
+    labelKey: 'postDashboard.status_needs_attention',
+    ring: ['#F2CF8A', '#EBBE6C', '#E2AE55'],
+    track: { light: 'rgba(221,162,74,0.15)', dark: 'rgba(237,190,106,0.16)' },
+    pill: 'bg-status-warning-bg text-status-warning',
+    panel: 'bg-amber-50/60 ring-amber-100/80 dark:bg-amber-500/10 dark:ring-amber-400/15',
+    accent: 'text-amber-600 dark:text-amber-300',
+    dot: 'bg-status-warning',
+  },
+  low: {
+    labelKey: 'postDashboard.status_off_track',
+    ring: ['#EFAAAA', '#E79393', '#DE7F7F'],
+    track: { light: 'rgba(217,115,115,0.13)', dark: 'rgba(233,147,147,0.16)' },
+    pill: 'bg-status-danger-bg text-status-danger',
+    panel: 'bg-rose-50/60 ring-rose-100/80 dark:bg-rose-500/10 dark:ring-rose-400/15',
+    accent: 'text-rose-600 dark:text-rose-300',
+    dot: 'bg-status-danger',
+  },
+} as const
+type ReadinessBand = keyof typeof READINESS_BANDS
+/** Lowest score that counts as on track (green) */
+const ON_TRACK_MIN = 71
+const readinessBandOf = (score: number): ReadinessBand => (score >= ON_TRACK_MIN ? 'good' : score >= 50 ? 'fair' : 'low')
+
+/** Readiness ring inside a 148px box: centre, radius and line width */
+const RING_BOX = 148
+const RING_C = 74
+const RING_R = 67
+const RING_W = 13
+const ringPoint = (turn: number, r = RING_R) => {
+  const angle = turn * 2 * Math.PI - Math.PI / 2
+  return `${(RING_C + r * Math.cos(angle)).toFixed(2)} ${(RING_C + r * Math.sin(angle)).toFixed(2)}`
+}
+/** Short arcs that make up the ring, each a step further from one colour to the other, so the colour runs around it */
+function ringArcs(stops: string[], steps = 72) {
+  const ch = (hex: string, i: number) => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16)
+  // Blend across the stops in turn, so a middle stop keeps the colour rich half way round
+  const mix = (k: number) => {
+    const pos = k * (stops.length - 1)
+    const at = Math.min(stops.length - 2, Math.floor(pos))
+    const f = pos - at
+    const [a, b] = [stops[at], stops[at + 1]]
+    return `rgb(${[0, 1, 2].map((i) => Math.round(ch(a, i) + (ch(b, i) - ch(a, i)) * f)).join(',')})`
+  }
+  return Array.from({ length: steps }, (_, i) => ({
+    // Each arc runs a hair past the next one's start so no seams show
+    d: `M${ringPoint(i / steps)} A${RING_R} ${RING_R} 0 0 1 ${ringPoint(Math.min(1, (i + 1.6) / steps))}`,
+    color: mix(i / (steps - 1)),
+  }))
+}
+
+/** The linked-accounts page's colours, so the two read as one */
+const ACCOUNT_SLICE_COLOR: Record<AssetSlice, string> = {
+  plan: 'var(--chart-blue)',
+  retirement: 'var(--chart-teal)',
+  cash: 'var(--chart-green-dark)',
+  property: 'var(--chart-amber)',
+}
 
 /** Icon for each next best action. */
 const NEXT_ACTION_ICONS: Record<NextActionId, React.ComponentType<{ className?: string }>> = {
@@ -74,11 +149,14 @@ const CARD_TONES = {
   warm: 'bg-[radial-gradient(70%_120%_at_0%_0%,#F1FAF5_0%,rgba(241,250,245,0)_50%),radial-gradient(60%_120%_at_100%_0%,#FFF3DC_0%,rgba(255,243,220,0)_60%),linear-gradient(#F8F9FE,#F8F9FE)] ring-1 ring-slate-200/70 dark:bg-[radial-gradient(70%_120%_at_0%_0%,rgba(16,185,129,0.07)_0%,rgba(16,185,129,0)_50%),radial-gradient(60%_120%_at_100%_0%,rgba(245,158,11,0.14)_0%,rgba(245,158,11,0)_60%),linear-gradient(#0B1436,#0B1436)] dark:ring-white/10',
 } as const
 
-/** The pre-enrollment dashboard's buttons: a solid pill and a white one. */
+/**
+ * Button levels. The page has one solid button (Launch Simulator); every other card action is the quiet
+ * white pill, and in-card "see more" links are plain text links.
+ */
 const PILL_PRIMARY =
-  'inline-flex h-10 items-center justify-center gap-1 rounded-full bg-primary px-4 text-sm font-semibold text-white shadow-[0_8px_20px_-10px_rgba(11,21,51,0.35)] dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)]'
+  'inline-flex h-9 items-center justify-center gap-1 rounded-full bg-primary px-4 text-[13px] font-semibold text-white shadow-[0_4px_10px_-6px_rgba(37,99,235,0.55)] transition-[filter] hover:brightness-110 dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)]'
 const PILL_SECONDARY =
-  'inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-white px-4 text-sm font-semibold text-slate-900 shadow-[0_8px_20px_-10px_rgba(11,21,51,0.3)] ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-slate-900 dark:text-white dark:ring-white/15 dark:hover:bg-slate-800'
+  'inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-white px-4 text-[13px] font-semibold text-slate-800 shadow-[0_1px_2px_rgba(11,21,51,0.06)] ring-1 ring-slate-200 transition-colors hover:bg-slate-50 hover:ring-slate-300 dark:bg-white/5 dark:text-white dark:ring-white/15 dark:hover:bg-white/10'
 const TEXT_LINK = 'inline-flex items-center gap-0.5 font-semibold text-primary hover:underline dark:text-blue-300'
 
 /** Card shell: rounded 20px with a soft ring, revealed the first time it scrolls into view, like the pre-enrollment cards. */
@@ -175,6 +253,77 @@ const balanceChartShape = [
   { i: 14, value: 142893 },
 ]
 
+/**
+ * "Unclaimed match" under Employer adds, as a button that opens a pro tip: how far to raise savings for the full match,
+ * what that costs and adds each month, the yearly total, and the way to change it. Closes on Escape or a click elsewhere.
+ */
+function MatchGapTip({ label, from, to, youMore, employerMore, yearly }: { label: string; from: number; to: number; youMore: string; employerMore: string; yearly: string }) {
+  const { t } = useTranslation()
+  const [open, setOpen] = React.useState(false)
+  const wrap = React.useRef<HTMLSpanElement>(null)
+  const panelId = useId()
+  React.useEffect(() => {
+    if (!open) return
+    const onDown = (e: MouseEvent) => {
+      if (wrap.current && !wrap.current.contains(e.target as Node)) setOpen(false)
+    }
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+  return (
+    <span ref={wrap} className="relative inline-flex">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-controls={panelId}
+        className="inline-flex items-center gap-1 rounded text-status-warning underline decoration-dotted underline-offset-2 hover:decoration-solid focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      >
+        {label}
+        <Lightbulb className="h-3.5 w-3.5" aria-hidden />
+      </button>
+      {open && (
+        <span
+          id={panelId}
+          role="dialog"
+          aria-label={t('postDashboard.match_tip_title')}
+          className="absolute left-0 top-full z-30 mt-2 block w-[280px] rounded-xl bg-surface-card p-3.5 text-left shadow-[0_12px_32px_-12px_rgba(11,21,51,0.35)] ring-1 ring-slate-200 dark:ring-white/10"
+        >
+          <span className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-amber-600 dark:text-amber-300">
+            <Lightbulb className="h-3.5 w-3.5" aria-hidden />
+            {t('postDashboard.match_tip_title')}
+          </span>
+          <span className="mt-1.5 block text-[13px] leading-snug text-text-primary">
+            <Trans i18nKey="postDashboard.match_tip_body" values={{ from, to }} components={{ b: <span className="font-semibold" /> }} />
+          </span>
+          <span className="mt-2.5 block space-y-1 border-t border-slate-200/80 pt-2.5 text-[12px] dark:border-white/10">
+            <span className="flex justify-between gap-3">
+              <span className="text-text-secondary">{t('postDashboard.match_tip_you')}</span>
+              <span className="font-semibold tabular-nums text-text-primary">+{youMore}{t('postDashboard.per_mo')}</span>
+            </span>
+            <span className="flex justify-between gap-3">
+              <span className="text-text-secondary">{t('postDashboard.match_tip_employer')}</span>
+              <span className="font-semibold tabular-nums text-status-success">+{employerMore}{t('postDashboard.per_mo')}</span>
+            </span>
+          </span>
+          <span className="mt-2 block text-[12px] text-text-secondary">
+            <Trans i18nKey="postDashboard.match_tip_year" values={{ amount: yearly }} components={{ b: <span className="font-semibold text-status-success" /> }} />
+          </span>
+          <Link to="/enrollment/contribution" className={`group mt-3 text-[13px] ${TEXT_LINK}`}>
+            {t('contributionLimits.change')}
+            <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+          </Link>
+        </span>
+      )}
+    </span>
+  )
+}
+
 export default function PostEnrollmentDashboard() {
   const { t } = useTranslation()
   const { resolvedMode } = useTheme()
@@ -192,8 +341,13 @@ export default function PostEnrollmentDashboard() {
   const vestedPct = Math.round((account.vested / account.balance) * 100)
   // ── Accounts held elsewhere, added to this plan's balance for the "All your accounts" card ──
   const outsideAccounts = useOutsideAssetsStore((s) => s.accounts)
-  const nextActions = useNextBestActions()
+  const { pending: nextActions, done: doneActions } = useNextBestActions()
   const allAccounts = useMemo(() => summarize(outsideAccounts, account.balance), [outsideAccounts, account.balance])
+  /** What net worth is made of: each kind of asset held, then any debts */
+  const accountRows = [
+    ...ASSET_SLICES.map((id) => ({ id: id as string, label: t(`outside_assets.slice.${id}`), value: allAccounts.slices[id], color: ACCOUNT_SLICE_COLOR[id] })),
+    { id: 'debts', label: t('outside_assets.group.debts'), value: -allAccounts.totalDebts, color: 'var(--chart-gray)' },
+  ].filter((row) => row.value !== 0)
   const balanceChartData = useMemo(() => {
     const scale = account.balance / balanceChartShape[balanceChartShape.length - 1].value
     return balanceChartShape.map((p) => ({ ...p, value: Math.round(p.value * scale) }))
@@ -229,12 +383,70 @@ export default function PostEnrollmentDashboard() {
     data.salary,
   )
   const readiness = income.readinessPct
+  const readinessShown = Math.max(0, Math.min(100, Math.round(readiness)))
+  const reduceMotion = useReducedMotion()
+  // useId adds characters that break url(#…), so keep letters, digits and dashes only
+  const ringId = `ring-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`
   const replacePct = data.salary > 0 ? Math.round((income.total / data.salary) * 100) : 0
-  // "On track" from 80, the same point where the Readiness step says "You're on a great track"
-  const onTrack = readiness >= 80
+  // On track above 70 (green), needs attention 50 to 70 (amber), off track under 50 (red)
+  const band = READINESS_BANDS[readinessBandOf(readinessShown)]
+  // Soft shades of the band's colour run round the ring; a full ring is one even shade, so there is no join at the top
+  const ringFull = readinessShown >= 100
+  const ringSegments = useMemo(() => ringArcs(ringFull ? [band.ring[1], band.ring[1]] : [...band.ring]), [band, ringFull])
   const contributionMonth = new Date().toLocaleDateString(locale, { month: 'long', year: 'numeric' })
   const limits = useContributionLimits()
   const monthlyGap = Math.round((fullMatch - annualMatch) / 12)
+  // ── Readiness suggestion: the single change that would help most, from the participant's own numbers, in order:
+  //    claim the full match, get on track, turn on auto-increase, save 1% more; with no room left to save, keep the mix in check ──
+  const readinessTip = (() => {
+    const rate = data.contributionPercent
+    const base = {
+      startingBalance: personalization.currentSavings,
+      salary: data.salary,
+      sources: data.contributionSources,
+      years: yearsToRetirement,
+      growthRate: getGrowthRate(data.riskLevel),
+      autoIncrease: data.autoIncrease ? { amount: data.autoIncreaseAmount, max: data.autoIncreaseMax } : null,
+    }
+    const incomeAt = (ratePercent: number, autoIncrease = base.autoIncrease) =>
+      retirementIncome(projectBalance({ ...base, ratePercent, autoIncrease }), yearsToRetirement, data.salary)
+    // Extra savings at retirement from a change, in today's dollars, rounded to the nearest $100
+    const addedSavings = (ratePercent: number, autoIncrease = base.autoIncrease) => {
+      const gain = projectBalance({ ...base, ratePercent, autoIncrease }) - projectBalance({ ...base, ratePercent: rate })
+      return Math.round(gain / Math.pow(1 + ASSUMED_INFLATION, yearsToRetirement) / 100) * 100
+    }
+    const perMonth = (yearly: number) => money(Math.round(yearly / 12))
+    if (limits.match.gapPercent > 0) {
+      return { key: 'tip_match', values: { pct: limits.match.gapPercent, amount: money(Math.round(fullMatch - annualMatch)) }, href: '/enrollment/contribution' }
+    }
+    if (readiness < ON_TRACK_MIN) {
+      // Most the participant could add this year without passing the IRS limit, in whole percent
+      const maxExtra = data.salary > 0 ? Math.max(0, Math.floor((limits.employeeLimit / data.salary) * 100) - rate) : 0
+      const steps = Array.from({ length: Math.min(15, maxExtra) }, (_, i) => i + 1)
+      const extra = steps.find((x) => incomeAt(rate + x).readinessPct >= ON_TRACK_MIN)
+      if (extra) return { key: 'tip_on_track', values: { pct: extra, amount: perMonth((data.salary * extra) / 100) }, href: '/enrollment/contribution' }
+      // Saving more alone won't get there in time: see whether retiring a little later would
+      const laterYears = Array.from({ length: 10 }, (_, i) => i + 1).find(
+        (y) => retirementIncome(projectBalance({ ...base, ratePercent: rate, years: yearsToRetirement + y }), yearsToRetirement + y, data.salary).readinessPct >= ON_TRACK_MIN,
+      )
+      if (laterYears) return { key: 'tip_retire_later', values: { count: laterYears, age: personalization.retirementAge + laterYears }, href: '/retirement-goal' }
+      // Otherwise, the biggest step that still moves the score
+      const best = steps.length ? steps[Math.min(4, steps.length - 1)] : 0
+      const raised = best ? incomeAt(rate + best).readinessPct : readiness
+      if (raised > readiness) return { key: 'tip_raise', values: { pct: best, score: raised }, href: '/enrollment/contribution' }
+      return { key: 'tip_simulator', values: {}, href: '/retirement-goal' }
+    }
+    const auto = PLAN_CONFIG.autoIncrease.default
+    if (!data.autoIncrease && rate < auto.max) {
+      const added = addedSavings(rate, { amount: auto.amount, max: auto.max })
+      if (added > 0) return { key: 'tip_auto', values: { amount: money(added) }, href: '/enrollment/auto-increase' }
+    }
+    if (limits.remaining > 0) {
+      const added = addedSavings(rate + 1)
+      if (added > 0) return { key: 'tip_more', values: { cost: perMonth(data.salary / 100), amount: money(added) }, href: '/enrollment/contribution' }
+    }
+    return { key: 'tip_review', values: { pct: replacePct }, href: '/investments' }
+  })()
   // Loan payments come out on the 15th: the next one is this month's if it hasn't passed, otherwise next month's
   const nextLoanDue = (() => {
     const now = new Date()
@@ -301,9 +513,9 @@ export default function PostEnrollmentDashboard() {
               <div className="mb-5">
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">{t('dashboard.totalBalance')}</p>
-                  <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold ${onTrack ? 'bg-status-success-bg text-status-success' : 'bg-status-warning-bg text-status-warning'}`}>
-                    <span className={`h-1.5 w-1.5 rounded-full ${onTrack ? 'bg-status-success' : 'bg-status-warning'}`} aria-hidden />
-                    {onTrack ? t('dashboard.onTrack') : t('postDashboard.status_needs_attention')}
+                  <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold ${band.pill}`}>
+                    <span className={`h-1.5 w-1.5 rounded-full ${band.dot}`} aria-hidden />
+                    {t(band.labelKey)}
                   </span>
                 </div>
                 <p className="mt-1.5 text-[36px] font-bold leading-none tracking-tight tabular-nums text-text-primary">{money(Math.round(account.balance))}</p>
@@ -353,48 +565,100 @@ export default function PostEnrollmentDashboard() {
               </div>
             </SpecCard>
 
-            {/* Readiness */}
-            <SpecCard tone="sky" className="flex flex-col items-center justify-center text-center lg:col-span-4">
-              <div className="mb-4 flex items-center justify-center gap-2.5">
-                <TitleBadge Icon={Target} color="bg-emerald-600" />
-                <span className="text-[16px] font-bold text-text-primary">{t('dashboard.readinessScore')}</span>
-              </div>
-              <div className="relative mx-auto h-[140px] w-[140px] text-text-primary [&_.recharts-surface]:overflow-visible">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadialBarChart
-                    cx="50%"
-                    cy="50%"
-                    innerRadius="78%"
-                    outerRadius="100%"
-                    barSize={10}
-                    data={[{ value: readiness }]}
-                    startAngle={90}
-                    endAngle={450}
-                  >
-                    <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
-                    <RadialBar
-                      background={{ fill: isDark ? 'var(--chart-grid-muted)' : 'var(--chart-grid)' }}
-                      dataKey="value"
-                      cornerRadius={6}
-                      fill={onTrack ? 'var(--status-success)' : 'var(--status-warning)'}
-                      animationDuration={1000}
-                    />
-                  </RadialBarChart>
-                </ResponsiveContainer>
-                <div className="absolute inset-0 flex flex-col items-center justify-center pt-1">
-                  <span className="text-[36px] font-bold leading-none text-text-primary">{readiness}</span>
-                  <span className="text-[14px] text-text-secondary">/100</span>
+            {/* Readiness: a soft tile icon with a one-line explainer, a ring in soft shades of the score band's colour, with the score inside and the status under it, what the score means in a quiet panel, then the page's main button */}
+            <SpecCard className="relative isolate flex flex-col lg:col-span-4">
+              {/* Soft wash in the top-right corner, clipped to the card in its own layer so tooltips can still spill out */}
+              <span className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[20px]" aria-hidden>
+                <span className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[radial-gradient(closest-side,rgba(52,211,153,0.16),rgba(52,211,153,0)_70%)] dark:bg-[radial-gradient(closest-side,rgba(52,211,153,0.12),rgba(52,211,153,0)_70%)]" />
+                <span className="absolute -right-24 -top-10 h-48 w-48 rounded-full bg-[radial-gradient(closest-side,rgba(96,165,250,0.12),rgba(96,165,250,0)_70%)]" />
+              </span>
+
+              <div className="flex items-center gap-3">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/20" aria-hidden>
+                  <ShieldCheck className="h-[22px] w-[22px]" />
+                </span>
+                <div className="min-w-0">
+                  <h2 className="text-[16px] font-bold leading-tight text-text-primary">{t('dashboard.readinessScore')}</h2>
+                  <p className="mt-0.5 flex items-center gap-1 text-[12px] text-text-secondary">
+                    {t('postDashboard.readiness_sub')}
+                    <InfoTip label={t('postDashboard.readiness_tip_label')} text={t('postDashboard.readiness_tip')} side="bottom" align="end" />
+                  </p>
                 </div>
               </div>
-              <div className={`mt-3 flex items-center justify-center gap-1.5 text-[14px] font-semibold ${onTrack ? 'text-status-success' : 'text-status-warning'}`}>
-                <span className={`h-2 w-2 rounded-full ${onTrack ? 'bg-status-success' : 'bg-status-warning'}`} aria-hidden />
-                {onTrack ? t('dashboard.onTrack') : t('postDashboard.status_needs_attention')}
+
+              <div className="flex flex-1 flex-col items-center justify-center py-2">
+                <div className="relative h-[148px] w-[148px]" role="img" aria-label={`${t('dashboard.readinessScore')}: ${readinessShown}/100, ${t(band.labelKey)}`}>
+                  <svg viewBox={`0 0 ${RING_BOX} ${RING_BOX}`} className="block h-full w-full overflow-visible" aria-hidden>
+                    <defs>
+                      {/* Reveals the coloured ring up to the score; animates on load */}
+                      <mask id={`${ringId}-mask`} maskUnits="userSpaceOnUse" x={-10} y={-10} width={RING_BOX + 20} height={RING_BOX + 20}>
+                        <motion.circle
+                          cx={RING_C}
+                          cy={RING_C}
+                          r={RING_R}
+                          fill="none"
+                          stroke="#fff"
+                          strokeWidth={RING_W}
+                          strokeLinecap="round"
+                          transform={`rotate(-90 ${RING_C} ${RING_C})`}
+                          pathLength={1}
+                          initial={reduceMotion ? false : { pathLength: 0 }}
+                          animate={{ pathLength: Math.min(readinessShown, 100) / 100 }}
+                          transition={{ duration: 1.1, ease }}
+                        />
+                      </mask>
+                    </defs>
+                    {/* The empty part of the ring: the same colour, faint */}
+                    <circle
+                      cx={RING_C}
+                      cy={RING_C}
+                      r={RING_R}
+                      fill="none"
+                      strokeWidth={RING_W}
+                      stroke={isDark ? band.track.dark : band.track.light}
+                    />
+                    {/* The colour runs round the ring, light at the top and deeper as it goes */}
+                    <g mask={`url(#${ringId}-mask)`}>
+                      {ringSegments.map((seg) => (
+                        <path key={seg.d} d={seg.d} fill="none" stroke={seg.color} strokeWidth={RING_W} />
+                      ))}
+                    </g>
+                    {/* Rounded start in the starting colour, so the deeper end colour never peeks out behind it */}
+                    {/* A full ring has no start to round off, so it is left as one smooth band */}
+                    {readinessShown > 0 && !ringFull && <circle cx={RING_C} cy={RING_C - RING_R} r={RING_W / 2} fill={ringSegments[0].color} />}
+                  </svg>
+                  {/* Score in the middle */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-[38px] font-medium leading-none tracking-tight tabular-nums text-text-primary">{readinessShown}</span>
+                    <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-text-secondary">{t('postDashboard.readiness_of')}</span>
+                  </div>
+                </div>
+                {/* Status under the ring */}
+                <span className={`mt-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold ${band.pill}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${band.dot}`} aria-hidden />
+                  {t(band.labelKey)}
+                </span>
               </div>
-              <p className="mx-auto mt-3 max-w-[260px] text-[12px] leading-relaxed text-text-secondary">
-                {t('postDashboard.projected_income', { pct: replacePct })}
-              </p>
-              {/* Same pill as Start chatting on the pre-enrollment dashboard */}
-              <Link to="/retirement-goal" className={`group mt-5 px-5 ${PILL_PRIMARY}`}>
+
+              {/* One suggestion worked out from the participant's numbers; the whole panel opens the place to act on it */}
+              <Link
+                to={readinessTip.href}
+                className={`group flex items-center gap-3 rounded-2xl p-3 ring-1 transition-shadow hover:shadow-[0_4px_12px_-6px_rgba(11,21,51,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${band.panel}`}
+              >
+                <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white shadow-[0_1px_2px_rgba(11,21,51,0.06)] dark:bg-white/10 ${band.accent}`} aria-hidden>
+                  <Lightbulb className="h-[18px] w-[18px]" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className={`block text-[10px] font-semibold uppercase tracking-[0.08em] ${band.accent}`}>{t('postDashboard.tip_label')}</span>
+                  <span className="mt-0.5 block text-[13px] leading-snug text-text-secondary">
+                    <Trans i18nKey={`postDashboard.${readinessTip.key}`} values={readinessTip.values} components={{ b: <span className="font-semibold text-text-primary" /> }} />
+                  </span>
+                </span>
+                <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+              </Link>
+
+              <Link to="/retirement-goal" className={`group mt-4 h-10 w-full gap-2 text-[14px] ${PILL_PRIMARY}`}>
+                <Calculator className="h-4 w-4" aria-hidden />
                 {t('dashboard.launchSimulator')}
                 <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
               </Link>
@@ -405,21 +669,24 @@ export default function PostEnrollmentDashboard() {
           <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-12">
             <div className="grid min-w-0 lg:col-span-8">
                 {/* Card 2: Quick Actions — one card, 4 tiles with dividers */}
-                  <SpecCard noPadding className="overflow-hidden">
-                    <div className="flex items-center gap-2.5 px-5 pb-4 pt-5">
+                  {/* The tiles fill whatever height the row gives them, with their content centred, so no blank band sits under them */}
+                  <SpecCard noPadding className="flex flex-col overflow-hidden">
+                    <div className="flex items-center gap-2.5 px-5 pb-3.5 pt-5">
                       <TitleBadge Icon={Zap} color="bg-blue-600" />
                       <h2 className="text-[16px] font-bold text-text-primary">{t('dashboard.quickActions')}</h2>
                     </div>
-                    <div className="grid grid-cols-1 divide-y divide-slate-200/80 border-t border-slate-200/80 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4 dark:divide-white/10 dark:border-white/10">
+                    <div className="grid flex-1 grid-cols-1 divide-y divide-slate-200/80 border-t border-slate-200/80 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4 dark:divide-white/10 dark:border-white/10">
                       {quickActions.map((tile) => (
                         <Link
                           key={tile.title}
                           to={tile.href}
-                          className="group relative block p-5 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary dark:hover:bg-white/5"
+                          className="group flex flex-col justify-center px-5 py-4 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary dark:hover:bg-white/5"
                         >
-                          <ChevronRight className="absolute right-3 top-4 h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
-                          <IconChip Icon={tile.Icon} tone={tile.tone} />
-                          <p className="mt-3 pr-6 text-[14px] font-bold leading-tight text-text-primary">{tile.title}</p>
+                          <span className="flex items-center justify-between">
+                            <IconChip Icon={tile.Icon} tone={tile.tone} />
+                            <ChevronRight className="-mr-1 h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+                          </span>
+                          <p className="mt-3 text-[14px] font-bold leading-tight text-text-primary">{tile.title}</p>
                           <p className="mt-1 text-[13px] font-medium text-primary dark:text-blue-300">{tile.sub}</p>
                           <p className="mt-0.5 text-[11px] text-text-secondary">{tile.hint}</p>
                         </Link>
@@ -431,7 +698,7 @@ export default function PostEnrollmentDashboard() {
             <div className="grid min-w-0 lg:col-span-4">
                 {/* Next Best Actions */}
                 <SpecCard className="flex flex-col">
-                  <div className="mb-2 flex items-center justify-between gap-2">
+                  <div className="mb-1.5 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5">
                       <TitleBadge Icon={CheckSquare} color="bg-emerald-600" />
                       <span className="text-[16px] font-bold text-text-primary">{t('dashboard.nextBestActions')}</span>
@@ -446,7 +713,7 @@ export default function PostEnrollmentDashboard() {
                         <li key={action.id}>
                           <Link
                             to={action.href}
-                            className="group flex items-center gap-3 rounded-xl px-2 py-3 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary dark:hover:bg-white/5"
+                            className="group flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary dark:hover:bg-white/5"
                           >
                             <IconChip Icon={ActionIcon} tone={action.required ? 'rose' : i === 0 ? 'blue' : 'slate'} small />
                             <span className="min-w-0 flex-1">
@@ -463,13 +730,16 @@ export default function PostEnrollmentDashboard() {
                         </li>
                       )
                     })}
+                    {/* With fewer than three to do, things already settled fill the list, marked done */}
+                    {doneActions.slice(0, Math.max(0, 3 - nextActions.length)).map((id: DoneActionId) => (
+                      <li key={id} className="flex items-center gap-3 px-2 py-2.5">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-status-success-bg text-status-success" aria-hidden>
+                          <Check className="h-3.5 w-3.5" />
+                        </span>
+                        <span className="min-w-0 flex-1 text-[13px] text-text-secondary">{t(`next_actions.done_${id}`)}</span>
+                      </li>
+                    ))}
                   </ul>
-                  {nextActions.length < 3 && (
-                    <p className="mt-auto flex items-center gap-1.5 border-t border-slate-200/80 pt-3 text-[12px] text-text-secondary dark:border-white/10">
-                      <Check className="h-3.5 w-3.5 text-status-success" aria-hidden />
-                      {t('postDashboard.actions_rest_done')}
-                    </p>
-                  )}
                 </SpecCard>
             </div>
 
@@ -504,7 +774,14 @@ export default function PostEnrollmentDashboard() {
                         valueClass: 'text-status-success',
                         sub:
                           monthlyGap > 0 ? (
-                            <>{t('postDashboard.c_match_gap', { amount: money(monthlyGap) })}</>
+                            <MatchGapTip
+                              label={t('postDashboard.c_match_gap', { amount: money(monthlyGap) })}
+                              from={data.contributionPercent}
+                              to={data.contributionPercent + limits.match.gapPercent}
+                              youMore={money(Math.round((data.salary * limits.match.gapPercent) / 100 / 12))}
+                              employerMore={money(monthlyGap)}
+                              yearly={money(Math.round(fullMatch - annualMatch))}
+                            />
                           ) : (
                             <>
                               <Check className="h-3.5 w-3.5" aria-hidden />
@@ -620,9 +897,9 @@ export default function PostEnrollmentDashboard() {
                     ))
                   ) : (
                     <>
-                      <ul className="divide-y divide-slate-200/80 dark:divide-white/10">
+                      <ul className="flex flex-1 flex-col divide-y divide-slate-200/80 dark:divide-white/10">
                         {ACTIVE_LOANS.map((loan) => (
-                          <li key={loan.ref} className="py-3 first:pt-0">
+                          <li key={loan.ref} className="flex flex-1 flex-col justify-center py-3 first:pt-0">
                             <div className="flex items-baseline justify-between gap-2">
                               <p className="min-w-0 truncate text-[14px] font-semibold text-text-primary">{t(`postDashboard.loan_${loan.purpose}`)}</p>
                               <p className="shrink-0 text-[15px] font-semibold tabular-nums text-text-primary">{money(loan.balance)}</p>
@@ -634,10 +911,14 @@ export default function PostEnrollmentDashboard() {
                             <div className="mt-2 h-1 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={loan.paidPct} aria-label={t('postDashboard.loan_paid', { pct: loan.paidPct })}>
                               <div className="h-full rounded-full bg-status-success" style={{ width: `${loan.paidPct}%` }} />
                             </div>
+                            <div className="mt-1.5 flex justify-between text-[11px] text-text-secondary">
+                              <span>{t('postDashboard.loan_paid', { pct: loan.paidPct })}</span>
+                              <span>{t('postDashboard.loan_left', { count: loan.paymentsLeft })}</span>
+                            </div>
                           </li>
                         ))}
                       </ul>
-                      <div className="mt-auto flex items-baseline justify-between border-t border-slate-200/80 pt-3 dark:border-white/10">
+                      <div className="flex items-baseline justify-between border-t border-slate-200/80 pt-3 dark:border-white/10">
                         <span className="text-[12px] text-text-secondary">{t('postDashboard.loans_total')}</span>
                         <span className="text-[16px] font-semibold tabular-nums text-text-primary">{money(loansTotal)}</span>
                       </div>
@@ -703,20 +984,25 @@ export default function PostEnrollmentDashboard() {
                     <span className="text-[16px] font-bold text-text-primary">{t('outside_assets.card_title')}</span>
                   </div>
                   {outsideAccounts.length > 0 ? (
-                    <dl className="grid grid-cols-2 divide-x divide-slate-200/80 dark:divide-white/10">
-                      <div className="pr-4">
-                        <dt className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary">{t('outside_assets.net_worth')}</dt>
-                        <dd className="mt-1 text-[18px] font-bold tabular-nums text-text-primary">{formatMoney(allAccounts.netWorth, locale)}</dd>
-                      </div>
-                      <div className="pl-4">
-                        <dt className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary">{t('outside_assets.card_retirement')}</dt>
-                        <dd className="mt-1 text-[18px] font-bold tabular-nums text-text-primary">{formatMoney(allAccounts.totalRetirement, locale)}</dd>
-                      </div>
-                    </dl>
+                    <>
+                      <p className="text-[12px] text-text-secondary">{t('outside_assets.net_worth')}</p>
+                      <p className="mt-0.5 text-[24px] font-bold leading-tight tabular-nums text-text-primary">{formatMoney(allAccounts.netWorth, locale)}</p>
+                      <dl className="mt-3 space-y-1.5 border-t border-slate-200/80 pt-3 dark:border-white/10">
+                        {accountRows.map((row) => (
+                          <div key={row.id} className="flex items-center justify-between gap-3 text-[13px]">
+                            <dt className="flex min-w-0 items-center gap-2 text-text-secondary">
+                              <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: row.color }} aria-hidden />
+                              <span className="truncate">{row.label}</span>
+                            </dt>
+                            <dd className="shrink-0 font-semibold tabular-nums text-text-primary">{formatMoney(row.value, locale)}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </>
                   ) : (
                     <p className="text-[13px] leading-relaxed text-slate-600 dark:text-slate-300">{t('outside_assets.card_invite')}</p>
                   )}
-                  <Link to="/outside-assets" className={`group mt-auto pt-3 text-[13px] ${TEXT_LINK}`}>
+                  <Link to="/outside-assets" className={`group mt-auto self-start pt-3 text-[13px] ${TEXT_LINK}`}>
                     {outsideAccounts.length > 0 ? t('outside_assets.card_link') : t('outside_assets.card_link_empty')}
                     <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
                   </Link>
@@ -731,12 +1017,13 @@ export default function PostEnrollmentDashboard() {
                       <TitleBadge Icon={History} color="bg-blue-600" />
                       <h3 className="text-[16px] font-bold text-text-primary">{t('dashboard.recentActivity')}</h3>
                     </div>
-                    <Link to="/post-enrollment-dashboard" className={`text-[13px] ${TEXT_LINK}`}>
-                      {t('postDashboard.view_all_arrow')}
+                    <Link to="/transactions" className={`group text-[13px] ${TEXT_LINK}`}>
+                      {t('dashboard.viewAll')}
+                      <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
                     </Link>
                   </div>
                   <ul className="divide-y divide-slate-200/80 dark:divide-white/10">
-                    <li className="flex items-center gap-3.5 py-3.5 first:pt-0">
+                    <li className="flex items-center gap-3.5 py-3 first:pt-0">
                       <IconChip Icon={ArrowDownLeft} tone="emerald" />
                       <div className="min-w-0 flex-1">
                         <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_contribution')}</p>
@@ -747,7 +1034,7 @@ export default function PostEnrollmentDashboard() {
                         <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct')}</p>
                       </div>
                     </li>
-                    <li className="flex items-center gap-3.5 py-3.5">
+                    <li className="flex items-center gap-3.5 py-3">
                       <IconChip Icon={Building2} tone="blue" />
                       <div className="min-w-0 flex-1">
                         <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_employer_match')}</p>
@@ -758,7 +1045,20 @@ export default function PostEnrollmentDashboard() {
                         <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct')}</p>
                       </div>
                     </li>
-                    <li className="flex items-center gap-3.5 py-3.5 last:pb-0">
+                    {ACTIVE_LOANS.length > 0 && (
+                      <li className="flex items-center gap-3.5 py-3">
+                        <IconChip Icon={CreditCard} tone="amber" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_loan_repayment')}</p>
+                          <p className="text-[12px] text-text-secondary">{t(`postDashboard.loan_${ACTIVE_LOANS[0].purpose}`)}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[14px] font-bold tabular-nums text-text-primary">{money(ACTIVE_LOANS[0].payment, true)}</p>
+                          <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct')}</p>
+                        </div>
+                      </li>
+                    )}
+                    <li className="flex items-center gap-3.5 py-3 last:pb-0">
                       <IconChip Icon={RefreshCcw} tone="slate" />
                       <div className="min-w-0 flex-1">
                         <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_rebalance')}</p>
@@ -811,7 +1111,7 @@ export default function PostEnrollmentDashboard() {
                       <Mail className="h-4 w-4" aria-hidden />
                       {t('dashboard.message')}
                     </Link>
-                    <Link to="/advisor?tab=meetings" className={`flex-auto gap-1.5 whitespace-nowrap ${PILL_PRIMARY}`}>
+                    <Link to="/advisor?tab=meetings" className={`flex-auto gap-1.5 whitespace-nowrap ${PILL_SECONDARY}`}>
                       <CalendarDays className="h-4 w-4" aria-hidden />
                       {t('dashboard.scheduleCall')}
                     </Link>
@@ -833,17 +1133,10 @@ export default function PostEnrollmentDashboard() {
                       <p className="mb-5 mt-2 max-w-[380px] text-[14px] leading-relaxed text-slate-600 dark:text-slate-300">
                         {t('enrich.intro')}
                       </p>
-                      <Link to="/enrich" className={`group/cta mt-auto ${PILL_PRIMARY}`}>
+                      <Link to="/enrich" className={`group/cta mt-auto ${PILL_SECONDARY}`}>
                         {t('postDashboard.library_cta')}
                         <ChevronRight className="h-4 w-4 transition-transform group-hover/cta:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
                       </Link>
-                    </div>
-
-                    {/* The three topics: saving, home, growth */}
-                    <div className="absolute right-4 top-4 z-10 hidden gap-1.5 sm:flex" aria-hidden>
-                      <IconChip Icon={PiggyBank} tone="amber" small />
-                      <IconChip Icon={Home} tone="blue" small />
-                      <IconChip Icon={TrendingUp} tone="emerald" small />
                     </div>
 
                     {/* The coin on the steps, faded into the card on its left and its bright top-right corner */}

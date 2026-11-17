@@ -15,6 +15,16 @@ import { RETIREMENT_INCOME_TARGET_RATIO } from '@/lib/retirementCalculations'
 export const ASSUMED_INFLATION = 0.03
 
 /**
+ * Readiness score out of 100 from the share of the income goal covered: meeting the goal exactly scores 80 (on track),
+ * and the last 20 points spread over 100% to 150% of the goal, so a plan that already meets it still moves with every choice.
+ */
+export function readinessScore(goalShare: number): number {
+  if (goalShare <= 0) return 0
+  const score = goalShare <= 1 ? goalShare * 80 : 80 + ((goalShare - 1) / 0.5) * 20
+  return Math.min(100, Math.round(score))
+}
+
+/**
  * Yearly retirement income in today's dollars versus the goal of 80% of current pay.
  * Income = 4% a year from the projected balance (after inflation) plus an estimated Social Security benefit.
  */
@@ -30,7 +40,9 @@ export function retirementIncome(projectedBalance: number, years: number, salary
     total,
     goal,
     gap: Math.max(0, goal - total),
-    readinessPct: goal > 0 ? Math.min(100, Math.round((total / goal) * 100)) : 0,
+    /** How much of the income goal the plan covers, in percent; can pass 100 */
+    goalPct: goal > 0 ? Math.round((total / goal) * 100) : 0,
+    readinessPct: readinessScore(goal > 0 ? total / goal : 0),
   }
 }
 

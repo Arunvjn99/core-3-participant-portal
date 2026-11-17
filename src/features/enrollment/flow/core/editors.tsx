@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, LayoutGrid, Plus, Search, SlidersHorizontal, Target, X } from 'lucide-react'
+import { Check, LayoutGrid, Lightbulb, Plus, Search, SlidersHorizontal, Target, X } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { CYCLES, PLAN_RULES, nextIncreaseDate, type InvestMode } from '@/features/plan/electionsData'
 import { fundCatalog } from '../../investmentCatalog'
 import { PLAN_CONFIG, PLAN_LIMITS, employerMatch } from '../../agent/planConfig'
-import { AUTO_AMOUNTS, AUTO_CAPS, FUND_COLORS, RISKS, blendedFee, clamp, fundMeta, round2, rowsFor, type Election } from './model'
+import { AUTO_AMOUNTS, AUTO_CAPS, FUND_COLORS, RISKS, clamp, fundMeta, round2, rowsFor, type Election } from './model'
 import { InfoTip, Pills, Segmented, Stepper, Switch } from './ui'
 
 interface Ctx {
@@ -55,6 +55,9 @@ export function ContributionEditor({ value, onChange, ctx }: { value: Election; 
   ]
   const active = presets.find((p) => p.pre === value.preTax && p.ro === value.roth)?.key ?? null
   const outOfRange = total < min || total > max
+  /** Points short of the full match: only pre-tax and Roth count toward it */
+  const matchGap = round2(Math.max(0, cap - (value.preTax + value.roth)))
+  const showMatchTip = match < fullMatch && matchGap > 0 && total + matchGap <= max
 
   const source = (key: 'preTax' | 'roth' | 'afterTax') => {
     const pct = value[key]
@@ -102,6 +105,33 @@ export function ContributionEditor({ value, onChange, ctx }: { value: Election; 
           const p = presets.find((x) => x.key === k)
           if (p) set(p.pre, p.ro)
         }} />
+        {/* Pro tip under the quick picks while some employer match is left unclaimed */}
+        <AnimatePresence initial={false}>
+          {showMatchTip && (
+            <motion.div key="match-tip" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+              <div className="mt-3 rounded-2xl bg-amber-50/80 p-3.5 ring-1 ring-amber-100 dark:bg-amber-500/10 dark:ring-amber-400/20">
+                <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-amber-700 dark:text-amber-300">
+                  <Lightbulb className="h-3.5 w-3.5" aria-hidden />
+                  {t('enrollment.core.pro_tip')}
+                </p>
+                <p className="mt-1.5 text-[13px] leading-[1.5] text-slate-700 dark:text-gray-200">
+                  <Trans
+                    i18nKey="enrollment.core.match_protip"
+                    values={{ gap: matchGap, amount: money((fullMatch - match) / 12), cost: money(dollarsFor(matchGap)) }}
+                    components={{ b: <strong className="font-semibold text-slate-900 dark:text-white" /> }}
+                  />
+                </p>
+                <button
+                  type="button"
+                  onClick={() => set(value.preTax + matchGap, value.roth)}
+                  className="mt-2.5 inline-flex h-8 items-center rounded-full bg-white px-3.5 text-[13px] font-semibold text-slate-900 ring-1 ring-amber-200 transition-colors hover:bg-amber-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-gray-900 dark:text-white dark:ring-amber-400/30 dark:hover:bg-gray-800"
+                >
+                  {t('enrollment.core.match_protip_cta')}
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </Field>
 
       <Field title={t('enrollment.core.ed.by_source')}>
@@ -240,7 +270,7 @@ export function InvestmentsEditor({ value, onChange, onViewAll }: { value: Elect
                 <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: FUND_COLORS[i % FUND_COLORS.length] }} aria-hidden />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[13px] font-medium text-slate-900 dark:text-white">{meta?.name ?? r.ticker}</span>
-                  <span className="text-[12px] text-slate-500">{r.ticker} · {meta?.expense}</span>
+                  <span className="text-[12px] text-slate-500">{r.ticker}{meta ? ` · ${meta.assetClass}` : ''}</span>
                 </span>
                 {value.mode === 'own' ? (
                   <span className="flex items-center gap-1">
@@ -258,7 +288,6 @@ export function InvestmentsEditor({ value, onChange, onViewAll }: { value: Elect
             )
           })}
         </ul>
-        <p className={cn(hint, 'mt-2')}>{t('enrollment.core.ed.fee_line', { fee: blendedFee(rows).toFixed(2) })}</p>
       </Field>
 
       {value.mode === 'own' && (
@@ -273,7 +302,7 @@ export function InvestmentsEditor({ value, onChange, onViewAll }: { value: Elect
                 <button type="button" onClick={() => onChange({ ...value, ownRows: [...value.ownRows, { ticker: c.ticker, pct: 0 }] })} className="flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-left hover:bg-slate-50 dark:hover:bg-gray-800">
                   <span className="min-w-0">
                     <span className="block truncate text-[13px] font-medium text-slate-900 dark:text-white">{c.name}</span>
-                    <span className="text-[12px] text-slate-500">{c.ticker} · {c.assetClass} · {c.expense}</span>
+                    <span className="text-[12px] text-slate-500">{c.ticker} · {c.assetClass}</span>
                   </span>
                   <Plus className="h-4 w-4 shrink-0 text-blue-600" aria-hidden />
                 </button>

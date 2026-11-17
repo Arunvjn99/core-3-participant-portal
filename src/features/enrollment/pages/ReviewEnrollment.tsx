@@ -150,7 +150,7 @@ export default function ReviewEnrollment() {
       ? t('enrollment.review_page.confidence_high', { amount: employerContribution.toLocaleString(locale) })
       : t('enrollment.review_page.confidence_default', {
           age: personalization.retirementAge,
-          pct: retirementIncome(projectedBalance, yearsToRetirement, data.salary).readinessPct,
+          pct: retirementIncome(projectedBalance, yearsToRetirement, data.salary).goalPct,
         })
 
   return (

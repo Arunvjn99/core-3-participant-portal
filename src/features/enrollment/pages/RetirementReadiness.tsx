@@ -80,7 +80,7 @@ function AnimatedScore({
     }
   }, [value])
 
-  const strokeDashoffset = circumference - (displayValue / 100) * circumference
+  const strokeDashoffset = circumference - (Math.min(Math.max(displayValue, 0), 100) / 100) * circumference
 
   return (
     <div className="relative h-48 w-48">
@@ -316,7 +316,8 @@ function RetirementReadiness() {
   }
 
   const circumference = 2 * Math.PI * 70
-  const scoreColor = score >= 40 ? 'var(--color-primary)' : 'var(--text-secondary)'
+  // Same bands as the dashboard: red under 50, amber 50 to 70, green above 70
+  const scoreColor = score > 70 ? 'var(--status-success)' : score >= 50 ? 'var(--status-warning)' : 'var(--status-danger)'
 
   const getMessage = () => {
     if (score >= 80) return t('enrollment.readiness.score_message_80')
@@ -325,7 +326,7 @@ function RetirementReadiness() {
     return t('enrollment.readiness.score_message_low')
   }
 
-  const suggestions: Suggestion[] = []
+  const candidates: Suggestion[] = []
 
   const boostPct = 2
   const boostedContrib = data.contributionPercent + boostPct
@@ -336,7 +337,7 @@ function RetirementReadiness() {
     const boostedBalance = project(boostedContrib, currentAutoIncrease, growthRate)
     const additionalPerYear = boostedAnnual + boostedMatch - annualContribution - employerContribution
 
-    suggestions.push({
+    candidates.push({
       id: 'boost-contribution',
       icon: <Percent className="h-4 w-4 text-blue-600 dark:text-blue-400" />,
       title: t('enrollment.readiness.suggest_boost_title', { pct: boostPct }),
@@ -371,7 +372,7 @@ function RetirementReadiness() {
     }
     const avgExtraContrib = yearsToRetirement > 0 ? Math.round(extraTotal / yearsToRetirement) : 0
 
-    suggestions.push({
+    candidates.push({
       id: 'enable-auto-increase',
       icon: <TrendingUp className="h-4 w-4 text-blue-600 dark:text-blue-400" />,
       title: t('enrollment.readiness.suggest_auto_title'),
@@ -402,7 +403,7 @@ function RetirementReadiness() {
     // Switching investments doesn't change what you save each year; only the balance grows differently
     const extraBalancePerYear = 0
 
-    suggestions.push({
+    candidates.push({
       id: 'upgrade-strategy',
       icon: <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400" />,
       title: t('enrollment.readiness.suggest_upgrade_title'),
@@ -424,8 +425,8 @@ function RetirementReadiness() {
     })
   }
 
-  suggestions.sort((a, b) => b.scoreIncrease - a.scoreIncrease)
-
+  // Only suggestions that would actually raise the score are offered, biggest gain first
+  const suggestions = candidates.filter((c) => c.newScore > score).sort((a, b) => b.scoreIncrease - a.scoreIncrease)
   const potentialScore = suggestions.length > 0 ? suggestions.reduce((max, s) => Math.max(max, s.newScore), score) : score
 
   const totalPotentialIncrease = potentialScore - score
@@ -471,7 +472,7 @@ function RetirementReadiness() {
 
               <p className={cn('mt-4 text-center text-lg font-bold', HEADING)}>{getMessage()}</p>
               <p className={cn('mt-1 text-center text-sm', BODY_TEXT)}>
-                {t('enrollment.readiness.on_track_line', { onTrack: t('enrollment.readiness.on_track_em', { score }) })}
+                {t('enrollment.readiness.on_track_line', { onTrack: t('enrollment.readiness.on_track_em', { score: income.goalPct }) })}
               </p>
               <p className={cn('mt-1 text-center text-xs', MUTED_TEXT)}>{t('enrollment.readiness.peer_benchmark')}</p>
 
@@ -611,11 +612,11 @@ function RetirementReadiness() {
             </div>
           )}
 
-          {suggestions.length === 0 && appliedChanges.length > 0 && (
+          {suggestions.length === 0 && (
             <Card className="text-center">
               <CheckCircle2 className="mx-auto mb-2 h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-              <p className={cn('text-sm font-bold', HEADING)}>{t('enrollment.readiness.all_applied_title')}</p>
-              <p className={cn('mt-0.5 text-xs', BODY_TEXT)}>{t('enrollment.readiness.all_applied_sub')}</p>
+              <p className={cn('text-sm font-bold', HEADING)}>{t(appliedChanges.length > 0 ? 'enrollment.readiness.all_applied_title' : 'enrollment.readiness.no_tips_title')}</p>
+              <p className={cn('mt-0.5 text-xs', BODY_TEXT)}>{t(appliedChanges.length > 0 ? 'enrollment.readiness.all_applied_sub' : 'enrollment.readiness.no_tips_sub')}</p>
             </Card>
           )}
         </div>

@@ -5,7 +5,7 @@ import { useEnrollment } from '@/core/hooks/useEnrollment'
 import { getAppDateLocale } from '@/lib/dateLocale'
 import { useEnrollmentStepNav } from '@/features/enrollment/components/EnrollmentStepNavContext'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
-import { Info, Minus, Plus, TrendingUp } from 'lucide-react'
+import { Info, Lightbulb, Minus, Plus, TrendingUp } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { BODY_TEXT, Card, CARD_TITLE, HEADING, MUTED_TEXT, ROUND_BUTTON, RULE, SECTION_LABEL, StepHeader, TitleBadge, chip } from '@/features/enrollment/enrollmentUi'
 import { PLAN_CONFIG } from '@/features/enrollment/agent/planConfig'
@@ -241,6 +241,25 @@ export default function Contribution() {
                   </button>
                 ))}
               </div>
+              {/* Pro tip under the quick picks while the rate is below the full match, to nudge it up */}
+              {percent < FULL_MATCH_PCT && matchGapAnnual > 0 && (
+                <div className="mt-3 rounded-2xl bg-amber-50/80 p-3.5 ring-1 ring-amber-100 dark:bg-amber-500/10 dark:ring-amber-400/20">
+                  <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-amber-700 dark:text-amber-300">
+                    <Lightbulb className="h-3.5 w-3.5" aria-hidden />
+                    {t('enrollment.contribution_page.pro_tip')}
+                  </p>
+                  <p className={cn('mt-1.5 text-[13px] leading-[1.5]', BODY_TEXT)}>
+                    {t('enrollment.contribution_page.pro_tip_body', { matchPct: FULL_MATCH_PCT, amount: `$${matchGapAnnual.toLocaleString(locale)}` })}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => handleQuick(FULL_MATCH_PCT)}
+                    className="mt-2.5 inline-flex h-8 items-center rounded-full bg-white px-3.5 text-[13px] font-semibold text-slate-900 ring-1 ring-amber-200 transition-colors hover:bg-amber-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-slate-900 dark:text-white dark:ring-amber-400/30 dark:hover:bg-slate-800"
+                  >
+                    {t('enrollment.contribution_page.pro_tip_cta', { pct: FULL_MATCH_PCT })}
+                  </button>
+                </div>
+              )}
             </div>
           </Card>
 

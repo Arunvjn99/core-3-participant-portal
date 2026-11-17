@@ -1,8 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useBlocker, useNavigate } from 'react-router-dom'
 import { Trans, useTranslation } from 'react-i18next'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { AlertTriangle, ArrowRight, Check, Landmark, Loader2, Lock, RotateCw } from 'lucide-react'
+import { AlertTriangle, ArrowRight, Check, Landmark, Loader2, Lock, Pencil, RotateCcw, RotateCw } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { LEGAL, ROUTES } from '@/lib/constants'
 import { getAppDateLocale } from '@/lib/dateLocale'
@@ -20,6 +20,7 @@ import { PLAN_CONFIG, PLAN_LIMITS, employerMatch } from '../../agent/planConfig'
 import { checkEligibility, getPlanRules, submitEnrollment } from '../../agent/enrollmentService'
 import { FUND_COLORS, blendedFee, fundMeta, pause, round2, rowsFor, type Election } from './model'
 import { AgentMark, AnimatedNumber, ConfettiField, DrawnCheck, EdgeGlow, InfoTip, ProjectionChart, Sheet, Shimmer } from './ui'
+import { AutoIncreaseEditor, ContributionEditor, InvestmentsEditor } from './editors'
 
 /**
  * One-click enrollment: Core AI builds a plan from the details already on file and opens straight on it. The participant
@@ -29,7 +30,16 @@ import { AgentMark, AnimatedNumber, ConfettiField, DrawnCheck, EdgeGlow, InfoTip
 
 type Stage = 'working' | 'review' | 'submitting' | 'done'
 type StepState = 'pending' | 'active' | 'done' | 'error'
-type SheetKind = 'contribution' | 'auto' | 'invest' | 'disclosures' | null
+type EditKind = 'contribution' | 'auto' | 'invest'
+type SheetKind = EditKind | 'disclosures' | null
+
+/** Whether one part of the plan differs between two elections: what the card's Edited tags and the change count compare */
+function partChanged(kind: EditKind, a: Election, b: Election): boolean {
+  if (kind === 'contribution') return a.preTax !== b.preTax || a.roth !== b.roth || a.afterTax !== b.afterTax || a.unit !== b.unit
+  if (kind === 'auto') return JSON.stringify(a.auto) !== JSON.stringify(b.auto)
+  return a.mode !== b.mode || a.risk !== b.risk || a.autoRebalance !== b.autoRebalance || a.sdb !== b.sdb || (b.mode === 'own' && JSON.stringify(a.ownRows) !== JSON.stringify(b.ownRows))
+}
+const EDIT_KINDS: EditKind[] = ['contribution', 'auto', 'invest']
 
 const WORK_STEPS = 6
 const SUBMIT_STEPS = 3
@@ -118,8 +128,13 @@ export default function CoreEnrollment() {
     sdb: false,
   })
   const [election, setElection] = useState<Election>(initialElection)
-  /** What Core AI first proposed, so Start over can return to it */
+  /** What Core AI first proposed: edits are compared with it, and Reset returns to it */
+  const [suggested, setSuggested] = useState<Election | null>(null)
+  /** The plan as it was when an edit panel opened, so Cancel can put it back */
+  const [snapshot, setSnapshot] = useState<Election | null>(null)
   const [sheet, setSheet] = useState<SheetKind>(null)
+  /** Set just before leaving on purpose (to the step-by-step flow), so the discard prompt doesn't stop it */
+  const leaving = useRef(false)
   const [showFunds, setShowFunds] = useState(false)
   /** Warns before leaving the confirmation without naming a beneficiary */
   const [beneWarn, setBeneWarn] = useState(false)
@@ -203,6 +218,73 @@ export default function CoreEnrollment() {
   const growthPct = round2(GROWTH_RATES[election.risk] * 100)
   const ready = stage !== 'working' && !problem
 
+  // ── Editing: panels change the plan live; Cancel puts back what was there when the panel opened ──
+  const edited = Object.fromEntries(EDIT_KINDS.map((k) => [k, !!suggested && partChanged(k, suggested, election)])) as Record<EditKind, boolean>
+  const changeCount = EDIT_KINDS.filter((k) => edited[k]).length
+  const canEdit = ready && stage === 'review'
+  const editCtx = { salary, periods, locale, now }
+  const openEdit = (kind: EditKind) => {
+    setSnapshot(election)
+    setSheet(kind)
+  }
+  const cancelEdit = () => {
+    if (snapshot) setElection(snapshot)
+    setSnapshot(null)
+    setSheet(null)
+  }
+  const doneEdit = (kind: EditKind) => {
+    if (snapshot && partChanged(kind, snapshot, election)) {
+      const text =
+        kind === 'contribution'
+          ? t('enrollment.core.toast_contribution', { rate: f.total })
+          : kind === 'auto'
+            ? election.auto.enabled
+              ? t('enrollment.core.toast_auto_on', { amount: election.auto.amount.preTax, max: election.auto.cap.preTax })
+              : t('enrollment.core.toast_auto_off')
+            : t('enrollment.core.toast_invest', { style: f.invest })
+      setToast({ id: Date.now(), text })
+    }
+    setSnapshot(null)
+    setSheet(null)
+  }
+  const resetToSuggested = () => {
+    if (!suggested) return
+    setElection(suggested)
+    setToast({ id: Date.now(), text: t('enrollment.core.reset_toast') })
+  }
+  /** Writes the plan as it stands into the enrollment draft, for approval or for the step-by-step flow */
+  const writeDraft = (e: Election) => {
+    const facts_ = facts(e)
+    const total = facts_.total
+    const share = (v: number) => (total > 0 ? Math.round((v / total) * 100) : 0)
+    const allocation = Object.fromEntries(facts_.rows.map((r) => [r.ticker, r.pct]))
+    const { mergeDraftSection } = useEnrollmentDraftStore.getState()
+    const planType = e.roth > e.preTax ? 'roth' : 'traditional'
+    mergeDraftSection('plan', { type: planType, planId: planType, planName: planType === 'roth' ? 'Roth 401(k)' : 'Traditional 401(k)' })
+    mergeDraftSection('contribution', { percent: total, rate: total, type: 'percentage' })
+    mergeDraftSection('source', { preTax: share(e.preTax), roth: share(e.roth), afterTax: share(e.afterTax) })
+    mergeDraftSection('autoIncrease', { enabled: e.auto.enabled, amount: e.auto.amount.preTax, max: e.auto.cap.preTax })
+    mergeDraftSection('investment', { riskLevel: e.risk, useRecommended: e.mode !== 'own', customAllocation: allocation })
+    return allocation
+  }
+  /** "More options": carry the plan as it stands into the step-by-step flow, at that panel's step */
+  const toCustomFlow = (kind: EditKind) => {
+    writeDraft(election)
+    setSnapshot(null)
+    setSheet(null)
+    leaving.current = true
+    navigate(kind === 'contribution' ? '/enrollment/contribution' : kind === 'auto' ? '/enrollment/auto-increase' : '/enrollment/investment')
+  }
+  // Leaving with unsaved edits (Cancel, browser back, a link) asks first; closing the tab gets the browser's own prompt
+  const blocker = useBlocker(({ currentLocation, nextLocation }) => !leaving.current && stage === 'review' && changeCount > 0 && currentLocation.pathname !== nextLocation.pathname)
+  const discardRef = useDialogA11y<HTMLDivElement>(blocker.state === 'blocked', () => blocker.reset?.())
+  useEffect(() => {
+    if (stage !== 'review' || changeCount === 0) return
+    const warn = (e: BeforeUnloadEvent) => e.preventDefault()
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [stage, changeCount])
+
   useEffect(() => {
     if (!toast) return
     const id = window.setTimeout(() => setToast(null), 2600)
@@ -275,6 +357,7 @@ export default function CoreEnrollment() {
       auto: { enabled: d.autoIncrease.enabled, cycle: 'plan_year', sourceWise: false, amount: { preTax: d.autoIncrease.amount, roth: d.autoIncrease.amount }, cap: { preTax: d.autoIncrease.max, roth: d.autoIncrease.max } },
     }
     setElection(proposed)
+    setSuggested(proposed)
     for (let i = 2; i < WORK_STEPS; i++) {
       markStep(i, 'active')
       await wait(220)
@@ -317,13 +400,7 @@ export default function CoreEnrollment() {
       markSubmit(1, 'done')
       markSubmit(2, 'active')
       const toUnit = (pct: number) => round2(election.unit === 'dollar' ? (pct / 100) * (salary / periods) : pct)
-      const { mergeDraftSection } = useEnrollmentDraftStore.getState()
-      const planType = election.roth > election.preTax ? 'roth' : 'traditional'
-      mergeDraftSection('plan', { type: planType, planId: planType, planName: planType === 'roth' ? 'Roth 401(k)' : 'Traditional 401(k)' })
-      mergeDraftSection('contribution', { percent: total, rate: total, type: 'percentage' })
-      mergeDraftSection('source', { preTax: share(election.preTax), roth: share(election.roth), afterTax: share(election.afterTax) })
-      mergeDraftSection('autoIncrease', { enabled: election.auto.enabled, amount: election.auto.amount.preTax, max: election.auto.cap.preTax })
-      mergeDraftSection('investment', { riskLevel: election.risk, useRecommended: election.mode !== 'own', customAllocation: allocation })
+      writeDraft(election)
       useEnrollmentDraftStore.setState((s) => ({
         currentStep: 8,
         highestCompletedStep: Math.max(s.highestCompletedStep, 7),
@@ -409,6 +486,40 @@ export default function CoreEnrollment() {
     </span>
   )
 
+  /** Edit on a row: opens that part's panel */
+  const editButton = (kind: EditKind, what: string) =>
+    canEdit ? (
+      <button
+        type="button"
+        onClick={() => openEdit(kind)}
+        aria-label={t('enrollment.core.edit_what', { what })}
+        className="inline-flex h-7 shrink-0 items-center gap-1 rounded-full px-2.5 text-[13px] font-semibold text-blue-700 ring-1 ring-inset ring-blue-200 transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-blue-300 dark:ring-blue-400/30 dark:hover:bg-blue-500/10"
+      >
+        <Pencil className="h-3 w-3" aria-hidden />
+        {t('enrollment.core.edit')}
+      </button>
+    ) : null
+  /** Marks a row that no longer matches the suggested plan */
+  const editedTag = (kind: EditKind) =>
+    canEdit && edited[kind] ? (
+      <span className="ml-1.5 inline-flex shrink-0 items-center rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">{t('enrollment.core.edited')}</span>
+    ) : null
+  /** Panel footer: the step-by-step flow on the left, Cancel and Done on the right */
+  const editFooter = (kind: EditKind, invalid: boolean) => (
+    <>
+      <button type="button" onClick={() => toCustomFlow(kind)} title={t('enrollment.core.more_options_title')} className="mr-auto inline-flex items-center gap-1 rounded-md text-[13px] font-semibold text-slate-600 transition-colors hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-gray-300 dark:hover:text-white">
+        {t('enrollment.core.more_options')}
+        <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+      </button>
+      <button type="button" onClick={cancelEdit} className="inline-flex h-10 items-center rounded-full bg-white px-5 text-[14px] font-semibold text-slate-900 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-gray-900 dark:text-white dark:ring-gray-700 dark:hover:bg-gray-800">
+        {t('enrollment.core.cancel')}
+      </button>
+      <button type="button" disabled={invalid} onClick={() => doneEdit(kind)} className="inline-flex h-10 items-center rounded-full bg-blue-600 px-5 text-[14px] font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">
+        {t('enrollment.core.done')}
+      </button>
+    </>
+  )
+
   const card = 'rounded-[24px] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_16px_40px_rgba(15,23,42,0.06)] ring-1 ring-slate-200/70 dark:bg-gray-900 dark:ring-gray-800'
   const label = 'text-[14px] font-medium text-slate-500 dark:text-gray-400'
 
@@ -487,8 +598,12 @@ export default function CoreEnrollment() {
                   <div className="grid md:grid-cols-[1.05fr_1fr]">
                     {/* You save */}
                     <section className="p-5 sm:p-6">
-                      <div className="flex items-center justify-between">
-                        <p className={label}>{t('enrollment.core.m_save')}</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className={cn(label, 'flex items-center')}>
+                          {t('enrollment.core.m_save')}
+                          {editedTag('contribution')}
+                        </p>
+                        {editButton('contribution', t('enrollment.core.m_save'))}
                       </div>
                       {ready ? (
                         <>
@@ -678,13 +793,9 @@ export default function CoreEnrollment() {
                         <p className={cn(label, 'flex items-center gap-0.5')}>
                           {t('enrollment.core.row_auto')}
                           <InfoTip side="top" label={t('enrollment.core.row_auto')} text={t('enrollment.core.auto_tip')} />
+                          {editedTag('auto')}
                         </p>
-                        {ready && election.auto.enabled && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[12px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-400/25">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden />
-                            {t('enrollment.core.auto_enabled')}
-                          </span>
-                        )}
+                        {editButton('auto', t('enrollment.core.row_auto'))}
                       </div>
                       {ready ? (
                         <>
@@ -694,6 +805,10 @@ export default function CoreEnrollment() {
                               <>
                                 <ArrowRight className="h-5 w-5" strokeWidth={2.5} aria-hidden />
                                 {`${nextRate}%`}
+                                <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[12px] font-semibold tracking-normal text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-400/25">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden />
+                                  {t('enrollment.core.auto_enabled')}
+                                </span>
                               </>
                             )}
                           </p>
@@ -718,7 +833,9 @@ export default function CoreEnrollment() {
                         <p className={cn(label, 'flex items-center gap-0.5')}>
                           {t('enrollment.core.row_invest')}
                           <InfoTip side="top" label={t('enrollment.core.row_invest')} text={t('enrollment.core.invest_tip')} />
+                          {editedTag('invest')}
                         </p>
+                        {editButton('invest', t('enrollment.core.row_invest'))}
                       </div>
                       {ready ? (
                         <>
@@ -784,14 +901,21 @@ export default function CoreEnrollment() {
                     {canApprove && !reduce && <motion.span className="pointer-events-none absolute inset-y-0 w-16 bg-gradient-to-r from-transparent via-white/25 to-transparent" initial={{ x: '-120%' }} animate={{ x: '500%' }} transition={{ duration: 1.6, repeat: Infinity, repeatDelay: 1.4 }} aria-hidden />}
                     {stage === 'submitting' ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : submitError ? <RotateCw className="h-4 w-4" aria-hidden /> : <Lock className="h-4 w-4" aria-hidden />}
                     {stage === 'submitting' ? t('enrollment.core.approving') : submitError ? t('enrollment.core.try_again') : t('enrollment.core.approve')}
+                    {stage === 'review' && !submitError && changeCount > 0 && <span className="text-[13px] font-medium opacity-80">{`· ${t('enrollment.core.approve_changes', { count: changeCount })}`}</span>}
                   </motion.button>
                 </motion.div>
 
                 {/* Leave without enrolling */}
-                <div className="flex items-center">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <button type="button" onClick={() => navigate(ROUTES.PRE_ENROLLMENT_DASHBOARD)} disabled={stage === 'submitting'} className="h-10 rounded-full bg-white px-5 text-[14px] font-semibold text-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.05)] ring-1 ring-slate-200/70 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:opacity-50 dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-800 dark:hover:bg-gray-800">
                     {t('enrollment.core.cancel')}
                   </button>
+                  {canEdit && changeCount > 0 && (
+                    <button type="button" onClick={resetToSuggested} className="inline-flex h-10 items-center gap-1.5 rounded-full px-3 text-[14px] font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white">
+                      <RotateCcw className="h-4 w-4" aria-hidden />
+                      {t('enrollment.core.reset_suggested')}
+                    </button>
+                  )}
                 </div>
               </>
             )}
@@ -890,7 +1014,7 @@ export default function CoreEnrollment() {
       </AnimatePresence>
 
       {/* The funds the money goes into, view only */}
-      <Sheet open={showFunds} onClose={() => setShowFunds(false)} title={t('enrollment.core.funds_title')} subtitle={`${f.invest} · ${t('enrollment.core.fee', { fee: f.fee.toFixed(2) })}`}>
+      <Sheet open={showFunds} stacked={sheet === 'invest'} onClose={() => setShowFunds(false)} title={t('enrollment.core.funds_title')} subtitle={f.invest}>
         <ul className="-mt-2 divide-y divide-slate-100 dark:divide-gray-800">
           {funds.map((r, i) => {
             const meta = fundMeta(r.ticker)
@@ -899,7 +1023,7 @@ export default function CoreEnrollment() {
                 <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: FUND_COLORS[i] }} aria-hidden />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[15px] font-medium text-slate-900 dark:text-white">{meta?.name ?? r.ticker}</span>
-                  <span className="block text-[13px] text-slate-500 dark:text-gray-400">{`${r.ticker}${meta ? ` · ${meta.assetClass} · ${t('enrollment.core.fee', { fee: parseFloat(meta.expense).toFixed(2) })}` : ''}`}</span>
+                  <span className="block text-[13px] text-slate-500 dark:text-gray-400">{`${r.ticker}${meta ? ` · ${meta.assetClass}` : ''}`}</span>
                 </span>
                 <span className="shrink-0 text-[16px] font-semibold tabular-nums text-slate-900 dark:text-white">{`${r.pct}%`}</span>
               </motion.li>
@@ -907,6 +1031,49 @@ export default function CoreEnrollment() {
           })}
         </ul>
       </Sheet>
+
+      {/* Edit panels: changes show on the card as they are made; Done keeps them, Cancel puts back what was there */}
+      <Sheet preview open={sheet === 'contribution'} onClose={cancelEdit} title={t('enrollment.core.sheet_contribution')} subtitle={t('enrollment.core.sheet_sub')} footer={editFooter('contribution', rateError)}>
+        <ContributionEditor value={election} onChange={setElection} ctx={editCtx} />
+      </Sheet>
+      <Sheet preview open={sheet === 'auto'} onClose={cancelEdit} title={t('enrollment.core.sheet_auto')} subtitle={t('enrollment.core.sheet_sub')} footer={editFooter('auto', false)}>
+        <AutoIncreaseEditor value={election} onChange={setElection} ctx={editCtx} />
+      </Sheet>
+      <Sheet preview open={sheet === 'invest'} onClose={cancelEdit} title={t('enrollment.core.sheet_invest')} subtitle={t('enrollment.core.sheet_sub')} footer={editFooter('invest', fundsError)}>
+        <InvestmentsEditor value={election} onChange={setElection} onViewAll={() => setShowFunds(true)} />
+      </Sheet>
+
+      {/* Leaving with edits that aren't approved yet */}
+      <AnimatePresence>
+        {blocker.state === 'blocked' && (
+          <div className="fixed inset-0 z-[90] flex items-center justify-center p-4">
+            <motion.div className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduce ? 0 : 0.2 }} onClick={() => blocker.reset()} aria-hidden />
+            <motion.div
+              ref={discardRef}
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="discard-title"
+              aria-describedby="discard-body"
+              initial={reduce ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={reduce ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.98 }}
+              transition={{ duration: reduce ? 0 : 0.25, ease }}
+              className="relative w-full max-w-[420px] rounded-[24px] bg-white p-6 text-left shadow-[0_24px_60px_-20px_rgba(15,23,42,0.45)] ring-1 ring-slate-200/70 dark:bg-gray-900 dark:ring-gray-800"
+            >
+              <h2 id="discard-title" className="text-[19px] font-semibold tracking-[-0.01em] text-slate-900 dark:text-white">{t('enrollment.core.discard_title')}</h2>
+              <p id="discard-body" className="mt-1.5 text-[15px] leading-[1.55] text-slate-600 dark:text-gray-300">{t('enrollment.core.discard_body', { count: changeCount })}</p>
+              <div className="mt-6 flex flex-col-reverse gap-2.5 sm:flex-row sm:justify-end">
+                <button type="button" onClick={() => blocker.proceed()} className="h-11 rounded-xl px-4 text-[15px] font-semibold text-slate-600 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-gray-300 dark:hover:bg-gray-800">
+                  {t('enrollment.core.discard_leave')}
+                </button>
+                <button type="button" onClick={() => blocker.reset()} className="h-11 rounded-xl bg-blue-600 px-5 text-[15px] font-semibold text-white shadow-[0_8px_20px_rgba(37,99,235,0.25)] transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
+                  {t('enrollment.core.discard_keep')}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <Sheet
         open={sheet === 'disclosures'}

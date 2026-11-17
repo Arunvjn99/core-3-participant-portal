@@ -221,7 +221,7 @@ export function AppShell() {
               </Link>
             </div>
 
-            <nav className="hidden flex-1 items-center justify-center gap-0.5 md:flex" aria-hidden={!showNav || undefined}>
+            <nav className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 lg:flex" aria-hidden={!showNav || undefined}>
               {showNav && navItems.map((item) => {
                 const active = isNavActive(item.href, location.pathname)
                 return (
@@ -229,13 +229,13 @@ export function AppShell() {
                     key={item.href}
                     to={item.href}
                     data-brand-nav-active={active ? '' : undefined}
-                    className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-semibold transition-all ${
+                    className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-all xl:px-3 ${
                       active
                         ? ''
                         : 'text-text-secondary hover:bg-surface-elevated hover:text-text-primary dark:hover:text-text-primary'
                     }`}
                   >
-                    <item.icon className="h-4 w-4 shrink-0" />
+                    <item.icon className="hidden h-4 w-4 shrink-0 xl:block" />
                     <span>{t(item.labelKey)}</span>
                   </Link>
                 )
@@ -309,8 +309,8 @@ export function AppShell() {
                   aria-haspopup="listbox"
                 >
                   <Globe className="h-4 w-4 shrink-0 transition-transform duration-700 ease-in-out group-hover:rotate-180 motion-reduce:transform-none motion-reduce:transition-none" aria-hidden />
-                  {/* Phones show the globe only, so the header fits; the name is still in the button's label */}
-                  <span className="hidden min-w-0 truncate text-xs font-medium text-text-primary sm:block sm:text-sm">
+                  {/* Below wide screens the globe shows alone, so the header fits; the name is still in the button's label */}
+                  <span className="hidden min-w-0 truncate text-sm font-medium text-text-primary xl:block">
                     {t(`lang.${menuLang}`)}
                   </span>
                 </button>
@@ -456,7 +456,7 @@ export function AppShell() {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen((o) => !o)}
-                className="ml-1 flex group h-9 w-9 items-center justify-center rounded-lg text-text-muted transition-[color,background-color,transform] duration-200 hover:bg-surface-elevated hover:text-primary active:scale-90 motion-reduce:active:scale-100 dark:hover:text-blue-300 md:hidden"
+                className="ml-1 flex group h-9 w-9 items-center justify-center rounded-lg text-text-muted transition-[color,background-color,transform] duration-200 hover:bg-surface-elevated hover:text-primary active:scale-90 motion-reduce:active:scale-100 dark:hover:text-blue-300 lg:hidden"
                 aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={mobileMenuOpen}
               >
@@ -467,7 +467,7 @@ export function AppShell() {
         </div>
 
         {mobileMenuOpen && (
-          <div className="border-t border-border-default bg-surface-card pb-3 md:hidden">
+          <div className="border-t border-border-default bg-surface-card pb-3 lg:hidden">
             <div className="mx-auto max-w-7xl px-4">
               {showNav && navItems.map((item) => {
                 const active = isNavActive(item.href, location.pathname)
