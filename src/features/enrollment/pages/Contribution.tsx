@@ -5,7 +5,9 @@ import { useEnrollment } from '@/core/hooks/useEnrollment'
 import { getAppDateLocale } from '@/lib/dateLocale'
 import { useEnrollmentStepNav } from '@/features/enrollment/components/EnrollmentStepNavContext'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
-import { Info, Minus, Plus } from 'lucide-react'
+import { Info, Minus, Plus, TrendingUp } from 'lucide-react'
+import { cn } from '@/lib/cn'
+import { BODY_TEXT, Card, CARD_TITLE, HEADING, MUTED_TEXT, ROUND_BUTTON, RULE, SECTION_LABEL, StepHeader, TitleBadge, chip } from '@/features/enrollment/enrollmentUi'
 import { PLAN_CONFIG } from '@/features/enrollment/agent/planConfig'
 import { annualEmployerMatch, matchableRate, missedEmployerMatch, type ProjectionInput } from '@/features/enrollment/enrollmentMath'
 import { getGrowthRate } from '@/lib/retirementCalculations'
@@ -150,64 +152,41 @@ export default function Contribution() {
 
   return (
     <AnimatedPage>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-            {t('enrollment.contribution_page.title')}
-          </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 sm:text-base">
-            {t('enrollment.contribution_page.subtitle')}
-          </p>
-        </div>
+      <div className="space-y-5">
+        <StepHeader title={t('enrollment.contribution_page.title')} subtitle={t('enrollment.contribution_page.subtitle')} />
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-5 lg:grid-cols-2">
           {/* Sections spread to the full card height so it lines up with the projection card */}
-          <div className="flex flex-col justify-between gap-5 rounded-2xl border border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-900 sm:p-6">
-            <div className="rounded-xl border border-blue-200/50 bg-gradient-to-br from-blue-50 to-blue-100/30 p-4 dark:border-blue-800/40 dark:from-blue-950/30 dark:to-blue-900/10">
-              <p className="text-center text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                {t('enrollment.contribution_page.monthly_paycheck')}
-              </p>
-              <p className="mt-1 text-center text-2xl font-bold text-gray-900 dark:text-white">
-                ${monthlyPaycheck.toLocaleString(locale)}
-              </p>
+          <Card className="flex flex-col justify-between gap-5">
+            <div className={cn('flex items-baseline justify-between gap-3 border-b pb-4', RULE)}>
+              <p className={SECTION_LABEL}>{t('enrollment.contribution_page.monthly_paycheck')}</p>
+              <p className={cn('text-xl font-bold tabular-nums', HEADING)}>${monthlyPaycheck.toLocaleString(locale)}</p>
             </div>
 
             <div className="text-center">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                {t('enrollment.contribution_page.your_contribution')}
-              </p>
-              <div className="flex items-center justify-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => adjustPercent(-1)}
-                  className="flex h-11 w-11 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 transition-colors hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/40 dark:hover:bg-blue-900/40"
-                >
-                  <Minus className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <p className={cn('mb-3', SECTION_LABEL)}>{t('enrollment.contribution_page.your_contribution')}</p>
+              <div className="flex items-center justify-center gap-4">
+                <button type="button" onClick={() => adjustPercent(-1)} className={ROUND_BUTTON} aria-label={t('enrollment.contribution_page.decrease')}>
+                  <Minus className="h-4 w-4" />
                 </button>
-                <p className="text-6xl font-extrabold leading-none tracking-tight text-blue-600 dark:text-blue-400">{percent}%</p>
-                <button
-                  type="button"
-                  onClick={() => adjustPercent(1)}
-                  className="flex h-11 w-11 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 transition-colors hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/40 dark:hover:bg-blue-900/40"
-                >
-                  <Plus className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <p className="min-w-[120px] text-6xl font-extrabold leading-none tracking-tight text-primary tabular-nums dark:text-blue-300">{percent}%</p>
+                <button type="button" onClick={() => adjustPercent(1)} className={ROUND_BUTTON} aria-label={t('enrollment.contribution_page.increase')}>
+                  <Plus className="h-4 w-4" />
                 </button>
               </div>
+              {/* One dollar figure, monthly like the paycheck above */}
+              <p className={cn('mt-3 text-sm', MUTED_TEXT)}>
+                <span className={cn('font-bold', HEADING)}>${monthlyContribution.toLocaleString(locale)}</span> {t('enrollment.contribution_page.per_month_from_pay')}
+              </p>
             </div>
 
-            {/* One dollar figure, monthly like the paycheck above */}
-            <p className="text-center text-sm text-gray-500 dark:text-gray-400">
-              <span className="font-semibold text-gray-900 dark:text-white">${monthlyContribution.toLocaleString(locale)}</span>{' '}
-              {t('enrollment.contribution_page.per_month_from_pay')}
-            </p>
-
             {/* What the employer adds, and how to get the rest when below the match */}
-            <div className="rounded-xl border border-emerald-200/70 bg-emerald-50/70 px-3.5 py-2.5 text-center dark:border-emerald-800/40 dark:bg-emerald-950/20">
-              <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
+            <div className="text-center">
+              <p className="inline-flex items-center rounded-full bg-emerald-50 px-3.5 py-1.5 text-sm font-semibold text-emerald-700 ring-1 ring-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/20">
                 {t('enrollment.contribution_page.match_simple', { amount: `$${employerAnnual.toLocaleString(locale)}` })}
               </p>
               {belowMatch && (
-                <p className="mt-0.5 text-xs text-emerald-700/90 dark:text-emerald-400/90">
+                <p className={cn('mt-1.5 text-xs', MUTED_TEXT)}>
                   {percent < FULL_MATCH_PCT
                     ? t('enrollment.contribution_page.match_more', {
                         pct: FULL_MATCH_PCT,
@@ -219,11 +198,11 @@ export default function Contribution() {
             </div>
 
             {/* Tax treatment: writes the same split the Source step edits, so both stay in sync */}
-            <div>
-              <p id={taxLabelId} className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <div className={cn('border-t pt-4', RULE)}>
+              <p id={taxLabelId} className={cn('mb-2', SECTION_LABEL)}>
                 {t('enrollment.contribution_page.tax_label')}
               </p>
-              <div role="radiogroup" aria-labelledby={taxLabelId} className="grid grid-cols-3 gap-1 rounded-xl bg-gray-100 p-1 dark:bg-gray-800">
+              <div role="radiogroup" aria-labelledby={taxLabelId} className="grid grid-cols-3 gap-1 rounded-full bg-slate-100 p-1 dark:bg-white/5">
                 {taxOptions.map((opt) => {
                   const selected = taxMode === opt.mode
                   return (
@@ -233,11 +212,12 @@ export default function Contribution() {
                       role="radio"
                       aria-checked={selected}
                       onClick={() => handleTaxMode(opt.mode)}
-                      className={`rounded-lg px-2 py-2 text-xs font-semibold transition-all ${
+                      className={cn(
+                        'rounded-full px-2 py-2 text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300/70',
                         selected
-                          ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-900 dark:text-white'
-                          : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
-                      }`}
+                          ? 'bg-white text-[#0B1533] shadow-[0_6px_14px_-8px_rgba(11,21,51,0.4)] ring-1 ring-slate-200 dark:bg-slate-900 dark:text-white dark:ring-white/15'
+                          : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
+                      )}
                     >
                       {opt.label}
                     </button>
@@ -246,66 +226,44 @@ export default function Contribution() {
               </div>
 
               {/* What the selected option means for you, in plain words */}
-              <div aria-live="polite" className="mt-2 rounded-xl bg-gray-50 px-3.5 py-2.5 dark:bg-gray-800/50">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">{t(`enrollment.contribution_page.tax_${taxKey}_title`)}</p>
-                <p className="mt-0.5 text-xs text-gray-600 dark:text-gray-300">{t(`enrollment.contribution_page.tax_${taxKey}_body`, { pre: sources.preTax, roth: sources.roth })}</p>
+              <div aria-live="polite" className="mt-3">
+                <p className={cn('text-sm font-bold', HEADING)}>{t(`enrollment.contribution_page.tax_${taxKey}_title`)}</p>
+                <p className={cn('mt-0.5 text-xs leading-relaxed', BODY_TEXT)}>{t(`enrollment.contribution_page.tax_${taxKey}_body`, { pre: sources.preTax, roth: sources.roth })}</p>
               </div>
             </div>
 
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                {t('enrollment.contribution_page.quick_select')}
-              </p>
+              <p className={cn('mb-2', SECTION_LABEL)}>{t('enrollment.contribution_page.quick_select')}</p>
               <div className="flex flex-wrap gap-2">
                 {quickOptions.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => handleQuick(opt.value)}
-                    className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all ${
-                      percent === opt.value
-                        ? 'brand-bg text-white shadow-md'
-                        : opt.highlight
-                          ? 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-300 dark:ring-emerald-800/40 dark:hover:bg-emerald-900/40'
-                          : 'bg-gray-100 text-gray-600 hover:scale-105 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
-                    }`}
-                  >
+                  <button key={opt.value} type="button" onClick={() => handleQuick(opt.value)} aria-pressed={percent === opt.value} className={chip(percent === opt.value)}>
                     {opt.label}
                   </button>
                 ))}
               </div>
             </div>
+          </Card>
 
-          </div>
+          <Card className="flex flex-col gap-4">
+            <div className="flex items-start gap-3">
+              <TitleBadge Icon={TrendingUp} />
+              <div className="min-w-0">
+                <h2 className={CARD_TITLE}>{t('enrollment.contribution_page.projection_title')}</h2>
+                <p className={cn('mt-1 text-xs', MUTED_TEXT)}>{t('enrollment.contribution_page.projection_sub', { age: personalization.retirementAge, rate: growthPct })}</p>
+              </div>
+            </div>
 
-          <div className="space-y-5 rounded-2xl border border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-900 sm:p-6">
-            {/* No "on track" chip: we don't know the target yet. The Monthly
-                Impact tile is gone too — the per-paycheck dollars already
-                live on the left column of this step. */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-                {t('enrollment.contribution_page.projection_title')}
-              </h3>
-              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                {t('enrollment.contribution_page.projection_sub', { age: personalization.retirementAge, rate: growthPct })}
-              </p>
+              <p className={SECTION_LABEL}>{t('enrollment.contribution_page.projected_age', { age: personalization.retirementAge })}</p>
+              <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <p className={cn('text-4xl font-extrabold leading-none tabular-nums', HEADING)}>{formatBalance(projectedTotal, locale)}</p>
+                <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                  {t('enrollment.contribution_page.per_mo', { amount: `$${monthlyRetirementIncome.toLocaleString(locale)}` })}
+                </p>
+              </div>
             </div>
 
-            <div className="rounded-xl border border-green-200/50 bg-gradient-to-br from-green-50 to-green-100/30 p-5 dark:border-green-800/40 dark:from-green-950/30 dark:to-green-900/10">
-              <p className="text-center text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                {t('enrollment.contribution_page.projected_age', { age: personalization.retirementAge })}
-              </p>
-              <p className="mt-1 text-center text-4xl font-extrabold leading-none text-green-700 dark:text-green-400">
-                {formatBalance(projectedTotal, locale)}
-              </p>
-              <p className="mt-1.5 text-center text-xs font-medium text-green-600 dark:text-green-500">
-                {t('enrollment.contribution_page.per_mo', {
-                  amount: `$${monthlyRetirementIncome.toLocaleString(locale)}`,
-                })}
-              </p>
-            </div>
-
-            <div className="h-56 rounded-xl border border-blue-100/50 bg-gradient-to-br from-blue-50/30 to-transparent p-3 dark:border-blue-900/20 dark:from-blue-950/10 sm:h-56">
+            <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={projectionData}>
                   <defs>
@@ -348,84 +306,51 @@ export default function Contribution() {
               </ResponsiveContainer>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-4">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
               <div className="flex items-center gap-1.5">
-                <div className="h-3 w-3 rounded-full brand-bg" />
-                <p className="text-xs text-gray-500 dark:text-gray-400">{t('enrollment.contribution_page.chart_total')}</p>
+                <span className="h-2.5 w-2.5 rounded-full bg-[var(--chart-blue)]" aria-hidden />
+                <p className={cn('text-xs', MUTED_TEXT)}>{t('enrollment.contribution_page.chart_total')}</p>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="h-0.5 w-3 border-t-2 border-dashed border-slate-500" />
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {t('enrollment.contribution_page.chart_contrib')}
-                </p>
+                <span className="w-3 border-t-2 border-dashed border-slate-400" aria-hidden />
+                <p className={cn('text-xs', MUTED_TEXT)}>{t('enrollment.contribution_page.chart_contrib')}</p>
               </div>
             </div>
 
             <div className="flex items-start gap-2">
-              <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gray-400" />
-              <p className="text-xs leading-relaxed text-gray-400 dark:text-gray-600">
-                {t('enrollment.contribution_page.disclaimer', { rate: growthPct })}
-              </p>
+              <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+              <p className={cn('text-xs leading-relaxed', MUTED_TEXT)}>{t('enrollment.contribution_page.disclaimer', { rate: growthPct })}</p>
             </div>
 
-            <div className="space-y-3 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white">
-                  {t('enrollment.contribution_page.compare_title')}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setCompareMode(!compareMode)}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
-                    compareMode
-                      ? 'brand-bg text-white shadow-md'
-                      : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-                  }`}
-                >
+            <div className={cn('mt-auto space-y-3 border-t pt-4', RULE)}>
+              <div className="flex items-center justify-between gap-3">
+                <p className={SECTION_LABEL}>{t('enrollment.contribution_page.compare_title')}</p>
+                <button type="button" onClick={() => setCompareMode(!compareMode)} aria-expanded={compareMode} className={chip(compareMode)}>
                   {compareMode ? t('enrollment.contribution_page.hide') : t('enrollment.contribution_page.show')}
                 </button>
               </div>
               {compareMode && (
-                <div className="space-y-3 border-t border-gray-200 pt-2 dark:border-gray-700">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex gap-2">
                     {[10, 12, 15].map((val) => (
-                      <button
-                        key={val}
-                        type="button"
-                        onClick={() => setComparePercent(val)}
-                        className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-all ${
-                          comparePercent === val
-                            ? 'brand-bg text-white shadow-md'
-                            : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-                        }`}
-                      >
+                      <button key={val} type="button" onClick={() => setComparePercent(val)} aria-pressed={comparePercent === val} className={chip(comparePercent === val)}>
                         {val}%
                       </button>
                     ))}
                   </div>
-                  <div
-                    className={`rounded-lg p-3 ${
-                      difference < 0
-                        ? 'border border-red-200 bg-red-50 dark:border-red-800/40 dark:bg-red-950/30'
-                        : 'border border-green-200 bg-green-50 dark:border-green-800/40 dark:bg-green-950/30'
-                    }`}
-                  >
-                    <p
-                      className={`text-sm font-bold ${difference < 0 ? 'text-red-800 dark:text-red-400' : 'text-green-800 dark:text-green-400'}`}
-                    >
-                      {difference >= 0 ? '+' : ''}${Math.abs(difference).toLocaleString(locale)}
-                    </p>
-                    <p
-                      className={`text-xs ${difference < 0 ? 'text-red-600 dark:text-red-500' : 'text-green-600 dark:text-green-500'}`}
-                    >
+                  <p className="text-right">
+                    <span className={cn('block text-lg font-bold tabular-nums', difference < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400')}>
+                      {difference >= 0 ? '+' : '−'}${Math.abs(difference).toLocaleString(locale)}
+                    </span>
+                    <span className={cn('block text-xs', MUTED_TEXT)}>
                       {difference >= 0 ? t('enrollment.contribution_page.more_suffix') : t('enrollment.contribution_page.less_suffix')}{' '}
                       {t('enrollment.contribution_page.compare_vs', { compare: comparePercent, current: percent })}
-                    </p>
-                  </div>
+                    </span>
+                  </p>
                 </div>
               )}
             </div>
-          </div>
+          </Card>
         </div>
       </div>
     </AnimatedPage>

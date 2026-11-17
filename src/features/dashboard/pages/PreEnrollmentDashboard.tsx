@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
-import { AnimatePresence, motion, useInView, useReducedMotion } from 'framer-motion'
+import { motion, useInView, useReducedMotion } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowRight, ArrowUp, BookOpen, ChevronRight, GraduationCap, HandCoins, Receipt, Sparkles, Zap } from 'lucide-react'
+import { ArrowRight, ArrowUp, ChevronRight, GraduationCap, Headset, Lightbulb, Sparkles, Star, Zap } from 'lucide-react'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { useAIStore } from '@/core/store/aiStore'
 import { useAuth } from '@/core/hooks/useAuth'
@@ -36,7 +36,7 @@ const HERO_TIME_GREETING_KEYS: Record<DayPeriod, { generic: string; withName: st
 }
 
 /** Enrich (enrich.org), the financial-learning partner behind the lead card */
-const ENRICH_URL = 'https://enrich.org/company/'
+const ENRICH_URL = 'https://enrich.org/'
 
 /** Makes a whole card respond to its one real button, so it stays one stop for keyboards and screen readers. */
 const stretchedAction =
@@ -107,67 +107,66 @@ function ChatMessages({ turn, state, running }: { turn: ChatTurn; state: Exchang
   const shown = phase === 'thinking' ? 0 : phase === 'answering' ? count : words.length
   const bubbleIn = reduce ? false : { opacity: 0, y: 8 }
 
+  if (!sent) return null
   return (
-    <motion.div
-      exit={reduce ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, y: -10, transition: { duration: 0.25, ease } }}
-      className="absolute inset-x-0 top-0 flex flex-col gap-2"
-    >
-      {sent && (
-        <>
-          <motion.p
-            initial={bubbleIn}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, ease }}
-            className="max-w-[85%] self-end rounded-2xl rounded-br-md bg-primary px-3.5 py-2.5 text-[13px] font-semibold leading-snug text-white dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)]"
-          >
-            {turn.q}
-          </motion.p>
-          <motion.div
-            initial={bubbleIn}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, ease, delay: reduce ? 0 : 0.12 }}
-            className="flex w-[94%] items-start gap-2 self-start rounded-2xl rounded-bl-md bg-slate-100 px-3 py-2.5 text-left dark:bg-slate-800"
-          >
-            <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-primary text-white">
-              <Sparkles className="h-2.5 w-2.5" />
+    // Earlier exchanges stay above this one and slide up as it grows, like a real chat
+    <motion.div layout={reduce ? false : 'position'} transition={{ duration: 0.25, ease }} className="flex flex-col gap-1.5">
+      <motion.p
+        initial={bubbleIn}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease }}
+        className="max-w-[85%] self-end rounded-2xl rounded-br-md bg-primary px-3 py-1.5 text-[12px] font-medium leading-snug text-white dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)]"
+      >
+        {turn.q}
+      </motion.p>
+      <motion.div
+        initial={bubbleIn}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease, delay: reduce ? 0 : 0.12 }}
+        className="flex w-[94%] items-start gap-2 self-start rounded-2xl rounded-bl-md bg-slate-100 px-2.5 py-1.5 text-left dark:bg-slate-800"
+      >
+        <span className="mt-px flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary text-white">
+          <Sparkles className="h-2.5 w-2.5" />
+        </span>
+        <motion.div
+          initial={false}
+          animate={{ height: phase === 'thinking' ? 16 : 'auto' }}
+          transition={reduce ? { duration: 0 } : { duration: 0.25, ease }}
+          className="relative min-w-0 flex-1 overflow-hidden"
+        >
+          <p className="text-[12px] leading-snug text-slate-700 dark:text-slate-200">
+            {words.map((word, i) => (
+              <span key={i} className={`transition-opacity duration-200 motion-reduce:transition-none ${i < shown ? 'opacity-100' : 'opacity-0'}`}>
+                {word}{i < words.length - 1 ? ' ' : ''}
+              </span>
+            ))}
+          </p>
+          {phase === 'thinking' && (
+            <span className="absolute left-0 top-0 flex h-4 items-center gap-1">
+              {[0, 1, 2].map((i) => (
+                <motion.span
+                  key={i}
+                  className="h-1.5 w-1.5 rounded-full bg-slate-500 dark:bg-slate-300"
+                  animate={running ? { opacity: [0.3, 1, 0.3], y: [0, -2, 0] } : { opacity: 0.5, y: 0 }}
+                  transition={running ? { duration: 0.7, repeat: Infinity, delay: i * 0.12 } : { duration: 0.2 }}
+                />
+              ))}
             </span>
-            <motion.div
-              initial={false}
-              animate={{ height: phase === 'thinking' ? 18 : 'auto' }}
-              transition={reduce ? { duration: 0 } : { duration: 0.25, ease }}
-              className="relative min-w-0 flex-1 overflow-hidden"
-            >
-              <p className="text-[13px] leading-snug text-slate-700 dark:text-slate-200">
-                {words.map((word, i) => (
-                  <span key={i} className={`transition-opacity duration-200 motion-reduce:transition-none ${i < shown ? 'opacity-100' : 'opacity-0'}`}>
-                    {word}{i < words.length - 1 ? ' ' : ''}
-                  </span>
-                ))}
-              </p>
-              {phase === 'thinking' && (
-                <span className="absolute left-0 top-0 flex h-[18px] items-center gap-1">
-                  {[0, 1, 2].map((i) => (
-                    <motion.span
-                      key={i}
-                      className="h-1.5 w-1.5 rounded-full bg-slate-500 dark:bg-slate-300"
-                      animate={running ? { opacity: [0.3, 1, 0.3], y: [0, -2, 0] } : { opacity: 0.5, y: 0 }}
-                      transition={running ? { duration: 0.7, repeat: Infinity, delay: i * 0.12 } : { duration: 0.2 }}
-                    />
-                  ))}
-                </span>
-              )}
-            </motion.div>
-          </motion.div>
-        </>
-      )}
+          )}
+        </motion.div>
+      </motion.div>
     </motion.div>
   )
 }
 
+/** Finished exchanges kept above the current one: enough to fill a tall chat window; older ones scroll off the top. */
+const HISTORY = 3
+
 function AskCoreAiCard({ turns, onStart }: { turns: ChatTurn[]; onStart: () => void }) {
   const { t } = useTranslation()
   const { ref, running, hold } = useCardMotion<HTMLDivElement>()
-  const [state, tick] = useReducer((e: Exchange) => nextExchange(e, turns), { turn: 0, phase: 'reading', count: 0 })
+  // Opens on a conversation already under way, so the window is full from the first look
+  const [state, tick] = useReducer((e: Exchange) => nextExchange(e, turns), { turn: HISTORY, phase: 'reading', count: 0 })
 
   useEffect(() => {
     if (!running) return
@@ -187,10 +186,16 @@ function AskCoreAiCard({ turns, onStart }: { turns: ChatTurn[]; onStart: () => v
 
       {/* The chat window stays still; only the conversation inside it changes */}
       <div className="pointer-events-none mt-3 flex min-h-[220px] flex-1 flex-col gap-2.5 rounded-2xl bg-surface-card p-2.5 xl:min-h-0 shadow-[0_12px_28px_-18px_rgba(30,64,175,0.35)] ring-1 ring-blue-100 dark:ring-white/10" aria-hidden>
-        <div className="relative min-h-0 flex-1 overflow-hidden">
-          <AnimatePresence initial={false}>
+        {/* Anchored to the bottom like a real chat: new messages push older ones up and out under a soft fade */}
+        <div className="relative min-h-0 flex-1 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0,black_28px)]">
+          <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2.5">
+            {Array.from({ length: HISTORY }, (_, i) => state.turn - HISTORY + i)
+              .filter((n) => n >= 0)
+              .map((n) => (
+                <ChatMessages key={n} turn={turns[n % turns.length]} state={{ turn: n, phase: 'reading', count: 0 }} running={false} />
+              ))}
             <ChatMessages key={state.turn} turn={turn} state={state} running={running} />
-          </AnimatePresence>
+          </div>
         </div>
 
         {/* One line tall whatever is typed: a long question scrolls left, as it does in a real box */}
@@ -224,55 +229,89 @@ function AskCoreAiCard({ turns, onStart }: { turns: ChatTurn[]; onStart: () => v
 }
 
 // ─── Talk to an Advisor ──────────────────────────────────────────────────────
-/** One short item in the plan widget: an icon, a title and a single line. */
-function PlanItem({ icon, title, line, children }: { icon: React.ReactNode; title: string; line: string; children?: React.ReactNode }) {
-  return (
-    <div className="flex items-start gap-3 py-3 md:px-4 md:py-0">
-      {icon}
-      <div className="min-w-0">
-        <h4 className="text-[14px] font-bold leading-tight text-text-primary">{title}</h4>
-        <p className="mt-1 text-[13px] leading-snug text-slate-600 dark:text-slate-300">{line}</p>
-        {children}
-      </div>
-    </div>
-  )
+/** The advisor shown before enrollment: the same person the enrolled dashboard shows as "Your Advisor". */
+const ADVISOR = {
+  name: 'Sarah Jenkins',
+  years: 12,
+  rating: 4.9,
+  photo: 'https://randomuser.me/api/portraits/women/44.jpg',
+  /** Shown if the photo can't load */
+  fallbackPhoto: '/media/advisor-avatar.png',
 }
 
-/** The plan widget's advisor item: a real advisor's face, shown as available, and a light link. */
-function AdvisorItem({ onMeet }: { onMeet: () => void }) {
+/** A whole card for the advisor: who she is, three quick tips in her words, and one way to book. */
+function AdvisorCard({ cap, onBook }: { cap: number; onBook: () => void }) {
   const { t } = useTranslation()
   const { ref, reduce, running, hold } = useCardMotion<HTMLDivElement>()
+  const firstName = ADVISOR.name.split(' ')[0]
+  const tips = [t('pre_dashboard.advisor_tip1', { cap }), t('pre_dashboard.advisor_tip2'), t('pre_dashboard.advisor_tip3')]
 
   return (
-    <div ref={ref} {...hold} className="group/advisor relative">
-      <PlanItem
-        icon={
-          <span className="relative h-9 w-9 shrink-0" aria-hidden>
+    <div ref={ref} {...hold} className="flex h-full flex-col">
+      {/* Section title: says what the card is for before showing who */}
+      <div className="mb-4 flex items-center gap-2.5">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600 ring-1 ring-amber-100 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-400/20" aria-hidden>
+          <Headset className="h-4 w-4" />
+        </span>
+        <h3 className="text-[15px] font-bold text-slate-900 dark:text-white">{t('pre_dashboard.advisor_heading')}</h3>
+      </div>
+    <div className="grid flex-1 gap-5 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:gap-0 md:divide-x md:divide-slate-200/80 md:dark:divide-white/10">
+      {/* Left: the person, and the one action */}
+      <div className="flex flex-col items-start md:pr-6">
+        <div className="flex items-center gap-3.5">
+          <span className="relative shrink-0">
             <img
-              src="/media/advisor-avatar.png"
-              alt=""
-              width={36}
-              height={36}
-              className="h-9 w-9 rounded-full object-cover ring-2 ring-white shadow-[0_6px_16px_-8px_rgba(11,21,51,0.5)] dark:ring-slate-900"
+              src={ADVISOR.photo}
+              onError={(e) => {
+                if (!e.currentTarget.src.endsWith(ADVISOR.fallbackPhoto)) e.currentTarget.src = ADVISOR.fallbackPhoto
+              }}
+              alt={ADVISOR.name}
+              width={56}
+              height={56}
+              className="h-14 w-14 rounded-full object-cover ring-2 ring-white shadow-[0_8px_20px_-10px_rgba(11,21,51,0.55)] dark:ring-slate-900"
             />
-            <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-white dark:bg-slate-900">
-              {running && !reduce && <motion.span className="absolute h-3 w-3 rounded-full bg-emerald-400" animate={{ scale: [1, 1.8], opacity: [0.6, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: 'easeOut' }} />}
-              <span className="relative h-2 w-2 rounded-full bg-emerald-500" />
+            <span className="absolute bottom-0.5 right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white dark:bg-slate-900" aria-hidden>
+              {running && !reduce && <motion.span className="absolute h-3.5 w-3.5 rounded-full bg-emerald-400" animate={{ scale: [1, 1.8], opacity: [0.6, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: 'easeOut' }} />}
+              <span className="relative h-2.5 w-2.5 rounded-full bg-emerald-500" />
             </span>
           </span>
-        }
-        title={t('advisor.title')}
-        line={t('pre_dashboard.plan_advisor_line')}
-      >
-        <button
-          type="button"
-          onClick={onMeet}
-          className={`mt-1.5 inline-flex items-center gap-0.5 text-[13px] font-semibold text-primary dark:text-blue-300 ${stretchedAction}`}
-        >
-          {t('advisor.meet_expert')}
-          <ChevronRight className="h-4 w-4 transition-transform group-hover/advisor:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
-        </button>
-      </PlanItem>
+          <div className="min-w-0">
+            <p className="text-[15px] font-bold leading-tight text-slate-900 dark:text-white">{ADVISOR.name}</p>
+            <p className="mt-0.5 text-[13px] text-slate-600 dark:text-slate-300">{t('postDashboard.advisor_title_role')}</p>
+            <p className="mt-1 flex items-center gap-1 text-[12px] text-slate-500 dark:text-slate-400">
+              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden />
+              {t('pre_dashboard.advisor_meta', { years: ADVISOR.years, rating: ADVISOR.rating })}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 md:mt-auto md:pt-5">
+          <button
+            type="button"
+            onClick={onBook}
+            // Secondary: same white pill as Customize My Plan, so the card doesn't compete with the enrollment buttons
+            className={`inline-flex h-10 items-center gap-1 rounded-full bg-white px-4 text-sm font-semibold text-slate-900 shadow-[0_8px_20px_-10px_rgba(11,21,51,0.3)] ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-slate-900 dark:text-white dark:ring-white/15 dark:hover:bg-slate-800 ${stretchedAction}`}
+          >
+            {t('pre_dashboard.advisor_book')}
+            <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+          </button>
+          <span className="text-[12px] text-slate-500 dark:text-slate-400">{t('pre_dashboard.plan_advisor_line')}</span>
+        </div>
+      </div>
+
+      {/* Right: her quick tips, straight on the card */}
+      <div className="border-t border-slate-200/80 pt-4 dark:border-white/10 md:border-t-0 md:pl-6 md:pt-0">
+        <p className="text-[13px] font-bold text-slate-900 dark:text-white">{t('pre_dashboard.advisor_tips_title', { name: firstName })}</p>
+        <ul className="mt-3 space-y-2.5">
+          {tips.map((tip) => (
+            <li key={tip} className="flex items-start gap-2.5 text-[13px] leading-snug text-slate-600 dark:text-slate-300">
+              <Lightbulb className="mt-px h-4 w-4 shrink-0 text-amber-500 dark:text-amber-300" aria-hidden />
+              {tip}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
     </div>
   )
 }
@@ -329,8 +368,9 @@ export function PreEnrollmentDashboard() {
     { q: t('pre_dashboard.chat_q2'), a: t('pre_dashboard.chat_a2', { rate: matchRate, cap }) },
     { q: t('pre_dashboard.chat_q1'), a: t('pre_dashboard.chat_a1') },
     { q: t('pre_dashboard.chat_q3'), a: t('pre_dashboard.chat_a3') },
+    { q: t('pre_dashboard.chat_q4'), a: t('pre_dashboard.chat_a4', { cap }) },
+    { q: t('pre_dashboard.chat_q5'), a: t('pre_dashboard.chat_a5') },
   ]
-  const dollarsPerDollar = matchRate % 100 === 0 ? `$${matchRate / 100}` : `$${(matchRate / 100).toFixed(2)}`
 
   return (
     <AnimatedPage className="min-h-full">
@@ -350,10 +390,10 @@ export function PreEnrollmentDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, ease }}
             aria-labelledby="pre-dashboard-title"
-            className="relative isolate flex min-h-[340px] overflow-hidden max-sm:flex-col rounded-[24px] lg:min-h-[280px] xl:min-h-[236px] bg-[radial-gradient(90%_120%_at_0%_0%,#D9F3FF_0%,rgba(217,243,255,0)_60%),radial-gradient(80%_120%_at_100%_100%,#DDF9E3_0%,rgba(221,249,227,0)_60%),linear-gradient(#FFFFFF,#FFFFFF)] ring-1 ring-slate-200/70 lg:items-center dark:bg-[radial-gradient(90%_120%_at_0%_0%,#12305C_0%,rgba(18,48,92,0)_60%),radial-gradient(80%_120%_at_100%_100%,#123F46_0%,rgba(18,63,70,0)_60%),linear-gradient(#0B1436,#0B1436)] dark:ring-white/10"
+            className="relative isolate flex min-h-[340px] overflow-hidden max-sm:flex-col rounded-[24px] lg:min-h-[280px] xl:min-h-[236px] bg-[radial-gradient(90%_120%_at_0%_0%,#D9F3FF_0%,rgba(217,243,255,0)_60%),radial-gradient(80%_120%_at_100%_100%,#EFFAF2_0%,rgba(239,250,242,0)_50%),linear-gradient(#FFFFFF,#FFFFFF)] ring-1 ring-slate-200/70 lg:items-center dark:bg-[radial-gradient(90%_120%_at_0%_0%,#12305C_0%,rgba(18,48,92,0)_60%),radial-gradient(80%_120%_at_100%_100%,rgba(18,63,70,0.45)_0%,rgba(18,63,70,0)_50%),linear-gradient(#0B1436,#0B1436)] dark:ring-white/10"
           >
             {/* The story: under the headline and above the buttons on phones, behind the copy on larger screens */}
-            <div className="pointer-events-none absolute inset-x-3 bottom-3 -z-10 h-[170px] max-sm:relative max-sm:inset-auto max-sm:order-2 max-sm:mx-3 max-sm:mt-4 sm:h-[220px] lg:inset-y-3 lg:left-auto lg:right-4 lg:h-auto lg:w-[calc(100%-570px)]">
+            <div className="pointer-events-none absolute inset-x-3 bottom-3 -z-10 h-[170px] max-sm:relative max-sm:inset-auto max-sm:order-2 max-sm:mx-3 max-sm:mt-4 sm:h-[220px] lg:inset-y-3 lg:left-auto lg:right-4 lg:h-auto lg:w-[calc(100%-570px)] xl:pl-[120px]">
               <HeroRideScene key={heroRun} running={heroRunning} onEnded={handleHeroEnded} />
             </div>
 
@@ -374,13 +414,13 @@ export function PreEnrollmentDashboard() {
                 <button
                   type="button"
                   onClick={() => navigate('/enrollment/quick')}
-                  className={`group inline-flex items-center justify-between gap-3 rounded-full bg-primary text-left text-white dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)] sm:gap-5 sm:whitespace-nowrap shadow-[inset_0_1px_0_rgba(255,255,255,0.5),inset_0_-10px_18px_rgba(11,21,51,0.2),0_0_0_4px_rgba(255,255,255,0.4),0_16px_32px_-12px_rgba(37,99,235,0.8)] transition-transform hover:scale-[1.02] active:scale-[0.98] motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100 ${bannerFocus} dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.4),inset_0_-10px_18px_rgba(11,21,51,0.25),0_0_0_4px_rgba(255,255,255,0.12),0_16px_32px_-12px_rgba(37,99,235,0.8)] min-h-14 py-2 pl-5 pr-2 sm:pl-6`}
+                  className={`group inline-flex items-center justify-between gap-3 rounded-full bg-primary text-left text-white dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)] sm:gap-5 sm:whitespace-nowrap shadow-[0_6px_14px_-8px_rgba(37,99,235,0.5)] transition-transform hover:scale-[1.02] active:scale-[0.98] motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100 ${bannerFocus} min-h-14 py-2 pl-5 pr-2 sm:pl-6`}
                 >
                   <span className="inline-flex min-w-0 items-center gap-2.5">
                     <Zap className="h-[18px] w-[18px] shrink-0" aria-hidden />
                     <span>
                       <span className="block text-sm font-semibold leading-tight">{t('hero.one_click')}</span>
-                      <span className="block text-[12px] leading-tight text-white">{t('hero.one_click_note')}</span>
+                      <span className="mt-0.5 block text-[12px] font-normal leading-tight text-white/90">{t('hero.one_click_time')}</span>
                     </span>
                   </span>
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-primary transition-transform group-hover:translate-x-0.5" aria-hidden>
@@ -391,10 +431,10 @@ export function PreEnrollmentDashboard() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(true)}
-                  className={`min-h-14 rounded-full bg-white px-5 py-2 text-left text-slate-900 sm:whitespace-nowrap sm:px-6 shadow-[0_8px_20px_-10px_rgba(11,21,51,0.3)] ring-1 ring-slate-200 transition-transform hover:scale-[1.02] active:scale-[0.98] motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100 ${bannerFocus} dark:bg-slate-900 dark:text-white dark:ring-1 dark:ring-white/15`}
+                  className={`min-h-14 rounded-full bg-white px-5 py-2 text-left text-slate-900 sm:whitespace-nowrap sm:px-6 shadow-[0_2px_6px_-3px_rgba(11,21,51,0.12)] ring-1 ring-slate-200 transition-transform hover:scale-[1.02] active:scale-[0.98] motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100 ${bannerFocus} dark:bg-slate-900 dark:text-white dark:ring-1 dark:ring-white/15`}
                 >
                   <span className="block text-sm font-semibold leading-tight">{t('hero.start_enrollment')}</span>
-                  <span className="block text-[12px] leading-tight text-slate-600 dark:text-slate-300">{t('hero.time_note')}</span>
+                  <span className="mt-0.5 block text-[12px] leading-tight text-slate-500 dark:text-slate-400">{t('hero.time_note')}</span>
                 </button>
               </div>
             </div>
@@ -410,16 +450,16 @@ export function PreEnrollmentDashboard() {
 
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)]">
               {/* Enrich financial learning: the lead card, opens Enrich in a new tab */}
-              <Reveal className="group relative isolate flex min-h-[180px] overflow-hidden rounded-[20px] bg-[radial-gradient(90%_120%_at_0%_0%,#D9F3FF_0%,rgba(217,243,255,0)_60%),radial-gradient(70%_130%_at_100%_100%,#DCE1FB_0%,rgba(220,225,251,0)_65%),linear-gradient(#F8F9FE,#F8F9FE)] p-5 pb-6 text-left ring-1 ring-slate-200/70 xl:min-h-[164px] xl:pb-5 transition-shadow hover:shadow-[0_24px_48px_-28px_rgba(37,99,235,0.45)] md:col-span-2 xl:col-span-3 dark:bg-[radial-gradient(90%_120%_at_0%_0%,#12305C_0%,rgba(18,48,92,0)_60%),radial-gradient(70%_130%_at_100%_100%,#262F86_0%,rgba(38,47,134,0)_65%),linear-gradient(#0B1436,#0B1436)] dark:ring-white/10">
+              <Reveal className="group relative isolate flex min-h-[180px] overflow-hidden rounded-[20px] bg-[radial-gradient(90%_130%_at_0%_0%,#CBE7FF_0%,rgba(203,231,255,0)_62%),radial-gradient(70%_130%_at_100%_100%,#C9D0FF_0%,rgba(201,208,255,0)_68%),linear-gradient(#EEF2FF,#EEF2FF)] p-6 text-left shadow-[0_18px_40px_-28px_rgba(37,99,235,0.55)] ring-1 ring-blue-200/80 xl:min-h-[164px] xl:py-5 transition-shadow hover:shadow-[0_24px_48px_-26px_rgba(37,99,235,0.6)] md:col-span-2 xl:col-span-3 dark:bg-[radial-gradient(90%_130%_at_0%_0%,#173F7A_0%,rgba(23,63,122,0)_62%),radial-gradient(70%_130%_at_100%_100%,#3340B0_0%,rgba(51,64,176,0)_68%),linear-gradient(#0F1A48,#0F1A48)] dark:shadow-none dark:ring-blue-400/25">
                 {/* The coin art's periwinkle, glowing behind it so the image and card share one light */}
-                <span className="pointer-events-none absolute -right-10 top-1/2 -z-10 h-64 w-80 -translate-y-1/2 rounded-full bg-[#8C9BFF] opacity-25 blur-[70px] transition-opacity group-hover:opacity-40 dark:bg-[#5B6BFF] dark:opacity-35" aria-hidden />
+                <span className="pointer-events-none absolute -right-10 top-1/2 -z-10 h-64 w-80 -translate-y-1/2 rounded-full bg-[#8C9BFF] opacity-35 blur-[70px] transition-opacity group-hover:opacity-50 dark:bg-[#5B6BFF] dark:opacity-45" aria-hidden />
                 {/* Left: what it is and the way in */}
-                <div className="relative z-10 flex max-w-[52%] flex-1 flex-col items-start">
-                  <span className="flex items-center gap-2.5">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_16px_-6px_rgba(37,99,235,0.6)]" aria-hidden>
-                      <GraduationCap className="h-[18px] w-[18px]" />
+                <div className="relative z-10 flex flex-1 flex-col items-start justify-center sm:max-w-[70%]">
+                  <span className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_16px_-6px_rgba(37,99,235,0.6)]" aria-hidden>
+                      <GraduationCap className="h-5 w-5" />
                     </span>
-                    <h3 className="text-[16px] font-bold text-slate-900 dark:text-white">
+                    <h3 className="text-[20px] font-bold leading-tight text-[#0B1533] dark:text-white">
                       <a
                         href={ENRICH_URL}
                         target="_blank"
@@ -431,9 +471,10 @@ export function PreEnrollmentDashboard() {
                       </a>
                     </h3>
                   </span>
-                  <p className="mt-3 max-w-[340px] text-[13px] leading-relaxed text-slate-600 dark:text-slate-300">{t('pre_dashboard.enrich_desc')}</p>
+                  {/* Lines up with the title, not the badge, so the text reads as one block */}
+                  <p className="mt-0.5 pl-[52px] text-[14px] leading-snug text-slate-700 dark:text-slate-200">{t('pre_dashboard.enrich_desc')}</p>
                   {/* Same button as Start chatting on the Ask Core AI card */}
-                  <span className="mt-auto inline-flex h-10 items-center gap-1 rounded-full bg-primary px-4 text-sm font-semibold text-white shadow-[0_8px_20px_-10px_rgba(11,21,51,0.35)] dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)]" aria-hidden>
+                  <span className="ml-[52px] mt-5 inline-flex h-10 items-center gap-1 rounded-full bg-primary px-4 text-sm font-semibold text-white shadow-[0_8px_20px_-10px_rgba(11,21,51,0.35)] dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)]" aria-hidden>
                     {t('pre_dashboard.enrich_cta')}
                     <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
                   </span>
@@ -455,37 +496,9 @@ export function PreEnrollmentDashboard() {
                 <AskCoreAiCard turns={chatTurns} onStart={openChat} />
               </Reveal>
 
-              {/* Plan widget: the two things worth knowing before you enroll, and a person to ask */}
-              <Reveal delay={0.08} className="relative isolate overflow-hidden rounded-[20px] bg-[radial-gradient(70%_120%_at_0%_0%,#E3F7EC_0%,rgba(227,247,236,0)_60%),radial-gradient(60%_120%_at_100%_0%,#FFF3DC_0%,rgba(255,243,220,0)_60%),linear-gradient(#F8F9FE,#F8F9FE)] p-5 text-left ring-1 ring-slate-200/70 md:col-span-2 xl:col-span-3 dark:bg-[radial-gradient(70%_120%_at_0%_0%,rgba(16,185,129,0.16)_0%,rgba(16,185,129,0)_60%),radial-gradient(60%_120%_at_100%_0%,rgba(245,158,11,0.14)_0%,rgba(245,158,11,0)_60%),linear-gradient(#0B1436,#0B1436)] dark:ring-white/10">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_16px_-6px_rgba(5,150,105,0.55)]" aria-hidden>
-                    <BookOpen className="h-[18px] w-[18px]" />
-                  </span>
-                  <h3 className="text-[16px] font-bold text-slate-900 dark:text-white">{t('pre_dashboard.learn_more_heading')}</h3>
-                </div>
-
-                {/* Three short items in one row on wider screens, stacked on phones */}
-                <div className="mt-4 grid grid-cols-1 divide-y divide-slate-200/80 rounded-2xl bg-white/80 px-4 py-1 shadow-[0_10px_24px_-20px_rgba(11,21,51,0.4)] ring-1 ring-slate-200/60 md:grid-cols-3 md:divide-x md:divide-y-0 md:px-0 md:py-4 dark:divide-white/10 dark:bg-white/5 dark:ring-white/10">
-                  <PlanItem
-                    icon={
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/20" aria-hidden>
-                        <HandCoins className="h-[18px] w-[18px]" />
-                      </span>
-                    }
-                    title={t('pre_dashboard.plan_match_title')}
-                    line={t('pre_dashboard.plan_match_line', { you: '$1', employer: dollarsPerDollar, cap })}
-                  />
-                  <PlanItem
-                    icon={
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-600 ring-1 ring-amber-100 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-400/20" aria-hidden>
-                        <Receipt className="h-[18px] w-[18px]" />
-                      </span>
-                    }
-                    title={t('pre_dashboard.tax_title')}
-                    line={t('pre_dashboard.plan_tax_line')}
-                  />
-                  <AdvisorItem onMeet={() => setAdvisorModalOpen(true)} />
-                </div>
+              {/* Talk to an advisor: a whole card for one person, her quick tips, and one way to book */}
+              <Reveal delay={0.08} className="group relative isolate overflow-hidden rounded-[20px] bg-[radial-gradient(55%_110%_at_100%_0%,#FFF6E6_0%,rgba(255,246,230,0)_70%),linear-gradient(180deg,#FFFFFF_0%,#F8FAFD_100%)] p-5 text-left ring-1 ring-slate-200/70 md:col-span-2 xl:col-span-3 dark:bg-[radial-gradient(55%_110%_at_100%_0%,rgba(245,158,11,0.08)_0%,rgba(245,158,11,0)_70%),linear-gradient(180deg,#0E1738_0%,#0B1436_100%)] dark:ring-white/10">
+                <AdvisorCard cap={cap} onBook={() => setAdvisorModalOpen(true)} />
               </Reveal>
             </div>
           </section>

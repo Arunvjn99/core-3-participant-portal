@@ -21,26 +21,34 @@ function EnrollmentStepper({ activeStep, onGoTo }: { activeStep: number; onGoTo:
   const stepOf = t('flows.step_of', { current: activeStep, total })
   // Ring for phones: circumference of r=18
   const ring = 2 * Math.PI * 18
-  const done = Math.min(activeStep, total) / total
+  // Green share of the ring = finished steps, matching the green checks on wider screens
+  const done = Math.max(0, Math.min(activeStep - 1, total)) / total
 
   return (
-    <nav aria-label={stepOf} className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+    <nav aria-label={stepOf} className="border-b border-slate-200/80 bg-surface-card dark:border-white/10">
       {/* Wide screens */}
-      <div className="mx-auto hidden max-w-5xl px-4 py-3 sm:px-6 md:block">
-        <ol className="flex items-center">
+      <div className="mx-auto hidden max-w-[1040px] items-center gap-4 px-4 py-3.5 sm:px-6 md:flex">
+        <ol className="flex flex-1 items-center">
           {STEPPER_STEPS.map((step, i) => {
             const n = i + 1
             const isDone = n < activeStep
             const isCurrent = n === activeStep
             // Numbers and checks only; the step name lives in the tooltip and screen-reader label
-            const chip = isDone ? <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden /> : <span aria-hidden>{n}</span>
-            const chipClass = `flex shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors ${
+            const chip = isDone ? <Check className="h-4 w-4" strokeWidth={3} aria-hidden /> : <span aria-hidden>{n}</span>
+            const chipClass = `flex shrink-0 items-center justify-center rounded-full text-[13px] font-bold transition-all duration-300 motion-reduce:transition-none ${
               isCurrent
-                ? 'h-8 w-8 bg-primary text-white shadow-[0_0_0_4px_rgba(37,99,235,0.15),0_6px_16px_-8px_rgba(37,99,235,0.7)] dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)] dark:shadow-[0_0_0_4px_rgba(96,165,250,0.18)]'
+                ? 'h-9 w-9 bg-primary text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_18px_-8px_rgba(11,21,51,0.55)] ring-4 ring-blue-500/15 dark:ring-blue-400/25'
                 : isDone
-                  ? 'h-7 w-7 bg-primary text-white hover:opacity-90 dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)]'
-                  : 'h-7 w-7 text-gray-400 ring-1 ring-inset ring-gray-300 dark:text-gray-500 dark:ring-gray-600'
+                  ? 'h-8 w-8 bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200 hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/25 dark:hover:bg-emerald-500/25'
+                  : 'h-8 w-8 bg-white text-slate-400 ring-1 ring-slate-200 dark:bg-white/5 dark:text-slate-500 dark:ring-white/10'
             }`
+            // Line after this step: pale green between finished steps, pale green into blue leading to the current one
+            const nextIsCurrent = n + 1 === activeStep
+            const line = isDone
+              ? nextIsCurrent
+                ? 'bg-gradient-to-r from-emerald-200 to-[var(--color-primary)] dark:from-emerald-400/30'
+                : 'bg-emerald-200 dark:bg-emerald-400/30'
+              : 'bg-slate-200 dark:bg-white/10'
             return (
               <li key={step.key} className={`flex items-center ${i < total - 1 ? 'flex-1' : ''}`} aria-current={isCurrent ? 'step' : undefined}>
                 {isDone ? (
@@ -52,12 +60,7 @@ function EnrollmentStepper({ activeStep, onGoTo }: { activeStep: number; onGoTo:
                     {chip}
                   </span>
                 )}
-                {i < total - 1 && (
-                  <span
-                    className={`mx-1.5 h-0.5 min-w-3 flex-1 rounded-full ${isDone ? 'bg-primary' : 'bg-gray-200 dark:bg-gray-700'}`}
-                    aria-hidden
-                  />
-                )}
+                {i < total - 1 && <span className={`mx-2 h-1 min-w-3 flex-1 rounded-full transition-colors duration-300 ${line}`} aria-hidden />}
               </li>
             )
           })}
@@ -68,7 +71,7 @@ function EnrollmentStepper({ activeStep, onGoTo }: { activeStep: number; onGoTo:
       <div className="flex items-center gap-3 px-4 py-2.5 md:hidden">
         <span className="relative h-11 w-11 shrink-0" aria-hidden>
           <svg viewBox="0 0 44 44" className="h-11 w-11 -rotate-90">
-            <circle cx="22" cy="22" r="18" fill="none" strokeWidth="4" className="stroke-gray-200 dark:stroke-gray-700" />
+            <circle cx="22" cy="22" r="18" fill="none" strokeWidth="4" className="stroke-slate-200 dark:stroke-white/10" />
             <circle
               cx="22"
               cy="22"
@@ -76,16 +79,16 @@ function EnrollmentStepper({ activeStep, onGoTo }: { activeStep: number; onGoTo:
               fill="none"
               strokeWidth="4"
               strokeLinecap="round"
-              className="stroke-primary transition-[stroke-dashoffset] duration-500 motion-reduce:transition-none"
+              className="stroke-emerald-400 transition-[stroke-dashoffset] duration-500 motion-reduce:transition-none"
               strokeDasharray={ring}
               strokeDashoffset={ring * (1 - done)}
             />
           </svg>
-          <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-gray-900 dark:text-white">
+          <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-[#0B1533] dark:text-white">
             {activeStep}/{total}
           </span>
         </span>
-        <p className="text-sm font-semibold text-gray-900 dark:text-white">{stepOf}</p>
+        <p className="text-sm font-semibold text-[#0B1533] dark:text-white">{stepOf}</p>
       </div>
     </nav>
   )
@@ -111,26 +114,26 @@ export function EnrollmentShell() {
   const isQuick = location.pathname.includes('/enrollment/quick')
 
   return (
-    <div className={`flex flex-col dark:bg-gray-950 ${isQuick ? 'h-dvh overflow-hidden bg-[#f5f6f8]' : 'min-h-screen bg-[var(--surface-shell)]'}`}>
+    <div className={`flex flex-col ${isQuick ? 'h-dvh overflow-hidden bg-[#f5f6f8] dark:bg-gray-950' : 'min-h-screen bg-surface-page'}`}>
       {/* The one-click page has its own header with steps, Start over and Save & exit */}
       {!isQuick && (
-        <div className="flex h-12 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 dark:border-gray-700 dark:bg-gray-900 sm:px-6">
+        <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200/80 bg-surface-card px-4 dark:border-white/10 sm:px-6">
           <div className="flex items-center gap-3">
             {activeStep > 1 && (
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                className="flex items-center gap-1.5 text-sm font-semibold text-slate-600 transition-colors hover:text-[#0B1533] dark:text-slate-300 dark:hover:text-white"
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span className="hidden sm:inline">{t('enrollment.shell.back')}</span>
               </button>
             )}
-            <span className="text-sm text-gray-400 dark:text-gray-500">{t('enrollment.shell.title')}</span>
+            <span className="text-sm text-slate-500 dark:text-slate-400">{t('enrollment.shell.title')}</span>
             {activeStep <= STEPPER_STEPS.length && (
               <>
-                <span className="text-sm text-gray-300 dark:text-gray-600">/</span>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span className="text-sm text-slate-300 dark:text-slate-600">/</span>
+                <span className="text-sm font-bold text-[#0B1533] dark:text-white">
                   {STEPPER_STEPS[activeStep - 1] ? t(`enrollment.steps.${STEPPER_STEPS[activeStep - 1].key}.label`) : ''}
                 </span>
               </>
@@ -139,7 +142,7 @@ export function EnrollmentShell() {
           <button
             type="button"
             onClick={() => navigate(ROUTES.PRE_ENROLLMENT_DASHBOARD)}
-            className="brand-text text-sm font-medium transition-colors hover:opacity-80"
+            className="inline-flex h-9 items-center justify-center rounded-full bg-white px-4 text-sm font-semibold text-slate-900 shadow-[0_8px_20px_-10px_rgba(11,21,51,0.3)] ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-slate-900 dark:text-white dark:ring-white/15 dark:hover:bg-slate-800"
           >
             {t('enrollment.shell.save_exit')}
           </button>
@@ -150,19 +153,19 @@ export function EnrollmentShell() {
         <EnrollmentStepper activeStep={activeStep} onGoTo={(path) => navigate(`/enrollment/${path}`)} />
       )}
 
-      {/* One-click keeps the footer pinned in view: the page scrolls above it */}
+      {/* The footer sits at the end of the page, below the fold: it scrolls into view rather than staying on screen */}
       <div className={`flex min-h-0 flex-1 flex-col ${isQuick ? 'overflow-y-auto overscroll-contain' : ''}`} data-quick-scroll={isQuick || undefined}>
-        <AnimatedPage>
+        <AnimatedPage className={isQuick ? 'flex flex-1 shrink-0 flex-col' : 'flex min-h-[calc(100dvh-3.5rem)] shrink-0 flex-col'}>
           <EnrollmentStepNavProvider>
-            <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">
+            <main className="mx-auto w-full max-w-[1040px] flex-1 px-4 py-6 sm:px-6 lg:py-7">
               <Outlet />
             </main>
           </EnrollmentStepNavProvider>
         </AnimatedPage>
-      </div>
-
-      <div className="shrink-0">
-        <AppFooter />
+        {/* One-click: the page grows to fill a tall window, so the footer keeps its own height at the bottom; on a long page it follows with a small gap */}
+        <div className={isQuick ? 'mt-4 shrink-0' : 'shrink-0'}>
+          <AppFooter />
+        </div>
       </div>
     </div>
   )

@@ -50,7 +50,7 @@ export function ActivityHistory() {
               ))}
             </select>
           </label>
-          <button type="button" onClick={() => setGenerating(true)} className="h-9 rounded-md border border-primary px-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/5">{t('documents.generate.open')}</button>
+          <button type="button" onClick={() => setGenerating(true)} className="h-9 rounded-md border border-primary px-3 text-sm font-semibold text-primary transition-colors hover:bg-[color:color-mix(in_srgb,var(--color-primary)_5%,transparent)]">{t('documents.generate.open')}</button>
         </div>
       </div>
 

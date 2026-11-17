@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Trans, useTranslation } from 'react-i18next'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { AlertTriangle, ArrowRight, Check, Loader2, Lock, RotateCw } from 'lucide-react'
+import { AlertTriangle, ArrowRight, Check, Landmark, Loader2, Lock, RotateCw } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { LEGAL, ROUTES } from '@/lib/constants'
 import { getAppDateLocale } from '@/lib/dateLocale'
@@ -85,7 +85,7 @@ export default function CoreEnrollment() {
   const now = useNow()
   const { saveCompleteEnrollment } = useEnrollmentSave()
   const { employer, periods, birthYear, birthMonth, birthDay, age, knownSalary, salary, retireAge, years, savings } = useParticipantBasics()
-  const planName = `${employer} ${t('enrollment.rw.plan_name')}`
+  const planName = t('enrollment.rw.plan_name', { employer })
 
   const money = (v: number) => `$${Math.round(v).toLocaleString(locale)}`
   const compact = (v: number) => (v >= 1_000_000 ? `$${(v / 1_000_000).toFixed(1)}M` : `$${Math.round(v / 1_000).toLocaleString(locale)}K`)
@@ -109,6 +109,7 @@ export default function CoreEnrollment() {
     unit: 'percent',
     preTax: 4,
     roth: 2,
+    afterTax: 1,
     auto: { enabled: true, cycle: 'plan_year', sourceWise: false, amount: { preTax: 1, roth: 1 }, cap: { preTax: 10, roth: 10 } },
     mode: 'risk_style',
     risk: 'balanced',
@@ -124,6 +125,8 @@ export default function CoreEnrollment() {
   const [beneWarn, setBeneWarn] = useState(false)
   const beneRef = useDialogA11y<HTMLDivElement>(beneWarn, () => setBeneWarn(false))
   const [consent, setConsent] = useState(false)
+  /** The contribution source being pointed at, on the bar or its card */
+  const [activeSrc, setActiveSrc] = useState<string | null>(null)
   /** A short confirmation after an edit or a reset; it clears itself */
   const [toast, setToast] = useState<{ id: number; text: string } | null>(null)
 
@@ -142,7 +145,7 @@ export default function CoreEnrollment() {
     let balance = savings
     const out = [balance]
     for (let y = 0; y < years; y++) {
-      balance = (balance + (salary * rate) / 100 + employerMatch(salary, rate)) * (1 + growth)
+      balance = (balance + (salary * (rate + e.afterTax)) / 100 + employerMatch(salary, rate)) * (1 + growth)
       out.push(balance)
       rate = Math.min(rate + step, ceiling)
     }
@@ -152,12 +155,13 @@ export default function CoreEnrollment() {
   // Derived, for any election
   const facts = (e: Election) => {
     const rows = rowsFor(e)
-    const total = round2(e.preTax + e.roth)
+    const total = round2(e.preTax + e.roth + e.afterTax)
     return {
       rows,
       total,
       perCheck: (salary * total) / 100 / periods,
-      match: employerMatch(salary, total),
+      // After-tax savings aren't matched
+      match: employerMatch(salary, round2(e.preTax + e.roth)),
       fee: blendedFee(rows),
       rowsTotal: rows.reduce((s, r) => s + r.pct, 0),
       projected: projectPath(e)[years],
@@ -173,15 +177,30 @@ export default function CoreEnrollment() {
   const fundsError = f.rowsTotal !== 100
   const canApprove = consent && !rateError && !fundsError && stage === 'review'
   const nextAuto = nextIncreaseDate(election.auto.cycle, now, now)
-  const autoTarget = election.auto.enabled ? Math.max(election.auto.cap.preTax, f.total) : f.total
+  const deferral = round2(election.preTax + election.roth)
   /** Where the contribution goes, by source; the bar is scaled to the auto-increase target */
   const sources = [
     { key: 'preTax', label: t('enrollment.core.src_pre'), pct: election.preTax, bar: 'bg-blue-600' },
     { key: 'roth', label: t('enrollment.core.src_roth'), pct: election.roth, bar: 'bg-indigo-400' },
+    { key: 'afterTax', label: t('enrollment.core.src_after'), pct: election.afterTax, bar: 'bg-sky-400' },
   ]
-  const barMax = Math.max(autoTarget, cap, f.total, 1)
-  const nextRate = Math.min(f.total + election.auto.amount.preTax, Math.max(election.auto.cap.preTax, f.total))
+  /** The bar is the whole contribution, split by source, so it is always full */
+  const barMax = f.total || 1
+  const nextRate = round2(Math.min(deferral + election.auto.amount.preTax, Math.max(election.auto.cap.preTax, deferral)) + election.afterTax)
   const series = projectPath(election)
+  const seriesMax = Math.max(...series) || 1
+  // Round axis values: about four steps of 1, 2, 2.5 or 5 times a power of ten, topping just above the largest balance
+  const yStep = (() => {
+    const raw = seriesMax / 4
+    const p = 10 ** Math.floor(Math.log10(raw))
+    return [1, 2, 2.5, 5, 10].map((m) => m * p).find((s) => s >= raw) ?? raw
+  })()
+  const yMax = Math.ceil(seriesMax / yStep) * yStep
+  const yTicks = Array.from({ length: Math.round(yMax / yStep) + 1 }, (_, i) => i * yStep)
+  const tickLabel = (v: number) => (v === 0 ? '$0' : v >= 1_000_000 ? `$${+(v / 1_000_000).toFixed(1)}M` : `$${Math.round(v / 1_000)}K`)
+  const midAge = Math.round((age + retireAge) / 2)
+  /** The average yearly return the projection assumes for this investment mix, as a percentage */
+  const growthPct = round2(GROWTH_RATES[election.risk] * 100)
   const ready = stage !== 'working' && !problem
 
   useEffect(() => {
@@ -200,10 +219,8 @@ export default function CoreEnrollment() {
       // The visible height divided by the zoom in effect gives the natural height
       const natural = el.getBoundingClientRect().height / (parseFloat(getComputedStyle(el).zoom) || 1)
       const top = document.querySelector('header.sticky')?.getBoundingClientRect().bottom ?? 0
-      const footers = document.getElementsByTagName('footer')
-      const footerH = footers.length ? footers[footers.length - 1].getBoundingClientRect().height : 0
-      // Leave room for the footer so it shows without scrolling
-      const available = window.innerHeight - Math.max(top, 0) - footerH - 48
+      // The footer sits below the page, so only the window's own height counts
+      const available = window.innerHeight - Math.max(top, 0) - 48
       // Phones scroll naturally; only wider screens are fitted
       const next = window.innerWidth < 640 ? 1 : Math.round(Math.max(0.82, Math.min(1, available / natural)) * 100) / 100
       if (next !== current) {
@@ -292,6 +309,7 @@ export default function CoreEnrollment() {
         ratePercent: total,
         preTaxPercent: share(election.preTax),
         rothPercent: share(election.roth),
+        afterTaxPercent: share(election.afterTax),
         autoIncrease: { enabled: election.auto.enabled, amount: election.auto.amount.preTax, max: election.auto.cap.preTax },
         allocation,
         consented: consent,
@@ -303,7 +321,7 @@ export default function CoreEnrollment() {
       const planType = election.roth > election.preTax ? 'roth' : 'traditional'
       mergeDraftSection('plan', { type: planType, planId: planType, planName: planType === 'roth' ? 'Roth 401(k)' : 'Traditional 401(k)' })
       mergeDraftSection('contribution', { percent: total, rate: total, type: 'percentage' })
-      mergeDraftSection('source', { preTax: share(election.preTax), roth: share(election.roth), afterTax: 0 })
+      mergeDraftSection('source', { preTax: share(election.preTax), roth: share(election.roth), afterTax: share(election.afterTax) })
       mergeDraftSection('autoIncrease', { enabled: election.auto.enabled, amount: election.auto.amount.preTax, max: election.auto.cap.preTax })
       mergeDraftSection('investment', { riskLevel: election.risk, useRecommended: election.mode !== 'own', customAllocation: allocation })
       useEnrollmentDraftStore.setState((s) => ({
@@ -315,6 +333,7 @@ export default function CoreEnrollment() {
       useElectionsStore.getState().applyEnrollment({
         preTaxRate: toUnit(election.preTax),
         rothRate: toUnit(election.roth),
+        afterTaxRate: toUnit(election.afterTax),
         unit: election.unit,
         autoIncrease: { enabled: election.auto.enabled, amount: election.auto.amount.preTax, max: election.auto.cap.preTax },
         autoIncreaseFull: election.auto,
@@ -345,12 +364,50 @@ export default function CoreEnrollment() {
   const submitLog = ['u1', 'u2', 'u3'].map((k, i) => ({ label: t(`enrollment.core.${k}_ing`), state: submitSteps[i] }))
 
   // What they enrolled in, for the confirmation
-  const summary: { label: string; value: string; good?: boolean }[] = [
-    { label: t('enrollment.core.m_save'), value: `${f.total}% · ${money(f.perCheck)}${t(periods === 12 ? 'enrollment.core.unit_month' : 'enrollment.core.unit_paycheck')}` },
+  const summary: { label: string; value: string; sub?: string; good?: boolean }[] = [
+    { label: t('enrollment.core.plan_label'), value: planName, sub: t(PLAN_CONFIG.plan.nameKey) },
+    {
+      label: t('enrollment.core.m_save'),
+      value: `${f.total}% · ${money(f.perCheck)}${t(periods === 12 ? 'enrollment.core.unit_month' : 'enrollment.core.unit_paycheck')}`,
+      sub: effective ? t('enrollment.core.first_on', { date: dateLong(effective) }) : undefined,
+    },
     { label: t('enrollment.core.m_match_short'), value: `+${money(f.match / 12)}${t('enrollment.core.unit_month')}`, good: true },
-    { label: t('enrollment.core.invested_in'), value: f.invest },
-    ...(effective ? [{ label: t('enrollment.core.first_contribution'), value: dateLong(effective) }] : []),
+    { label: t('enrollment.core.row_invest'), value: f.invest },
   ]
+
+  /** Employer adds tooltip: the rule, then what you'd save and get at half the cap, at the cap, and above it */
+  const matchPer = `$${(PLAN_CONFIG.match.ratePercent / 100).toFixed(PLAN_CONFIG.match.ratePercent % 100 === 0 ? 0 : 2)}`
+  const matchRows = [round2(cap / 2), cap, cap + 2].map((r) => {
+    const you = (salary * r) / 100 / 12
+    const employer = employerMatch(salary, r) / 12
+    return { r, you, employer, total: you + employer }
+  })
+  const matchTip = (
+    <span className="block">
+      <span className="block">{t('enrollment.core.match_tip_intro', { per: matchPer, cap })}</span>
+      <span className="mt-2 block text-white/60">{t('enrollment.core.match_tip_on', { pay: money(salary / 12) })}</span>
+      <span className="mt-1 grid grid-cols-[1.3fr_1fr_1fr] gap-x-3 tabular-nums">
+        <span className="py-1 text-[11px] text-white/60">{t('enrollment.core.match_col_you')}</span>
+        <span className="py-1 text-right text-[11px] text-white/60">{t('enrollment.core.match_col_employer')}</span>
+        <span className="py-1 text-right text-[11px] text-white/60">{t('enrollment.core.match_col_total')}</span>
+        {matchRows.map((row) => {
+          const best = row.r === cap
+          const cell = cn('border-t border-white/10 py-1', best && 'font-semibold text-white')
+          return (
+            <span key={row.r} className="contents">
+              <span className={cell}>{`${row.r}% · ${money(row.you)}`}</span>
+              <span className={cn(cell, 'text-right')}>
+                {money(row.employer)}
+                {row.r > cap && <span className="ml-1 text-[10px] text-white/60">{t('enrollment.core.match_max')}</span>}
+              </span>
+              <span className={cn(cell, 'text-right')}>{money(row.total)}</span>
+            </span>
+          )
+        })}
+      </span>
+      <span className="mt-2 block text-white/75">{t('enrollment.core.match_tip_sources')}</span>
+    </span>
+  )
 
   const card = 'rounded-[24px] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_16px_40px_rgba(15,23,42,0.06)] ring-1 ring-slate-200/70 dark:bg-gray-900 dark:ring-gray-800'
   const label = 'text-[14px] font-medium text-slate-500 dark:text-gray-400'
@@ -361,14 +418,7 @@ export default function CoreEnrollment() {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[460px] bg-[radial-gradient(70%_70%_at_50%_0%,rgba(37,99,235,0.09),transparent_70%)]" aria-hidden />
       {stage === 'done' && <ConfettiField />}
 
-      {/* Where they are in enrollment */}
-      <header className="sticky top-0 z-30 bg-[#f5f6f8]/75 backdrop-blur-xl dark:bg-gray-950/80">
-        <div className="mx-auto flex h-12 max-w-[1120px] items-center gap-3 px-4 sm:px-6">
-          <h1 className="text-[22px] font-bold tracking-[-0.015em] text-slate-900 dark:text-white">{t('enrollment.core.title')}</h1>
-        </div>
-      </header>
-
-      <main className="relative mx-auto max-w-[900px] px-4 pb-6 pt-6 sm:px-6">
+      <main className="relative mx-auto max-w-[1040px] px-4 pb-6 pt-6 sm:px-6">
         {showPlan ? (
           <div ref={planRef} style={fit < 1 ? { zoom: fit } : undefined} className="space-y-4">
             {/* Title */}
@@ -377,21 +427,25 @@ export default function CoreEnrollment() {
                 <AgentMark size={52} star working={stage === 'working' || stage === 'submitting'} />
               </motion.span>
               <div className="min-w-0 flex-1">
-                <h2 className="text-[24px] font-semibold leading-tight tracking-[-0.03em] text-slate-900 sm:text-[30px] dark:text-white">
+                <h1 className="text-[24px] font-semibold leading-tight tracking-[-0.03em] text-slate-900 sm:text-[30px] dark:text-white">
                   {ready || stage === 'submitting' ? (
                     <>
                       {t('enrollment.core.ready_lead')}{' '}
                       <span className="bg-gradient-to-r from-blue-700 to-indigo-500 bg-clip-text text-transparent dark:from-blue-300 dark:to-indigo-300">{t('enrollment.core.ready_word')}</span>
+                      {t('enrollment.core.ready_tail')}
                     </>
                   ) : problem ? (
                     t('enrollment.core.st_attention')
                   ) : (
                     <Shimmer>{t('enrollment.core.building')}</Shimmer>
                   )}
-                </h2>
-                <div className="mt-0.5 text-[15px] text-slate-500 dark:text-gray-400">
-                  {stage === 'working' && !problem ? <LiveLine steps={workSteps} /> : <p className="truncate"><strong className="font-semibold text-slate-900 dark:text-white">{planName}</strong>{` · ${t('enrollment.core.review_enroll')}`}</p>}
-                </div>
+                </h1>
+                {/* While it's being built, what's happening; the plan's name now sits in the card */}
+                {stage === 'working' && !problem && (
+                  <div className="mt-0.5 text-[15px] text-slate-500 dark:text-gray-400">
+                    <LiveLine steps={workSteps} />
+                  </div>
+                )}
               </div>
             </div>
 
@@ -416,6 +470,19 @@ export default function CoreEnrollment() {
                 {/* The plan */}
                 <motion.article initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.45, ease }} aria-label={t('enrollment.core.step_plan')} className={cn(card, 'relative overflow-hidden')}>
                   {!ready && !reduce && <motion.span className="pointer-events-none absolute inset-y-0 z-10 w-1/3 bg-gradient-to-r from-transparent via-white/70 to-transparent dark:via-white/5" initial={{ x: '-100%' }} animate={{ x: '400%' }} transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }} aria-hidden />}
+
+                  {/* Which plan this is */}
+                  <div className="flex flex-wrap items-center gap-x-2.5 gap-y-2 border-b border-slate-100 px-5 py-3.5 sm:px-6 dark:border-gray-800">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300" aria-hidden>
+                      <Landmark className="h-[18px] w-[18px]" />
+                    </span>
+                    <p className="min-w-0 flex-1 basis-[180px] truncate text-[17px] font-semibold tracking-[-0.01em] text-slate-900 dark:text-white">{planName}</p>
+                    {/* Plan type: beside the name on wider screens, under it on narrow ones */}
+                    <span className="inline-flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-slate-600 dark:text-gray-300">
+                      <span className="text-slate-400 dark:text-gray-500">{t('enrollment.core.plan_type')}</span>
+                      <span className="font-semibold text-slate-900 dark:text-white">{t(PLAN_CONFIG.plan.nameKey)}</span>
+                    </span>
+                  </div>
 
                   <div className="grid md:grid-cols-[1.05fr_1fr]">
                     {/* You save */}
@@ -443,15 +510,16 @@ export default function CoreEnrollment() {
                               components={{ b: <strong className="font-semibold text-slate-900 dark:text-white" /> }}
                             />
                           </p>
-                          {/* How much of pay goes in, split by source */}
-                          <div className="mt-3 flex h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-gray-800" role="img" aria-label={`${f.total}% ${t('enrollment.core.of_pay')}`}>
-                            {sources.map((src, i) => (
-                              <motion.span key={src.key} initial={reduce ? false : { width: 0 }} animate={{ width: `${(src.pct / barMax) * 100}%` }} transition={{ delay: 0.35 + i * 0.1, duration: 0.7, ease }} className={cn('h-full', src.bar)} />
-                            ))}
-                          </div>
-                          <ul className="mt-3 grid grid-cols-2 gap-2">
+                          <hr className="my-4 border-slate-100 dark:border-gray-800" />
+                          <p className="text-[13px] font-semibold text-slate-900 dark:text-white">{t('enrollment.core.sources_title', { total: f.total })}</p>
+                          <ul className="mt-2.5 grid grid-cols-3 gap-2">
                             {sources.map((src) => (
-                              <li key={src.key} className="rounded-xl bg-slate-50 px-3 py-2 dark:bg-gray-800/60">
+                              <li
+                                key={src.key}
+                                onMouseEnter={() => setActiveSrc(src.key)}
+                                onMouseLeave={() => setActiveSrc(null)}
+                                className={cn('rounded-xl bg-slate-50 px-3 py-2 ring-1 ring-transparent transition-shadow dark:bg-gray-800/60', activeSrc === src.key && 'ring-slate-200 dark:ring-gray-700')}
+                              >
                                 <span className="flex items-center gap-1.5 text-[12px] font-medium text-slate-500 dark:text-gray-400">
                                   <span className={cn('h-2 w-2 shrink-0 rounded-full', src.bar)} aria-hidden />
                                   <span className="truncate">{src.label}</span>
@@ -460,6 +528,44 @@ export default function CoreEnrollment() {
                               </li>
                             ))}
                           </ul>
+                          {/* The whole contribution, split by source, right under the tiles it colours */}
+                          <div className="relative mt-3">
+                            <div className="flex h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-gray-800">
+                              {sources.map((src, i) => (
+                                <motion.span
+                                  key={src.key}
+                                  tabIndex={src.pct > 0 ? 0 : -1}
+                                  role="img"
+                                  aria-label={`${src.label}: ${src.pct}%, ${money((salary * src.pct) / 100 / periods)} ${t('enrollment.core.per_paycheck')}. ${t(`enrollment.core.src_tip_${src.key}`)}`}
+                                  onMouseEnter={() => setActiveSrc(src.key)}
+                                  onMouseLeave={() => setActiveSrc(null)}
+                                  onFocus={() => setActiveSrc(src.key)}
+                                  onBlur={() => setActiveSrc(null)}
+                                  initial={reduce ? false : { width: 0 }}
+                                  animate={{ width: `${(src.pct / barMax) * 100}%` }}
+                                  transition={{ delay: 0.35 + i * 0.1, duration: 0.7, ease }}
+                                  className={cn('h-full cursor-default transition-opacity focus-visible:outline-none', src.bar, activeSrc && activeSrc !== src.key && 'opacity-40')}
+                                />
+                              ))}
+                            </div>
+                            {(() => {
+                              const i = sources.findIndex((s) => s.key === activeSrc)
+                              if (i < 0) return null
+                              const src = sources[i]
+                              const before = sources.slice(0, i).reduce((sum, s) => sum + s.pct, 0)
+                              const center = ((before + src.pct / 2) / barMax) * 100
+                              return (
+                                <div
+                                  className="pointer-events-none absolute top-full z-20 mt-2 w-max max-w-[220px] rounded-lg bg-slate-900 px-3 py-2 text-left text-[12px] leading-snug text-white shadow-lg dark:bg-white dark:text-slate-900"
+                                  style={{ left: `${center}%`, transform: `translateX(${center > 70 ? '-85%' : center < 30 ? '-15%' : '-50%'})` }}
+                                  aria-hidden
+                                >
+                                  <p className="font-semibold">{`${src.label} · ${src.pct}% · ${money((salary * src.pct) / 100 / periods)} ${t('enrollment.core.per_paycheck')}`}</p>
+                                  <p className="mt-0.5 text-white/75 dark:text-slate-600">{t(`enrollment.core.src_tip_${src.key}`)}</p>
+                                </div>
+                              )
+                            })()}
+                          </div>
                           {rateError && <p role="alert" className="mt-1 text-[12px] font-medium text-red-600">{t('enrollment.feed.err_rate', { min: PLAN_LIMITS.rate[0], max: PLAN_LIMITS.rate[1], total: f.total })}</p>}
                         </>
                       ) : (
@@ -472,7 +578,7 @@ export default function CoreEnrollment() {
                     </section>
 
                     {/* Projected */}
-                    <section className="border-t border-slate-100 bg-gradient-to-b from-slate-50/70 to-white p-5 sm:p-6 md:border-l md:border-t-0 dark:border-gray-800 dark:from-gray-800/30 dark:to-gray-900">
+                    <section className="flex flex-col border-t border-slate-100 bg-gradient-to-b from-slate-50/70 to-white p-5 sm:p-6 md:border-l md:border-t-0 dark:border-gray-800 dark:from-gray-800/30 dark:to-gray-900">
                       <div className="flex items-center justify-between gap-2">
                         <p className={cn(label, 'flex items-center gap-0.5')}>
                           {t('enrollment.core.m_proj', { age: retireAge })}
@@ -486,30 +592,45 @@ export default function CoreEnrollment() {
                             <span className="text-[36px] font-bold tracking-[-0.03em] text-slate-900 sm:text-[42px] dark:text-white">
                               <AnimatedNumber countUp delay={0.45} value={f.projected} format={compact} />
                             </span>
-                            <span className="text-[14px] font-medium text-emerald-700 dark:text-emerald-400">{t('enrollment.core.incl_match')}</span>
                           </p>
-                          <div className="relative mt-1 h-[72px] [&_svg]:h-[72px]">
-                            <span className="absolute inset-x-0 top-1/2 border-t border-dashed border-slate-200 dark:border-gray-700" aria-hidden />
-                            <ProjectionChart
-                              key={`${f.total}-${election.risk}`}
-                              points={series}
-                              startAge={age}
-                              height={72}
-                              delay={0.6}
-                              format={compact}
-                              label={t('enrollment.core.chart_label')}
-                              pointLabel={(a, value) => t('enrollment.core.chart_point', { age: a, value })}
-                            />
-                          </div>
-                          <div className="mt-1.5 flex justify-between text-[13px] text-slate-400">
-                            <span>{t('enrollment.core.today', { age })}</span>
-                            <span>{t('enrollment.core.at_age', { age: retireAge })}</span>
+                          <p className="text-[12px] leading-snug text-slate-500 dark:text-gray-400">
+                            <span className="font-semibold text-amber-700 dark:text-amber-400">{t('enrollment.core.not_guaranteed')}</span>{' · '}
+                            {t('enrollment.core.proj_basis', { rate: growthPct })}
+                          </p>
+                          {/* Balance (y) by age (x): round values on light gridlines, no heavy axis lines; the plot fills the rest of the section */}
+                          <div className="mt-5 flex min-h-[150px] flex-1 flex-col">
+                            <div className="relative min-h-0 flex-1 pl-10">
+                              {yTicks.map((v) => (
+                                <div key={v} className="pointer-events-none absolute inset-x-0" style={{ top: `${(1 - v / yMax) * 100}%` }} aria-hidden>
+                                  <span className="absolute left-0 w-8 -translate-y-1/2 text-right text-[11px] leading-none tabular-nums text-slate-400 dark:text-gray-500">{tickLabel(v)}</span>
+                                  <span className={cn('absolute left-10 right-0 border-t', v === 0 ? 'border-slate-200 dark:border-gray-700' : 'border-dashed border-slate-200/70 dark:border-gray-800')} />
+                                </div>
+                              ))}
+                              <div className="relative h-full [&_svg]:!h-full">
+                                <ProjectionChart
+                                  key={`${f.total}-${election.risk}`}
+                                  points={series}
+                                  startAge={age}
+                                  height={100}
+                                  yMax={yMax}
+                                  delay={0.6}
+                                  format={compact}
+                                  label={t('enrollment.core.chart_label')}
+                                  pointLabel={(a, value) => t('enrollment.core.chart_point', { age: a, value })}
+                                />
+                              </div>
+                            </div>
+                            <div className="mt-2 flex justify-between pl-10 text-[11px] tabular-nums text-slate-400 dark:text-gray-500" aria-hidden>
+                              <span>{t('enrollment.core.today', { age })}</span>
+                              <span>{t('enrollment.core.at_age', { age: midAge })}</span>
+                              <span>{t('enrollment.core.at_age', { age: retireAge })}</span>
+                            </div>
                           </div>
                         </>
                       ) : (
                         <div className="mt-3 space-y-3">
                           <Bone className="h-10 w-40" />
-                          <Bone className="h-[72px] w-full" />
+                          <Bone className="h-[150px] w-full" />
                         </div>
                       )}
                     </section>
@@ -523,7 +644,8 @@ export default function CoreEnrollment() {
                         <InfoTip
                           side="top"
                           label={t('enrollment.core.m_match_short')}
-                          text={t('enrollment.core.match_tip', { rate: PLAN_CONFIG.match.ratePercent, cap: cap, pay: money(salary / 12), amount: money(fullMatch / 12) })}
+                          wide
+                          text={matchTip}
                         />
                       </p>
                       {ready ? (
@@ -553,7 +675,10 @@ export default function CoreEnrollment() {
 
                     <section className="border-t border-slate-100 p-5 sm:border-t-0 sm:px-6 dark:border-gray-800">
                       <div className="flex items-center justify-between gap-2">
-                        <p className={label}>{t('enrollment.core.row_auto')}</p>
+                        <p className={cn(label, 'flex items-center gap-0.5')}>
+                          {t('enrollment.core.row_auto')}
+                          <InfoTip side="top" label={t('enrollment.core.row_auto')} text={t('enrollment.core.auto_tip')} />
+                        </p>
                         {ready && election.auto.enabled && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[12px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-400/25">
                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden />
@@ -590,13 +715,15 @@ export default function CoreEnrollment() {
 
                     <section className="border-t border-slate-100 p-5 sm:border-t-0 sm:px-6 dark:border-gray-800">
                       <div className="flex items-center justify-between gap-2">
-                        <p className={label}>{t('enrollment.core.row_invest')}</p>
+                        <p className={cn(label, 'flex items-center gap-0.5')}>
+                          {t('enrollment.core.row_invest')}
+                          <InfoTip side="top" label={t('enrollment.core.row_invest')} text={t('enrollment.core.invest_tip')} />
+                        </p>
                       </div>
                       {ready ? (
                         <>
                           <p className="mt-1.5 truncate text-[22px] font-semibold tracking-[-0.02em] text-slate-900 dark:text-white">{f.invest}</p>
                           <p className="mt-1 text-[14px] text-slate-500 dark:text-gray-400">
-                            {t('enrollment.core.fee', { fee: f.fee.toFixed(2) })} ·{' '}
                             <button type="button" onClick={() => setShowFunds(true)} className="rounded-md font-semibold text-blue-700 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-blue-300">
                               {t('enrollment.core.funds_n', { count: funds.length })}
                             </button>
@@ -671,16 +798,7 @@ export default function CoreEnrollment() {
           </div>
         ) : (
           /* Enrolled */
-          <div className="relative mx-auto flex max-w-[600px] flex-col items-center pt-2 text-center">
-            <motion.p
-              initial={reduce ? false : { opacity: 0, y: 10, scale: 0.8 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: 0.5, type: 'spring', stiffness: 380, damping: 18 }}
-              className="relative mb-5 rounded-[18px] bg-white px-5 py-2.5 text-[16px] font-semibold text-slate-900 shadow-[0_6px_20px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/60 dark:bg-gray-900 dark:text-white dark:ring-gray-800"
-            >
-              {t('enrollment.core.welcome')}
-              <span className="absolute -bottom-[7px] left-1/2 h-3.5 w-3.5 translate-x-1 rotate-45 rounded-[2px] bg-white ring-1 ring-slate-200/60 [clip-path:polygon(100%_0,100%_100%,0_100%)] dark:bg-gray-900 dark:ring-gray-800" aria-hidden />
-            </motion.p>
+          <div className="relative mx-auto flex max-w-[600px] flex-col items-center pt-8 text-center">
             <motion.span initial={reduce ? false : { scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 240, damping: 14 }}>
               {/* Enrolled: a green tick that draws itself */}
               <span className="relative flex h-[100px] w-[100px] items-center justify-center rounded-full bg-emerald-500 text-white shadow-[0_16px_36px_-12px_rgba(16,185,129,0.55),inset_0_1px_0_rgba(255,255,255,0.25)] ring-[9px] ring-emerald-500/15">
@@ -696,9 +814,12 @@ export default function CoreEnrollment() {
 
             <motion.dl initial={reduce ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55, duration: 0.5, ease }} className={cn(card, 'mt-6 w-full divide-y divide-slate-100 px-6 py-1 text-left dark:divide-gray-800')}>
               {summary.map((row, i) => (
-                <motion.div key={row.label} initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 + i * 0.08 }} className="flex items-center justify-between gap-4 py-3.5">
-                  <dt className="text-[15px] text-slate-500 dark:text-gray-400">{row.label}</dt>
-                  <dd className={cn('text-right text-[16px] font-semibold', row.good ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-900 dark:text-white')}>{row.value}</dd>
+                <motion.div key={row.label} initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 + i * 0.08 }} className="flex items-start justify-between gap-4 py-3.5">
+                  <dt className="pt-px text-[15px] text-slate-500 dark:text-gray-400">{row.label}</dt>
+                  <dd className="text-right">
+                    <span className={cn('block text-[16px] font-semibold', row.good ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-900 dark:text-white')}>{row.value}</span>
+                    {row.sub && <span className="mt-0.5 block text-[13px] text-slate-500 dark:text-gray-400">{row.sub}</span>}
+                  </dd>
                 </motion.div>
               ))}
             </motion.dl>
@@ -787,7 +908,31 @@ export default function CoreEnrollment() {
         </ul>
       </Sheet>
 
-      <Sheet open={sheet === 'disclosures'} onClose={() => setSheet(null)} title={t('enrollment.core.terms_title')} subtitle={planName}>
+      <Sheet
+        open={sheet === 'disclosures'}
+        onClose={() => setSheet(null)}
+        title={t('enrollment.core.terms_title')}
+        subtitle={planName}
+        footer={
+          <>
+            <button type="button" onClick={() => setSheet(null)} className="inline-flex h-10 items-center rounded-full bg-white px-5 text-[14px] font-semibold text-slate-900 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-gray-900 dark:text-white dark:ring-gray-700 dark:hover:bg-gray-800">
+              {t('enrollment.core.cancel')}
+            </button>
+            {/* Agreeing here ticks the consent box on the page, the same as ticking it directly */}
+            <button
+              type="button"
+              disabled={!ready}
+              onClick={() => {
+                setConsent(true)
+                setSheet(null)
+              }}
+              className="inline-flex h-10 items-center rounded-full bg-blue-600 px-5 text-[14px] font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {t('enrollment.core.agree')}
+            </button>
+          </>
+        }
+      >
         <ul className="space-y-5">
           {PLAN_CONFIG.disclosures.map((id) => (
             <li key={id}>

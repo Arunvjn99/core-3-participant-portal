@@ -396,7 +396,7 @@ export default function AgentEnrollment() {
 
   if (stage === 'welcome') {
     return (
-      <div className="relative mx-auto flex min-h-[calc(100vh-11rem)] max-w-5xl flex-col">
+      <div className="relative mx-auto flex min-h-[calc(100vh-11rem)] max-w-[1040px] flex-col">
         <motion.section initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="m-auto flex max-w-xl flex-col items-center px-2 py-10 text-center">
           <Orb size={56} />
           <p className="mt-6 text-blue-700 dark:text-blue-300" style={{ fontSize: '0.85rem', fontWeight: 600, letterSpacing: '0.04em' }}>{t('enrollment.flow.eyebrow')}</p>
@@ -422,7 +422,7 @@ export default function AgentEnrollment() {
 
   return (
     <div className="relative -mx-4 -my-6 bg-gradient-to-b from-blue-50/60 via-white to-white px-4 py-6 dark:from-gray-950 dark:via-gray-950 dark:to-gray-950 sm:-mx-6 sm:px-6">
-      <div className="mx-auto grid max-w-5xl gap-6 lg:h-[calc(100vh-9.5rem)] lg:grid-cols-[minmax(0,1fr)_260px]">
+      <div className="mx-auto grid max-w-[1040px] gap-6 lg:h-[calc(100vh-9.5rem)] lg:grid-cols-[minmax(0,1fr)_260px]">
         {/* Conversation */}
         <section className="order-2 flex min-h-0 flex-col lg:order-1" aria-label={t('enrollment.chat.conversation')}>
           <div ref={threadRef} className="min-h-0 flex-1 space-y-4 overflow-y-auto pb-3 pr-1">

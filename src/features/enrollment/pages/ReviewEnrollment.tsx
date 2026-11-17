@@ -14,6 +14,8 @@ import { useEnrollmentStepNav, type EnrollmentPrimaryLabel } from '@/features/en
 import { Edit3, DollarSign, Briefcase, TrendingUp, Clock, Sparkles, ExternalLink } from 'lucide-react'
 import { annualEmployerMatch, projectBalance, retirementIncome } from '@/features/enrollment/enrollmentMath'
 import { getGrowthRate } from '@/lib/retirementCalculations'
+import { cn } from '@/lib/cn'
+import { BODY_TEXT, Card, CARD_TITLE, DIVIDE, HEADING, IconChip, MUTED_TEXT, RULE, SECTION_LABEL, StepHeader, TEXT_LINK } from '@/features/enrollment/enrollmentUi'
 
 export default function ReviewEnrollment() {
   const { t } = useTranslation()
@@ -153,28 +155,16 @@ export default function ReviewEnrollment() {
 
   return (
     <AnimatedPage>
-      <div className="mx-auto w-full max-w-5xl space-y-5">
-        {/* Header */}
-        <div>
-          <h1 className="text-gray-900 dark:text-white">{t('enrollment.review_page.title')}</h1>
-          <p className="mt-1 text-gray-500 dark:text-gray-400" style={{ fontSize: '0.9rem' }}>
-            {t('enrollment.review_page.subtitle')}
-          </p>
-        </div>
+      <div className="mx-auto w-full max-w-[1040px] space-y-5">
+        <StepHeader title={t('enrollment.review_page.title')} subtitle={t('enrollment.review_page.subtitle')} />
 
-        {/* Hero — light blue */}
-        <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 border border-blue-200 p-6 dark:from-blue-950/40 dark:to-indigo-950/40 dark:border-blue-800/50">
-          <p className="text-blue-600 dark:text-blue-400" style={{ fontSize: '0.75rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            {t('enrollment.review_page.projected_label')}
-          </p>
-          <p className="mt-1 tabular-nums text-gray-900 dark:text-white" style={{ fontSize: '2.6rem', fontWeight: 700 }}>
-            {formatCurrency(projectedBalance)}
-          </p>
-          <p className="mt-0.5 text-gray-500 dark:text-gray-400" style={{ fontSize: '0.75rem' }}>
-            {t('enrollment.review_page.projected_note', { years: yearsToRetirement })}
-          </p>
+        {/* Projected balance, with the four figures behind it under one rule */}
+        <Card tone="blue">
+          <p className={SECTION_LABEL}>{t('enrollment.review_page.projected_label')}</p>
+          <p className={cn('mt-1 text-[40px] font-extrabold leading-none tabular-nums', HEADING)}>{formatCurrency(projectedBalance)}</p>
+          <p className={cn('mt-2 text-xs', MUTED_TEXT)}>{t('enrollment.review_page.projected_note', { years: yearsToRetirement })}</p>
 
-          <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <dl className={cn('mt-5 grid grid-cols-2 gap-y-4 border-t pt-4 md:grid-cols-4 md:divide-x', RULE, DIVIDE)}>
             {(
               [
                 {
@@ -203,84 +193,64 @@ export default function ReviewEnrollment() {
                 },
               ] as const
             ).map(({ Icon, labelKey, value, sub }) => (
-              <div key={labelKey} className="rounded-xl bg-white/70 border border-blue-200 px-3.5 py-3 dark:bg-blue-900/20 dark:border-blue-700/50">
-                <div className="mb-1 flex items-center gap-1.5">
-                  <Icon className="h-3 w-3 text-blue-500 dark:text-blue-400" />
-                  <span className="text-blue-600 dark:text-blue-400" style={{ fontSize: '0.62rem', fontWeight: 500 }}>
-                    {t(`enrollment.review_page.${labelKey}`)}
-                  </span>
-                </div>
-                <p className="text-gray-900 dark:text-white" style={{ fontSize: '1.05rem', fontWeight: 700 }}>{value}</p>
-                <p className="text-gray-500 dark:text-gray-400" style={{ fontSize: '0.6rem' }}>
-                  {sub}
-                </p>
+              <div key={labelKey} className="md:px-4 md:first:pl-0 md:last:pr-0">
+                <dt className={cn('flex items-center gap-1.5 text-xs font-medium', MUTED_TEXT)}>
+                  <Icon className="h-3.5 w-3.5 text-primary dark:text-blue-300" aria-hidden />
+                  {t(`enrollment.review_page.${labelKey}`)}
+                </dt>
+                <dd className={cn('mt-1 text-lg font-bold leading-tight tabular-nums', HEADING)}>{value}</dd>
+                <dd className={cn('text-[11px]', MUTED_TEXT)}>{sub}</dd>
               </div>
             ))}
-          </div>
-        </div>
+          </dl>
+        </Card>
 
-        {/* Plan Summary Grid */}
-        <div>
-          <p className="mb-3 text-gray-900 dark:text-white" style={{ fontSize: '0.95rem', fontWeight: 600 }}>
-            {t('enrollment.review_page.setup_title')}
-          </p>
-          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-3">
+        {/* Plan summary: one card, each choice with its own Edit link */}
+        <Card>
+          <h2 className={CARD_TITLE}>{t('enrollment.review_page.setup_title')}</h2>
+          <dl className="mt-4 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 md:grid-cols-3">
             {planSections.map((section) => (
-              <div
-                key={section.labelKey}
-                className="group flex flex-col justify-between rounded-xl border border-gray-200 bg-white px-4 py-3.5 dark:border-gray-700 dark:bg-gray-900"
-              >
-                <div>
-                  <p className="text-gray-400 dark:text-gray-500" style={{ fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    {t(`enrollment.review_page.${section.labelKey}`)}
-                  </p>
-                  <p className="mt-1 text-gray-900 dark:text-white" style={{ fontSize: '0.82rem', fontWeight: 500 }}>
-                    {section.value}
-                  </p>
+              <div key={section.labelKey} className={cn('flex items-start justify-between gap-3 border-t pt-3', RULE)}>
+                <div className="min-w-0">
+                  <dt className={SECTION_LABEL}>{t(`enrollment.review_page.${section.labelKey}`)}</dt>
+                  <dd className={cn('mt-1 text-sm font-semibold', HEADING)}>{section.value}</dd>
                 </div>
                 <button
                   type="button"
                   onClick={() => navigate(section.editPath)}
-                  className="mt-2.5 flex items-center gap-1 self-start text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                  style={{ fontSize: '0.7rem', fontWeight: 500 }}
+                  aria-label={`${t('enrollment.edit')}: ${t(`enrollment.review_page.${section.labelKey}`)}`}
+                  className={cn(TEXT_LINK, 'shrink-0 gap-1 text-xs')}
                 >
-                  <Edit3 className="h-3 w-3" /> {t('enrollment.edit')}
+                  <Edit3 className="h-3 w-3" aria-hidden /> {t('enrollment.edit')}
                 </button>
               </div>
             ))}
-          </div>
-        </div>
+          </dl>
+        </Card>
 
-        {/* Confidence Banner */}
-        <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-3.5 dark:border-amber-800/40 dark:bg-amber-950/30">
-          <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
-          <p className="text-amber-800 dark:text-amber-400" style={{ fontSize: '0.82rem', fontWeight: 500 }}>
-            {confidenceMessage}
-          </p>
-        </div>
+        {/* Confidence banner */}
+        <Card tone="warm" className="flex items-center gap-3 !py-4">
+          <IconChip Icon={Sparkles} tone="amber" />
+          <p className={cn('text-sm font-semibold', HEADING)}>{confidenceMessage}</p>
+        </Card>
 
-        {/* Terms Checkbox */}
-        <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
+        {/* Terms */}
+        <Card className="!py-4">
           <label className="flex cursor-pointer items-start gap-3">
-            <div className="mt-0.5">
-              <input
-                type="checkbox"
-                checked={data.agreedToTerms}
-                onChange={(e) => updateData({ agreedToTerms: e.target.checked })}
-                className="h-5 w-5 rounded border-gray-300 text-blue-600 accent-blue-600"
-              />
-            </div>
-            <span className="text-gray-700 dark:text-gray-300" style={{ fontSize: '0.82rem' }}>
+            <input
+              type="checkbox"
+              checked={data.agreedToTerms}
+              onChange={(e) => updateData({ agreedToTerms: e.target.checked })}
+              className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 accent-[var(--color-primary)]"
+            />
+            <span className={cn('text-sm', BODY_TEXT)}>
               {t('enrollment.review_page.terms')}{' '}
-              <LegalHrefLink
-                href={LEGAL.termsOfServiceHref}
-                className="inline-flex items-center gap-0.5 font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
-              >
+              <LegalHrefLink href={LEGAL.termsOfServiceHref} className={TEXT_LINK}>
                 {t('enrollment.review_page.view_terms')} <ExternalLink className="h-3 w-3" />
               </LegalHrefLink>
             </span>
           </label>
-        </div>
+        </Card>
       </div>
     </AnimatedPage>
   )

@@ -179,7 +179,7 @@ export default function LoginPage() {
       {/* ── Page footer — pinned to bottom ── */}
       <div className="px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-800">
         <p className="text-xs text-gray-400 dark:text-gray-600">
-          {t('auth.copyright')}
+          {t('auth.copyright', { year: new Date().getFullYear() })}
         </p>
         <div className="flex items-center gap-4">
           <LegalHrefLink

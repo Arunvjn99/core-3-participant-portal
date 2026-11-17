@@ -6,7 +6,6 @@ import { ENV, ROUTES, dashboardPath } from '@/lib/constants'
 import {
   PrivacyPolicyPage,
   TermsOfServicePage,
-  HelpCenterPage,
 } from '@/features/legal/pages/LegalStaticPage'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import PreEnrollmentDashboard from '@/features/dashboard/pages/PreEnrollmentDashboard'
@@ -88,6 +87,8 @@ const RetirementGoalPage = lazy(() => import('../features/retirement/RetirementG
 const EnrichPage = lazy(() => import('../features/learning/EnrichPage'))
 const DocumentsPage = lazy(() => import('../features/documents/DocumentsPage'))
 const FeeReportPage = lazy(() => import('../features/fees/FeeReportPage'))
+const OutsideAssetsPage = lazy(() => import('../features/outside-assets/OutsideAssetsPage'))
+const HelpCenterPage = lazy(() => import('../features/help/HelpCenterPage'))
 const InvestmentsPage = lazy(() => import('../features/investments/pages/InvestmentsPage'))
 const ProfilePage = lazy(() => import('../features/profile/pages/ProfilePage').then((m) => ({ default: m.ProfilePage })))
 
@@ -200,7 +201,7 @@ export const router = createBrowserRouter([
       { path: 'auth', element: <Navigate to="/login" replace /> },
       { path: 'privacy', element: <PrivacyPolicyPage /> },
       { path: 'terms', element: <TermsOfServicePage /> },
-      { path: 'help', element: <HelpCenterPage /> },
+      { path: 'help', element: withSuspense(HelpCenterPage) },
 
       // Legacy versioned auth (keeps old URLs working)
       {
@@ -265,6 +266,7 @@ export const router = createBrowserRouter([
           { path: 'retirement-goal', element: withSuspense(RetirementGoalPage) },
           { path: 'account-summary', element: withSuspense(AccountSummaryPage) },
           { path: 'service-requests', element: withSuspense(ServiceRequestsPage) },
+          { path: 'outside-assets', element: withSuspense(OutsideAssetsPage) },
           { path: 'profile', element: withSuspense(ProfilePage) },
           { path: 'transactions', element: <TransactionCenter /> },
           {

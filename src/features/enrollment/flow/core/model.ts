@@ -8,6 +8,8 @@ export interface Election {
   unit: Unit
   preTax: number
   roth: number
+  /** After-tax savings: not matched, and auto-increase doesn't raise them */
+  afterTax: number
   auto: AutoIncrease
   mode: InvestMode
   risk: RiskKey

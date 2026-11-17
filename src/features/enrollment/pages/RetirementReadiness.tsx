@@ -16,6 +16,8 @@ import {
   Globe,
 } from 'lucide-react'
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { cn } from '@/lib/cn'
+import { BODY_TEXT, Card, CARD_TITLE, HEADING, IconChip, MUTED_TEXT, PILL_PRIMARY, PILL_SECONDARY, RULE, SECTION_LABEL, StepHeader, TitleBadge, badge, card } from '@/features/enrollment/enrollmentUi'
 import { getGrowthRate, type RiskLevel } from '@/lib/retirementCalculations'
 import { annualEmployerMatch, projectBalance, retirementIncome } from '@/features/enrollment/enrollmentMath'
 import { useEnrollmentStepNav, type EnrollmentPrimaryLabel } from '@/features/enrollment/components/EnrollmentStepNavContext'
@@ -89,7 +91,7 @@ function AnimatedScore({
           r="70"
           fill="none"
           stroke="currentColor"
-          className="text-gray-100 dark:text-gray-800"
+          className="text-slate-100 dark:text-white/10"
           strokeWidth="10"
         />
         <circle
@@ -106,8 +108,8 @@ function AnimatedScore({
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-5xl font-bold tabular-nums text-gray-900 dark:text-white">{displayValue}</span>
-        <span className="text-xs text-gray-500 dark:text-gray-400">{t('enrollment.readiness.out_of_100')}</span>
+        <span className="text-5xl font-bold tabular-nums text-[#0B1533] dark:text-white">{displayValue}</span>
+        <span className="text-xs text-slate-500 dark:text-slate-400">{t('enrollment.readiness.out_of_100')}</span>
       </div>
     </div>
   )
@@ -157,25 +159,25 @@ function ConfirmationModal({
     suggestion.newScore >= 60
       ? 'text-blue-600 dark:text-blue-400'
       : suggestion.newScore >= 40
-        ? 'text-gray-700 dark:text-gray-300'
-        : 'text-gray-600 dark:text-gray-400'
+        ? 'text-slate-600 dark:text-slate-300'
+        : 'text-slate-600 dark:text-slate-300'
 
   return (
     <div
       ref={backdropRef}
       onClick={handleBackdropClick}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B1533]/50 p-4 backdrop-blur-sm"
     >
-      <div className="w-full max-w-md overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xl dark:border-gray-800 dark:bg-gray-900">
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-800">
+      <div className="w-full max-w-md overflow-hidden rounded-[24px] bg-white shadow-2xl ring-1 ring-slate-200/70 dark:bg-[#0B1436] dark:ring-white/10">
+        <div className={cn('flex items-center justify-between border-b px-6 py-4', RULE)}>
           <div>
-            <p className="text-base font-semibold text-gray-900 dark:text-white">{t('enrollment.readiness.confirm_title')}</p>
-            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{t('enrollment.readiness.confirm_subtitle')}</p>
+            <p className={CARD_TITLE}>{t('enrollment.readiness.confirm_title')}</p>
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{t('enrollment.readiness.confirm_subtitle')}</p>
           </div>
           <button
             type="button"
             onClick={onCancel}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700 dark:border-gray-700 dark:hover:bg-gray-800"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-[#0B1533] dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
           >
             <X className="h-4 w-4" />
           </button>
@@ -183,58 +185,56 @@ function ConfirmationModal({
 
         <div className="space-y-5 px-6 py-5">
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-              {t('enrollment.readiness.confirm_whats_changing')}
-            </p>
+            <p className={cn('mb-3', SECTION_LABEL)}>{t('enrollment.readiness.confirm_whats_changing')}</p>
             <div className="flex items-center gap-3">
-              <div className="flex-1 rounded-xl border border-gray-200 bg-gray-50 p-3 text-center dark:border-gray-700 dark:bg-gray-800/50">
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{suggestion.currentLabel}</p>
-                <p className="mt-0.5 text-lg font-bold text-gray-900 dark:text-white">{suggestion.currentValue}</p>
+              <div className="flex-1 rounded-2xl bg-white p-3 text-center ring-1 ring-slate-200 dark:bg-white/5 dark:ring-white/10">
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{suggestion.currentLabel}</p>
+                <p className="mt-0.5 text-lg font-bold text-[#0B1533] dark:text-white">{suggestion.currentValue}</p>
               </div>
-              <ArrowRight className="h-4 w-4 shrink-0 text-gray-400" />
-              <div className="flex-1 rounded-xl border border-blue-200 bg-blue-50/80 p-3 text-center dark:border-blue-800/40 dark:bg-blue-950/30">
-                <p className="text-xs font-medium text-blue-700 dark:text-blue-400">{suggestion.newLabel}</p>
-                <p className="mt-0.5 text-lg font-bold text-blue-600 dark:text-blue-400">{suggestion.newValue}</p>
+              <ArrowRight className="h-4 w-4 shrink-0 text-slate-400" />
+              <div className="flex-1 rounded-2xl bg-blue-50 p-3 text-center ring-2 ring-primary dark:bg-blue-500/10 dark:ring-blue-400">
+                <p className="text-xs font-medium text-primary dark:text-blue-300">{suggestion.newLabel}</p>
+                <p className="mt-0.5 text-lg font-bold text-primary dark:text-blue-300">{suggestion.newValue}</p>
               </div>
             </div>
           </div>
 
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{t('enrollment.readiness.impact')}</p>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800/50">
-                <span className="text-sm text-gray-500 dark:text-gray-400">{t('enrollment.readiness.readiness_score')}</span>
+            <p className={cn('mb-1', SECTION_LABEL)}>{t('enrollment.readiness.impact')}</p>
+            <div className="divide-y divide-slate-200/80 dark:divide-white/10">
+              <div className="flex items-center justify-between py-3">
+                <span className="text-sm text-slate-500 dark:text-slate-400">{t('enrollment.readiness.readiness_score')}</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold tabular-nums text-gray-500 dark:text-gray-400">{currentScore}</span>
-                  <ArrowRight className="h-3.5 w-3.5 text-gray-400" />
+                  <span className="text-sm font-semibold tabular-nums text-slate-500 dark:text-slate-400">{currentScore}</span>
+                  <ArrowRight className="h-3.5 w-3.5 text-slate-400" />
                   <span className={`text-sm font-bold tabular-nums ${newScoreColor}`}>{suggestion.newScore}</span>
-                  <span className="flex items-center gap-0.5 rounded bg-blue-100 px-1.5 py-0.5 text-xs font-semibold text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
+                  <span className={cn(badge('emerald'), 'gap-0.5 px-1.5')}>
                     <ArrowUpRight className="h-2.5 w-2.5" />+{scoreDiff}
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800/50">
-                <span className="text-sm text-gray-500 dark:text-gray-400">{t('enrollment.readiness.additional_annual')}</span>
-                <span className="text-sm font-bold tabular-nums text-blue-600 dark:text-blue-400">
+              <div className="flex items-center justify-between py-3">
+                <span className="text-sm text-slate-500 dark:text-slate-400">{t('enrollment.readiness.additional_annual')}</span>
+                <span className="text-sm font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
                   {suggestion.additionalAnnualSavings > 0 ? `+$${suggestion.additionalAnnualSavings.toLocaleString(locale)}` : '—'}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800/50">
-                <span className="text-sm text-gray-500 dark:text-gray-400">{t('enrollment.readiness.projected_balance')}</span>
+              <div className="flex items-center justify-between py-3">
+                <span className="text-sm text-slate-500 dark:text-slate-400">{t('enrollment.readiness.projected_balance')}</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm tabular-nums text-gray-500 dark:text-gray-400">{formatCurrency(currentBalance)}</span>
-                  <ArrowRight className="h-3.5 w-3.5 text-gray-400" />
-                  <span className="text-sm font-bold tabular-nums text-gray-900 dark:text-white">
+                  <span className="text-sm tabular-nums text-slate-500 dark:text-slate-400">{formatCurrency(currentBalance)}</span>
+                  <ArrowRight className="h-3.5 w-3.5 text-slate-400" />
+                  <span className="text-sm font-bold tabular-nums text-[#0B1533] dark:text-white">
                     {formatCurrency(suggestion.projectedBalance)}
                   </span>
                 </div>
               </div>
 
               {balanceDiff > 0 && (
-                <div className="rounded-xl border border-gray-200 bg-slate-50 px-4 py-2.5 text-center dark:border-gray-700 dark:bg-gray-800/50">
-                  <span className="text-sm font-semibold text-blue-700 dark:text-blue-400">
+                <div className="pt-3 text-center">
+                  <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
                     {t('enrollment.readiness.confirm_more_retirement', { amount: `+${formatCurrency(balanceDiff)}` })}
                   </span>
                 </div>
@@ -243,18 +243,18 @@ function ConfirmationModal({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 border-t border-gray-200 px-6 py-4 dark:border-gray-800">
+        <div className={cn('flex items-center justify-end gap-3 border-t px-6 py-4', RULE)}>
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            className={PILL_SECONDARY}
           >
             {t('enrollment.readiness.cancel')}
           </button>
           <button
             type="button"
             onClick={onApply}
-            className="btn-brand flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium active:scale-[0.98]"
+            className={PILL_PRIMARY}
           >
             <Zap className="h-3.5 w-3.5" /> {t('enrollment.readiness.apply_change')}
           </button>
@@ -459,232 +459,151 @@ function RetirementReadiness() {
   }, [setStepNav, navigate, handleNext, t])
 
   return (
-    <div className="mx-auto max-w-5xl">
-      <div className="mb-5">
-        <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">{t('enrollment.readiness.title')}</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          {t('enrollment.readiness.subtitle')}
-        </p>
-      </div>
+    <div className="mx-auto max-w-[1040px]">
+      <StepHeader className="mb-5" title={t('enrollment.readiness.title')} subtitle={t('enrollment.readiness.subtitle')} />
 
-      <div className="grid items-start gap-8 md:grid-cols-[1fr_340px] lg:grid-cols-[1fr_380px]">
-        <div className="min-w-0 space-y-6">
-          <div className="rounded-2xl border border-gray-200 bg-white p-7 shadow-lg dark:border-gray-700 dark:bg-gray-900">
+      <div className="grid items-start gap-5 md:grid-cols-[1fr_340px] lg:grid-cols-[1fr_380px]">
+        <div className="min-w-0 space-y-4">
+          {/* Score, then the projected balance under one rule */}
+          <Card tone="blue">
             <div className="flex flex-col items-center">
               <AnimatedScore value={score} color={scoreColor} circumference={circumference} />
 
-              <p className="mt-4 text-center text-base font-semibold text-gray-900 dark:text-white">{getMessage()}</p>
-              <p className="mt-1 text-center text-sm text-gray-500 dark:text-gray-400">
+              <p className={cn('mt-4 text-center text-lg font-bold', HEADING)}>{getMessage()}</p>
+              <p className={cn('mt-1 text-center text-sm', BODY_TEXT)}>
                 {t('enrollment.readiness.on_track_line', { onTrack: t('enrollment.readiness.on_track_em', { score }) })}
               </p>
-              <p className="mt-1 text-center text-xs text-gray-400 dark:text-gray-500">
-                {t('enrollment.readiness.peer_benchmark')}
-              </p>
+              <p className={cn('mt-1 text-center text-xs', MUTED_TEXT)}>{t('enrollment.readiness.peer_benchmark')}</p>
 
               <div className="mt-4 flex items-center justify-center gap-2">
-                <div className="h-1.5 w-24 overflow-hidden rounded-full border border-gray-200 bg-gray-100 dark:border-gray-600 dark:bg-gray-800">
-                  <div className="h-full rounded-full bg-gray-500 dark:bg-gray-400" style={{ width: '65%' }} />
+                <div className="h-1.5 w-24 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+                  <div className="h-full rounded-full bg-slate-500 dark:bg-slate-300" style={{ width: '65%' }} />
                 </div>
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                <span className={cn('text-xs font-medium', MUTED_TEXT)}>
                   {t('enrollment.readiness.target')} <span className="font-semibold">100%</span>
                 </span>
               </div>
             </div>
 
-            <div className="my-5 border-t border-gray-200 dark:border-gray-700" />
-
-            {/* Projected balance */}
-            <div className="text-center mt-2">
-              <div className="flex items-center justify-center gap-1.5 mb-1">
-                <Globe className="w-3.5 h-3.5 text-gray-400" />
-                <p className="text-gray-400 dark:text-gray-500 uppercase tracking-wide"
-                   style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.06em' }}>
-                  {t('enrollment.readiness.projected_balance_label')}
-                </p>
-              </div>
-              <p className="text-gray-900 dark:text-white tabular-nums"
-                 style={{ fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.5px', transition: 'all 0.5s ease' }}>
-                {formatCurrency(projectedBalance)}
+            <div className={cn('mt-5 border-t pt-5 text-center', RULE)}>
+              <p className={cn('flex items-center justify-center gap-1.5', SECTION_LABEL)}>
+                <Globe className="h-3.5 w-3.5" aria-hidden />
+                {t('enrollment.readiness.projected_balance_label')}
               </p>
-              <p className="text-gray-400 dark:text-gray-500 mt-0.5" style={{ fontSize: '0.75rem' }}>
-                {t('enrollment.readiness.at_age', { age: personalization.retirementAge })}
-              </p>
+              <p className={cn('mt-1 text-[32px] font-extrabold leading-none tabular-nums', HEADING)}>{formatCurrency(projectedBalance)}</p>
+              <p className={cn('mt-1.5 text-xs', MUTED_TEXT)}>{t('enrollment.readiness.at_age', { age: personalization.retirementAge })}</p>
             </div>
-          </div>
+          </Card>
 
-          {/* Understanding Your Score card */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-950/40 flex items-center justify-center shrink-0">
-                <Info className="w-3 h-3 text-blue-600" />
-              </div>
-              <p className="text-gray-900 dark:text-white font-semibold" style={{ fontSize: '0.88rem' }}>
-                {t('enrollment.readiness.understanding_title')}
-              </p>
-            </div>
-            <p className="text-gray-500 dark:text-gray-400" style={{ fontSize: '0.78rem', lineHeight: 1.6 }}>
-              {t('enrollment.readiness.understanding_body', { score })}
-            </p>
-          </div>
-
-          {/* Annual Funding Summary card */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-4">
-            <p className="text-gray-900 dark:text-white font-bold mb-3" style={{ fontSize: '0.9rem' }}>
-              {t('enrollment.readiness.annual_summary_title')}
-            </p>
-            <div className="space-y-2.5">
-              {/* Retirement Income Goal */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-gray-400 dark:bg-gray-500 shrink-0" />
-                  <span className="text-gray-600 dark:text-gray-400" style={{ fontSize: '0.8rem' }}>
-                    {t('enrollment.readiness.income_goal')}
-                  </span>
-                </div>
-                <span className="text-gray-900 dark:text-white font-semibold tabular-nums" style={{ fontSize: '0.85rem' }}>
-                  ${income.goal.toLocaleString(locale)}
-                </span>
-              </div>
-              {/* Current Annual Contributions */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0" />
-                  <span className="text-gray-600 dark:text-gray-400" style={{ fontSize: '0.8rem' }}>
-                    {t('enrollment.readiness.current_annual')}
-                  </span>
-                </div>
-                <span className="text-blue-600 dark:text-blue-400 font-semibold tabular-nums" style={{ fontSize: '0.85rem' }}>
-                  ${income.total.toLocaleString(locale)}
-                </span>
-              </div>
-              {/* Annual Savings Gap */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0" />
-                  <span className="text-gray-600 dark:text-gray-400" style={{ fontSize: '0.8rem' }}>
-                    {t('enrollment.readiness.savings_gap')}
-                  </span>
-                </div>
-                <span className="text-red-600 dark:text-red-400 font-semibold tabular-nums" style={{ fontSize: '0.85rem' }}>
-                  ${income.gap.toLocaleString(locale)}
-                </span>
+          {/* Understanding Your Score */}
+          <Card>
+            <div className="flex items-start gap-3">
+              <IconChip Icon={Info} tone="blue" />
+              <div className="min-w-0">
+                <h2 className={CARD_TITLE}>{t('enrollment.readiness.understanding_title')}</h2>
+                <p className={cn('mt-1 text-[13px] leading-relaxed', BODY_TEXT)}>{t('enrollment.readiness.understanding_body', { score })}</p>
               </div>
             </div>
-            {/* Footnote */}
-            <p className="text-gray-400 dark:text-gray-600 mt-3 pt-3 border-t border-gray-100 dark:border-gray-800"
-               style={{ fontSize: '0.72rem', lineHeight: 1.5 }}>
-              {t('enrollment.readiness.annual_footnote')}
-            </p>
-          </div>
+          </Card>
+
+          {/* Annual Funding Summary */}
+          <Card>
+            <h2 className={CARD_TITLE}>{t('enrollment.readiness.annual_summary_title')}</h2>
+            <dl className="mt-3 space-y-2.5">
+              {[
+                { dot: 'bg-slate-400', label: t('enrollment.readiness.income_goal'), value: income.goal, color: HEADING },
+                { dot: 'bg-[var(--chart-blue)]', label: t('enrollment.readiness.current_annual'), value: income.total, color: 'text-primary dark:text-blue-300' },
+                { dot: 'bg-rose-500', label: t('enrollment.readiness.savings_gap'), value: income.gap, color: 'text-rose-600 dark:text-rose-400' },
+              ].map((row) => (
+                <div key={row.label} className="flex items-center justify-between gap-3">
+                  <dt className={cn('flex items-center gap-2 text-[13px]', BODY_TEXT)}>
+                    <span className={cn('h-2.5 w-2.5 shrink-0 rounded-full', row.dot)} aria-hidden />
+                    {row.label}
+                  </dt>
+                  <dd className={cn('text-sm font-bold tabular-nums', row.color)}>${row.value.toLocaleString(locale)}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className={cn('mt-3 border-t pt-3 text-xs leading-relaxed', RULE, MUTED_TEXT)}>{t('enrollment.readiness.annual_footnote')}</p>
+          </Card>
 
           {successMessage && (
-            <div
-              className="flex items-center gap-3 rounded-2xl border border-green-200 bg-green-50 px-5 py-3.5 dark:border-green-800/40 dark:bg-green-950/30"
-              style={{ animation: 'fadeSlideIn 0.4s ease' }}
-            >
-              <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600 dark:text-green-400" />
-              <p className="text-sm font-semibold text-gray-900 dark:text-gray-200">{t('enrollment.readiness.success_applied')}</p>
+            <div className={cn(card('green', false), 'flex items-center gap-3 px-5 py-3.5')} style={{ animation: 'fadeSlideIn 0.4s ease' }}>
+              <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+              <p className={cn('text-sm font-semibold', HEADING)}>{t('enrollment.readiness.success_applied')}</p>
             </div>
           )}
-
-          <div className="hidden pt-1 md:block" />
         </div>
 
-        <div className="min-w-0 space-y-6">
+        <div className="min-w-0 space-y-4">
           {suggestions.length > 0 && totalPotentialIncrease > 0 && (
-            <div className="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 px-5 py-4 shadow-lg dark:border-blue-800/40 dark:from-blue-950/30 dark:to-indigo-950/20">
-              <div className="mb-3 flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  <p className="text-sm font-bold text-gray-900 dark:text-white">{t('enrollment.readiness.reco_title')}</p>
+            <Card tone="sky">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <TitleBadge Icon={Sparkles} />
+                  <p className={CARD_TITLE}>{t('enrollment.readiness.reco_title')}</p>
                 </div>
-                <div className="rounded-lg bg-blue-100 px-2 py-1 dark:bg-blue-950/50">
-                  <p className="text-xs font-extrabold text-blue-700 dark:text-blue-400">{t('enrollment.readiness.reco_score', { score: potentialScore })}</p>
-                </div>
+                <span className={badge('blue')}>{t('enrollment.readiness.reco_score', { score: potentialScore })}</span>
               </div>
-              <p className="mb-3 text-xs leading-normal text-gray-800 dark:text-gray-200">
-                {t('enrollment.readiness.reco_body', { potentialScore, points: totalPotentialIncrease })}
-              </p>
-            </div>
+              <p className={cn('mt-3 text-[13px] leading-relaxed', BODY_TEXT)}>{t('enrollment.readiness.reco_body', { potentialScore, points: totalPotentialIncrease })}</p>
+            </Card>
           )}
 
           {suggestions.length > 0 && (
             <div>
               <div className="mb-3">
-                <p className="text-base font-semibold text-gray-900 dark:text-white">{t('enrollment.readiness.optional_title')}</p>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  {t('enrollment.readiness.optional_sub')}
-                </p>
+                <h2 className={CARD_TITLE}>{t('enrollment.readiness.optional_title')}</h2>
+                <p className={cn('mt-1 text-xs', MUTED_TEXT)}>{t('enrollment.readiness.optional_sub')}</p>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {suggestions.map((suggestion, index) => {
                   const isRecommended = index === 0
                   return (
-                    <div
-                      key={suggestion.id}
-                      className={`rounded-xl border transition-all ${
-                        isRecommended
-                          ? 'border-blue-200 bg-blue-50/80 shadow-lg dark:border-blue-800/40 dark:bg-blue-950/20'
-                          : 'border-gray-200 bg-gray-50/60 dark:border-gray-700 dark:bg-gray-800/50'
-                      }`}
-                    >
-                      <div className="p-5">
-                        {isRecommended && (
-                          <div className="mb-2.5 flex items-center gap-1">
-                            <Award className="h-3 w-3 text-blue-600 dark:text-blue-400" />
-                            <span className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">
-                              {t('enrollment.readiness.recommended_badge')}
-                            </span>
-                          </div>
-                        )}
-                        <div className="flex items-start gap-3">
-                          <div
-                            className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${
-                              isRecommended ? 'bg-blue-100 dark:bg-blue-950/40' : 'border border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-900'
-                            }`}
-                          >
-                            {suggestion.icon}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{suggestion.title}</p>
-                            <p className="mt-0.5 text-xs leading-normal text-gray-500 dark:text-gray-400">{suggestion.description}</p>
-
-                            <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1.5">
-                              <div>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{t('enrollment.readiness.score_col')}</p>
-                                <div className="mt-0.5 flex items-center gap-1">
-                                  <span className="text-sm font-semibold tabular-nums text-gray-500 dark:text-gray-400">{score}</span>
-                                  <ArrowRight className="h-3 w-3 text-gray-400" />
-                                  <span className="text-sm font-bold tabular-nums text-blue-600 dark:text-blue-400">{suggestion.newScore}</span>
-                                </div>
-                              </div>
-                              <div>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{t('enrollment.readiness.savings_col')}</p>
-                                <p className="mt-0.5 text-sm font-bold tabular-nums text-blue-600 dark:text-blue-400">
-                                  {suggestion.additionalAnnualSavings > 0
-                                    ? t('enrollment.readiness.savings_yr', { amount: suggestion.additionalAnnualSavings.toLocaleString(locale) })
-                                    : '—'}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{t('enrollment.readiness.balance_col')}</p>
-                                <p className="mt-0.5 text-sm font-bold tabular-nums text-gray-900 dark:text-white">
-                                  {formatCurrency(suggestion.projectedBalance)}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
+                    <div key={suggestion.id} className={cn(card(isRecommended ? 'selected' : 'plain', false), 'p-5')}>
+                      {isRecommended && (
+                        <span className={cn(badge('blue'), 'mb-2.5')}>
+                          <Award className="h-3 w-3" aria-hidden />
+                          {t('enrollment.readiness.recommended_badge')}
+                        </span>
+                      )}
+                      <div className="flex items-start gap-3">
+                        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 ring-1 ring-blue-100 dark:bg-blue-500/15 dark:ring-blue-400/20" aria-hidden>
+                          {suggestion.icon}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className={cn('text-sm font-bold', HEADING)}>{suggestion.title}</p>
+                          <p className={cn('mt-0.5 text-xs leading-normal', BODY_TEXT)}>{suggestion.description}</p>
                         </div>
-
-                        <button
-                          type="button"
-                          onClick={() => handleOpenConfirm(suggestion)}
-                          className="mt-3 w-full rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-semibold text-gray-900 transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-900 dark:text-white dark:hover:bg-gray-800"
-                        >
-                          {t('enrollment.readiness.apply_reco')}
-                        </button>
                       </div>
+
+                      {/* Score, savings and balance as three figures between two rules */}
+                      <dl className={cn('mt-3 grid grid-cols-3 divide-x border-y py-2.5', RULE, 'divide-slate-200/80 dark:divide-white/10')}>
+                        <div className="pr-3">
+                          <dt className={cn('text-[11px]', MUTED_TEXT)}>{t('enrollment.readiness.score_col')}</dt>
+                          <dd className="mt-0.5 flex items-center gap-1">
+                            <span className={cn('text-sm font-semibold tabular-nums', MUTED_TEXT)}>{score}</span>
+                            <ArrowRight className="h-3 w-3 text-slate-400" aria-hidden />
+                            <span className="text-sm font-bold tabular-nums text-primary dark:text-blue-300">{suggestion.newScore}</span>
+                          </dd>
+                        </div>
+                        <div className="px-3">
+                          <dt className={cn('text-[11px]', MUTED_TEXT)}>{t('enrollment.readiness.savings_col')}</dt>
+                          <dd className="mt-0.5 text-sm font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
+                            {suggestion.additionalAnnualSavings > 0
+                              ? t('enrollment.readiness.savings_yr', { amount: suggestion.additionalAnnualSavings.toLocaleString(locale) })
+                              : '—'}
+                          </dd>
+                        </div>
+                        <div className="pl-3">
+                          <dt className={cn('text-[11px]', MUTED_TEXT)}>{t('enrollment.readiness.balance_col')}</dt>
+                          <dd className={cn('mt-0.5 text-sm font-bold tabular-nums', HEADING)}>{formatCurrency(suggestion.projectedBalance)}</dd>
+                        </div>
+                      </dl>
+
+                      <button type="button" onClick={() => handleOpenConfirm(suggestion)} className={cn(isRecommended ? PILL_PRIMARY : PILL_SECONDARY, 'mt-3 h-10 w-full')}>
+                        {t('enrollment.readiness.apply_reco')}
+                      </button>
                     </div>
                   )
                 })}
@@ -693,13 +612,12 @@ function RetirementReadiness() {
           )}
 
           {suggestions.length === 0 && appliedChanges.length > 0 && (
-            <div className="rounded-2xl border border-gray-200 bg-white px-5 py-4 text-center shadow-lg dark:border-gray-700 dark:bg-gray-900">
-              <CheckCircle2 className="mx-auto mb-2 h-6 w-6 text-blue-600 dark:text-blue-400" />
-              <p className="text-sm font-semibold text-gray-900 dark:text-white">{t('enrollment.readiness.all_applied_title')}</p>
-              <p className="mt-0.5 text-xs text-blue-600 dark:text-blue-400">{t('enrollment.readiness.all_applied_sub')}</p>
-            </div>
+            <Card className="text-center">
+              <CheckCircle2 className="mx-auto mb-2 h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+              <p className={cn('text-sm font-bold', HEADING)}>{t('enrollment.readiness.all_applied_title')}</p>
+              <p className={cn('mt-0.5 text-xs', BODY_TEXT)}>{t('enrollment.readiness.all_applied_sub')}</p>
+            </Card>
           )}
-
         </div>
       </div>
 

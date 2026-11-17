@@ -22,7 +22,7 @@ export function ResumeWhereYouLeftOff({ progressPct, onResume }: ResumeWhereYouL
           <h3 className="text-base font-semibold text-text-primary">{t('transactions.resume_loan_application')}</h3>
           <p className="mt-1 text-sm text-text-secondary">{t('transactions.resume_progress', { pct: progressPct })}</p>
           <div
-            className="mt-3 h-2 w-full max-w-md overflow-hidden rounded bg-primary/15 dark:bg-primary/25"
+            className="mt-3 h-2 w-full max-w-md overflow-hidden rounded bg-[color:color-mix(in_srgb,var(--color-primary)_15%,transparent)] dark:bg-[color:color-mix(in_srgb,var(--color-primary)_25%,transparent)]"
             role="progressbar"
             aria-valuenow={progressPct}
             aria-valuemin={0}

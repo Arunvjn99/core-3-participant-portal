@@ -27,22 +27,17 @@ export default function AppFooter() {
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-medium text-gray-600 dark:text-gray-400">
             <LegalHrefLink
               href={LEGAL.privacyPolicyHref}
-              className="uppercase tracking-wide transition-colors hover:text-gray-700 dark:hover:text-gray-300"
+              className="transition-colors hover:text-gray-700 dark:hover:text-gray-300"
             >
               {t('footer.privacy')}
             </LegalHrefLink>
             <LegalHrefLink
               href={LEGAL.termsOfServiceHref}
-              className="uppercase tracking-wide transition-colors hover:text-gray-700 dark:hover:text-gray-300"
+              className="transition-colors hover:text-gray-700 dark:hover:text-gray-300"
             >
               {t('footer.terms')}
             </LegalHrefLink>
-            <LegalHrefLink
-              href={LEGAL.helpCenterHref}
-              className="uppercase tracking-wide transition-colors hover:text-gray-700 dark:hover:text-gray-300"
-            >
-              {t('footer.help')}
-            </LegalHrefLink>
+            {/* Help Center lives in the top bar, next to search */}
           </div>
         </div>
       </div>

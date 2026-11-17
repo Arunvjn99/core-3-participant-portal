@@ -1,4 +1,5 @@
 import { useState, useMemo, useId, useEffect, useCallback } from 'react'
+import { RangeSlider } from '@/design-system/components/RangeSlider'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
@@ -9,7 +10,9 @@ import { getAppDateLocale } from '@/lib/dateLocale'
 import { getGrowthRate } from '@/lib/retirementCalculations'
 import { projectBalance } from '@/features/enrollment/enrollmentMath'
 import { PLAN_CONFIG } from '@/features/enrollment/agent/planConfig'
-import { TrendingUp, Calendar, Target, DollarSign, Info } from 'lucide-react'
+import { Calendar, Target, DollarSign, Info } from 'lucide-react'
+import { cn } from '@/lib/cn'
+import { BODY_TEXT, CARD_TITLE, HEADING, IconChip, MUTED_TEXT, RULE, SECTION_LABEL, StepHeader, TEXT_LINK, badge, card, chip, choice } from '@/features/enrollment/enrollmentUi'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 type IncrementCycle = 'calendar' | 'participant' | 'plan'
@@ -27,7 +30,6 @@ export default function AutoIncreaseSetup() {
   const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, Math.round(v)))
   const [increaseAmount, setIncreaseAmount] = useState(() => clamp(data.autoIncreaseAmount, amountMin, amountMax))
   const [maxContribution, setMaxContribution] = useState(() => clamp(data.autoIncreaseMax, capMin, capMax))
-  const amountFill = ((increaseAmount - amountMin) / (amountMax - amountMin)) * 100
   const [incrementCycle, setIncrementCycle] = useState<IncrementCycle>('calendar')
   // Growth timeline shows every year, which gets long fast. Default to key
   // milestones (Now, Y1, midpoint, final) and let people open the full list.
@@ -166,11 +168,11 @@ export default function AutoIncreaseSetup() {
     if (active && payload && payload.length) {
       const v = payload[0].value
       return (
-        <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-          <p className="text-gray-500 dark:text-gray-400" style={{ fontSize: '0.7rem' }}>
+        <div className="rounded-xl bg-white px-3 py-2 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-white/15">
+          <p className="text-slate-500 dark:text-slate-400" style={{ fontSize: '0.7rem' }}>
             {label === 0 ? t('enrollment.auto_increase_setup.tooltip_today') : t('enrollment.auto_increase_setup.tooltip_year', { n: label })}
           </p>
-          <p className="tabular-nums text-gray-900 dark:text-white" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+          <p className="tabular-nums text-[#0B1533] dark:text-white" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
             {t('enrollment.auto_increase_setup.tooltip_pct', { v })}
           </p>
         </div>
@@ -190,200 +192,107 @@ export default function AutoIncreaseSetup() {
   return (
     <AnimatedPage>
       <div className="space-y-5">
-        {/* Header */}
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-          <div>
-            <div className="mb-1 flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-100 dark:bg-green-950/40">
-                <TrendingUp className="h-4 w-4 text-green-600" />
+        <StepHeader
+          title={t('enrollment.auto_increase_setup.title')}
+          subtitle={t('enrollment.auto_increase_setup.subtitle')}
+          aside={
+            <dl className={cn('flex shrink-0 items-start divide-x', 'divide-slate-200/80 dark:divide-white/10')}>
+              <div className="pr-5">
+                <dt className={SECTION_LABEL}>{t('enrollment.auto_increase_setup.current')}</dt>
+                <dd className={cn('mt-1 text-2xl font-extrabold leading-none tabular-nums', HEADING)}>
+                  {currentPercent}%<span className={cn('ml-1.5 text-xs font-medium', MUTED_TEXT)}>${currentMonthlyContribution.toLocaleString(locale)}/mo</span>
+                </dd>
               </div>
-              <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-                {t('enrollment.auto_increase_setup.title')}
-              </h1>
-            </div>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 sm:text-base">
-              {t('enrollment.auto_increase_setup.subtitle')}
-            </p>
-          </div>
-          <div className="shrink-0 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 dark:border-blue-800/40 dark:bg-blue-950/30">
-            <div className="flex items-start gap-6">
-              <div>
-                <p
-                  className="mb-0.5 text-blue-700 dark:text-blue-400"
-                  style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}
-                >
-                  {t('enrollment.auto_increase_setup.current')}
-                </p>
-                <p className="text-blue-900 dark:text-blue-300" style={{ fontSize: '1.5rem', fontWeight: 800, lineHeight: 1 }}>
-                  {currentPercent}%
-                </p>
-                <p className="mt-1 text-blue-700 dark:text-blue-400" style={{ fontSize: '0.7rem' }}>
-                  ${currentMonthlyContribution.toLocaleString(locale)}/mo
-                </p>
+              <div className="pl-5">
+                <dt className={SECTION_LABEL}>{t('enrollment.auto_increase_setup.target_max')}</dt>
+                <dd className="mt-1 text-2xl font-extrabold leading-none tabular-nums text-primary dark:text-blue-300">{maxContribution}%</dd>
               </div>
-              <div className="border-l border-blue-300 pl-6 dark:border-blue-700">
-                <p
-                  className="mb-0.5 text-blue-600 dark:text-blue-400"
-                  style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}
-                >
-                  {t('enrollment.auto_increase_setup.target_max')}
-                </p>
-                <p className="text-blue-900 dark:text-blue-300" style={{ fontSize: '1.5rem', fontWeight: 800, lineHeight: 1 }}>
-                  {maxContribution}%
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+            </dl>
+          }
+        />
 
         <div className="grid items-start gap-5 lg:grid-cols-5">
-          {/* Left — Controls (3/5) */}
-          <div className="space-y-4 lg:col-span-3">
-            {/* Increment Cycle */}
-            <div className="rounded-2xl border-2 border-blue-200 bg-white px-4 py-3 shadow-sm dark:border-blue-800/40 dark:bg-gray-900">
-              <h3 className="mb-2.5 text-gray-900 dark:text-white" style={{ fontSize: '0.9rem', fontWeight: 700 }}>
-                {t('enrollment.auto_increase_setup.increment_cycle')}
-              </h3>
-              <div className="grid grid-cols-3 gap-3">
-                {cycleOptions.map((opt) => (
-                  <label
-                    key={opt.value}
-                    className={`flex cursor-pointer flex-col gap-2 rounded-xl border-2 p-3 transition-all hover:border-blue-300 dark:hover:border-blue-700 ${
-                      incrementCycle === opt.value
-                        ? 'border-blue-600 bg-blue-50 dark:border-blue-500 dark:bg-blue-950/30'
-                        : 'border-gray-200 dark:border-gray-700'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
+          {/* Left — Controls (3/5): one card, three ruled sections */}
+          <div className="space-y-3 lg:col-span-3">
+            <div className={cn(card('plain', false), 'divide-y', 'divide-slate-200/80 dark:divide-white/10')}>
+              {/* Increment Cycle */}
+              <fieldset className="p-5 sm:p-6">
+                <legend className={cn('float-left mb-3 w-full', CARD_TITLE)}>{t('enrollment.auto_increase_setup.increment_cycle')}</legend>
+                <div className="clear-both grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  {cycleOptions.map((opt) => (
+                    <label
+                      key={opt.value}
+                      className={cn(choice(incrementCycle === opt.value), 'flex cursor-pointer flex-col gap-0.5 p-3.5 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-blue-300/70')}
+                    >
                       <input
                         type="radio"
                         name="increment-cycle"
                         value={opt.value}
                         checked={incrementCycle === opt.value}
                         onChange={(e) => setIncrementCycle(e.target.value as IncrementCycle)}
-                        className="h-4 w-4 cursor-pointer text-blue-600"
+                        className="sr-only"
                       />
-                      <p className="text-gray-900 dark:text-white" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-                        {t(`enrollment.auto_increase_setup.${opt.labelKey}`)}
-                      </p>
-                    </div>
-                    <p className="ml-6 text-gray-500 dark:text-gray-400" style={{ fontSize: '0.7rem' }}>
-                      {t(`enrollment.auto_increase_setup.${opt.subKey}`)}
-                    </p>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Increase Amount */}
-            <div className="rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-              <div className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30">
-                  <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      <span className={cn('text-sm font-bold', HEADING)}>{t(`enrollment.auto_increase_setup.${opt.labelKey}`)}</span>
+                      <span className={cn('text-xs', MUTED_TEXT)}>{t(`enrollment.auto_increase_setup.${opt.subKey}`)}</span>
+                    </label>
+                  ))}
                 </div>
-                <div className="flex-1">
-                  <label className="text-gray-900 dark:text-white" style={{ fontSize: '0.85rem', fontWeight: 500 }}>
-                    {t('enrollment.auto_increase_setup.increase_label')}
-                  </label>
-                  <div className="mt-2">
-                    <div className="mb-1 flex items-center justify-between">
-                      <span className="text-gray-400 dark:text-gray-600" style={{ fontSize: '0.65rem' }}>
-                        {amountMin}%
-                      </span>
-                      <span className="tabular-nums text-blue-600 dark:text-blue-400" style={{ fontSize: '0.9rem', fontWeight: 700 }}>
-                        {t('enrollment.auto_increase_setup.per_cycle', { v: increaseAmount })}
-                      </span>
-                      <span className="text-gray-400 dark:text-gray-600" style={{ fontSize: '0.65rem' }}>
-                        {amountMax}%
-                      </span>
+              </fieldset>
+
+              {/* Increase Amount */}
+              <div className="flex items-start gap-3 p-5 sm:p-6">
+                <IconChip Icon={Calendar} tone="blue" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className={cn('text-sm font-bold', HEADING)}>{t('enrollment.auto_increase_setup.increase_label')}</p>
+                    <p className="shrink-0 text-base font-extrabold tabular-nums text-primary dark:text-blue-300">{t('enrollment.auto_increase_setup.per_cycle', { v: increaseAmount })}</p>
+                  </div>
+                  <div className="mt-3">
+                    <RangeSlider min={amountMin} max={amountMax} step={1} value={increaseAmount} onChange={setIncreaseAmount} aria-label={t('enrollment.auto_increase_setup.increase_label')} aria-valuetext={`${increaseAmount}%`} />
+                    <div className="mt-1.5 flex items-center justify-between text-xs text-slate-400">
+                      <span>{amountMin}%</span>
+                      <span>{amountMax}%</span>
                     </div>
-                    <input
-                      type="range"
-                      min={amountMin}
-                      max={amountMax}
-                      step={1}
-                      value={increaseAmount}
-                      onChange={(e) => setIncreaseAmount(parseInt(e.target.value, 10))}
-                      className="h-2 w-full cursor-pointer appearance-none rounded-full"
-                      style={{
-                        background: `linear-gradient(to right, var(--color-primary) 0%, var(--color-primary) ${amountFill}%, var(--slider-track) ${amountFill}%, var(--slider-track) 100%)`,
-                      }}
-                    />
                   </div>
                   <div className="mt-2 flex gap-2">
                     {[1, 2, 3].map((opt) => (
-                      <button
-                        key={opt}
-                        type="button"
-                        onClick={() => setIncreaseAmount(opt)}
-                        className={`flex-1 rounded-lg py-1.5 transition-all ${
-                          increaseAmount === opt
-                            ? 'brand-bg text-white shadow-sm'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
-                        }`}
-                        style={{ fontSize: '0.75rem', fontWeight: 500 }}
-                      >
+                      <button key={opt} type="button" onClick={() => setIncreaseAmount(opt)} aria-pressed={increaseAmount === opt} className={cn(chip(increaseAmount === opt), 'min-w-[56px]')}>
                         {opt}%
                       </button>
                     ))}
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Max Contribution */}
-            <div className="rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-              <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-purple-50 dark:bg-purple-950/30">
-                  <Target className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div className="flex-1">
-                  <label className="text-gray-900 dark:text-white" style={{ fontSize: '0.9rem', fontWeight: 500 }}>
-                    {t('enrollment.auto_increase_setup.stop_at')}
-                  </label>
-                  <p className="mt-0.5 text-gray-400 dark:text-gray-500" style={{ fontSize: '0.78rem' }}>
-                    {t('enrollment.auto_increase_setup.stop_hint')}
-                  </p>
-                  <div className="mt-4">
-                    <div className="mb-1.5 flex items-center justify-between">
-                      <span className="text-gray-400 dark:text-gray-600" style={{ fontSize: '0.7rem' }}>
-                        {capMin}%
-                      </span>
-                      <span className="tabular-nums text-purple-600 dark:text-purple-400" style={{ fontSize: '1rem', fontWeight: 700 }}>
-                        {maxContribution}%
-                      </span>
-                      <span className="text-gray-400 dark:text-gray-600" style={{ fontSize: '0.7rem' }}>
-                        {capMax}%
-                      </span>
+              {/* Max Contribution */}
+              <div className="flex items-start gap-3 p-5 sm:p-6">
+                <IconChip Icon={Target} tone="violet" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className={cn('text-sm font-bold', HEADING)}>{t('enrollment.auto_increase_setup.stop_at')}</p>
+                    <p className="shrink-0 text-base font-extrabold tabular-nums text-primary dark:text-blue-300">{maxContribution}%</p>
+                  </div>
+                  <p className={cn('mt-0.5 text-xs', MUTED_TEXT)}>{t('enrollment.auto_increase_setup.stop_hint')}</p>
+                  <div className="mt-3">
+                    <RangeSlider min={capMin} max={capMax} step={1} value={maxContribution} onChange={setMaxContribution} aria-label={t('enrollment.auto_increase_setup.stop_at')} aria-valuetext={`${maxContribution}%`} />
+                    <div className="mt-1.5 flex items-center justify-between text-xs text-slate-400">
+                      <span>{capMin}%</span>
+                      <span>{capMax}%</span>
                     </div>
-                    <input
-                      type="range"
-                      min={capMin}
-                      max={capMax}
-                      step={1}
-                      value={maxContribution}
-                      onChange={(e) => setMaxContribution(parseInt(e.target.value, 10))}
-                      className="h-2 w-full cursor-pointer appearance-none rounded-full"
-                      style={{
-                        background: `linear-gradient(to right, var(--accent-purple) 0%, var(--accent-purple) ${((maxContribution - capMin) / (capMax - capMin)) * 100}%, var(--slider-track) ${((maxContribution - capMin) / (capMax - capMin)) * 100}%, var(--slider-track) 100%)`,
-                      }}
-                    />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-start gap-2.5 px-1">
-              <Info className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
-              <p className="text-gray-400 dark:text-gray-500" style={{ fontSize: '0.78rem' }}>
-                {t('enrollment.auto_increase_setup.footnote')}
-              </p>
+            <div className="flex items-start gap-2 px-1">
+              <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+              <p className={cn('text-xs leading-relaxed', MUTED_TEXT)}>{t('enrollment.auto_increase_setup.footnote')}</p>
             </div>
           </div>
 
           {/* Right — Projection (2/5) — above controls on mobile */}
           <div className="order-first lg:order-last lg:col-span-2">
-            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900 lg:sticky lg:top-28">
+            <div className={cn(card('plain', false), 'overflow-hidden lg:sticky lg:top-28')}>
               {/* Chart */}
               <div className="h-48 p-4">
                 <ResponsiveContainer width="100%" height="100%">
@@ -416,10 +325,10 @@ export default function AutoIncreaseSetup() {
                 </ResponsiveContainer>
               </div>
 
-              <div className="border-t border-gray-100 dark:border-gray-800" />
+              <div className={cn('border-t', RULE)} />
 
               <div className="px-5 py-3.5">
-                <p className="text-gray-700 dark:text-gray-300" style={{ fontSize: '0.82rem' }}>
+                <p className={cn('text-[13px] leading-relaxed', BODY_TEXT)}>
                   {currentPercent >= maxContribution
                     ? t('enrollment.auto_increase_setup.summary_at_max')
                     : increaseAmount === 0
@@ -435,30 +344,28 @@ export default function AutoIncreaseSetup() {
 
               {increaseAmount > 0 && financialImpact.difference > 0 && (
                 <>
-                  <div className="border-t border-gray-100 dark:border-gray-800" />
+                  <div className={cn('border-t', RULE)} />
                   {/* Savings Impact as a single row: Without / With stacked
                       vertically so the two figures compare cleanly, and the
                       "Could add" delta as one sentence below. No tiles,
                       no heavy backgrounds. */}
                   <div className="space-y-2.5 px-5 py-4">
-                    <p className="text-gray-900 dark:text-white" style={{ fontSize: '0.82rem', fontWeight: 600 }}>
-                      {t('enrollment.auto_increase_setup.savings_impact')}
-                    </p>
+                    <p className={SECTION_LABEL}>{t('enrollment.auto_increase_setup.savings_impact')}</p>
                     <dl className="grid grid-cols-2 gap-x-6 gap-y-0.5">
-                      <dt className="text-gray-500 dark:text-gray-400" style={{ fontSize: '0.7rem' }}>
+                      <dt className={cn('text-xs', MUTED_TEXT)}>
                         {t('enrollment.auto_increase_setup.without')}
                       </dt>
-                      <dt className="text-right text-green-700 dark:text-green-400" style={{ fontSize: '0.7rem', fontWeight: 600 }}>
+                      <dt className="text-right text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                         {t('enrollment.auto_increase_setup.with_increases')}
                       </dt>
-                      <dd className="tabular-nums text-gray-700 dark:text-gray-200" style={{ fontSize: '1.1rem', fontWeight: 700 }}>
+                      <dd className={cn('text-lg font-bold tabular-nums', HEADING)}>
                         {formatCurrency(financialImpact.withoutIncrease)}
                       </dd>
-                      <dd className="text-right tabular-nums text-green-700 dark:text-green-400" style={{ fontSize: '1.1rem', fontWeight: 700 }}>
+                      <dd className="text-right text-lg font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
                         {formatCurrency(financialImpact.withIncrease)}
                       </dd>
                     </dl>
-                    <p className="flex items-start gap-1.5 pt-1 text-green-700 dark:text-green-400" style={{ fontSize: '0.75rem' }}>
+                    <p className="flex items-start gap-1.5 pt-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
                       <DollarSign className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
                       <span>{t('enrollment.auto_increase_setup.could_add', { amount: formatCurrency(financialImpact.difference) })}</span>
                     </p>
@@ -468,18 +375,15 @@ export default function AutoIncreaseSetup() {
 
               {yearByYearData.length > 0 && (
                 <>
-                  <div className="border-t border-gray-100 dark:border-gray-800" />
-                  <div className="px-4 py-3">
+                  <div className={cn('border-t', RULE)} />
+                  <div className="px-5 py-4">
                     <div className="mb-3 flex items-center justify-between gap-2">
-                      <h3 className="text-gray-900 dark:text-white" style={{ fontSize: '0.85rem', fontWeight: 700 }}>
-                        {t('enrollment.auto_increase_setup.growth_timeline')}
-                      </h3>
+                      <h3 className={SECTION_LABEL}>{t('enrollment.auto_increase_setup.growth_timeline')}</h3>
                       {yearByYearData.length > 4 && (
                         <button
                           type="button"
                           onClick={() => setShowAllRows((v) => !v)}
-                          className="text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400"
-                          style={{ fontSize: '0.72rem', fontWeight: 500 }}
+                          className={cn(TEXT_LINK, 'text-xs')}
                         >
                           {showAllRows
                             ? t('enrollment.auto_increase_setup.show_milestones', 'Show milestones only')
@@ -487,51 +391,45 @@ export default function AutoIncreaseSetup() {
                         </button>
                       )}
                     </div>
-                    <div className="-mx-4 overflow-x-auto">
+                    <div className="-mx-5 overflow-x-auto">
                       <table className="w-full">
-                        <thead className="border-b border-gray-200 dark:border-gray-700">
+                        <thead className={cn('border-b', RULE)}>
                           <tr>
                             {(['col_year', 'col_date', 'col_pct', 'col_annual'] as const).map((h, i) => (
                               <th
                                 key={h}
-                                className={`px-3 py-1.5 text-gray-600 dark:text-gray-400 ${i === 3 ? 'text-right' : 'text-left'}`}
-                                style={{ fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                                className={cn('px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide first:pl-5 last:pr-5', MUTED_TEXT, i === 3 ? 'text-right' : 'text-left')}
                               >
                                 {t(`enrollment.auto_increase_setup.${h}`)}
                               </th>
                             ))}
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                        <tbody className="divide-y divide-slate-200/80 dark:divide-white/10">
                           {(showAllRows ? yearByYearData : timelineHighlights).map((row, idx) => (
                             <tr
                               key={idx}
-                              className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${row.percent === maxContribution ? 'bg-purple-50 dark:bg-purple-950/20' : ''}`}
+                              className={cn('transition-colors hover:bg-slate-50/70 dark:hover:bg-white/5', row.percent === maxContribution && 'bg-blue-50/70 dark:bg-blue-500/10')}
                             >
-                              <td className="px-3 py-1.5 text-gray-900 dark:text-white" style={{ fontSize: '0.75rem', fontWeight: 500 }}>
+                              <td className={cn('py-1.5 pl-5 pr-3 text-xs font-semibold', HEADING)}>
                                 {row.year === 0
                                   ? t('enrollment.auto_increase_setup.now')
                                   : t('enrollment.auto_increase_setup.y_prefix', { n: row.year })}
                               </td>
-                              <td className="px-3 py-1.5 text-gray-600 dark:text-gray-400" style={{ fontSize: '0.7rem' }}>
+                              <td className={cn('px-3 py-1.5 text-xs', MUTED_TEXT)}>
                                 {row.date}
                               </td>
                               <td className="px-3 py-1.5">
                                 <div className="flex items-center gap-1">
-                                  <span className="tabular-nums text-gray-900 dark:text-white" style={{ fontSize: '0.75rem', fontWeight: 600 }}>
+                                  <span className={cn('text-xs font-semibold tabular-nums', HEADING)}>
                                     {row.percent}%
                                   </span>
                                   {row.percent === maxContribution && (
-                                    <span
-                                      className="rounded bg-purple-100 px-1 py-0.5 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400"
-                                      style={{ fontSize: '0.55rem', fontWeight: 600 }}
-                                    >
-                                      {t('enrollment.auto_increase_setup.max_badge')}
-                                    </span>
+                                    <span className={cn(badge('blue'), 'px-1.5 py-0 text-[9px]')}>{t('enrollment.auto_increase_setup.max_badge')}</span>
                                   )}
                                 </div>
                               </td>
-                              <td className="px-3 py-1.5 text-right tabular-nums text-gray-900 dark:text-white" style={{ fontSize: '0.75rem', fontWeight: 600 }}>
+                              <td className={cn('py-1.5 pl-3 pr-5 text-right text-xs font-semibold tabular-nums', HEADING)}>
                                 ${(row.annual / 1000).toLocaleString(locale)}K
                               </td>
                             </tr>
@@ -539,9 +437,9 @@ export default function AutoIncreaseSetup() {
                         </tbody>
                       </table>
                     </div>
-                    <div className="mt-3 border-t border-gray-200 pt-3 dark:border-gray-700">
-                      <p className="text-gray-700 dark:text-gray-300" style={{ fontSize: '0.7rem' }}>
-                        <span className="font-semibold text-gray-900 dark:text-white">
+                    <div className={cn('mt-3 border-t pt-3', RULE)}>
+                      <p className="text-xs">
+                        <span className={cn('font-semibold', HEADING)}>
                           {t('enrollment.auto_increase_setup.timeline_line', {
                             from: currentPercent,
                             to: maxContribution,

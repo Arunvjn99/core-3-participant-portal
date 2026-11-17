@@ -55,6 +55,16 @@ export const useProfileStore = create<ProfileState>()(
     {
       name: 'profile_details',
       storage: createJSONStorage(() => localStorage),
+      // v2: the seed employer was renamed (from a placeholder, then from an interim name); profiles saved before keep everything else
+      version: 2,
+      migrate: (saved, version) => {
+        const state = saved as Partial<ProfileState>
+        const oldSeedNames = ['Example Corp', 'Veltrix Systems']
+        if (version < 2 && state.employment && oldSeedNames.includes(state.employment.employer)) {
+          return { ...state, employment: { ...state.employment, employer: DEFAULT_EMPLOYMENT.employer } } as ProfileState
+        }
+        return state as ProfileState
+      },
       // SSNs, bank account and routing numbers stay in memory only.
       partialize: ({ personal, bank, employment, flags, classification, beneficiaries }) => ({ personal, bank, employment, flags, classification, beneficiaries }),
     },

@@ -71,7 +71,7 @@ function AttentionRequiredTimeline({ onResolve }: AttentionRequiredTimelineProps
         >
           <div className="flex gap-3">
             <div
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-status-warning/15 text-status-warning dark:bg-amber-900/40 dark:text-amber-300"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[color:color-mix(in_srgb,var(--status-warning)_15%,transparent)] text-status-warning dark:bg-amber-900/40 dark:text-amber-300"
               aria-hidden
             >
               <AlertTriangle className="h-5 w-5" />
@@ -85,7 +85,7 @@ function AttentionRequiredTimeline({ onResolve }: AttentionRequiredTimelineProps
                 </p>
               ) : null}
               {item.onAction ? (
-                <div className="mt-3 flex justify-end border-t border-status-warning/40 pt-3 dark:border-amber-800/50">
+                <div className="mt-3 flex justify-end border-t border-[color:color-mix(in_srgb,var(--status-warning)_40%,transparent)] pt-3 dark:border-amber-800/50">
                   <Button type="button" variant="primary" size="sm" onClick={item.onAction}>
                     {t(item.actionKey)}
                   </Button>

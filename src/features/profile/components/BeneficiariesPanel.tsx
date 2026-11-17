@@ -8,6 +8,8 @@ import type { Beneficiary, BeneficiaryType } from '../profileData'
 import { useProfileStore } from '../profileStore'
 import { BeneficiaryForm } from './BeneficiaryForm'
 import { ProfileCard } from './ProfileCard'
+import { BeneficiaryAuthorization } from '@/features/verification/BeneficiaryAuthorization'
+import { useIdentityGate } from '@/features/verification/useIdentityGate'
 
 const TYPES: BeneficiaryType[] = ['primary', 'contingent']
 
@@ -22,6 +24,7 @@ export function BeneficiariesPanel({ startAdding = false }: { startAdding?: bool
   const [editType, setEditType] = useState<BeneficiaryType | null>(null)
   const [draftShares, setDraftShares] = useState<Record<string, string>>({})
   const [removeTarget, setRemoveTarget] = useState<Beneficiary | null>(null)
+  const { guard, dialog: identityDialog } = useIdentityGate()
 
   const totals = useMemo(
     () => Object.fromEntries(TYPES.map((tp) => [tp, beneficiaries.filter((b) => b.type === tp).reduce((s, b) => s + b.share, 0)])) as Record<BeneficiaryType, number>,
@@ -57,7 +60,7 @@ export function BeneficiariesPanel({ startAdding = false }: { startAdding?: bool
       <ProfileCard
         title={t('profile.d.beneficiary_title')}
         actions={
-          <button type="button" onClick={() => setAdding(true)} className="btn-brand inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-sm font-semibold">
+          <button type="button" onClick={() => guard(() => setAdding(true))} className="btn-brand inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-sm font-semibold">
             <Plus className="h-4 w-4" aria-hidden />
             {t('profile.d.add_beneficiary')}
           </button>
@@ -96,10 +99,10 @@ export function BeneficiariesPanel({ startAdding = false }: { startAdding?: bool
                     <td className="py-3 pr-3 text-right tabular-nums">{b.share}%</td>
                     <td className="py-3 text-right">
                       <div className="flex justify-end gap-1">
-                        <button type="button" onClick={() => openShares(b.type)} className="rounded-md px-2 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/30">
+                        <button type="button" onClick={() => guard(() => openShares(b.type))} className="rounded-md px-2 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/30">
                           {t('profile.d.set_pct')}
                         </button>
-                        <button type="button" onClick={() => setRemoveTarget(b)} aria-label={`${t('profile.d.remove')}: ${b.name}`} className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-800">
+                        <button type="button" onClick={() => guard(() => setRemoveTarget(b))} aria-label={`${t('profile.d.remove')}: ${b.name}`} className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-800">
                           <Trash2 className="h-4 w-4" aria-hidden />
                         </button>
                       </div>
@@ -110,7 +113,9 @@ export function BeneficiariesPanel({ startAdding = false }: { startAdding?: bool
             </table>
           </div>
         )}
+        <BeneficiaryAuthorization />
       </ProfileCard>
+      {identityDialog}
 
       <Modal open={editType !== null} onClose={() => setEditType(null)} title={editType ? t('profile.d.set_shares_title', { type: t(`profile.d.type_${editType}`) }) : ''}>
         <p className="mb-3 text-sm text-gray-600 dark:text-gray-300">{t('profile.d.set_shares_body')}</p>

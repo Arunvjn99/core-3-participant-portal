@@ -1,8 +1,7 @@
 import { useDialogA11y } from '@/lib/useDialogA11y'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import * as SliderPrimitive from '@radix-ui/react-slider'
 import {
   ChevronRight,
   ChevronLeft,
@@ -16,6 +15,7 @@ import {
   Search,
 } from 'lucide-react'
 import { cn } from '@/lib/cn'
+import { RangeSlider } from '@/design-system/components/RangeSlider'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { ACCOUNT_BALANCE } from '@/features/enrollment/enrollmentMath'
 import { ALL_US_STATES, POPULAR_LOCATIONS } from '@/lib/usStates'
@@ -55,24 +55,24 @@ function getSavingsInsight(savingsNum: number, yearsUntilRetirement: number) {
   if (savingsNum === 0) {
     return {
       title: 'Perfect Timing! ⚡',
-      message: `Starting from zero with ${yearsUntilRetirement} years ahead is actually great. The average American who starts at your stage retires with $800K+. Your 401(k) enrolment today is the single best financial decision you can make.`,
+      message: `Starting now with ${yearsUntilRetirement} years ahead is great timing. Enrolling in your 401(k) today is the best first step.`,
     }
   }
   if (savingsNum < 10000) {
     return {
       title: 'Great Start! 💪',
-      message: `$${savingsNum.toLocaleString()} is a solid foundation. With ${yearsUntilRetirement} years and compound interest at 7%, adding just $200/month could grow this to over $${Math.round(((savingsNum + 200 * 12 * yearsUntilRetirement) * 1.5) / 1000)}K by retirement.`,
+      message: `$${savingsNum.toLocaleString()} is a solid foundation. With ${yearsUntilRetirement} years of compound growth, small monthly additions add up.`,
     }
   }
   if (savingsNum < 100000) {
     return {
       title: 'Strong Foundation! 📈',
-      message: `You're ahead of 60% of Americans your age with $${savingsNum.toLocaleString()} saved. Maximizing your 401(k) contribution ($23,000/year limit in 2024) could add another $${Math.round((23000 * yearsUntilRetirement * 1.4) / 1000)}K over ${yearsUntilRetirement} years with market growth.`,
+      message: `With $${savingsNum.toLocaleString()} saved, you're ahead of 60% of Americans your age. Your 401(k) can build on it over ${yearsUntilRetirement} years.`,
     }
   }
   return {
     title: 'Excellent Progress! 🎉',
-    message: `With $${savingsNum.toLocaleString()} already saved, you're in the top 25% of savers your age. At this trajectory, you're on track for a comfortable retirement. Consider catch-up contributions ($7,500 extra/year if 50+) to maximize your position.`,
+    message: `With $${savingsNum.toLocaleString()} saved, you're in the top 25% of savers your age and on track for a comfortable retirement.`,
   }
 }
 
@@ -96,7 +96,6 @@ type RiskOption = {
   icon: string
   label: string
   description: string
-  popular?: boolean
 }
 
 const RISK_OPTIONS: RiskOption[] = [
@@ -111,7 +110,6 @@ const RISK_OPTIONS: RiskOption[] = [
     icon: '📊',
     label: 'Balanced',
     description: 'Moderate growth with a mix of stocks and steadier assets.',
-    popular: true,
   },
   {
     id: 'growth',
@@ -133,6 +131,48 @@ const STEPS = [
   { id: 3, label: 'Savings' },
   { id: 4, label: 'Comfort' },
 ]
+
+/* The pre-enrollment dashboard's look, reused here so the wizard feels like part of that page:
+   its banner wash, navy headings, pill buttons, soft rings and solid icon badges. */
+const WASH_BANNER =
+  'bg-[radial-gradient(90%_120%_at_0%_0%,#D9F3FF_0%,rgba(217,243,255,0)_60%),radial-gradient(80%_120%_at_100%_100%,#EFFAF2_0%,rgba(239,250,242,0)_50%),linear-gradient(#FFFFFF,#FFFFFF)] dark:bg-[radial-gradient(90%_120%_at_0%_0%,#12305C_0%,rgba(18,48,92,0)_60%),radial-gradient(80%_120%_at_100%_100%,rgba(18,63,70,0.45)_0%,rgba(18,63,70,0)_50%),linear-gradient(#0B1436,#0B1436)]'
+const HEADING = 'text-[#0B1533] dark:text-white'
+const BODY_TEXT = 'text-slate-600 dark:text-slate-300'
+const RULE = 'border-slate-200/80 dark:border-white/10'
+const PILL_PRIMARY =
+  'inline-flex h-11 items-center justify-center gap-1.5 rounded-full bg-primary px-5 text-sm font-semibold text-white shadow-[0_8px_20px_-10px_rgba(11,21,51,0.35)] transition-transform hover:scale-[1.02] active:scale-[0.98] motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100 dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)]'
+const PILL_SECONDARY =
+  'inline-flex h-11 items-center justify-center gap-1.5 rounded-full bg-white px-4 text-sm font-semibold text-slate-900 shadow-[0_8px_20px_-10px_rgba(11,21,51,0.3)] ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-slate-900 dark:text-white dark:ring-white/15 dark:hover:bg-slate-800'
+const ROUND_BUTTON =
+  'flex h-8 w-8 items-center justify-center rounded-full bg-white text-slate-700 shadow-[0_6px_14px_-10px_rgba(11,21,51,0.35)] ring-1 ring-slate-200 transition-colors hover:bg-slate-50 disabled:opacity-40 dark:bg-slate-900 dark:text-slate-200 dark:ring-white/15 dark:hover:bg-slate-800'
+const HEADER_CHIP =
+  'flex items-center gap-1 rounded-full bg-white/80 px-2.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200/70 dark:bg-white/10 dark:text-slate-200 dark:ring-white/10'
+const FIELD =
+  'w-full rounded-xl bg-white px-3 py-2.5 text-sm text-slate-900 ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-primary dark:bg-white/5 dark:text-white dark:ring-white/15'
+const FIELD_LABEL = 'mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400'
+const SECTION_LABEL = 'text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400'
+const TEXT_LINK = 'font-semibold text-primary hover:underline dark:text-blue-300'
+/** A tile the participant picks: a soft ring at rest, the brand ring and a blue tint once chosen. */
+const choiceClass = (selected: boolean) =>
+  selected
+    ? 'bg-blue-50 ring-2 ring-primary dark:bg-blue-500/10 dark:ring-blue-400'
+    : 'bg-white ring-1 ring-slate-200 hover:ring-blue-300 dark:bg-white/5 dark:ring-white/10 dark:hover:ring-blue-400/50'
+
+/** The AI tip on each step: the Ask Core AI card's blue wash with a solid sparkle badge. The text is held to two lines. */
+function Insight({ title, children, action }: { title: ReactNode; children: ReactNode; action?: ReactNode }) {
+  return (
+    <div className="flex items-start gap-3 rounded-2xl bg-[linear-gradient(180deg,#EAF2FF_0%,#F6F9FF_100%)] p-3.5 ring-1 ring-blue-100 dark:bg-none dark:bg-white/5 dark:ring-white/10">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_16px_-6px_rgba(37,99,235,0.6)]" aria-hidden>
+        <Sparkles className="h-4 w-4" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className={cn('text-sm font-bold', HEADING)}>{title}</p>
+        <p className={cn('mt-0.5 line-clamp-2 text-xs leading-snug', BODY_TEXT)}>{children}</p>
+        {action}
+      </div>
+    </div>
+  )
+}
 
 interface Props {
   isOpen: boolean
@@ -229,7 +269,7 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
           aria-modal="true"
           aria-label={t('hero.modal_personalize_subtitle')}
           data-app-blocking-overlay
-          className="fixed inset-0 z-[100] flex items-end justify-center p-0 sm:items-center sm:p-4 sm:p-6"
+          className="fixed inset-0 z-[100] flex items-end justify-center p-0 sm:items-center sm:p-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -245,73 +285,50 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 24 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative flex h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl dark:bg-gray-900 sm:h-auto sm:max-h-[88vh] sm:max-w-xl sm:rounded-3xl"
+            className="relative flex h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-[24px] bg-white shadow-[0_40px_80px_-32px_rgba(11,21,51,0.55)] ring-1 ring-slate-200/70 dark:bg-[#0B1436] dark:ring-white/10 sm:h-auto sm:max-h-[88vh] sm:max-w-xl sm:rounded-[24px]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative flex-shrink-0 bg-gradient-to-br from-blue-600 to-indigo-600 px-4 pb-4 pt-4 sm:px-6 sm:pb-5 sm:pt-6">
-              <div className="absolute -left-4 -top-4 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-
-              <div className="relative z-10 flex items-start justify-between">
+            {/* Header: the dashboard banner's light wash, with navy type instead of a solid blue block */}
+            <div className={cn('relative flex-shrink-0 border-b px-4 pb-4 pt-4 sm:px-6 sm:pb-5 sm:pt-6', RULE, WASH_BANNER)}>
+              <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h1 className="mb-1 text-2xl font-bold text-white sm:text-3xl">
+                  <h1 className={cn('mb-1 text-2xl font-bold leading-tight sm:text-[28px]', HEADING)}>
                     {userName && userName !== 'there'
                       ? t('hero.modal_greeting_with_name', { name: userName })
                       : t('hero.modal_greeting_generic')}
                   </h1>
-                  <p className="text-sm text-blue-100 sm:text-base">{t('hero.modal_personalize_subtitle')}</p>
+                  <p className={cn('text-sm sm:text-[15px]', BODY_TEXT)}>{t('hero.modal_personalize_subtitle')}</p>
                 </div>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
+                  className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-white text-slate-600 shadow-[0_8px_20px_-12px_rgba(11,21,51,0.35)] ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-200 dark:ring-white/15 dark:hover:bg-slate-800"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
 
-              <div className="relative z-10 mt-4 flex flex-nowrap items-stretch gap-2">
-                <div className="flex items-center gap-1 rounded-full border border-white/20 bg-white/15 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
+              <div className="mt-4 flex flex-nowrap items-stretch gap-2">
+                <div className={HEADER_CHIP}>
                   <span className="shrink-0">⏱</span>
                   <span className="line-clamp-2 leading-tight">Takes ~3 minutes</span>
                 </div>
-                <div className="flex items-center gap-1 rounded-full border border-white/20 bg-white/15 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                <div className={HEADER_CHIP}>
                   <span className="shrink-0">🔒</span>
                   <span className="line-clamp-2 leading-tight">Secure &amp; private</span>
                 </div>
-                <div className="flex items-center gap-1 rounded-full border border-white/20 bg-white/15 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                <div className={HEADER_CHIP}>
                   <span className="shrink-0">✨</span>
                   <span className="line-clamp-2 leading-tight">AI-powered insights</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-shrink-0 items-center justify-between border-b border-gray-100 bg-white px-4 py-3 dark:border-gray-800 dark:bg-gray-900 sm:px-6">
-              <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
-                Step {currentStep} of {STEPS.length}
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4 [scrollbar-color:rgb(226_232_240)_transparent] [scrollbar-width:thin] dark:[scrollbar-color:rgb(51_65_85)_transparent] sm:space-y-4 sm:px-6 sm:py-5">
+              {/* No progress strip on screen; the step number and name are still announced to screen readers */}
+              <span className="sr-only">
+                Step {currentStep} of {STEPS.length}: {STEPS[currentStep - 1]?.label}
               </span>
-
-              <div className="flex items-center gap-2">
-                {STEPS.map((step) => (
-                  <div
-                    key={step.id}
-                    className={cn(
-                      'rounded-full transition-all duration-300',
-                      currentStep === step.id
-                        ? 'h-2 w-6 brand-bg'
-                        : currentStep > step.id
-                          ? 'h-2 w-2 bg-emerald-500'
-                          : 'h-2 w-2 bg-gray-200 dark:bg-gray-700'
-                    )}
-                  />
-                ))}
-              </div>
-
-              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-                {STEPS[currentStep - 1]?.label}
-              </span>
-            </div>
-
-            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-white px-4 py-3 [scrollbar-color:rgb(229_231_235)_transparent] [scrollbar-width:thin] dark:bg-gray-900 dark:[scrollbar-color:rgb(55_65_81)_transparent] sm:space-y-4 sm:px-6 sm:py-4">
               <AnimatePresence>
                 {currentStep === 1 && (
                   <motion.div
@@ -320,47 +337,46 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.2 }}
-                    className="space-y-3"
+                    className="space-y-4"
                   >
-                    <div className="relative overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50 p-3 dark:border-blue-900/40 dark:from-blue-950/30 dark:to-indigo-950/30 sm:p-4">
+                    {/* Who we think you are: one quiet row, so the question below leads the step */}
+                    <div>
                       {!isEditingBirthDate ? (
                         <div className="flex items-center gap-3">
-                          <div className="brand-bg flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full">
-                            <span className="text-sm font-bold text-white">{displayInitials}</span>
+                          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)]">
+                            <span className="text-xs font-bold text-white">{displayInitials}</span>
                           </div>
-                          <div className="flex-1">
-                            <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                          <div className="min-w-0 flex-1">
+                            <p className={cn('text-sm font-bold leading-tight', HEADING)}>
                               You&apos;re {currentAge} years old 🎉
                             </p>
-                            <div className="mt-0.5 flex items-center justify-between">
-                              <p className="text-sm text-gray-500 dark:text-gray-400">
-                                Born {birthMonth} {birthDay}, {birthYear}
-                              </p>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setTempMonth(birthMonth)
-                                  setTempDay(birthDay)
-                                  setTempYear(birthYear)
-                                  setIsEditingBirthDate(true)
-                                }}
-                                className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline"
-                              >
-                                Edit
-                              </button>
-                            </div>
+                            <p className={cn('mt-0.5 text-xs', BODY_TEXT)}>
+                              Born {birthMonth} {birthDay}, {birthYear}
+                            </p>
                           </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setTempMonth(birthMonth)
+                              setTempDay(birthDay)
+                              setTempYear(birthYear)
+                              setIsEditingBirthDate(true)
+                            }}
+                            className={cn('shrink-0 text-xs', TEXT_LINK)}
+                          >
+                            Edit
+                          </button>
                         </div>
                       ) : (
                         <div className="space-y-3">
-                          <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                          <h3 className={cn('text-base font-bold', HEADING)}>
                             Edit your birth date
                           </h3>
                           <div className="flex gap-2">
                             <div className="flex-1">
-                              <label className="mb-1 block text-xs font-medium text-gray-500">Month</label>
+                              <label className={FIELD_LABEL}>Month</label>
                               <select
-                                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                className={FIELD}
                                 value={tempMonth}
                                 onChange={(e) => setTempMonth(e.target.value)}
                               >
@@ -370,23 +386,23 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                               </select>
                             </div>
                             <div className="w-20">
-                              <label className="mb-1 block text-xs font-medium text-gray-500">Day</label>
+                              <label className={FIELD_LABEL}>Day</label>
                               <input
                                 type="number"
                                 min={1}
                                 max={31}
-                                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                className={FIELD}
                                 value={tempDay}
                                 onChange={(e) => setTempDay(Number(e.target.value))}
                               />
                             </div>
                             <div className="w-24">
-                              <label className="mb-1 block text-xs font-medium text-gray-500">Year</label>
+                              <label className={FIELD_LABEL}>Year</label>
                               <input
                                 type="number"
                                 min={1900}
                                 max={currentYear - 18}
-                                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                className={FIELD}
                                 value={tempYear}
                                 onChange={(e) => setTempYear(Number(e.target.value))}
                               />
@@ -396,14 +412,14 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                             <button
                               type="button"
                               onClick={() => setIsEditingBirthDate(false)}
-                              className="flex items-center gap-1.5 rounded-lg bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                              className={cn(PILL_SECONDARY, 'h-9 px-3.5')}
                             >
                               <X className="h-3.5 w-3.5" /> Cancel
                             </button>
                             <button
                               type="button"
                               onClick={handleSaveBirthDate}
-                              className="btn-brand flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold"
+                              className={cn(PILL_PRIMARY, 'h-9 px-3.5')}
                             >
                               <Check className="h-3.5 w-3.5" /> Save
                             </button>
@@ -412,127 +428,90 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                       )}
                     </div>
 
-                    <div className="space-y-2">
-                      <h2 className="text-center text-base font-bold text-gray-900 dark:text-white sm:text-lg">
+                    {/* The one question of this step: heading, the age, the slider, then what it means */}
+                    <div className="space-y-3">
+                      <h2 className={cn('text-center text-[20px] font-bold leading-tight', HEADING)}>
                         At what age would you like to retire?
                       </h2>
 
-                      <div className="flex items-center justify-center gap-4 py-0">
+                      <div className="flex items-center justify-center gap-3">
                         <button
                           type="button"
                           onClick={() => setRetirementAge((a) => Math.max(currentAge + 1, a - 1))}
                           disabled={retirementAge <= currentAge + 1}
-                          className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-40 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                          className={ROUND_BUTTON}
                         >
-                          <Minus className="h-4 w-4" />
+                          <Minus className="h-3.5 w-3.5" />
                         </button>
 
-                        <div className="min-w-[100px] text-center">
-                          <div className="text-xs text-gray-500 dark:text-gray-400">I plan to retire at</div>
+                        <div className="min-w-[72px] text-center">
                           <motion.div
                             key={retirementAge}
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            className="text-4xl font-black text-blue-600 sm:text-5xl leading-none my-0.5"
+                            className="text-4xl font-bold leading-none tracking-tight text-primary dark:text-blue-300"
                           >
                             {retirementAge}
                           </motion.div>
-                          <div className="text-xs text-gray-400">years old</div>
+                          <div className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">years old</div>
                         </div>
 
                         <button
                           type="button"
                           onClick={() => setRetirementAge((a) => Math.min(75, a + 1))}
                           disabled={retirementAge >= 75}
-                          className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-40 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                          className={ROUND_BUTTON}
                         >
-                          <Plus className="h-4 w-4" />
+                          <Plus className="h-3.5 w-3.5" />
                         </button>
                       </div>
 
-                      <div className="px-2">
-                        <SliderPrimitive.Root
-                          className="relative flex h-5 w-full touch-none select-none items-center"
-                          value={[retirementAge]}
-                          onValueChange={([v]) => setRetirementAge(v)}
+                      <div>
+                        <RangeSlider
+                          value={retirementAge}
+                          onChange={setRetirementAge}
                           min={currentAge + 1}
                           max={75}
                           step={1}
-                        >
-                          <SliderPrimitive.Track className="relative h-1.5 grow rounded-full bg-gray-200 dark:bg-gray-700">
-                            <SliderPrimitive.Range className="absolute h-full rounded-full bg-gradient-to-r from-blue-600 to-indigo-600" />
-                          </SliderPrimitive.Track>
-                          <SliderPrimitive.Thumb className="block h-6 w-6 cursor-grab rounded-full border-2 border-blue-600 bg-white shadow-lg transition-transform hover:bg-blue-50 focus:outline-none focus:ring-4 focus:ring-blue-200 active:cursor-grabbing active:scale-110 dark:bg-gray-900" />
-                        </SliderPrimitive.Root>
-                        <div className="mt-0.5 flex justify-between text-[10px] text-gray-400">
+                          aria-label="At what age would you like to retire?"
+                          aria-valuetext={`${retirementAge} years old`}
+                        />
+                        <div className="mt-1 flex justify-between px-2 text-[10px] text-slate-500 dark:text-slate-400">
                           <span>{currentAge + 1}</span>
                           <span>75</span>
                         </div>
                       </div>
 
-                      <div className="rounded-xl border border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50 p-2 sm:p-3 shadow-sm dark:border-purple-800/50 dark:from-purple-950/30 dark:to-blue-950/30">
-                        <div className="flex items-start gap-2 sm:gap-3">
-                          <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-blue-500">
-                            <Sparkles className="h-3.5 w-3.5 text-white" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="mb-0.5 flex items-center gap-2">
-                              <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                                {ageInsight.title}
-                              </span>
-                            </div>
-                            <p className="line-clamp-2 text-xs leading-snug text-gray-600 dark:text-gray-400">
-                              {ageInsight.message}
-                            </p>
-                            {retirementAge !== 62 && (
-                              <button
-                                type="button"
-                                onClick={() => setRetirementAge(62)}
-                                className="mt-1 text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline"
-                              >
-                                Apply most popular age (62) →
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="rounded-xl border border-gray-200 bg-gray-50 p-2 sm:p-3 dark:border-gray-700 dark:bg-gray-800/50">
-                        <p className="mb-1.5 text-center text-xs text-gray-800 dark:text-gray-200">
+                      {/* What the choice means: one sentence and the two years, said once */}
+                      <div className="text-center">
+                        <p className={cn('text-sm', HEADING)}>
                           Retiring at <span className="font-bold">{retirementAge}</span> means{' '}
-                          <span className="font-bold text-blue-600">{yearsUntilRetirement} years</span> until retirement.
+                          <span className="font-bold text-primary dark:text-blue-300">{yearsUntilRetirement} years</span> until retirement.
                         </p>
-                        {/* Top labels */}
-                        <div className="mb-1.5 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
-                          <span>Now — <span className="font-semibold text-gray-700 dark:text-gray-200">{currentYear}</span></span>
-                          <span>Retire — <span className="font-semibold text-gray-700 dark:text-gray-200">{retirementYear}</span></span>
-                        </div>
-
-                        {/* Progress bar */}
-                        <div className="relative h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-                          <div className="absolute inset-y-0 left-0 w-1/3 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500" />
-                          <div className="absolute inset-y-0 left-1/3 flex -translate-x-1/2 items-center">
-                            <span className="whitespace-nowrap rounded-full bg-indigo-600 px-2 py-0.5 text-[10px] font-bold text-white shadow">
-                              {yearsUntilRetirement} yrs
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Bottom labels */}
-                        <div className="mt-1.5 flex items-start justify-between">
-                          <div className="flex flex-col items-start">
-                            <div className="brand-bg h-2 w-2 rounded-full" />
-                            <span className="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">Now</span>
-                            <span className="text-xs font-bold text-gray-800 dark:text-gray-100">{currentYear}</span>
-                          </div>
-                          <div className="flex flex-col items-end">
-                            <div className="ml-auto brand-bg h-2 w-2 rounded-full opacity-70" />
-                            <span className="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">Retire</span>
-                            <span className="text-xs font-bold text-gray-800 dark:text-gray-100">{retirementYear}</span>
-                          </div>
-                        </div>
+                        <p className={cn('mt-1 text-xs', BODY_TEXT)}>
+                          Now — <span className={cn('font-semibold', HEADING)}>{currentYear}</span>
+                          <span className="mx-2 text-slate-300 dark:text-slate-600" aria-hidden>·</span>
+                          Retire — <span className={cn('font-semibold', HEADING)}>{retirementYear}</span>
+                        </p>
                       </div>
                     </div>
+
+                    <Insight
+                      title={ageInsight.title}
+                      action={
+                        retirementAge !== 62 && (
+                          <button
+                            type="button"
+                            onClick={() => setRetirementAge(62)}
+                            className={cn('mt-1 text-xs', TEXT_LINK)}
+                          >
+                            Apply most popular age (62) →
+                          </button>
+                        )
+                      }
+                    >
+                      {ageInsight.message}
+                    </Insight>
                   </motion.div>
                 )}
 
@@ -546,20 +525,20 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                     className="space-y-4"
                   >
                     <div className="space-y-1 text-center">
-                      <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                      <h2 className={cn('text-[20px] font-bold leading-tight', HEADING)}>
                         Where do you imagine retiring? 🌎
                       </h2>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className={cn('text-sm', BODY_TEXT)}>
                         Your location helps us estimate cost of living and plan smarter.
                       </p>
                     </div>
 
                     <div className="relative">
-                      <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                      <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                       <input
                         type="text"
                         placeholder="Search any US state..."
-                        className="w-full rounded-xl border-2 border-gray-200 bg-white py-3 pl-11 pr-4 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                        className="w-full rounded-full bg-white py-3 pl-11 pr-4 text-sm text-slate-900 shadow-[0_8px_20px_-14px_rgba(11,21,51,0.3)] ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-primary dark:bg-white/5 dark:text-white dark:ring-white/15"
                         value={locationSearch}
                         onChange={(e) => {
                           setLocationSearch(e.target.value)
@@ -569,15 +548,15 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                         onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                       />
                       {showSuggestions && filteredStates.length > 0 && (
-                        <ul className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                        <ul className="absolute z-10 mt-2 max-h-48 w-full overflow-y-auto rounded-2xl bg-white shadow-[0_24px_48px_-24px_rgba(11,21,51,0.45)] ring-1 ring-slate-200 dark:bg-[#0F1B45] dark:ring-white/10">
                           {filteredStates.map((state) => (
                             <li key={state}>
                               <button
                                 type="button"
-                                className="flex w-full items-center gap-2 border-b border-gray-100 px-4 py-2.5 text-left text-sm text-gray-800 last:border-0 hover:bg-blue-50 dark:border-gray-700/50 dark:text-gray-200 dark:hover:bg-blue-950/30"
+                                className="flex w-full items-center gap-2 border-b border-slate-100 px-4 py-2.5 text-left text-sm text-slate-800 last:border-0 hover:bg-blue-50 dark:border-white/5 dark:text-slate-200 dark:hover:bg-blue-500/10"
                                 onClick={() => handleLocationSelect(state)}
                               >
-                                <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-blue-500" />
+                                <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-primary dark:text-blue-300" />
                                 {state}
                               </button>
                             </li>
@@ -587,8 +566,8 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                     </div>
 
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-400">
-                        <Sparkles className="h-3.5 w-3.5 text-purple-500" />
+                      <div className={cn('flex items-center gap-2', SECTION_LABEL)}>
+                        <Sparkles className="h-3.5 w-3.5 text-primary dark:text-blue-300" />
                         Popular retirement destinations
                       </div>
                       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
@@ -597,37 +576,32 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                             key={loc.name}
                             type="button"
                             onClick={() => handleLocationSelect(loc.name)}
-                            className={cn(
-                              'rounded-xl border-2 p-3 text-left transition-all',
-                              selectedLocation === loc.name
-                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30'
-                                : 'border-gray-200 bg-white hover:border-blue-300 dark:border-gray-700 dark:bg-gray-800/50 dark:hover:border-blue-700'
-                            )}
+                            className={cn('rounded-2xl p-3 text-left transition-all', choiceClass(selectedLocation === loc.name))}
                           >
                             <div className="flex items-center gap-3">
                               <span className="text-2xl">{loc.icon}</span>
                               <div className="min-w-0 flex-1">
                                 <div className="flex flex-wrap items-center gap-2">
-                                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                                  <span className={cn('text-sm font-bold', HEADING)}>
                                     {loc.name}
                                   </span>
                                   <span
                                     className={cn(
-                                      'rounded-full px-2 py-0.5 text-[10px] font-bold',
+                                      'rounded-full px-2 py-0.5 text-[10px] font-bold ring-1',
                                       loc.cost === 'Low'
-                                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400'
-                                        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400'
+                                        ? 'bg-emerald-50 text-emerald-700 ring-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/20'
+                                        : 'bg-amber-50 text-amber-700 ring-amber-100 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-400/20'
                                     )}
                                   >
                                     {loc.cost} Cost
                                   </span>
                                 </div>
-                                <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                                <p className={cn('mt-0.5 text-xs', BODY_TEXT)}>
                                   {loc.description}
                                 </p>
                               </div>
                               {selectedLocation === loc.name && (
-                                <Check className="h-4 w-4 flex-shrink-0 text-blue-600" />
+                                <Check className="h-4 w-4 flex-shrink-0 text-primary dark:text-blue-300" />
                               )}
                             </div>
                           </button>
@@ -636,25 +610,11 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                     </div>
 
                     {selectedLocation && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="rounded-xl border border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50 p-3 dark:border-purple-800/50 dark:from-purple-950/30 dark:to-blue-950/30"
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-blue-500">
-                            <Sparkles className="h-4 w-4 text-white" />
-                          </div>
-                          <div>
-                            <p className="mb-1 text-sm font-semibold text-gray-900 dark:text-white">
-                              Smart Choice! 🎯
-                            </p>
-                            <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-400">
-                              {selectedLocationData?.insight ??
-                                `${selectedLocation} is a great retirement destination. Research shows location can impact retirement savings by up to 40%. We'll help optimize your plan!`}
-                            </p>
-                          </div>
-                        </div>
+                      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+                        <Insight title="Smart Choice! 🎯">
+                          {selectedLocationData?.insight ??
+                            `${selectedLocation} is a great retirement destination. Research shows location can impact retirement savings by up to 40%. We'll help optimize your plan!`}
+                        </Insight>
                       </motion.div>
                     )}
                   </motion.div>
@@ -670,27 +630,25 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                     className="space-y-5"
                   >
                     <div className="space-y-1 text-center">
-                      <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                      <h2 className={cn('text-[20px] font-bold leading-tight', HEADING)}>
                         What&apos;s your current retirement savings? 💰
                       </h2>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className={cn('text-sm', BODY_TEXT)}>
                         Sharing this helps us give you a clearer picture of your future.
                       </p>
                     </div>
 
                     <div className="space-y-2">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500">
-                        Total retirement savings
-                      </label>
                       <div className="relative">
-                        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xl font-bold text-gray-400">
+                        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-slate-400">
                           $
                         </span>
                         <input
                           type="text"
                           inputMode="numeric"
                           placeholder="0"
-                          className="w-full rounded-xl border-2 border-gray-200 bg-white py-4 pl-10 pr-4 text-xl font-bold focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                          aria-label="Total retirement savings"
+                          className="w-full rounded-2xl bg-white py-3 pl-9 pr-4 text-lg font-bold text-[#0B1533] ring-1 ring-slate-200 focus:outline-none focus:ring-2 focus:ring-primary dark:bg-white/5 dark:text-white dark:ring-white/15"
                           value={savingsAmount}
                           onChange={(e) => {
                             const raw = e.target.value.replace(/[^0-9]/g, '')
@@ -698,65 +656,29 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                           }}
                         />
                       </div>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
                         Exclude 401(k), IRA, pension — only personal savings and investments
                       </p>
                     </div>
 
-                    <div className="rounded-xl border border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50 p-4 dark:border-purple-800/50 dark:from-purple-950/30 dark:to-blue-950/30">
-                      <div className="flex items-start gap-3">
-                        <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-blue-500">
-                          <Sparkles className="h-4 w-4 text-white" />
-                        </div>
-                        <div>
-                          <p className="mb-1 text-sm font-semibold text-gray-900 dark:text-white">
-                            {savingsInsight.title}
-                          </p>
-                          <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-400">
-                            {savingsInsight.message}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
+                    {/* The snapshot as one quiet line: no label, no rules */}
                     {savingsNum > 0 && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
-                      >
-                        <p className="text-xs font-bold uppercase tracking-wider text-gray-400">
-                          Your retirement snapshot
-                        </p>
-                        <div className="grid grid-cols-3 gap-3">
-                          <div className="text-center">
-                            <div className="text-xl font-black text-blue-600">{retirementAge}</div>
-                            <div className="text-[10px] font-medium text-gray-400">Retire at</div>
-                          </div>
-                          <div className="border-x border-gray-100 text-center dark:border-gray-700">
-                            <div className="text-xl font-black text-indigo-600">{yearsUntilRetirement}y</div>
-                            <div className="text-[10px] font-medium text-gray-400">To go</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-xl font-black text-emerald-600">
-                              ${savingsNum >= 1000 ? `${(savingsNum / 1000).toFixed(0)}K` : savingsNum}
-                            </div>
-                            <div className="text-[10px] font-medium text-gray-400">Saved</div>
-                          </div>
-                        </div>
+                      <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={cn('text-center text-sm', BODY_TEXT)}>
+                        Retire at <span className={cn('font-bold', HEADING)}>{retirementAge}</span>
+                        <span className="mx-2 text-slate-300 dark:text-slate-600" aria-hidden>·</span>
+                        <span className={cn('font-bold', HEADING)}>{yearsUntilRetirement} years</span> to go
+                        <span className="mx-2 text-slate-300 dark:text-slate-600" aria-hidden>·</span>
+                        <span className={cn('font-bold', HEADING)}>${savingsNum >= 1000 ? `${(savingsNum / 1000).toFixed(0)}K` : savingsNum}</span> saved
                         {selectedLocation && (
-                          <div className="flex items-center gap-2 border-t border-gray-100 pt-1 dark:border-gray-700">
-                            <MapPin className="h-3.5 w-3.5 text-blue-500" />
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              Retiring in{' '}
-                              <span className="font-semibold text-gray-700 dark:text-gray-300">
-                                {selectedLocation}
-                              </span>
-                            </span>
-                          </div>
+                          <>
+                            <span className="mx-2 text-slate-300 dark:text-slate-600" aria-hidden>·</span>
+                            Retiring in <span className={cn('font-bold', HEADING)}>{selectedLocation}</span>
+                          </>
                         )}
-                      </motion.div>
+                      </motion.p>
                     )}
+
+                    <Insight title={savingsInsight.title}>{savingsInsight.message}</Insight>
                   </motion.div>
                 )}
 
@@ -770,10 +692,10 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                     className="space-y-5"
                   >
                     <div className="space-y-1 text-center">
-                      <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                      <h2 className={cn('text-[20px] font-bold leading-tight', HEADING)}>
                         How comfortable are you with investment risk?
                       </h2>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className={cn('text-sm', BODY_TEXT)}>
                         This helps us recommend a portfolio that matches your style.
                       </p>
                     </div>
@@ -785,22 +707,15 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                           type="button"
                           onClick={() => setRiskTolerance(option.id)}
                           className={cn(
-                            'relative rounded-2xl border-2 p-5 text-left transition-all hover:scale-[1.01]',
-                            riskTolerance === option.id
-                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30'
-                              : 'border-gray-200 bg-white hover:border-blue-300 dark:border-gray-700 dark:bg-gray-800/50'
+                            'relative rounded-2xl p-4 text-left transition-all hover:scale-[1.01] motion-reduce:hover:scale-100',
+                            choiceClass(riskTolerance === option.id)
                           )}
                         >
-                          {option.popular && (
-                            <div className="absolute -top-3 right-4 rounded-full bg-purple-600 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
-                              Most Common
-                            </div>
-                          )}
                           <div className="flex items-start gap-3">
                             <span className="mt-0.5 text-2xl">{option.icon}</span>
                             <div>
-                              <p className="text-base font-bold text-gray-900 dark:text-white">{option.label}</p>
-                              <p className="mt-1 text-sm leading-snug text-gray-500 dark:text-gray-400">
+                              <p className={cn('text-[15px] font-bold leading-tight', HEADING)}>{option.label}</p>
+                              <p className={cn('mt-0.5 text-xs leading-snug', BODY_TEXT)}>
                                 {option.description}
                               </p>
                             </div>
@@ -809,42 +724,36 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                       ))}
                     </div>
 
-                    <div className="rounded-xl border border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50 p-4 dark:border-purple-800/50 dark:from-purple-950/30 dark:to-blue-950/30">
-                      <div className="flex items-start gap-3">
-                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-blue-500">
-                          <Sparkles className="h-4 w-4 text-white" />
-                        </div>
-                        <div>
-                          <p className="mb-1 text-sm font-semibold text-gray-900 dark:text-white">
-                            {riskTolerance === 'conservative' && 'Safe & Steady 🛡️'}
-                            {riskTolerance === 'balanced' && 'Smart Balance 📊'}
-                            {riskTolerance === 'growth' && 'Growth Focused 📈'}
-                            {riskTolerance === 'aggressive' && 'Maximum Growth ⚡'}
-                          </p>
-                          <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-400">
-                            {riskTolerance === 'conservative' &&
-                              `With ${yearsUntilRetirement} years to retirement, a conservative approach preserves capital. Typical allocation: 70% bonds, 30% stocks. Lower volatility, steady 4-5% average annual returns.`}
-                            {riskTolerance === 'balanced' &&
-                              `The most popular choice. A balanced portfolio (60% stocks / 40% bonds) historically returns 7-8% annually. With ${yearsUntilRetirement} years, this is a well-rounded strategy.`}
-                            {riskTolerance === 'growth' &&
-                              `Growth portfolios (80% stocks / 20% bonds) target 9-10% average returns. With ${yearsUntilRetirement} years, you have time to ride out market fluctuations and build substantial wealth.`}
-                            {riskTolerance === 'aggressive' &&
-                              `100% equity portfolio. Historically 10-12% average annual returns with significant volatility. Best suited if you have ${yearsUntilRetirement}+ years and can stomach short-term swings.`}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                    <Insight
+                      title={
+                        <>
+                          {riskTolerance === 'conservative' && 'Safe & Steady 🛡️'}
+                          {riskTolerance === 'balanced' && 'Smart Balance 📊'}
+                          {riskTolerance === 'growth' && 'Growth Focused 📈'}
+                          {riskTolerance === 'aggressive' && 'Maximum Growth ⚡'}
+                        </>
+                      }
+                    >
+                      {riskTolerance === 'conservative' &&
+                        `A conservative mix (about 70% bonds, 30% stocks) protects what you have, with steadier 4-5% average annual returns.`}
+                      {riskTolerance === 'balanced' &&
+                        `A balanced mix (60% stocks, 40% bonds) has historically returned 7-8% a year, a well-rounded fit for ${yearsUntilRetirement} years.`}
+                      {riskTolerance === 'growth' &&
+                        `A growth mix (80% stocks, 20% bonds) targets 9-10% a year. With ${yearsUntilRetirement} years, you have time to ride out market swings.`}
+                      {riskTolerance === 'aggressive' &&
+                        `An all-stock portfolio has historically returned 10-12% a year with big swings. Best with ${yearsUntilRetirement}+ years ahead.`}
+                    </Insight>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            <footer className="flex flex-shrink-0 items-center justify-between border-t border-gray-100 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-800/50 sm:px-6 sm:py-4">
+            <footer className={cn('flex flex-shrink-0 items-center justify-between border-t px-4 py-3 sm:px-6 sm:py-4', RULE)}>
               {currentStep > 1 ? (
                 <button
                   type="button"
                   onClick={() => setCurrentStep((s) => s - 1)}
-                  className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                  className={PILL_SECONDARY}
                 >
                   <ChevronLeft className="h-4 w-4" /> Back
                 </button>
@@ -852,7 +761,7 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+                  className={PILL_SECONDARY}
                 >
                   <Save className="h-4 w-4" /> Save &amp; Exit
                 </button>
@@ -861,7 +770,7 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
               <button
                 type="button"
                 onClick={currentStep === 4 ? handleComplete : () => setCurrentStep((s) => s + 1)}
-                className="btn-brand flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-sm font-semibold shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] dark:shadow-blue-900/30"
+                className={PILL_PRIMARY}
               >
                 {currentStep === 4 ? 'View My Plan' : 'Continue'}
                 <ChevronRight className="h-4 w-4" />

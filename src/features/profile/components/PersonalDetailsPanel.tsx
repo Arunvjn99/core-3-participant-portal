@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Eye, EyeOff } from 'lucide-react'
+import { BadgeCheck, Eye, EyeOff } from 'lucide-react'
 import { Input } from '@/design-system/components/Input'
 import { Select } from '@/design-system/components/Select'
 import { getAppDateLocale } from '@/lib/dateLocale'
@@ -9,6 +9,9 @@ import { GENDERS, MARITAL_STATUSES, ageFrom, formatSsn, isEmail, isPastDate, isP
 import { useProfileStore } from '../profileStore'
 import { FormActions, ProfileCard, ReadField, ReadGrid } from './ProfileCard'
 import { useOptions } from './useOptions'
+import { AddressCheckDialog } from '@/features/verification/AddressCheckDialog'
+import { validateAddress, type AddressResult, type PostalAddress } from '@/features/verification/verificationService'
+import { addressKey, useVerificationStore } from '@/features/verification/verificationStore'
 
 type Errors = Partial<Record<keyof PersonalDetails | 'ssn', string>>
 
@@ -26,6 +29,10 @@ export function PersonalDetailsPanel() {
   const [draft, setDraft] = useState<PersonalDetails>(personal)
   const [draftSsn, setDraftSsn] = useState(formatSsn(ssn))
   const [errors, setErrors] = useState<Errors>({})
+  const verifiedFor = useVerificationStore((s) => s.addressVerifiedFor)
+  const setAddressVerified = useVerificationStore((s) => s.setAddressVerified)
+  /** An address check that needs the participant's answer before the form can be saved. */
+  const [addressCheck, setAddressCheck] = useState<Exclude<AddressResult, { status: 'verified' }> | null>(null)
 
   const genderOptions = useOptions('profile.d.gender_', GENDERS)
   const maritalOptions = useOptions('profile.d.marital_', MARITAL_STATUSES)
@@ -55,7 +62,19 @@ export function PersonalDetailsPanel() {
     return e
   }
 
-  const submit = (ev: FormEvent) => {
+  const draftAddress: PostalAddress = { address1: draft.address1, address2: draft.address2, city: draft.city, state: draft.state, zip: draft.zip, country: draft.country }
+
+  /** Saves the form with the given address, and records whether that address passed the check. */
+  const commit = (address: PostalAddress, verified: boolean) => {
+    const next = { ...draft, ...address, firstName: draft.firstName.trim(), lastName: draft.lastName.trim(), middleName: draft.middleName.trim() }
+    save(next, draftSsn.replace(/\D/g, ''))
+    setAddressVerified(verified ? addressKey(next) : null)
+    setAddressCheck(null)
+    setEditing(false)
+    setSaved(true)
+  }
+
+  const submit = async (ev: FormEvent) => {
     ev.preventDefault()
     const e = validate()
     setErrors(e)
@@ -63,9 +82,11 @@ export function PersonalDetailsPanel() {
       requestAnimationFrame(() => document.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus())
       return
     }
-    save({ ...draft, firstName: draft.firstName.trim(), lastName: draft.lastName.trim(), middleName: draft.middleName.trim() }, draftSsn.replace(/\D/g, ''))
-    setEditing(false)
-    setSaved(true)
+    // An address that already passed, and has not been touched, is not checked again
+    if (addressKey(draftAddress) === verifiedFor) return commit(draftAddress, true)
+    const result = await validateAddress(draftAddress)
+    if (result.status === 'verified') commit(result.address, true)
+    else setAddressCheck(result)
   }
 
   const fullName = [personal.firstName, personal.middleName, personal.lastName].filter(Boolean).join(' ')
@@ -106,6 +127,16 @@ export function PersonalDetailsPanel() {
             {[personal.address1, personal.address2].filter(Boolean).join(', ')}
             <br />
             {[personal.city, personal.state, personal.zip, personal.country].filter(Boolean).join(', ')}
+            <span
+              className={`mt-1.5 flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ${
+                addressKey(personal) === verifiedFor
+                  ? 'bg-emerald-50 text-emerald-700 ring-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/20'
+                  : 'bg-amber-50 text-amber-700 ring-amber-100 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-400/20'
+              }`}
+            >
+              {addressKey(personal) === verifiedFor && <BadgeCheck className="h-3 w-3" aria-hidden />}
+              {t(addressKey(personal) === verifiedFor ? 'verify.address.badge_verified' : 'verify.address.badge_unverified')}
+            </span>
           </ReadField>
         </ReadGrid>
       </ProfileCard>
@@ -116,7 +147,7 @@ export function PersonalDetailsPanel() {
 
   return (
     <ProfileCard title={t('profile.d.personal_title')} editing>
-      <form onSubmit={submit} noValidate>
+      <form onSubmit={(e) => void submit(e)} noValidate>
         <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">{t('profile.d.about_you')}</h3>
         <div className="grid gap-4 sm:grid-cols-3">
           <Input id="pd-first" label={`${t('profile.d.first_name')} *`} value={draft.firstName} onChange={(e) => set('firstName', e.target.value)} autoComplete="given-name" {...inv('firstName')} />
@@ -159,6 +190,7 @@ export function PersonalDetailsPanel() {
         </div>
         <FormActions onCancel={() => setEditing(false)} saveLabel={t('profile.d.save')} cancelLabel={t('profile.d.cancel')} />
       </form>
+      <AddressCheckDialog result={addressCheck} entered={draftAddress} onUse={commit} onEdit={() => setAddressCheck(null)} />
     </ProfileCard>
   )
 }

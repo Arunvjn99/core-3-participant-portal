@@ -40,9 +40,10 @@ export function ContributionEditor({ value, onChange, ctx }: { value: Election; 
   const money = (v: number) => `$${Math.round(v).toLocaleString(ctx.locale)}`
   const cap = PLAN_CONFIG.match.capPercent
   const [min, max] = PLAN_LIMITS.rate
-  const total = round2(value.preTax + value.roth)
+  const total = round2(value.preTax + value.roth + value.afterTax)
   const perCheck = (ctx.salary * total) / 100 / ctx.periods
-  const match = employerMatch(ctx.salary, total)
+  // After-tax savings aren't matched
+  const match = employerMatch(ctx.salary, round2(value.preTax + value.roth))
   const fullMatch = employerMatch(ctx.salary, cap)
   const dollarsFor = (pct: number) => round2((ctx.salary * pct) / 100 / ctx.periods)
   const set = (preTax: number, roth: number) => onChange({ ...value, preTax: round2(preTax), roth: round2(roth) })
@@ -55,9 +56,9 @@ export function ContributionEditor({ value, onChange, ctx }: { value: Election; 
   const active = presets.find((p) => p.pre === value.preTax && p.ro === value.roth)?.key ?? null
   const outOfRange = total < min || total > max
 
-  const source = (key: 'preTax' | 'roth') => {
+  const source = (key: 'preTax' | 'roth' | 'afterTax') => {
     const pct = value[key]
-    const setPct = (v: number) => (key === 'preTax' ? set(v, value.roth) : set(value.preTax, v))
+    const setPct = (v: number) => (key === 'afterTax' ? onChange({ ...value, afterTax: round2(v) }) : key === 'preTax' ? set(v, value.roth) : set(value.preTax, v))
     return (
       <div className="flex items-center justify-between gap-3 py-3">
         <p className={cn(label, 'flex items-center gap-1')}>
@@ -108,6 +109,7 @@ export function ContributionEditor({ value, onChange, ctx }: { value: Election; 
         <div className="mt-1 divide-y divide-slate-100 dark:divide-gray-800">
           {source('preTax')}
           {source('roth')}
+          {source('afterTax')}
         </div>
         {outOfRange && <p role="alert" className="mt-1 text-[12px] font-medium text-red-600">{t('enrollment.feed.err_rate', { min, max, total })}</p>}
       </Field>

@@ -133,7 +133,7 @@ function QuickActionCard({
     <button
       type="button"
       onClick={item.onClick}
-      className="group relative flex min-w-[170px] flex-1 flex-col overflow-hidden rounded-[14px] border border-slate-100 bg-white pb-3 pl-5 pr-4 pt-4 text-left transition-all hover:border-primary/30 hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
+      className="group relative flex min-w-[170px] flex-1 flex-col overflow-hidden rounded-[14px] border border-slate-100 bg-white pb-3 pl-5 pr-4 pt-4 text-left transition-all hover:border-[color:color-mix(in_srgb,var(--color-primary)_30%,transparent)] hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-br from-blue-50 to-blue-100 text-primary dark:from-blue-950/40 dark:to-blue-900/40">
@@ -183,14 +183,14 @@ function PlanSummaryCard({
       <Card
         padding="md"
         className={cn(
-          'rounded-xl border border-primary/35 shadow-none',
+          'rounded-xl border border-[color:color-mix(in_srgb,var(--color-primary)_35%,transparent)] shadow-none',
           'bg-[linear-gradient(135deg,color-mix(in_srgb,var(--color-primary)_14%,var(--surface-page))_0%,color-mix(in_srgb,var(--color-primary)_10%,var(--surface-elevated))_100%)]'
         )}
       >
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-0">
           <div className="flex items-center gap-4">
             <div
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/35 bg-surface-card"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[color:color-mix(in_srgb,var(--color-primary)_35%,transparent)] bg-surface-card"
               aria-hidden
             >
               <ShieldIcon className="h-5 w-5 text-primary" />
@@ -211,12 +211,12 @@ function PlanSummaryCard({
             </div>
           </div>
 
-          <div className="hidden h-14 w-px shrink-0 bg-primary/35 sm:mx-10 lg:mx-14 sm:block" aria-hidden />
-          <div className="h-px w-full shrink-0 bg-primary/35 sm:hidden" aria-hidden />
+          <div className="hidden h-14 w-px shrink-0 bg-[color:color-mix(in_srgb,var(--color-primary)_35%,transparent)] sm:mx-10 lg:mx-14 sm:block" aria-hidden />
+          <div className="h-px w-full shrink-0 bg-[color:color-mix(in_srgb,var(--color-primary)_35%,transparent)] sm:hidden" aria-hidden />
 
           <div className="flex flex-1 items-center gap-4">
             <div
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/35 bg-surface-card"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[color:color-mix(in_srgb,var(--color-primary)_35%,transparent)] bg-surface-card"
               aria-hidden
             >
               <ChartBarIcon className="h-5 w-5 text-primary" />
@@ -234,7 +234,7 @@ function PlanSummaryCard({
                 </span>
               </div>
               <div
-                className="mt-2 h-[5px] w-full max-w-md overflow-hidden rounded bg-primary/15 dark:bg-primary/25"
+                className="mt-2 h-[5px] w-full max-w-md overflow-hidden rounded bg-[color:color-mix(in_srgb,var(--color-primary)_15%,transparent)] dark:bg-[color:color-mix(in_srgb,var(--color-primary)_25%,transparent)]"
                 role="presentation"
               >
                 <div className="h-full rounded bg-primary" style={{ width: pctWidth }} />
@@ -369,7 +369,7 @@ export default function TransactionCenter() {
               subtitle={t('tracking.subtitle')}
               badge={
                 activeRequests > 0
-                  ? { text: t('tracking.active_badge', { count: activeRequests }), color: 'bg-primary/10 text-primary' }
+                  ? { text: t('tracking.active_badge', { count: activeRequests }), color: 'bg-[color:color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-primary' }
                   : undefined
               }
             />
@@ -436,7 +436,7 @@ export default function TransactionCenter() {
                   title={t('transactions.draft_transactions')}
                   badge={{
                     text: t('transactions.drafts_badge', { count: DRAFT_COUNT }),
-                    color: 'bg-primary/10 text-primary',
+                    color: 'bg-[color:color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-primary',
                   }}
                   subtitle={t('transactions.resume_subtitle')}
                 />

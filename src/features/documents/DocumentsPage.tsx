@@ -183,7 +183,7 @@ export default function DocumentsPage() {
             </div>
             <div className="flex items-center gap-3">
               <p role="status" className="text-sm font-medium text-text-secondary">{t('documents.filters.records', { count: visible.length })}</p>
-              <button type="button" onClick={() => setGenerating(true)} className="rounded-md border border-primary px-3.5 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/5">{t('documents.generate.open')}</button>
+              <button type="button" onClick={() => setGenerating(true)} className="rounded-md border border-primary px-3.5 py-2 text-sm font-semibold text-primary transition-colors hover:bg-[color:color-mix(in_srgb,var(--color-primary)_5%,transparent)]">{t('documents.generate.open')}</button>
             </div>
           </div>
 

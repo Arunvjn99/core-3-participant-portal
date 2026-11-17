@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-export type LegalPageKind = 'privacy' | 'terms' | 'help'
+export type LegalPageKind = 'privacy' | 'terms'
 
 function LegalStaticPage({ kind }: { kind: LegalPageKind }) {
   const { t } = useTranslation()
@@ -30,13 +30,6 @@ function LegalStaticPage({ kind }: { kind: LegalPageKind }) {
           <p>{t(`legal.${kind}_p2`)}</p>
           {kind === 'privacy' && <p>{t('legal.privacy_p3')}</p>}
           {kind === 'terms' && <p>{t('legal.terms_p3')}</p>}
-          {kind === 'help' && (
-            <p>
-              <a href="mailto:support@congruentsolutions.com" className="font-medium text-primary hover:underline">
-                support@congruentsolutions.com
-              </a>
-            </p>
-          )}
         </div>
       </main>
     </div>
@@ -49,8 +42,4 @@ export function PrivacyPolicyPage() {
 
 export function TermsOfServicePage() {
   return <LegalStaticPage kind="terms" />
-}
-
-export function HelpCenterPage() {
-  return <LegalStaticPage kind="help" />
 }

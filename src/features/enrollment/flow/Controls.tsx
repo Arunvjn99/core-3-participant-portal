@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { RangeSlider } from '@/design-system/components/RangeSlider'
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { getAppDateLocale } from '@/lib/dateLocale'
@@ -124,17 +125,7 @@ export function RangeField({
       <p className="text-center tabular-nums text-slate-900 dark:text-white" style={{ fontSize: '2rem', fontWeight: 700, lineHeight: 1.1 }} aria-hidden>
         {format(value)}
       </p>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        aria-label={label}
-        aria-valuetext={format(value)}
-        className="mt-3 h-2 w-full cursor-pointer accent-blue-600"
-      />
+      <RangeSlider min={min} max={max} step={step} value={value} onChange={onChange} aria-label={label} aria-valuetext={format(value)} className="mt-3" />
       <div className="mt-1 flex justify-between text-slate-400" style={{ fontSize: '0.75rem' }} aria-hidden>
         <span>{format(min)}</span>
         <span>{t('enrollment.flow.drag_hint')}</span>

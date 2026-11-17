@@ -310,7 +310,7 @@ export function Stepper({ value, onChange, min, max, step = 1, label, prefix, su
 }
 
 /** A short explanation on hover, focus or tap. */
-export function InfoTip({ label, text, side = 'top' }: { label: string; text: string; side?: 'top' | 'bottom' }) {
+export function InfoTip({ label, text, side = 'top', wide = false }: { label: string; text: React.ReactNode; side?: 'top' | 'bottom'; /** Room for a small table */ wide?: boolean }) {
   const [open, setOpen] = useState(false)
   return (
     <span className="group relative inline-flex align-middle" onMouseLeave={() => setOpen(false)}>
@@ -327,7 +327,9 @@ export function InfoTip({ label, text, side = 'top' }: { label: string; text: st
       <span
         role="tooltip"
         className={cn(
-          'pointer-events-none absolute left-1/2 z-30 w-64 -translate-x-1/2 rounded-lg bg-slate-900 px-3 py-2 text-left text-[12px] font-normal leading-[1.5] text-white shadow-xl group-hover:block group-focus-within:block dark:bg-gray-800',
+          'pointer-events-none absolute z-30 rounded-lg bg-slate-900 px-3 py-2 text-left text-[12px] font-normal leading-[1.5] text-white shadow-xl group-hover:block group-focus-within:block dark:bg-gray-800',
+          // A wide tooltip opens rightward from about the start of its label, so a card's edge doesn't cut it off; a narrow one centres on the icon
+          wide ? '-left-28 w-[300px]' : 'left-1/2 w-64 -translate-x-1/2',
           side === 'top' ? 'bottom-full mb-2' : 'top-full mt-2',
           open ? 'block' : 'hidden',
         )}
@@ -417,13 +419,14 @@ export function Sheet({ open, onClose, title, subtitle, children, footer, wide =
 }
 
 /** A soft area chart that draws itself in. */
-export function Sparkline({ points, height = 64, delay = 0, endDot = true }: { points: number[]; height?: number; delay?: number; endDot?: boolean }) {
+export function Sparkline({ points, height = 64, delay = 0, endDot = true, yMax }: { points: number[]; height?: number; delay?: number; endDot?: boolean; /** Top of the scale; when set, $0 is the bottom edge and `yMax` the top edge */ yMax?: number }) {
   const reduce = useReducedMotion()
   const gid = useId().replace(/:/g, '')
   if (points.length < 2) return null
   const w = 600
   const max = Math.max(...points) || 1
-  const xy = points.map((v, i) => [(i / (points.length - 1)) * w, height - 4 - (v / max) * (height - 10)] as const)
+  const yOf = (v: number) => (yMax ? height * (1 - v / yMax) : height - 4 - (v / max) * (height - 10))
+  const xy = points.map((v, i) => [(i / (points.length - 1)) * w, yOf(v)] as const)
   const line = xy.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ')
   const area = `${line} L${w} ${height} L0 ${height} Z`
   const [ex, ey] = xy[xy.length - 1]
@@ -446,10 +449,12 @@ export function Sparkline({ points, height = 64, delay = 0, endDot = true }: { p
  * Projection chart you can explore: hover, drag or use the arrow keys to read the balance at any age.
  * Points are one per year, starting at `startAge`.
  */
-export function ProjectionChart({ points, startAge, height = 72, delay = 0, format, label, pointLabel }: {
+export function ProjectionChart({ points, startAge, height = 72, delay = 0, format, label, pointLabel, yMax }: {
   points: number[]
   startAge: number
   height?: number
+  /** Top of the scale, so the chart lines up with axis ticks drawn around it */
+  yMax?: number
   delay?: number
   format: (v: number) => string
   label: string
@@ -462,7 +467,8 @@ export function ProjectionChart({ points, startAge, height = 72, delay = 0, form
   const last = points.length - 1
   const max = Math.max(...points) || 1
   const xPct = (i: number) => (i / last) * 100
-  const yPx = (v: number) => height - 4 - (v / max) * (height - 10)
+  // Vertical position as a percentage of the chart's height, so it lines up however tall the chart is drawn
+  const yPct = (v: number) => (yMax ? (1 - v / yMax) * 100 : ((height - 4 - (v / max) * (height - 10)) / height) * 100)
   const pick = (clientX: number) => {
     const box = boxRef.current?.getBoundingClientRect()
     if (!box || box.width === 0) return
@@ -494,11 +500,11 @@ export function ProjectionChart({ points, startAge, height = 72, delay = 0, form
       onBlur={() => setActive(null)}
       className="relative h-full w-full cursor-crosshair touch-none rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
     >
-      <Sparkline points={points} height={height} delay={delay} endDot={false} />
+      <Sparkline points={points} height={height} delay={delay} endDot={false} yMax={yMax} />
       {/* Round markers drawn in HTML: the stretched SVG would squash them */}
       <motion.span
         className="pointer-events-none absolute h-2.5 w-2.5 rounded-full border-2 border-white bg-blue-600 dark:border-gray-900"
-        style={{ left: '100%', top: yPx(points[last]), x: '-50%', y: '-50%' }}
+        style={{ left: '100%', top: `${yPct(points[last])}%`, x: '-50%', y: '-50%' }}
         initial={reduce ? false : { scale: 0 }}
         animate={{ scale: i === null ? 1 : 0 }}
         transition={{ delay: i === null ? delay + 1.1 : 0, type: 'spring', stiffness: 400, damping: 18 }}
@@ -509,12 +515,12 @@ export function ProjectionChart({ points, startAge, height = 72, delay = 0, form
           <span className="pointer-events-none absolute inset-y-0 w-px bg-blue-600/40" style={{ left: `${xPct(i)}%` }} aria-hidden />
           <span
             className="pointer-events-none absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-blue-600 shadow dark:border-gray-900"
-            style={{ left: `${xPct(i)}%`, top: yPx(points[i]) }}
+            style={{ left: `${xPct(i)}%`, top: `${yPct(points[i])}%` }}
             aria-hidden
           />
           <span
             className="pointer-events-none absolute whitespace-nowrap rounded-lg bg-slate-900 px-2.5 py-1 text-[12px] font-semibold text-white shadow-lg dark:bg-white dark:text-slate-900"
-            style={{ left: `${xPct(i)}%`, top: yPx(points[i]) < height / 2 ? yPx(points[i]) + 10 : yPx(points[i]) - 34, transform: `translateX(${i / last > 0.75 ? '-100%' : i / last < 0.25 ? '0' : '-50%'})` }}
+            style={{ left: `${xPct(i)}%`, top: yPct(points[i]) < 50 ? `calc(${yPct(points[i])}% + 10px)` : `calc(${yPct(points[i])}% - 34px)`, transform: `translateX(${i / last > 0.75 ? '-100%' : i / last < 0.25 ? '0' : '-50%'})` }}
             aria-hidden
           >
             {text}

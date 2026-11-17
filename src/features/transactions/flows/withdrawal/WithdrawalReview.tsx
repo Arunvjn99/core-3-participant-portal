@@ -41,7 +41,7 @@ function WithdrawalReview() {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="flex flex-col items-center justify-center py-16"
       >
-        <div className="flex h-16 w-16 items-center justify-center rounded-full border border-status-success/30 bg-status-success-bg mb-5">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[color:color-mix(in_srgb,var(--status-success)_30%,transparent)] bg-status-success-bg mb-5">
           <CheckCircle2 className="h-8 w-8 text-status-success" />
         </div>
         <h2 className="text-[26px] font-extrabold text-text-primary tracking-tight mb-2">
@@ -130,7 +130,7 @@ function WithdrawalReview() {
         </div>
 
         {/* Gross amount */}
-        <div className="rounded-[10px] border border-primary/20 bg-primary/5 px-4 py-3 mb-3">
+        <div className="rounded-[10px] border border-[color:color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color:color-mix(in_srgb,var(--color-primary)_5%,transparent)] px-4 py-3 mb-3">
           <div className="flex items-center justify-between">
             <p className="text-[13px] font-semibold text-text-secondary">Withdrawal Amount</p>
             <p className="text-[18px] font-extrabold text-primary">${amount.toLocaleString()}</p>
@@ -148,7 +148,7 @@ function WithdrawalReview() {
         </div>
 
         {/* Final payout */}
-        <div className="rounded-[10px] border border-status-success/20 bg-status-success-bg px-4 py-3 mt-3">
+        <div className="rounded-[10px] border border-[color:color-mix(in_srgb,var(--status-success)_20%,transparent)] bg-status-success-bg px-4 py-3 mt-3">
           <div className="flex items-center justify-between">
             <p className="text-[14px] font-bold text-text-primary">Final Payout</p>
             <p className="text-[24px] font-extrabold text-status-success">${finalPayout.toLocaleString()}</p>
@@ -161,7 +161,7 @@ function WithdrawalReview() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.15 }}
-        className="rounded-[16px] border border-status-warning/30 bg-status-warning-bg p-4 flex gap-3"
+        className="rounded-[16px] border border-[color:color-mix(in_srgb,var(--status-warning)_30%,transparent)] bg-status-warning-bg p-4 flex gap-3"
       >
         <AlertTriangle className="h-5 w-5 shrink-0 text-status-warning mt-0.5" />
         <p className="text-[12px] text-text-secondary leading-relaxed">

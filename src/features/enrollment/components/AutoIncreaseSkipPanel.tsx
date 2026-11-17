@@ -1,12 +1,13 @@
 import { useTranslation } from 'react-i18next'
-import { X, Info } from 'lucide-react'
+import { X, AlertTriangle } from 'lucide-react'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
 import { getAppDateLocale } from '@/lib/dateLocale'
+import { cn } from '@/lib/cn'
+import { BODY_TEXT, HEADING, IconChip, PILL_PRIMARY, PILL_SECONDARY } from '@/features/enrollment/enrollmentUi'
 
 export interface AutoIncreaseSkipPanelProps {
-  /** Dollars auto-increase would add over 10 years — the "with" projection
-   *  minus the "without" projection. Shown as a neutral For-context line,
-   *  not a loss-framed tile. Omitted or <= 0: the context line is hidden. */
+  /** Dollars auto-increase would add over 10 years: the "with" projection minus the "without" projection.
+   *  Shown in the warning tile. Omitted or <= 0: the tile is hidden. */
   missedSavingsAmount?: number
   /** User chose to turn auto-increase on after all. */
   onReconsider: () => void
@@ -18,12 +19,8 @@ export interface AutoIncreaseSkipPanelProps {
 }
 
 /**
- * Neutral confirmation for skipping auto-increase. The earlier version
- * framed the choice as a mistake ("Potential Missed Savings — you will be
- * losing $61,322") and put "Reconsider Auto Increase" as the primary
- * button. This panel keeps the dollar figure but as a For-context line in
- * a neutral tile, and treats skipping as a plain choice: one line of what
- * will happen, two equal-weight buttons, no loss framing.
+ * Confirmation for skipping auto-increase: one line of what will happen, a warning tile with the savings the
+ * participant could miss, and two buttons. Turning it on is the primary action; keeping it off is secondary.
  */
 export function AutoIncreaseSkipPanel({
   missedSavingsAmount,
@@ -48,7 +45,7 @@ export function AutoIncreaseSkipPanel({
         <button
           type="button"
           onClick={onDismiss}
-          className="absolute right-0 top-0 z-10 shrink-0 rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+          className="absolute right-0 top-0 z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-[#0B1533] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300/70 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
           aria-label={t('enrollment.auto_increase_skip.close')}
         >
           <X className="h-5 w-5" aria-hidden />
@@ -58,34 +55,31 @@ export function AutoIncreaseSkipPanel({
       <div
         className={`flex flex-col items-center text-center ${showDismissButton ? 'px-10 sm:px-11' : ''}`}
       >
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800">
-          <X className="h-6 w-6 text-gray-500 dark:text-gray-400" strokeWidth={2.25} aria-hidden />
-        </div>
+        <IconChip Icon={X} tone="slate" />
         <h2
           id="auto-increase-skip-title"
-          className="mt-4 text-lg font-bold leading-snug tracking-tight text-gray-900 dark:text-white sm:text-xl"
+          className={cn('mt-3 text-xl font-bold leading-snug', HEADING)}
         >
           {t('enrollment.auto_increase_skip.title')}
         </h2>
-        <p className="mt-3 max-w-md text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+        <p className={cn('mt-2 max-w-md text-sm leading-relaxed', BODY_TEXT)}>
           {t('enrollment.auto_increase_skip.body', { plan: planLabel, rate })}
         </p>
       </div>
 
-      {/* For-context tile: a neutral note, not a loss alert. Only shows
-          when we actually have a number to quote. */}
+      {/* Warning tile: what skipping could cost. Only shows when we actually have a number to quote. */}
       {showContext && (
         <div
-          className="mt-5 rounded-xl border border-gray-200 bg-gray-50 p-3.5 text-left dark:border-gray-700 dark:bg-gray-800/60"
+          className="mt-5 rounded-2xl bg-amber-50 p-3.5 text-left ring-1 ring-amber-200 dark:bg-amber-500/10 dark:ring-amber-400/25"
           role="note"
         >
           <div className="flex gap-2.5">
-            <Info className="mt-0.5 h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" aria-hidden />
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              <p className="text-xs font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-300">
                 {t('enrollment.auto_increase_skip.info_label')}
               </p>
-              <p className="mt-1 text-sm leading-relaxed text-gray-700 dark:text-gray-200">
+              <p className="mt-1 text-sm leading-relaxed text-amber-900 dark:text-amber-100">
                 {t('enrollment.auto_increase_skip.info_body', {
                   amount: `$${missedSavingsAmount.toLocaleString(locale)}`,
                 })}
@@ -95,22 +89,21 @@ export function AutoIncreaseSkipPanel({
         </div>
       )}
 
-      {/* Two equal-weight choices. "Keep it off" is primary because it's
-          the choice the viewer has already made; "Turn it on" is plain. */}
+      {/* "Turn it on" is the primary action; "Keep it off" is the secondary one. On phones the primary sits on top. */}
       <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-center">
         <button
           type="button"
-          onClick={onReconsider}
-          className="min-h-[48px] rounded-xl border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50 active:scale-[0.99] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800"
+          onClick={onContinueWithout}
+          className={cn(PILL_SECONDARY, 'px-6')}
         >
-          {t('enrollment.auto_increase_skip.turn_on')}
+          {t('enrollment.auto_increase_skip.keep_off')}
         </button>
         <button
           type="button"
-          onClick={onContinueWithout}
-          className="btn-brand min-h-[48px] rounded-xl px-6 py-3 text-sm font-semibold active:scale-[0.99]"
+          onClick={onReconsider}
+          className={cn(PILL_PRIMARY, 'px-6')}
         >
-          {t('enrollment.auto_increase_skip.keep_off')}
+          {t('enrollment.auto_increase_skip.turn_on')}
         </button>
       </div>
     </div>

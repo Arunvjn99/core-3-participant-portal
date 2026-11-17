@@ -18,6 +18,7 @@ import {
   ChevronDown,
   Check,
   FileText,
+  CircleHelp,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { LANGUAGE_MENU_LANGS, type LanguageMenuLang } from '@/core/i18n'
@@ -30,7 +31,8 @@ import AppFooter from '@/features/dashboard/components/AppFooter'
 import { supabase } from '@/core/supabase'
 import { useNotifications } from '@/features/notifications/useNotifications'
 import { NotificationPanel } from '@/features/notifications/NotificationPanel'
-import { ROUTES } from '@/lib/constants'
+import { LEGAL, ROUTES } from '@/lib/constants'
+import { LegalHrefLink } from '@/features/legal/components/LegalHrefLink'
 import CoreLogo from '@/components/ui/CoreLogo'
 
 function getNavItems(isEnrolled: boolean) {
@@ -244,18 +246,31 @@ export function AppShell() {
               <button
                 type="button"
                 onClick={toggleSearch}
-                className="hidden h-9 w-9 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-elevated sm:flex"
+                className="hidden group h-9 w-9 items-center justify-center rounded-lg text-text-muted transition-[color,background-color,transform] duration-200 hover:bg-surface-elevated hover:text-primary active:scale-90 motion-reduce:active:scale-100 dark:hover:text-blue-300 sm:flex"
                 aria-label={t('nav.open_search')}
               >
-                <Search className="h-4 w-4" />
+                <Search className="h-4 w-4 transition-transform duration-300 ease-out motion-reduce:transform-none motion-reduce:transition-none group-hover:-rotate-12 group-hover:scale-110" />
               </button>
+              {/* Help Center: from tablet width up; on phones it is in the menu, as the bar has no room */}
+              <LegalHrefLink
+                href={LEGAL.helpCenterHref}
+                aria-label={t('footer.help')}
+                title={t('footer.help')}
+                className="hidden group h-9 w-9 items-center justify-center rounded-lg text-text-muted transition-[color,background-color,transform] duration-200 hover:bg-surface-elevated hover:text-primary active:scale-90 motion-reduce:active:scale-100 dark:hover:text-blue-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:flex"
+              >
+                <CircleHelp className="h-4 w-4 group-hover:animate-[header-icon-wobble_0.6s_ease-in-out] motion-reduce:!animate-none" aria-hidden />
+              </LegalHrefLink>
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="hidden h-9 w-9 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-elevated sm:flex"
+                className="hidden group h-9 w-9 items-center justify-center rounded-lg text-text-muted transition-[color,background-color,transform] duration-200 hover:bg-surface-elevated hover:text-primary active:scale-90 motion-reduce:active:scale-100 dark:hover:text-blue-300 sm:flex"
                 aria-label={t('nav.toggle_theme')}
               >
-                {resolvedMode === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {resolvedMode === 'dark' ? (
+                  <Sun className="h-4 w-4 animate-[header-theme-swap_0.45s_ease-out] transition-transform duration-300 ease-out motion-reduce:transform-none motion-reduce:transition-none duration-500 group-hover:rotate-90 motion-reduce:animate-none" />
+                ) : (
+                  <Moon className="h-4 w-4 animate-[header-theme-swap_0.45s_ease-out] transition-transform duration-300 ease-out motion-reduce:transform-none motion-reduce:transition-none group-hover:-rotate-[25deg] group-hover:scale-110 motion-reduce:animate-none" />
+                )}
               </button>
               <div className="relative">
                 <button
@@ -265,12 +280,12 @@ export function AppShell() {
                     setLangMenuOpen(false)
                     setUserMenuOpen(false)
                   }}
-                  className="relative flex h-9 w-9 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-elevated"
+                  className="relative flex group h-9 w-9 items-center justify-center rounded-lg text-text-muted transition-[color,background-color,transform] duration-200 hover:bg-surface-elevated hover:text-primary active:scale-90 motion-reduce:active:scale-100 dark:hover:text-blue-300"
                   aria-label={t('nav.notifications')}
                   aria-expanded={notificationsOpen}
                   aria-haspopup="dialog"
                 >
-                  <Bell className="h-4 w-4" />
+                  <Bell className="h-4 w-4 origin-top group-hover:animate-[header-bell-ring_0.7s_ease-in-out] motion-reduce:!animate-none" />
                   {hasUnreadNotifications && (
                     <span
                       className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full border-2 border-surface-card"
@@ -288,12 +303,12 @@ export function AppShell() {
                     setUserMenuOpen(false)
                     setNotificationsOpen(false)
                   }}
-                  className="flex h-9 max-w-[11rem] min-w-0 items-center gap-1.5 rounded-lg px-2 text-text-muted transition-colors hover:bg-surface-elevated sm:gap-2 sm:px-2.5"
+                  className="group flex h-9 max-w-[11rem] min-w-0 items-center gap-1.5 rounded-lg px-2 text-text-muted transition-[color,background-color,transform] duration-200 hover:bg-surface-elevated hover:text-primary active:scale-95 motion-reduce:active:scale-100 dark:hover:text-blue-300 sm:gap-2 sm:px-2.5"
                   aria-label={`${t('language')}: ${t(`lang.${menuLang}`)}`}
                   aria-expanded={langMenuOpen}
                   aria-haspopup="listbox"
                 >
-                  <Globe className="h-4 w-4 shrink-0" aria-hidden />
+                  <Globe className="h-4 w-4 shrink-0 transition-transform duration-700 ease-in-out group-hover:rotate-180 motion-reduce:transform-none motion-reduce:transition-none" aria-hidden />
                   {/* Phones show the globe only, so the header fits; the name is still in the button's label */}
                   <span className="hidden min-w-0 truncate text-xs font-medium text-text-primary sm:block sm:text-sm">
                     {t(`lang.${menuLang}`)}
@@ -347,19 +362,19 @@ export function AppShell() {
                     setLangMenuOpen(false)
                     setNotificationsOpen(false)
                   }}
-                  className="flex items-center gap-1 rounded-lg border-2 border-transparent bg-surface-card py-1 pl-1 pr-1.5 transition-[border-color,background-color] duration-150 hover:bg-surface-elevated active:border-[color:var(--brand-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--brand-primary)]/35 focus-visible:ring-offset-2"
+                  className="group flex items-center gap-1 rounded-lg border-2 border-transparent bg-surface-card py-1 pl-1 pr-1.5 transition-[border-color,background-color] duration-150 hover:bg-surface-elevated active:border-[color:var(--brand-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--brand-primary)]/35 focus-visible:ring-offset-2"
                   aria-expanded={userMenuOpen}
                   aria-haspopup="menu"
                   aria-label={t('nav.user_menu')}
                 >
                   <span
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white transition-[transform,box-shadow] duration-200 group-hover:scale-105 group-hover:shadow-[0_4px_12px_-4px_rgba(37,99,235,0.6)] motion-reduce:transform-none"
                     style={{ backgroundColor: 'var(--brand-primary)' }}
                   >
                     {avatarLetter}
                   </span>
                   <ChevronDown
-                    className={`h-4 w-4 shrink-0 text-slate-600 transition-transform dark:text-slate-300 ${userMenuOpen ? 'rotate-180' : ''}`}
+                    className={`h-4 w-4 shrink-0 text-slate-600 transition-transform dark:text-slate-300 ${userMenuOpen ? 'rotate-180' : 'group-hover:translate-y-0.5'} motion-reduce:transition-none`}
                     aria-hidden
                   />
                 </button>
@@ -404,6 +419,16 @@ export function AppShell() {
                       >
                         {t('nav.service_requests')}
                       </Link>
+                      {showNav && (
+                        <Link
+                          role="menuitem"
+                          to="/outside-assets"
+                          className="block px-4 py-2.5 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-200/60 dark:text-white dark:hover:bg-white/10"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          {t('outside_assets.nav_label')}
+                        </Link>
+                      )}
                       <Link
                         role="menuitem"
                         to="/profile?section=security"
@@ -431,7 +456,7 @@ export function AppShell() {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen((o) => !o)}
-                className="ml-1 flex h-9 w-9 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-elevated md:hidden"
+                className="ml-1 flex group h-9 w-9 items-center justify-center rounded-lg text-text-muted transition-[color,background-color,transform] duration-200 hover:bg-surface-elevated hover:text-primary active:scale-90 motion-reduce:active:scale-100 dark:hover:text-blue-300 md:hidden"
                 aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={mobileMenuOpen}
               >
@@ -462,6 +487,15 @@ export function AppShell() {
                 )
               })}
               <div className={showNav ? 'mt-2 border-t border-border-default pt-2' : 'pt-2'}>
+                {/* The bar's Help icon is hidden on phones, so Help Center is here instead */}
+                <LegalHrefLink
+                  href={LEGAL.helpCenterHref}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-text-primary transition-all hover:bg-surface-elevated sm:hidden"
+                >
+                  <CircleHelp className="h-5 w-5 shrink-0" aria-hidden />
+                  <span className="text-sm font-medium">{t('footer.help')}</span>
+                </LegalHrefLink>
                 <button
                   type="button"
                   onClick={() => {
@@ -488,7 +522,8 @@ export function AppShell() {
         notifications={notifications}
       />
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-auto bg-surface-page">
+      {/* At least a screen tall under the header, so the footer sits at the end of the page instead of staying in view */}
+      <div className="flex min-h-[calc(100dvh-3.5rem-1px)] flex-1 flex-col overflow-auto bg-surface-page">
           <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col px-4 pb-6 pt-4 sm:px-6 lg:px-8">
             <AnimatePresence>
               <main id="main-content" className="flex min-h-0 min-w-0 flex-1 flex-col">

@@ -1,4 +1,348 @@
 {
+  "next_actions": {
+    "add_beneficiary": "Add a beneficiary",
+    "add_beneficiary_sub": "Choose who receives your savings.",
+    "sign_beneficiary": "Sign your beneficiary choices",
+    "sign_beneficiary_sub": "They take effect once you sign.",
+    "spouse_consent": "Get your spouse's consent",
+    "spouse_consent_sub": "Needed for your beneficiary choices.",
+    "full_match": "Claim your full employer match",
+    "full_match_sub": "You are missing {{amount}} a year.",
+    "verify_bank": "Verify your bank account",
+    "verify_bank_sub": "So payments can be sent to it.",
+    "verify_address": "Confirm your address",
+    "verify_address_sub": "So mail and tax forms reach you.",
+    "auto_increase": "Turn on auto-increase",
+    "auto_increase_sub": "Raise your savings a little each year.",
+    "link_accounts": "Link your other accounts",
+    "link_accounts_sub": "See all your retirement savings together.",
+    "review_risk": "Review your investments",
+    "review_risk_sub": "Check your mix still fits your goals."
+  },
+  "faq": {
+    "nav_label": "Help and FAQs",
+    "title": "Help and FAQs",
+    "subtitle": "Answers about your plan, by topic.",
+    "search_label": "Search questions",
+    "search_placeholder": "Search questions, for example loan or match",
+    "topics_label": "Topics",
+    "all_topics": "All topics",
+    "results_one": "{{count}} question matches “{{query}}”",
+    "results_other": "{{count}} questions match “{{query}}”",
+    "no_results_title": "No questions match your search",
+    "no_results_body": "Try a different word, or ask the Core AI assistant.",
+    "clear_search": "Clear search",
+    "help_title": "Still need help?",
+    "help_body": "Open a service request and the plan's team will reply, or write to",
+    "help_request": "Open a service request",
+    "help_ai": "Ask Core AI",
+    "category": {
+      "contributions": "Contributions",
+      "match_vesting": "Employer match and vesting",
+      "investments": "Investments",
+      "loans_withdrawals": "Loans and withdrawals",
+      "rollovers": "Rollovers",
+      "account_security": "Account and security"
+    },
+    "items": {
+      "change_rate": {
+        "q": "How do I change my contribution rate?",
+        "a": "Go to **Enrollment** and open the Contribution step, choose a new percentage and submit. The change usually applies from the next available pay period."
+      },
+      "auto_increase": {
+        "q": "What is auto-increase?",
+        "a": "Auto-increase raises your contribution rate by a small amount each year, up to a cap you choose. You can change the amount or the cap, or turn it off, at any time under **Enrollment**."
+      },
+      "how_match_works": {
+        "q": "How does the employer match work?",
+        "a": "Your employer adds money to your account based on what you contribute, up to a set percentage of your pay. The contribution limits card on the dashboard shows your match and any amount you are missing."
+      },
+      "full_match": {
+        "q": "How do I get the full match?",
+        "a": "Contribute at least the percentage of pay your employer matches. If you are below it, the dashboard shows how much match goes unclaimed each year and links to raise your rate."
+      },
+      "leave_unvested": {
+        "q": "What happens to unvested money if I leave?",
+        "a": "Your own contributions are always yours. Employer contributions that have not vested by your last day are generally returned to the plan, following the plan's vesting schedule."
+      },
+      "change_investments": {
+        "q": "How do I change my investments?",
+        "a": "Open **Investments** to see your funds and allocation. You can change how future contributions are invested, or move existing balances with a transfer or rebalance from **Transactions**."
+      },
+      "target_date": {
+        "q": "What is a target-date fund?",
+        "a": "A target-date fund holds a mix of stocks and bonds that becomes more conservative as its target year approaches. You choose the fund closest to the year you expect to retire."
+      },
+      "rebalancing": {
+        "q": "What is rebalancing?",
+        "a": "Rebalancing moves money between your funds to bring them back to the mix you chose, after markets have shifted it. You can rebalance from **Transactions**."
+      },
+      "fees": {
+        "q": "What fees do I pay?",
+        "a": "Plans charge fund expenses and may charge administrative and transaction fees. The **Fee report** under Investments shows each one in dollars for your account."
+      },
+      "hardship": {
+        "q": "What is a hardship withdrawal?",
+        "a": "A hardship withdrawal lets you take money out for an immediate and heavy financial need, such as medical costs or avoiding eviction, if your plan allows it. It is taxed, may carry a **10% additional tax**, and cannot be repaid."
+      },
+      "track_request": {
+        "q": "How do I track a loan or withdrawal?",
+        "a": "After you submit, **Transactions** shows a timeline with each stage, such as approved and funds sent, and the expected date. You also get a notification when the stage changes."
+      },
+      "what_is_rollover": {
+        "q": "What is a rollover?",
+        "a": "A rollover moves retirement savings from one plan or IRA to another without paying tax on the move."
+      },
+      "roll_in": {
+        "q": "Can I roll an old 401(k) into this plan?",
+        "a": "Yes, if your plan accepts rollovers. Start a rollover from **Transactions**. You will need the details of the old account, and the old provider sends the money to this plan."
+      },
+      "direct_vs_indirect": {
+        "q": "Direct or indirect rollover?",
+        "a": "In a **direct** rollover the money goes straight from one provider to the other and no tax is withheld. In an **indirect** rollover you receive a check, 20% is usually withheld, and you have 60 days to deposit the full amount to avoid tax."
+      },
+      "leaving_job": {
+        "q": "What are my options when I leave my job?",
+        "a": "You can usually leave the money in the plan, roll it to a new employer's plan or an IRA, or take it as cash. Cash is taxed and may carry a 10% additional tax before age 59½."
+      },
+      "beneficiary": {
+        "q": "How do I add or change a beneficiary?",
+        "a": "Open **Profile**, then Beneficiaries. Add people, set their shares, then sign the designation. If you are married and name someone other than your spouse as primary, your spouse's notarized consent is needed."
+      },
+      "password": {
+        "q": "How do I change my password?",
+        "a": "Open **Profile**, then Password. If you cannot sign in, use Forgot password on the sign-in page."
+      },
+      "documents": {
+        "q": "Where are my statements and tax forms?",
+        "a": "**Documents** holds statements, tax forms, plan notices and confirmations. You can filter by type, download a PDF, or generate a statement for a period you choose."
+      },
+      "update_details": {
+        "q": "How do I update my address or bank details?",
+        "a": "Open **Profile**. Personal details holds your address, which is checked when you save. Bank details holds the account used for payments: you confirm your identity before changing it, then verify the new account."
+      },
+      "other_accounts": {
+        "q": "Can I see my other accounts here?",
+        "a": "Yes. **Linked accounts** lets you connect or enter accounts held elsewhere, and shows your total retirement savings and net worth."
+      }
+    }
+  },
+  "outside_assets": {
+    "nav_label": "Linked accounts",
+    "title": "Linked accounts",
+    "subtitle": "Your retirement savings and net worth in one place.",
+    "add": "Add account",
+    "cancel": "Cancel",
+    "save": "Save",
+    "keep": "Keep account",
+    "edit": "Edit balance",
+    "edit_aria": "Edit balance for {{name}}",
+    "edit_title": "Update balance",
+    "remove": "Remove",
+    "remove_aria": "Remove {{name}}",
+    "remove_title": "Remove this account?",
+    "remove_body_linked": "The connection to this institution ends and its balance leaves your totals. You can connect it again later.",
+    "remove_body_manual": "This account and its balance leave your totals. You can add it again later.",
+    "accounts_title": "Your accounts",
+    "this_plan": "This plan",
+    "total_retirement": "Total retirement savings",
+    "total_retirement_note": "{{plan}} in this plan + {{outside}} elsewhere",
+    "net_worth": "Net worth",
+    "net_worth_note": "{{assets}} owned − {{debts}} owed",
+    "mix_label": "What you own",
+    "updated": "Updated {{date}}",
+    "notice_added": "{{name}} added.",
+    "notice_removed": "{{name}} removed.",
+    "notice_updated": "{{name}} updated.",
+    "empty": {
+      "title": "Bring your other accounts into view",
+      "body": "This plan holds {{balance}}. Add accounts you hold elsewhere to see the full picture.",
+      "retirement_title": "All retirement savings",
+      "retirement_body": "Old 401(k)s and IRAs counted with this plan.",
+      "net_worth_title": "Net worth",
+      "net_worth_body": "What you own minus what you owe.",
+      "control_title": "You stay in control",
+      "control_body": "Remove an account at any time.",
+      "cta_note": "Connect an institution or enter a balance by hand."
+    },
+    "form": {
+      "mode_label": "How to add the account",
+      "mode_connect": "Connect an institution",
+      "mode_manual": "Enter manually",
+      "institution": "Institution",
+      "institution_choose": "Choose an institution",
+      "type": "Account type",
+      "connect": "Connect",
+      "connecting": "Connecting…",
+      "loading": "Loading institutions…",
+      "connect_note": "You sign in with your institution. We receive balances only, never your sign-in details.",
+      "nickname": "Account name",
+      "nickname_hint": "For example: Old employer 401(k)",
+      "balance": "Current balance",
+      "balance_owed": "Amount owed",
+      "err_balance": "Enter an amount, for example 12,500.",
+      "err_balance_max": "Enter an amount under $1,000,000,000.",
+      "err_connect": "We couldn't connect to that institution. Try again, or enter the account manually.",
+      "err_institution": "Choose an institution.",
+      "err_nickname": "Enter a name for this account."
+    },
+    "group": {
+      "retirement": "Retirement",
+      "assets": "Other assets",
+      "debts": "Debts"
+    },
+    "slice": {
+      "plan": "This plan",
+      "retirement": "Other retirement",
+      "cash": "Cash and investments",
+      "property": "Property"
+    },
+    "source": {
+      "linked": "Connected",
+      "manual": "Entered by you"
+    },
+    "type": {
+      "retirement_401k": "401(k)",
+      "ira": "Traditional IRA",
+      "roth_ira": "Roth IRA",
+      "brokerage": "Brokerage",
+      "savings": "Savings",
+      "checking": "Checking",
+      "property": "Property",
+      "mortgage": "Mortgage",
+      "loan": "Loan",
+      "credit_card": "Credit card"
+    },
+    "card_title": "All your accounts",
+    "card_retirement": "Retirement savings",
+    "card_invite": "Link accounts you hold elsewhere to see your total retirement savings and net worth.",
+    "card_link": "View linked accounts",
+    "card_link_empty": "Link an account"
+  },
+  "verify": {
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "close": "Close",
+    "done": "Done",
+    "identity": {
+      "title": "Confirm it's you",
+      "intro": "Before you change bank details or beneficiaries, confirm two details from your record. It takes about a minute.",
+      "last4": "Last 4 digits of your SSN",
+      "dob": "Date of birth",
+      "err_match": "These details don't match your record.",
+      "progress": "Question {{n}} of {{total}}",
+      "q_street": "Which of these streets have you lived on?",
+      "q_city": "In which of these cities have you had an address?",
+      "q_hire_year": "In what year did you start with your current employer?",
+      "finish": "Confirm",
+      "passed_title": "Identity confirmed",
+      "passed_body": "You won't be asked again for the next 15 minutes.",
+      "failed_title": "We couldn't confirm it's you",
+      "failed_body_one": "Check your answers and try again. You have {{count}} attempt left.",
+      "failed_body_other": "Check your answers and try again. You have {{count}} attempts left.",
+      "try_again": "Try again",
+      "locked_title": "Too many attempts",
+      "locked_body": "For your security, changes are paused. Open a service request or call the plan's support line to continue."
+    },
+    "address": {
+      "corrected_title": "Confirm your address",
+      "corrected_body": "We standardized your address to the postal format. Choose the one to save.",
+      "suggested": "Suggested",
+      "entered": "As you entered it",
+      "use": "Use this address",
+      "edit": "Edit address",
+      "keep": "Keep as entered",
+      "unverified_title": "We couldn't verify this address",
+      "issue_zip_state_mismatch": "The ZIP code doesn't belong to the state you entered. Check both and try again.",
+      "issue_missing_street_number": "The street line needs a house or building number, or a PO Box.",
+      "issue_unknown_state": "We don't recognize that state. Enter the full name or the two-letter code.",
+      "issue_outside_us": "Addresses outside the United States can't be checked automatically. You can keep it as entered.",
+      "badge_verified": "Verified address",
+      "badge_unverified": "Not verified"
+    },
+    "bank": {
+      "title": "Verify your bank account",
+      "intro": "We confirm the account is yours before any money is sent to it.",
+      "instant": "Verify instantly",
+      "instant_sub": "We check the account and the name on it right now.",
+      "deposits": "Use two small deposits",
+      "deposits_sub": "We send two deposits under $1. Enter the amounts when they arrive, in 1 to 2 business days.",
+      "failed_title": "Instant verification didn't work",
+      "failed_name_mismatch": "The name on the account doesn't match the name on your plan record. You can verify with two small deposits instead.",
+      "failed_routing_not_found": "We couldn't find a bank for that routing number. Check the number, or verify with two small deposits.",
+      "use_deposits": "Send two deposits",
+      "deposits_sent": "Two small deposits were sent on {{date}}. Enter both amounts as they appear on your bank statement.",
+      "amount_first": "First deposit ($)",
+      "amount_second": "Second deposit ($)",
+      "amount_error": "Those amounts don't match. Enter two different amounts under $1.00.",
+      "later": "I'll do this later",
+      "confirm": "Confirm amounts",
+      "done_title": "Account verified",
+      "done_body": "This account can now receive loan and withdrawal payments.",
+      "status": "Verification",
+      "status_verified": "Verified on {{date}}",
+      "status_pending": "Deposits sent",
+      "status_unverified": "Not verified",
+      "verify_cta": "Verify account",
+      "enter_amounts": "Enter amounts"
+    },
+    "bene": {
+      "unsigned_title": "Your beneficiary choices need your signature",
+      "unsigned_body": "They take effect once you sign electronically.",
+      "changed_body": "Your beneficiaries changed since you last signed. Sign again to make the change official.",
+      "sign_cta": "Review and sign",
+      "dialog_title": "Sign your beneficiary designation",
+      "dialog_intro": "Check the people and shares below, then type your name to sign.",
+      "sign_label": "Type your full legal name",
+      "sign_hint": "As shown on your record: {{name}}",
+      "sign_error": "This doesn't match the name on your record.",
+      "agree": "I confirm these beneficiaries and shares, and agree that typing my name is my signature.",
+      "sign": "Sign",
+      "consent_title": "Your spouse's consent is needed",
+      "consent_body": "You are married and part of the primary share goes to someone other than your spouse.",
+      "consent_cta": "Request consent",
+      "consent_dialog_body": "We'll email your spouse a secure link to sign the consent on a video call with an online notary. It usually takes about 10 minutes.",
+      "spouse_email": "Spouse's email address",
+      "send": "Send request",
+      "later": "Not now",
+      "waiting_title": "Waiting for your spouse's notarized consent",
+      "waiting_body": "Sent to {{email}} on {{date}}. Your designation takes effect once it is signed.",
+      "check_status": "Check status",
+      "complete_title": "Designation signed and in effect",
+      "complete_body": "Signed on {{signed}}.",
+      "complete_body_consent": "Signed on {{signed}}. Spouse's consent notarized on {{consent}}."
+    }
+  },
+  "comms": {
+    "title": "Communication preferences",
+    "sent_to": "We use {{email}} and {{phone}}.",
+    "change_contact": "Change contact details",
+    "delivery": "Statements, tax forms and plan notices",
+    "delivery_paperless": "Paperless",
+    "delivery_paperless_sub": "Emailed when ready and kept in Documents.",
+    "delivery_mail": "Paper by mail",
+    "delivery_mail_sub": "Mailed to your home address. Still available in Documents.",
+    "topics": "What we contact you about",
+    "topic": "Topic",
+    "email": "Email",
+    "text": "Text",
+    "required": "Required",
+    "topic_notices": "Plan notices and disclosures",
+    "topic_notices_sub": "Fee disclosures, plan changes, annual notices",
+    "topic_statements": "Statements and tax forms",
+    "topic_statements_sub": "Quarterly statements, 1099-R",
+    "topic_transactions": "Transaction updates",
+    "topic_transactions_sub": "Loan approved, check on the way, funds received",
+    "topic_contributions": "Contribution changes",
+    "topic_contributions_sub": "Rate changes, auto-increase, payroll deposits",
+    "topic_education": "Guidance and next steps",
+    "topic_education_sub": "Match reminders, readiness tips, learning articles",
+    "topic_market": "Market updates",
+    "topic_market_sub": "Weekly commentary on your funds",
+    "portal_note": "Everything also appears in your notifications here in the portal.",
+    "text_consent": "By saving, you agree to receive text messages at the mobile number on your record. Message and data rates may apply. Turn text off here at any time.",
+    "save": "Save preferences"
+  },
   "app_name": "Participant Portal",
   "language": "Language",
   "lang": {
@@ -80,7 +424,7 @@
     "resend_no_email": "We could not determine your email. Please sign in again to request a code.",
     "platform_name": "Retirement Intelligence Platform",
     "platform_by": "by Congruent Solutions",
-    "copyright": "© Congruent Solutions, Inc. All Rights Reserved",
+    "copyright": "© {{year}} Congruent Solutions, Inc. All rights reserved.",
     "privacy_policy": "Privacy Policy",
     "signup_check_email": "Check your email to confirm your account before you sign in. After you confirm, your user will appear in the Supabase dashboard.",
     "select_company_first": "Please select your employer first."
@@ -127,9 +471,9 @@
     "title_line2": "Your way.",
     "title_line3": ", together.",
     "subtitle": "Activate your 401(k) in a few simple steps. We'll personalize the experience for you.",
-    "start_enrollment": "Customize My Plan",
+    "start_enrollment": "Customize my plan",
     "learn_plan": "Learn about the plan",
-    "time_note": "It takes only a few minutes",
+    "time_note": "Step by step, about 5 min",
     "video_aria": "Video introducing your retirement plan and enrollment experience",
     "greeting_morning": "Good morning",
     "greeting_afternoon": "Good afternoon",
@@ -142,7 +486,8 @@
     "modal_personalize_subtitle": "Let's personalize your retirement journey.",
     "one_click_hint": "Short on time?",
     "one_click": "Enroll in one click",
-    "one_click_note": "Done in seconds",
+    "one_click_note": "Plan default settings",
+    "one_click_time": "Takes less than a minute",
     "illustration_alt": "Coastal road winding toward the sunset"
   },
   "learning": {
@@ -157,7 +502,7 @@
   },
   "advisor": {
     "title": "Talk to an Advisor",
-    "subtitle": "Get personalized guidance from a certified retirement planner. Book a free 30-minute session.",
+    "subtitle": "Get personalized guidance from a certified retirement planner. Book a 30-minute session.",
     "browse": "Browse Advisors",
     "meet_expert": "Meet an Expert"
   },
@@ -202,7 +547,7 @@
     "leave_feedback": "Leave feedback"
   },
   "footer": {
-    "copyright": "© {{year}} Congruent Solutions Inc. All rights reserved.",
+    "copyright": "© {{year}} Congruent Solutions, Inc. All rights reserved.",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "help": "Help Center"
@@ -349,6 +694,8 @@
       "opt_15": "15%",
       "pro_tip": "Pro tip",
       "per_month_from_pay": "a month from your paycheck",
+      "decrease": "Decrease contribution",
+      "increase": "Increase contribution",
       "match_simple": "Your employer adds {{amount}}/yr",
       "match_more": "Save {{pct}}% to get the full {{amount}}/yr",
       "match_after_tax": "After-tax savings aren't matched",
@@ -1436,7 +1783,7 @@
       "have_salary": "{{amount}} a year"
     },
     "rw": {
-      "plan_name": "401(k) Plan",
+      "plan_name": "{{employer}} 401(k) Savings Plan",
       "sample": "Sample"
     },
     "core": {
@@ -1515,14 +1862,14 @@
       "row_contribution": "Contribution",
       "row_auto": "Auto-increase",
       "cancel": "Cancel",
-      "customize": "Customize My Plan",
+      "customize": "Customize my plan",
       "pay_line": "From your <b>{{pay}}</b> monthly paycheck, <b>{{amount}}</b> a month goes to savings.",
       "chart_label": "Projected balance by age. Use the left and right arrow keys to explore.",
       "chart_point": "Age {{age}}: {{value}}",
       "style_conservative": "Conservative",
       "style_moderate": "Moderate",
       "style_aggressive": "Aggressive",
-      "match_tip": "Free money from your employer, added to your account on top of what you save. They put in {{rate}}% of what you contribute, on up to {{cap}}% of your pay. On your {{pay}} monthly pay, saving {{cap}}% gets you the full {{amount}} a month.",
+      "match_tip": "Save {{save}} a month ({{cap}}% of your pay) and your employer adds another {{amount}}. Pre-tax and Roth count together, e.g. {{half}}% pre-tax + {{half}}% Roth. After-tax isn't matched.",
       "auto_enabled": "Enabled",
       "row_invest": "Investment Style",
       "row_options": "Account options",
@@ -1557,8 +1904,8 @@
       "submit_error": "I couldn't submit your enrollment. Nothing was lost and your choices are exactly as you left them. Approve again to retry.",
       "consent": "I agree to the <terms>Terms and Conditions</terms> of the <b>{{plan}}</b>.",
       "read_disclosures": "Read disclosures ({{n}})",
-      "bene_warn_title": "You haven't added beneficiaries",
-      "bene_warn_body": "You might lose your savings if you don’t add a beneficiary. It only takes a minute to add one.",
+      "bene_warn_title": "Who should get your savings?",
+      "bene_warn_body": "Add a beneficiary so your savings go to the people you choose, not your plan's default rules. It takes about a minute.",
       "bene_warn_skip": "Skip for now",
       "src_pre": "Pre-tax",
       "src_roth": "Roth",
@@ -1667,6 +2014,26 @@
       "reset_toast": "Back to your plan's defaults.",
       "ready_lead": "Your plan is",
       "ready_word": "ready",
+      "match_tip_intro": "Your employer adds {{per}} for every $1 you save, up to {{cap}}% of your pay.",
+      "match_tip_on": "On your {{pay}} monthly pay:",
+      "match_col_you": "You save",
+      "match_col_employer": "Employer",
+      "match_col_total": "Total",
+      "match_max": "max",
+      "match_tip_sources": "Pre-tax and Roth count together. After-tax isn't matched.",
+      "plan_label": "Plan",
+      "first_on": "First contribution {{date}}",
+      "plan_type": "Plan type",
+      "agree": "Agree",
+      "sources_title": "How your {{total}}% is split",
+      "src_tip_preTax": "Lowers your taxable pay now. Taxed when you withdraw.",
+      "src_tip_roth": "Taxed now. Tax-free when you withdraw in retirement.",
+      "src_tip_afterTax": "Taxed now; only the growth is taxed later. Not matched by your employer.",
+      "ready_tail": " for enrollment",
+      "not_guaranteed": "Not guaranteed",
+      "proj_basis": "Based on {{rate}}% average yearly growth.",
+      "auto_tip": "Raises your savings rate a little each year, up to a limit. You can change or stop it anytime.",
+      "invest_tip": "How your money is invested. Growth styles aim for more over time but rise and fall more along the way.",
       "building": "Getting Your Plan Ready",
       "review_enroll": "Review and enroll",
       "of_pay": "of pay",
@@ -2098,6 +2465,7 @@
   },
   "dashboard": {
     "overview": "Overview",
+    "overview_sub": "Your retirement account at a glance: balance, contributions, investments and next steps.",
     "greeting_morning": "Good morning",
     "greeting_afternoon": "Good afternoon",
     "greeting_evening": "Good evening",
@@ -2132,6 +2500,31 @@
     "ql_statement": "Generate statement"
   },
   "postDashboard": {
+    "actions_rest_done": "Everything else is up to date.",
+    "c_you": "You save",
+    "c_employer": "Employer adds",
+    "c_total": "Total",
+    "per_mo": "/mo",
+    "c_of_pay": "{{pct}}% of pay",
+    "c_full_match": "Full match",
+    "c_match_gap": "{{amount}}/mo unclaimed",
+    "c_total_sub": "Goes in each month",
+    "limit_left": "left of {{limit}}",
+    "limit_pace": "{{ytd}} contributed so far · on pace for {{projected}} this year",
+    "limit_pace_est": "About {{ytd}} contributed so far · on pace for {{projected}} this year",
+    "loans_title": "Active loans",
+    "loans_total": "Total remaining",
+    "loan_general": "General purpose",
+    "loan_residential": "Home purchase",
+    "loan_since": "since {{date}}",
+    "loan_paid": "{{pct}}% paid off",
+    "loan_left_one": "{{count}} payment left",
+    "loan_left_other": "{{count}} payments left",
+    "loan_next_short": "Next {{amount}} · {{date}}",
+    "this_quarter": "this quarter",
+    "actions_count": "{{count}} to do",
+    "contributions_title": "Your contributions",
+    "library_cta": "Browse the library",
     "summary_suffix": "Here's your retirement summary.",
     "greeting_morning": "Good morning, {{name}}.",
     "greeting_afternoon": "Good afternoon, {{name}}.",
@@ -2366,6 +2759,7 @@
     }
   },
   "alerts": {
+    "sr_resolved_body": "Ref. {{ref}} · Resolved {{date}}",
     "section_label": "Notifications",
     "dismiss": "Dismiss notification",
     "empty": "You're all caught up.",
@@ -2387,7 +2781,7 @@
     "adviser_message_body": "Open your conversation to read it.",
     "adviser_meeting_title": "Meeting with your adviser coming up",
     "sr_update_title": "Service request {{ref}}: {{stage}}",
-    "sr_resolved_title": "Service request {{ref}} is resolved",
+    "sr_resolved_title": "Your request \"{{subject}}\" is complete",
     "cta_view_request": "View request"
   },
   "documents": {
@@ -2649,6 +3043,7 @@
     "tab_history": "History",
     "src_preTax": "Pre-tax",
     "src_roth": "Roth",
+    "src_afterTax": "After-tax",
     "def": {
       "title": "Deferral & auto increase",
       "edit_title": "Edit deferral",
@@ -2660,6 +3055,7 @@
       "per_paycheck": "per paycheck",
       "explain_preTax": "Pre-tax deferrals lower this year's taxes. The deferrals and their earnings are taxable when withdrawn, but not when rolled over.",
       "explain_roth": "Roth deferrals are taxed in the year you contribute, but not when withdrawn. Earnings are tax-free if age and holding-period rules are met.",
+      "explain_afterTax": "After-tax savings are taxed now. Only their growth is taxed when withdrawn, and your employer doesn't match them.",
       "limit_warning": "At this rate you'll reach the {{year}} IRS limit of {{limit}} before year-end. Deferrals stop automatically once you hit it.",
       "err_zero": "Enter a deferral above 0, or opt out of the plan.",
       "err_max": "The total deferral can't be more than {{max}}% of pay.",
@@ -3178,15 +3574,23 @@
     }
   },
   "pre_dashboard": {
+    "advisor_heading": "Talk to a retirement expert",
+    "advisor_available": "Available today",
+    "advisor_meta": "{{years}} years experience · {{rating}} rating",
+    "advisor_book": "Book a session",
+    "advisor_tips_title": "Quick tips from {{name}}",
+    "advisor_tip1": "Save at least {{cap}}% of your pay to get the full employer match.",
+    "advisor_tip2": "Pre-tax savings lower the income tax you pay today.",
+    "advisor_tip3": "Start small: raising your rate 1% a year adds up over time.",
     "title": "A Better Tomorrow",
     "title_accent": "Starts Today.",
-    "why_title": "Why enroll now",
-    "why_sub": "A 401(k) is a retirement account you fund from your paycheck, and your employer adds to it.",
+    "why_title": "Get ready to enroll",
+    "why_sub": "Learn the basics, ask a quick question, or talk to an expert before you start.",
     "learn_more_heading": "Learn more about the plan",
     "plan_match_title": "Employer match",
     "plan_match_line": "{{employer}} for every {{you}} you save, up to {{cap}}%",
     "plan_tax_line": "You're taxed on less of your pay",
-    "plan_advisor_line": "Free 30-minute session",
+    "plan_advisor_line": "30-minute session",
     "match_title": "Your employer matches you",
     "match_desc": "Every {{you}} you save gets {{employer}} from your employer, up to {{cap}}% of your pay.",
     "coin_you": "You",
@@ -3212,10 +3616,14 @@
     "chat_a2": "Your employer adds {{rate}}% of what you save, up to {{cap}}% of your pay.",
     "chat_q3": "Can I change my rate later?",
     "chat_a3": "Yes. You can change your contribution rate after you enroll.",
+    "chat_q4": "How much should I save?",
+    "chat_a4": "Save at least {{cap}}% to get the full match. Many people work up to 10–15% over time.",
+    "chat_q5": "When can I take money out?",
+    "chat_a5": "Usually from age 59½ without a penalty. Your plan may also offer loans.",
     "replay_animation": "Replay animation",
     "pause_animation": "Pause animation",
     "play_animation": "Play animation",
-    "advisor_note": "A free 30-minute session with a certified planner.",
+    "advisor_note": "A 30-minute session with a certified planner.",
     "advisor_role1": "Certified Financial Planner",
     "advisor_role2": "Wealth Management Advisor",
     "advisor_role3": "Retirement Income Specialist"

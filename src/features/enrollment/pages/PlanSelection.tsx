@@ -6,6 +6,7 @@ import { useEnrollmentStepNav } from '@/features/enrollment/components/Enrollmen
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { cn } from '@/lib/cn'
 import { Check, Sparkles, ArrowRight, MessageCircle, Landmark, HelpCircle } from 'lucide-react'
+import { BODY_TEXT, Card, CARD_TITLE, HEADING, MUTED_TEXT, PILL_PRIMARY, PILL_SECONDARY, RULE, StepHeader, TitleBadge, badge, card } from '@/features/enrollment/enrollmentUi'
 
 export default function PlanSelection() {
   const { t } = useTranslation()
@@ -52,16 +53,6 @@ export default function PlanSelection() {
 
   const hasTwoPlans = data.companyPlans.length >= 2
 
-  /** CTA before this plan is the active selection — neutral, no primary stroke */
-  const neutralCtaClass =
-    'border border-gray-300 bg-white text-gray-800 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800'
-  /** CTA once selected — solid blue */
-  const selectedCtaClass =
-    'border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 hover:border-blue-700'
-  /** Selected card — subtle blue stroke + light wash */
-  const selectedPlanCardClass =
-    'border border-blue-300 bg-blue-50/70 shadow-sm ring-1 ring-blue-200/60 hover:shadow-md dark:border-blue-500/55 dark:bg-blue-950/30 dark:ring-blue-400/25'
-
   if (!hasTwoPlans) {
     const onlyPlan = data.companyPlans[0] || 'traditional'
     const planLabel =
@@ -69,28 +60,20 @@ export default function PlanSelection() {
     return (
       <AnimatedPage>
         <div className="flex min-h-[50vh] items-center justify-center">
-          <div className="w-full max-w-md space-y-5 rounded-3xl border border-gray-200 bg-white p-6 text-center shadow-lg dark:border-gray-700 dark:bg-gray-900 sm:p-8">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 dark:bg-blue-950/40">
-              <Landmark className="h-7 w-7 text-blue-600" />
-            </div>
+          <Card tone="blue" className="w-full max-w-md space-y-5 text-center sm:p-8">
+            <span className="mx-auto flex w-fit">
+              <TitleBadge Icon={Landmark} />
+            </span>
             <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                {t('enrollment.plan.single_title', { plan: planLabel })}
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
-                {onlyPlan === 'traditional'
-                  ? t('enrollment.plan.single_desc_traditional')
-                  : t('enrollment.plan.single_desc_roth')}
+              <h2 className={cn('text-xl font-bold', HEADING)}>{t('enrollment.plan.single_title', { plan: planLabel })}</h2>
+              <p className={cn('mt-2 text-sm leading-relaxed', BODY_TEXT)}>
+                {onlyPlan === 'traditional' ? t('enrollment.plan.single_desc_traditional') : t('enrollment.plan.single_desc_roth')}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => confirmPlan(onlyPlan)}
-              className="btn-brand flex w-full items-center justify-center gap-2 rounded-xl py-3.5 font-semibold active:scale-[0.98]"
-            >
+            <button type="button" onClick={() => confirmPlan(onlyPlan)} className={cn(PILL_PRIMARY, 'w-full')}>
               {t('enrollment.plan.continue_contributions')} <ArrowRight className="h-4 w-4" />
             </button>
-          </div>
+          </Card>
         </div>
       </AnimatedPage>
     )
@@ -110,140 +93,95 @@ export default function PlanSelection() {
     [t('enrollment.plan.compare_row5'), t('enrollment.plan.compare_row5_t'), t('enrollment.plan.compare_row5_r')],
   ]
 
+  const plans = [
+    { id: 'traditional' as const, title: t('enrollment.plan.traditional_title'), desc: t('enrollment.plan.traditional_desc'), bullets: traditionalBullets, mostCommon: true },
+    { id: 'roth' as const, title: t('enrollment.plan.roth_title'), desc: t('enrollment.plan.roth_desc'), bullets: rothBullets, mostCommon: false },
+  ]
+
   return (
     <AnimatedPage>
       <div className="space-y-5">
-        <div className="text-center md:text-left">
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-            {t('enrollment.plan.choose_title')}
-          </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 sm:text-base">{t('enrollment.plan.choose_subtitle')}</p>
-        </div>
+        <StepHeader title={t('enrollment.plan.choose_title')} subtitle={t('enrollment.plan.choose_subtitle')} />
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div
-            className={cn(
-              'flex flex-col rounded-2xl bg-white p-5 text-left shadow-sm transition-all sm:p-6 dark:bg-gray-900',
-              selectedPlan === 'traditional'
-                ? selectedPlanCardClass
-                : 'border border-gray-200 dark:border-gray-700 hover:shadow-md',
-            )}
-          >
-            <div className="relative mb-1">
-              <span
-                className="inline-flex cursor-default items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
-                onMouseEnter={() => setShowTooltip(true)}
-                onMouseLeave={() => setShowTooltip(false)}
-              >
-                {t('enrollment.plan.most_common')}
-                <HelpCircle className="h-3 w-3 opacity-70" />
-              </span>
-              {showTooltip && (
-                <div className="absolute left-0 top-full z-10 mt-1 whitespace-nowrap rounded-lg bg-gray-900 px-3 py-2 text-xs text-white shadow-lg">
-                  {t('enrollment.plan.most_common_tip')}
-                  <div className="absolute left-6 top-0 h-2 w-2 -translate-y-1/2 rotate-45 bg-gray-900" />
+          {plans.map((plan) => {
+            const isSelected = selectedPlan === plan.id
+            const isConfirmed = confirmedPlan === plan.id
+            return (
+              <div key={plan.id} className={cn(card(isSelected ? 'selected' : 'plain'), 'flex flex-col text-left transition-shadow')}>
+                <div className={cn('items-center md:flex md:min-h-[22px]', plan.mostCommon ? 'flex' : 'hidden')}>
+                  {plan.mostCommon && (
+                    <div className="relative">
+                      <span className={cn(badge('amber'), 'cursor-default')} onMouseEnter={() => setShowTooltip(true)} onMouseLeave={() => setShowTooltip(false)}>
+                        {t('enrollment.plan.most_common')}
+                        <HelpCircle className="h-3 w-3 opacity-70" />
+                      </span>
+                      {showTooltip && (
+                        <div className="absolute left-0 top-full z-10 mt-1.5 whitespace-nowrap rounded-xl bg-[#0B1533] px-3 py-2 text-xs text-white shadow-lg">
+                          {t('enrollment.plan.most_common_tip')}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            <h3 className="mt-3 text-xl font-bold text-gray-900 dark:text-white">{t('enrollment.plan.traditional_title')}</h3>
-            <p className="mt-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400">{t('enrollment.plan.traditional_desc')}</p>
+                <h3 className={cn('text-xl font-bold md:mt-2', plan.mostCommon && 'mt-2', HEADING)}>{plan.title}</h3>
+                <p className={cn('mt-1 text-sm leading-relaxed', BODY_TEXT)}>{plan.desc}</p>
 
-            <ul className="mt-4 flex-1 space-y-3">
-              {traditionalBullets.map((b) => (
-                <li key={b} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 sm:text-base">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
-                  {b}
-                </li>
-              ))}
-            </ul>
+                <ul className="mt-4 flex-1 space-y-2.5">
+                  {plan.bullets.map((b) => (
+                    <li key={b} className={cn('flex items-start gap-2.5 text-sm', BODY_TEXT)}>
+                      <span className="mt-0.5 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/20" aria-hidden>
+                        <Check className="h-3 w-3" strokeWidth={3} />
+                      </span>
+                      {b}
+                    </li>
+                  ))}
+                </ul>
 
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedPlan('traditional')
-                setConfirmedPlan('traditional')
-              }}
-              className={cn(
-                'mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold shadow-sm transition-all active:scale-[0.98] sm:text-base',
-                confirmedPlan === 'traditional' ? selectedCtaClass : neutralCtaClass,
-              )}
-            >
-              {confirmedPlan === 'traditional' ? (
-                <>
-                  <Check className="h-4 w-4 shrink-0" aria-hidden />
-                  {t('enrollment.plan.selected')}
-                </>
-              ) : (
-                <>
-                  {t('enrollment.plan.select_plan')} <ArrowRight className="h-4 w-4" />
-                </>
-              )}
-            </button>
-          </div>
-
-          <div
-            className={cn(
-              'flex flex-col rounded-2xl bg-white p-5 text-left shadow-sm transition-all sm:p-6 dark:bg-gray-900',
-              selectedPlan === 'roth' ? selectedPlanCardClass : 'border border-gray-200 dark:border-gray-700 hover:shadow-md',
-            )}
-          >
-            <h3 className="mt-3 text-xl font-bold text-gray-900 dark:text-white">{t('enrollment.plan.roth_title')}</h3>
-            <p className="mt-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400">{t('enrollment.plan.roth_desc')}</p>
-
-            <ul className="mt-4 flex-1 space-y-3">
-              {rothBullets.map((b) => (
-                <li key={b} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 sm:text-base">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
-                  {b}
-                </li>
-              ))}
-            </ul>
-
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedPlan('roth')
-                setConfirmedPlan('roth')
-              }}
-              className={cn(
-                'mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold shadow-sm transition-all active:scale-[0.98] sm:text-base',
-                confirmedPlan === 'roth' ? selectedCtaClass : neutralCtaClass,
-              )}
-            >
-              {confirmedPlan === 'roth' ? (
-                <>
-                  <Check className="h-4 w-4 shrink-0" aria-hidden />
-                  {t('enrollment.plan.selected')}
-                </>
-              ) : (
-                <>
-                  {t('enrollment.plan.select_plan')} <ArrowRight className="h-4 w-4" />
-                </>
-              )}
-            </button>
-          </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedPlan(plan.id)
+                    setConfirmedPlan(plan.id)
+                  }}
+                  aria-pressed={isConfirmed}
+                  className={cn(isConfirmed ? PILL_PRIMARY : PILL_SECONDARY, 'mt-5 w-full')}
+                >
+                  {isConfirmed ? (
+                    <>
+                      <Check className="h-4 w-4 shrink-0" aria-hidden />
+                      {t('enrollment.plan.selected')}
+                    </>
+                  ) : (
+                    <>
+                      {t('enrollment.plan.select_plan')} <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </button>
+              </div>
+            )
+          })}
         </div>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900 sm:p-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 sm:text-base">{t('enrollment.plan.not_sure')}</p>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('enrollment.plan.ai_help')}</p>
+        <Card tone="sky">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+            <div className="flex min-w-0 flex-1 items-start gap-3">
+              <TitleBadge Icon={Sparkles} />
+              <div className="min-w-0">
+                <p className={CARD_TITLE}>{t('enrollment.plan.not_sure')}</p>
+                <p className={cn('mt-1 text-sm', BODY_TEXT)}>{t('enrollment.plan.ai_help')}</p>
+              </div>
             </div>
-            <div className="flex shrink-0 flex-wrap items-center gap-3 sm:justify-end">
+            <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
               <button
                 type="button"
                 onClick={() => {
                   setShowAI(!showAI)
                   setShowCompare(false)
                 }}
-                className={cn(
-                  'flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors',
-                  showAI
-                    ? 'bg-purple-200 text-purple-800 dark:bg-purple-800/50 dark:text-purple-200'
-                    : 'bg-purple-50 text-purple-700 hover:bg-purple-100 dark:bg-purple-950/30 dark:text-purple-400 dark:hover:bg-purple-900/40',
-                )}
+                aria-expanded={showAI}
+                className={cn(showAI ? PILL_PRIMARY : PILL_SECONDARY, 'h-10')}
               >
                 <Sparkles className="h-4 w-4" /> {t('enrollment.plan.ask_ai')}
               </button>
@@ -253,12 +191,8 @@ export default function PlanSelection() {
                   setShowCompare(!showCompare)
                   setShowAI(false)
                 }}
-                className={cn(
-                  'flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors',
-                  showCompare
-                    ? 'bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-gray-200'
-                    : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700',
-                )}
+                aria-expanded={showCompare}
+                className={cn(showCompare ? PILL_PRIMARY : PILL_SECONDARY, 'h-10')}
               >
                 <MessageCircle className="h-4 w-4" /> {t('enrollment.plan.compare_plans')}
               </button>
@@ -266,46 +200,35 @@ export default function PlanSelection() {
           </div>
 
           {showAI && (
-            <div className="mt-4 rounded-xl border border-purple-100 bg-purple-50 p-4 dark:border-purple-900/40 dark:bg-purple-950/30">
-              <div className="flex items-start gap-2">
-                <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-purple-600 dark:text-purple-400" />
-                <div className="text-sm">
-                  <p className="font-semibold text-purple-800 dark:text-purple-300">{t('enrollment.plan.ai_recommendation')}</p>
-                  <p className="mt-1 leading-relaxed text-purple-700 dark:text-purple-400">{t('enrollment.plan.ai_body')}</p>
-                </div>
-              </div>
+            <div className={cn('mt-4 border-t pt-4 text-sm', RULE)}>
+              <p className={cn('font-bold', HEADING)}>{t('enrollment.plan.ai_recommendation')}</p>
+              <p className={cn('mt-1 leading-relaxed', BODY_TEXT)}>{t('enrollment.plan.ai_body')}</p>
             </div>
           )}
 
           {showCompare && (
-            <div className="mt-4 overflow-x-auto">
-              <table className="min-w-[400px] w-full text-sm">
+            <div className={cn('mt-4 overflow-x-auto border-t pt-2', RULE)}>
+              <table className="w-full min-w-[400px] text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
-                    <th className="py-2 text-left font-medium text-gray-500 dark:text-gray-400">
-                      {t('enrollment.plan.compare_feature')}
-                    </th>
-                    <th className="py-2 text-left font-semibold text-gray-900 dark:text-white">
-                      {t('enrollment.plan.compare_traditional')}
-                    </th>
-                    <th className="py-2 text-left font-semibold text-gray-900 dark:text-white">
-                      {t('enrollment.plan.compare_roth')}
-                    </th>
+                  <tr className={cn('border-b', RULE)}>
+                    <th className={cn('py-2.5 text-left font-medium', MUTED_TEXT)}>{t('enrollment.plan.compare_feature')}</th>
+                    <th className={cn('py-2.5 text-left font-bold', HEADING)}>{t('enrollment.plan.compare_traditional')}</th>
+                    <th className={cn('py-2.5 text-left font-bold', HEADING)}>{t('enrollment.plan.compare_roth')}</th>
                   </tr>
                 </thead>
-                <tbody className="text-gray-700 dark:text-gray-300">
+                <tbody className={BODY_TEXT}>
                   {compareRows.map(([feature, trad, roth]) => (
-                    <tr key={String(feature)} className="border-b border-gray-100 dark:border-gray-800">
-                      <td className="py-2 text-gray-500 dark:text-gray-400">{feature}</td>
-                      <td className="py-2">{trad}</td>
-                      <td className="py-2">{roth}</td>
+                    <tr key={String(feature)} className={cn('border-b last:border-b-0', RULE)}>
+                      <td className={cn('py-2.5', MUTED_TEXT)}>{feature}</td>
+                      <td className="py-2.5">{trad}</td>
+                      <td className="py-2.5">{roth}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           )}
-        </div>
+        </Card>
       </div>
     </AnimatedPage>
   )

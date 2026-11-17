@@ -1,7 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Select } from '../../../design-system/components/Select'
-import { Checkbox } from '../../../design-system/components/Checkbox'
 import { Button } from '../../../design-system/components/Button'
 import { useTheme } from '../../../core/hooks/useTheme'
 import { useBrandTheme } from '../../../core/theme/BrandThemeContext'
@@ -9,6 +8,7 @@ import { getAllCompanies, type Company } from '../../../lib/supabaseIntegration'
 import type { ThemeMode } from '../../../core/types/theme.types'
 import { SUPPORTED_LANGS } from '@/core/i18n'
 import { Building2, RotateCcw, Palette } from 'lucide-react'
+import { CommunicationPreferences } from './CommunicationPreferences'
 
 export function PreferencesPanel() {
   const { t, i18n } = useTranslation()
@@ -184,33 +184,7 @@ export function PreferencesPanel() {
         )}
       </div>
 
-      {/* Notifications */}
-      <div>
-        <p className="mb-3 text-sm font-semibold text-text-primary">{t('profile.preferences_editor.notifications')}</p>
-        <div className="flex flex-col gap-3">
-          <Checkbox
-            label={t('profile.preferences_editor.notif_email')}
-            description={t('profile.preferences_editor.notif_email_desc')}
-            defaultChecked
-          />
-          <Checkbox
-            label={t('profile.preferences_editor.notif_contrib')}
-            description={t('profile.preferences_editor.notif_contrib_desc')}
-            defaultChecked
-          />
-          <Checkbox
-            label={t('profile.preferences_editor.notif_market')}
-            description={t('profile.preferences_editor.notif_market_desc')}
-          />
-          <Checkbox
-            label={t('profile.preferences_editor.notif_enrolment')}
-            description={t('profile.preferences_editor.notif_enrolment_desc')}
-            defaultChecked
-          />
-        </div>
-      </div>
-
-      <Button className="w-fit">{t('profile.preferences_editor.save_prefs')}</Button>
+      <CommunicationPreferences />
     </div>
   )
 }

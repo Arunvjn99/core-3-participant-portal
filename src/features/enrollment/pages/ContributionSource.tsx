@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { RangeSlider } from '@/design-system/components/RangeSlider'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
@@ -6,6 +7,7 @@ import { useEnrollmentStepNav, type EnrollmentPrimaryLabel } from '@/features/en
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { getAppDateLocale } from '@/lib/dateLocale'
 import { cn } from '@/lib/cn'
+import { CARD_TITLE, HEADING, MUTED_TEXT, RULE, SECTION_LABEL, StepHeader, TEXT_LINK, TitleBadge, badge, card } from '@/features/enrollment/enrollmentUi'
 import { PLAN_CONFIG } from '@/features/enrollment/agent/planConfig'
 import { annualEmployerMatch, matchableRate, splitWhole } from '@/features/enrollment/enrollmentMath'
 import {
@@ -85,21 +87,17 @@ export default function ContributionSource() {
   return (
     <AnimatedPage>
       <div className="space-y-5">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-            {t('enrollment.source_page.title')}
-          </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 sm:text-base">{t('enrollment.source_page.subtitle')}</p>
-        </div>
+        <StepHeader title={t('enrollment.source_page.title')} subtitle={t('enrollment.source_page.subtitle')} />
 
         {/* Allocation controls on the left, what it means each month on the right */}
-        <div className="flex w-full flex-col gap-5 rounded-2xl border border-gray-200 bg-white p-5 shadow-lg dark:border-gray-700 dark:bg-gray-900 sm:flex-row sm:p-6">
-            <div className="flex min-w-0 flex-1 flex-col space-y-4">
+        <div className={cn(card(), 'flex w-full flex-col gap-5 sm:flex-row sm:gap-6')}>
+            {/* Heading, sliders and links spread down the column so it ends level with the monthly impact panel */}
+            <div className="flex min-w-0 flex-1 flex-col justify-between gap-5">
               <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">{t('enrollment.source_page.your_tax_strategy')}</h3>
-                  <p className="mt-1 inline-flex items-center gap-1.5 text-sm font-semibold text-blue-700 dark:text-blue-300">
-                    <Wallet className="h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" aria-hidden />
+                  <h2 className={CARD_TITLE}>{t('enrollment.source_page.your_tax_strategy')}</h2>
+                  <p className="mt-1.5 inline-flex items-center gap-1.5 text-sm font-semibold text-primary dark:text-blue-300">
+                    <Wallet className="h-4 w-4 shrink-0" aria-hidden />
                     {t('enrollment.source_page.banner', {
                       pct: percent,
                       amount: monthlyTotal.toLocaleString(locale),
@@ -114,7 +112,7 @@ export default function ContributionSource() {
                       })
                       setShowAdvanced(false)
                     }}
-                    className="mt-2 block text-xs font-medium text-blue-600 underline-offset-2 hover:underline dark:text-blue-400"
+                    className={cn(TEXT_LINK, 'mt-2 flex text-xs')}
                   >
                     {t('enrollment.source_page.reset_default')}
                   </button>
@@ -135,32 +133,22 @@ export default function ContributionSource() {
                 />
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-10">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-2">
-                        <div className="brand-bg h-3 w-3 rounded-full" />
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{t('enrollment.source_page.pre_tax')}</p>
+                        <span className="h-2.5 w-2.5 rounded-full bg-[var(--chart-blue)]" aria-hidden />
+                        <p className={cn('text-sm font-bold', HEADING)}>{t('enrollment.source_page.pre_tax')}</p>
                       </div>
-                      <p className="ml-5 text-xs text-gray-500 dark:text-gray-400">{t('enrollment.source_page.pre_tax_hint')}</p>
+                      <p className={cn('ml-[18px] text-xs', MUTED_TEXT)}>{t('enrollment.source_page.pre_tax_hint')}</p>
                     </div>
-                    <p className="text-xl font-extrabold text-blue-700 dark:text-blue-400">{sources.preTax}%</p>
+                    <p className={cn('text-xl font-extrabold tabular-nums', HEADING)}>{sources.preTax}%</p>
                   </div>
-                  <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    value={sources.preTax}
-                    onChange={(e) => handlePreTaxChange(Number(e.target.value))}
-                    className="h-2 w-full cursor-pointer appearance-none rounded-full"
-                    style={{
-                      background: `linear-gradient(to right, var(--chart-blue) 0%, var(--chart-blue) ${sources.preTax}%, var(--slider-track) ${sources.preTax}%, var(--slider-track) 100%)`,
-                    }}
-                  />
-                  <div className="flex items-center justify-between text-xs text-gray-400">
+                  <RangeSlider min={0} max={100} value={sources.preTax} onChange={handlePreTaxChange} color="var(--chart-blue)" aria-label={t('enrollment.source_page.pre_tax')} aria-valuetext={`${sources.preTax}%`} />
+                  <div className="flex items-center justify-between text-xs text-slate-400">
                     <span>0%</span>
-                    <span className="font-semibold text-gray-700 dark:text-gray-300">
+                    <span className="font-semibold text-slate-700 dark:text-slate-200">
                       ${monthlyPreTax.toLocaleString(locale)}/mo
                     </span>
                     <span>100%</span>
@@ -171,27 +159,17 @@ export default function ContributionSource() {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-2">
-                        <div className="h-3 w-3 rounded-full bg-purple-600" />
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{t('enrollment.source_page.roth')}</p>
+                        <span className="h-2.5 w-2.5 rounded-full bg-[var(--accent-purple)]" aria-hidden />
+                        <p className={cn('text-sm font-bold', HEADING)}>{t('enrollment.source_page.roth')}</p>
                       </div>
-                      <p className="ml-5 text-xs text-gray-500 dark:text-gray-400">{t('enrollment.source_page.roth_hint')}</p>
+                      <p className={cn('ml-[18px] text-xs', MUTED_TEXT)}>{t('enrollment.source_page.roth_hint')}</p>
                     </div>
-                    <p className="text-xl font-extrabold text-purple-700 dark:text-purple-400">{sources.roth}%</p>
+                    <p className={cn('text-xl font-extrabold tabular-nums', HEADING)}>{sources.roth}%</p>
                   </div>
-                  <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    value={sources.roth}
-                    onChange={(e) => handleRothChange(Number(e.target.value))}
-                    className="h-2 w-full cursor-pointer appearance-none rounded-full"
-                    style={{
-                      background: `linear-gradient(to right, var(--accent-purple) 0%, var(--accent-purple) ${sources.roth}%, var(--slider-track) ${sources.roth}%, var(--slider-track) 100%)`,
-                    }}
-                  />
-                  <div className="flex items-center justify-between text-xs text-gray-400">
+                  <RangeSlider min={0} max={100} value={sources.roth} onChange={handleRothChange} color="var(--accent-purple)" aria-label={t('enrollment.source_page.roth')} aria-valuetext={`${sources.roth}%`} />
+                  <div className="flex items-center justify-between text-xs text-slate-400">
                     <span>0%</span>
-                    <span className="font-semibold text-gray-700 dark:text-gray-300">
+                    <span className="font-semibold text-slate-700 dark:text-slate-200">
                       ${monthlyRoth.toLocaleString(locale)}/mo
                     </span>
                     <span>100%</span>
@@ -201,36 +179,22 @@ export default function ContributionSource() {
                 {showAdvanced && (
                   <div className="space-y-2 border-t border-gray-100 pt-4 dark:border-gray-800">
                     <div className="mb-1 flex items-center gap-2">
-                      <div className="rounded border border-orange-200 bg-orange-50 px-2 py-0.5 dark:border-orange-800/40 dark:bg-orange-950/30">
-                        <p className="text-xs font-bold uppercase text-orange-700 dark:text-orange-400">
-                          {t('enrollment.source_page.advanced')}
-                        </p>
-                      </div>
+                      <span className={badge('amber')}>{t('enrollment.source_page.advanced')}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="flex items-center gap-2">
-                          <div className="h-3 w-3 rounded-full bg-orange-600" />
-                          <p className="text-sm font-semibold text-gray-900 dark:text-white">{t('enrollment.source_page.after_tax')}</p>
+                          <span className="h-2.5 w-2.5 rounded-full bg-[var(--chart-amber)]" aria-hidden />
+                          <p className={cn('text-sm font-bold', HEADING)}>{t('enrollment.source_page.after_tax')}</p>
                         </div>
-                        <p className="ml-5 text-xs text-gray-500 dark:text-gray-400">{t('enrollment.source_page.after_tax_hint')}</p>
+                        <p className={cn('ml-[18px] text-xs', MUTED_TEXT)}>{t('enrollment.source_page.after_tax_hint')}</p>
                       </div>
-                      <p className="text-xl font-extrabold text-orange-700 dark:text-orange-400">{sources.afterTax}%</p>
+                      <p className={cn('text-xl font-extrabold tabular-nums', HEADING)}>{sources.afterTax}%</p>
                     </div>
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      value={sources.afterTax}
-                      onChange={(e) => handleAfterTaxChange(Number(e.target.value))}
-                      className="h-2 w-full cursor-pointer appearance-none rounded-full"
-                      style={{
-                        background: `linear-gradient(to right, var(--chart-amber) 0%, var(--chart-amber) ${sources.afterTax}%, var(--slider-track) ${sources.afterTax}%, var(--slider-track) 100%)`,
-                      }}
-                    />
-                    <div className="flex items-center justify-between text-xs text-gray-400">
+                    <RangeSlider min={0} max={100} value={sources.afterTax} onChange={handleAfterTaxChange} color="var(--chart-amber)" aria-label={t('enrollment.source_page.after_tax')} aria-valuetext={`${sources.afterTax}%`} />
+                    <div className="flex items-center justify-between text-xs text-slate-400">
                       <span>0%</span>
-                      <span className="font-semibold text-gray-700 dark:text-gray-300">
+                      <span className="font-semibold text-slate-700 dark:text-slate-200">
                         ${monthlyAfterTax.toLocaleString(locale)}/mo
                       </span>
                       <span>100%</span>
@@ -239,11 +203,13 @@ export default function ContributionSource() {
                 )}
               </div>
 
+              {/* Links stay together at the bottom of the column */}
+              <div className="flex flex-col items-start gap-3">
               {!showAdvanced ? (
                 <button
                   type="button"
                   onClick={() => setShowAdvanced(true)}
-                  className="flex items-center gap-1.5 self-start text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                  className="flex items-center gap-1.5 self-start text-sm font-semibold text-slate-600 transition-colors hover:text-[#0B1533] dark:text-slate-300 dark:hover:text-white"
                 >
                   <ChevronDown className="h-4 w-4" /> {t('enrollment.source_page.show_advanced')}
                 </button>
@@ -262,7 +228,7 @@ export default function ContributionSource() {
                       })
                     }
                   }}
-                  className="flex items-center gap-1.5 self-start text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                  className="flex items-center gap-1.5 self-start text-sm font-semibold text-slate-600 transition-colors hover:text-[#0B1533] dark:text-slate-300 dark:hover:text-white"
                 >
                   <ChevronUp className="h-4 w-4" /> {t('enrollment.source_page.hide_advanced')}
                 </button>
@@ -270,43 +236,42 @@ export default function ContributionSource() {
 
               <a
                 href="#understand-the-difference"
-                className="self-start text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                className={cn(TEXT_LINK, 'self-start text-sm')}
               >
                 {t('enrollment.source_page.whats_difference')}
               </a>
+              </div>
             </div>
 
-            <div className="flex w-full flex-col space-y-4 border-t border-gray-100 pt-5 dark:border-gray-800 sm:w-[38%] sm:border-l sm:border-t-0 sm:pl-5 sm:pt-0 lg:w-[32%]">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white">
-                {t('enrollment.source_page.monthly_impact_title')}
-              </h4>
+            <div className={cn('flex w-full flex-col gap-4 border-t pt-5 sm:w-[38%] sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0 lg:w-[32%]', RULE)}>
+              <h3 className={SECTION_LABEL}>{t('enrollment.source_page.monthly_impact_title')}</h3>
               <div>
-                <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">{t('enrollment.source_page.you_contribute_label')}</p>
-                <p className="mb-3 text-xl font-extrabold text-gray-900 dark:text-white">
+                <p className={cn('mb-1 text-xs', MUTED_TEXT)}>{t('enrollment.source_page.you_contribute_label')}</p>
+                <p className={cn('mb-2.5 text-xl font-extrabold tabular-nums', HEADING)}>
                   ${monthlyTotal.toLocaleString(locale)}
                 </p>
-                <div className="space-y-1.5 border-l-2 border-gray-200 pl-3 dark:border-gray-700">
+                <div className="space-y-1.5">
                   {[
-                    { color: 'brand-bg', labelKey: 'pre_tax_label' as const, amount: monthlyPreTax },
-                    { color: 'bg-purple-600', labelKey: 'roth_label' as const, amount: monthlyRoth },
+                    { color: 'bg-[var(--chart-blue)]', labelKey: 'pre_tax_label' as const, amount: monthlyPreTax },
+                    { color: 'bg-[var(--accent-purple)]', labelKey: 'roth_label' as const, amount: monthlyRoth },
                   ].map(({ color, labelKey, amount }) => (
                     <div key={labelKey} className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         <div className={cn('h-1.5 w-1.5 rounded-full', color)} />
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
                           {t(`enrollment.source_page.${labelKey}`)}
                         </p>
                       </div>
-                      <p className="text-xs font-semibold text-gray-900 dark:text-white">${amount.toLocaleString(locale)}</p>
+                      <p className="text-xs font-semibold text-[#0B1533] dark:text-white">${amount.toLocaleString(locale)}</p>
                     </div>
                   ))}
                   {monthlyAfterTax > 0 && (
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
-                        <div className="h-1.5 w-1.5 rounded-full bg-orange-600" />
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{t('enrollment.source_page.after_tax_label')}</p>
+                        <div className="h-1.5 w-1.5 rounded-full bg-[var(--chart-amber)]" />
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{t('enrollment.source_page.after_tax_label')}</p>
                       </div>
-                      <p className="text-xs font-semibold text-gray-900 dark:text-white">
+                      <p className="text-xs font-semibold text-[#0B1533] dark:text-white">
                         ${monthlyAfterTax.toLocaleString(locale)}
                       </p>
                     </div>
@@ -314,99 +279,67 @@ export default function ContributionSource() {
                 </div>
               </div>
 
-              <div className="rounded-lg border border-green-200 bg-gradient-to-br from-green-50 to-green-100/50 p-3 dark:border-green-800/40 dark:from-green-950/30 dark:to-green-900/10">
-                <p className="mb-1 text-xs font-bold uppercase tracking-wider text-green-700 dark:text-green-400">
-                  {t('enrollment.source_page.employer_match')}
+              <div className={cn('border-t pt-4', RULE)}>
+                <p className={SECTION_LABEL}>{t('enrollment.source_page.employer_match')}</p>
+                <p className="mt-1 text-xl font-extrabold tabular-nums text-emerald-600 dark:text-emerald-400">
+                  {t('enrollment.source_page.match_amount_monthly', { amount: `$${monthlyMatch.toLocaleString(locale)}` })}
                 </p>
-                <p className="text-base font-extrabold text-green-700 dark:text-green-400">
-                  {t('enrollment.source_page.match_amount_monthly', {
-                    amount: `$${monthlyMatch.toLocaleString(locale)}`,
-                  })}
-                </p>
-                <p className="mt-1 text-xs text-green-600 dark:text-green-500">
-                  {t('enrollment.source_page.match_line', { rate: matchRate, pct: matchCap })}
-                </p>
+                <p className={cn('mt-0.5 text-xs', MUTED_TEXT)}>{t('enrollment.source_page.match_line', { rate: matchRate, pct: matchCap })}</p>
                 {/* How the match is worked out */}
-                <dl className="mt-2.5 space-y-1.5 border-t border-green-200/80 pt-2.5 text-xs dark:border-green-800/40">
+                <dl className="mt-3 space-y-1.5 text-xs">
                   <div className="flex items-center justify-between gap-2">
-                    <dt className="text-green-800/80 dark:text-green-300/80">{t('enrollment.source_page.mb_pay')}</dt>
-                    <dd className="font-semibold tabular-nums text-green-900 dark:text-green-200">${monthlyPay.toLocaleString(locale)}</dd>
+                    <dt className={MUTED_TEXT}>{t('enrollment.source_page.mb_pay')}</dt>
+                    <dd className={cn('font-semibold tabular-nums', HEADING)}>${monthlyPay.toLocaleString(locale)}</dd>
                   </div>
                   <div className="flex items-center justify-between gap-2">
-                    <dt className="text-green-800/80 dark:text-green-300/80">{t('enrollment.source_page.mb_matched', { pct: matchPercent })}</dt>
-                    <dd className="font-semibold tabular-nums text-green-900 dark:text-green-200">${monthlyMatched.toLocaleString(locale)}</dd>
+                    <dt className={MUTED_TEXT}>{t('enrollment.source_page.mb_matched', { pct: matchPercent })}</dt>
+                    <dd className={cn('font-semibold tabular-nums', HEADING)}>${monthlyMatched.toLocaleString(locale)}</dd>
                   </div>
                   <div className="flex items-center justify-between gap-2">
-                    <dt className="text-green-800/80 dark:text-green-300/80">{t('enrollment.source_page.mb_rate', { rate: matchRate })}</dt>
-                    <dd className="font-semibold tabular-nums text-green-900 dark:text-green-200">+${monthlyMatch.toLocaleString(locale)}</dd>
+                    <dt className={MUTED_TEXT}>{t('enrollment.source_page.mb_rate', { rate: matchRate })}</dt>
+                    <dd className="font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">+${monthlyMatch.toLocaleString(locale)}</dd>
                   </div>
-                  <div className="flex items-center justify-between gap-2 border-t border-green-200/80 pt-1.5 dark:border-green-800/40">
-                    <dt className="font-medium text-green-800 dark:text-green-300">{t('enrollment.source_page.mb_year')}</dt>
-                    <dd className="font-bold tabular-nums text-green-900 dark:text-green-200">${annualMatch.toLocaleString(locale)}</dd>
+                  <div className="flex items-center justify-between gap-2">
+                    <dt className={MUTED_TEXT}>{t('enrollment.source_page.mb_year')}</dt>
+                    <dd className={cn('font-bold tabular-nums', HEADING)}>${annualMatch.toLocaleString(locale)}</dd>
                   </div>
                 </dl>
-                {matchable < matchCap && (
-                  <p className="mt-2 text-xs font-medium text-amber-700 dark:text-amber-400">{t('enrollment.source_page.mb_gap', { pct: matchCap })}</p>
-                )}
+                {matchable < matchCap && <p className="mt-2 text-xs font-semibold text-amber-700 dark:text-amber-400">{t('enrollment.source_page.mb_gap', { pct: matchCap })}</p>}
               </div>
 
-              <div className="rounded-lg bg-gray-100 p-3 dark:bg-gray-800">
-                <p className="mb-1 text-xs font-semibold text-gray-500 dark:text-gray-400">{t('enrollment.source_page.total_investment')}</p>
-                <p className="text-2xl font-extrabold text-gray-900 dark:text-white">
+              <div className={cn('mt-auto border-t pt-4', RULE)}>
+                <p className={SECTION_LABEL}>{t('enrollment.source_page.total_investment')}</p>
+                <p className={cn('mt-1 text-[28px] font-extrabold leading-none tabular-nums', HEADING)}>
                   ${totalMonthlyInvestment.toLocaleString(locale)}
+                  <span className={cn('ml-1.5 text-xs font-medium', MUTED_TEXT)}>{t('enrollment.source_page.per_month')}</span>
                 </p>
-                <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{t('enrollment.source_page.per_month')}</p>
               </div>
             </div>
         </div>
 
-        <div id="understand-the-difference" className="space-y-3 opacity-90 scroll-mt-20">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t('enrollment.source_page.understanding_title')}</h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div id="understand-the-difference" className="scroll-mt-20 space-y-3">
+          <h2 className={cn('text-xl font-bold', HEADING)}>{t('enrollment.source_page.understanding_title')}</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {(
               [
-                {
-                  bg: 'from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/10',
-                  border: 'border-blue-200 dark:border-blue-800/40',
-                  icon: <TrendingUp className="h-4 w-4 text-white" />,
-                  iconBg: 'brand-bg',
-                  checkColor: 'text-blue-600',
-                  titleKey: 'card_pre_title' as const,
-                  pointKeys: ['card_pre_p1', 'card_pre_p2', 'card_pre_p3'] as const,
-                },
-                {
-                  bg: 'from-purple-50 to-purple-100/50 dark:from-purple-950/30 dark:to-purple-900/10',
-                  border: 'border-purple-200 dark:border-purple-800/40',
-                  icon: <Shield className="h-4 w-4 text-white" />,
-                  iconBg: 'bg-purple-600',
-                  checkColor: 'text-purple-600',
-                  titleKey: 'card_roth_title' as const,
-                  pointKeys: ['card_roth_p1', 'card_roth_p2', 'card_roth_p3'] as const,
-                },
-                {
-                  bg: 'from-orange-50 to-orange-100/50 dark:from-orange-950/30 dark:to-orange-900/10',
-                  border: 'border-orange-200 dark:border-orange-800/40',
-                  icon: <DollarSign className="h-4 w-4 text-white" />,
-                  iconBg: 'bg-orange-600',
-                  checkColor: 'text-orange-600',
-                  titleKey: 'card_after_title' as const,
-                  pointKeys: ['card_after_p1', 'card_after_p2', 'card_after_p3'] as const,
-                },
+                { Icon: TrendingUp, iconBg: 'bg-blue-600', titleKey: 'card_pre_title' as const, pointKeys: ['card_pre_p1', 'card_pre_p2', 'card_pre_p3'] as const },
+                { Icon: Shield, iconBg: 'bg-violet-600', titleKey: 'card_roth_title' as const, pointKeys: ['card_roth_p1', 'card_roth_p2', 'card_roth_p3'] as const },
+                { Icon: DollarSign, iconBg: 'bg-amber-500', titleKey: 'card_after_title' as const, pointKeys: ['card_after_p1', 'card_after_p2', 'card_after_p3'] as const },
               ] as const
-            ).map(({ bg, border, icon, iconBg, checkColor, titleKey, pointKeys }) => (
-              <div key={titleKey} className={cn('rounded-xl border bg-gradient-to-br p-4 sm:col-span-1', bg, border)}>
-                <div className="mb-3 flex items-center gap-2.5">
-                  <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg', iconBg)}>{icon}</div>
-                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">{t(`enrollment.source_page.${titleKey}`)}</h3>
+            ).map(({ Icon, iconBg, titleKey, pointKeys }) => (
+              <div key={titleKey} className={cn(card('plain', false), 'p-5')}>
+                <div className="mb-3 flex items-center gap-3">
+                  <TitleBadge Icon={Icon} color={iconBg} />
+                  <h3 className={CARD_TITLE}>{t(`enrollment.source_page.${titleKey}`)}</h3>
                 </div>
-                <div className="space-y-1.5">
+                <ul className="space-y-2">
                   {pointKeys.map((pk) => (
-                    <div key={pk} className="flex items-start gap-2">
-                      <Check className={cn('mt-0.5 h-3.5 w-3.5 shrink-0', checkColor)} />
-                      <p className="text-xs text-gray-700 dark:text-gray-300">{t(`enrollment.source_page.${pk}`)}</p>
-                    </div>
+                    <li key={pk} className="flex items-start gap-2">
+                      <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" strokeWidth={3} aria-hidden />
+                      <p className="text-[13px] leading-snug text-slate-600 dark:text-slate-300">{t(`enrollment.source_page.${pk}`)}</p>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </div>
             ))}
           </div>
@@ -454,8 +387,8 @@ function AllocationDonut({
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center" aria-hidden>
-        <span className="text-base font-extrabold leading-none text-gray-900 dark:text-white">{centerValue}</span>
-        <span className="mt-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-400">{centerLabel}</span>
+        <span className="text-base font-extrabold leading-none text-[#0B1533] dark:text-white">{centerValue}</span>
+        <span className="mt-0.5 text-[10px] font-medium text-slate-500 dark:text-slate-400">{centerLabel}</span>
       </div>
     </div>
   )

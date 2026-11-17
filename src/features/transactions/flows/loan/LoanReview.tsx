@@ -48,7 +48,7 @@ function LoanReview() {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="flex flex-col items-center justify-center py-16"
       >
-        <div className="flex h-16 w-16 items-center justify-center rounded-full border border-status-success/30 bg-status-success-bg mb-5">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[color:color-mix(in_srgb,var(--status-success)_30%,transparent)] bg-status-success-bg mb-5">
           <CheckCircle2 className="h-8 w-8 text-status-success" />
         </div>
         <h2 className="text-[26px] font-extrabold text-text-primary tracking-tight mb-2">
@@ -100,7 +100,7 @@ function LoanReview() {
           {statItems.map((item) => (
             <div
               key={item.label}
-              className={`rounded-[12px] border p-4 ${item.highlight ? 'border-primary/20 bg-primary/5' : 'border-border-default bg-surface-elevated'}`}
+              className={`rounded-[12px] border p-4 ${item.highlight ? 'border-[color:color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color:color-mix(in_srgb,var(--color-primary)_5%,transparent)]' : 'border-border-default bg-surface-elevated'}`}
             >
               <div className="flex items-center gap-1.5 mb-1.5">
                 <item.icon className={`h-3.5 w-3.5 ${item.highlight ? 'text-primary' : 'text-text-muted'}`} />
@@ -154,7 +154,7 @@ function LoanReview() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.15 }}
-        className="rounded-[16px] border border-primary/20 bg-primary/5 p-5"
+        className="rounded-[16px] border border-[color:color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color:color-mix(in_srgb,var(--color-primary)_5%,transparent)] p-5"
       >
         <div className="flex items-center gap-2 mb-4">
           <Clock className="h-4 w-4 text-primary" />
@@ -168,7 +168,7 @@ function LoanReview() {
             { step: "Funds Sent", time: "Day 3–5", desc: "EFT processed" },
           ].map((item, idx) => (
             <div key={idx} className="flex flex-col items-center text-center">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary/30 bg-surface-card text-[11px] font-bold text-primary mb-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[color:color-mix(in_srgb,var(--color-primary)_30%,transparent)] bg-surface-card text-[11px] font-bold text-primary mb-2">
                 {idx + 1}
               </div>
               <p className="text-[12px] font-bold text-text-primary">{item.step}</p>

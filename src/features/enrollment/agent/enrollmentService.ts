@@ -49,6 +49,7 @@ export interface EnrollmentSubmission {
   ratePercent: number
   preTaxPercent: number
   rothPercent: number
+  afterTaxPercent?: number
   autoIncrease: { enabled: boolean; amount: number; max: number }
   allocation: Record<string, number>
   /** The participant ticked the consent box. Submission is refused without it. */

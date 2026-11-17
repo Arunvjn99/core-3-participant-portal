@@ -138,7 +138,7 @@ export const DEFAULT_BANK: BankDetails = { accountHolder: 'Alex Morgan', bankNam
 
 export const DEFAULT_EMPLOYMENT: EmploymentDetails = {
   employeeId: 'EMP-00001',
-  employer: 'Example Corp',
+  employer: 'EverVest',
   jobTitle: 'Analyst',
   status: 'Active',
   payrollFrequency: 'monthly',

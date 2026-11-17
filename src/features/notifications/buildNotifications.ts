@@ -146,7 +146,11 @@ export function buildNotifications({ tracked, limits, adviser, serviceRequests, 
         severity: 'success',
         at: step.at,
         href: '/service-requests',
-        render: (t) => ({ title: t('alerts.sr_resolved_title', { ref: req.ref }), body: req.subject }),
+        ctaKey: 'alerts.cta_view_request',
+        render: (t, fmtDate) => ({
+          title: t('alerts.sr_resolved_title', { subject: req.subject }),
+          body: t('alerts.sr_resolved_body', { ref: req.ref, date: fmtDate(step.at) }),
+        }),
       })
     } else if (timeline.currentIndex > 0) {
       out.push({

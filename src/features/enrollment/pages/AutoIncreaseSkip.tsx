@@ -42,7 +42,7 @@ export default function AutoIncreaseSkip() {
 
   return (
     <AnimatedPage>
-      <div className="mx-auto max-w-lg rounded-[28px] border border-slate-200/90 bg-white p-6 text-left shadow-lg sm:p-8 dark:border-gray-700 dark:bg-gray-900">
+      <div className="mx-auto max-w-lg rounded-[24px] bg-surface-card p-6 text-left shadow-[0_12px_32px_-28px_rgba(11,21,51,0.45)] ring-1 ring-slate-200/70 sm:p-8 dark:ring-white/10">
         <AutoIncreaseSkipPanel
           missedSavingsAmount={missedSavingsAmount}
           onReconsider={handleReconsider}

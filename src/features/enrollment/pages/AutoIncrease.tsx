@@ -8,6 +8,8 @@ import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { AutoIncreaseSkipPanel } from '@/features/enrollment/components/AutoIncreaseSkipPanel'
 import { ArrowRight, TrendingUp, Minus } from 'lucide-react'
+import { cn } from '@/lib/cn'
+import { BODY_TEXT, Card, CARD_TITLE, HEADING, IconChip, PILL_PRIMARY, PILL_SECONDARY, SECTION_LABEL, StepHeader, TitleBadge, badge } from '@/features/enrollment/enrollmentUi'
 import { compareAutoIncrease } from '@/features/enrollment/enrollmentMath'
 import { getGrowthRate } from '@/lib/retirementCalculations'
 
@@ -77,95 +79,63 @@ export default function AutoIncrease() {
 
   return (
     <AnimatedPage>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-            {t('enrollment.auto_increase_page.title')}
-          </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 sm:text-base">
-            {t('enrollment.auto_increase_page.subtitle')}
-          </p>
-        </div>
+      <div className="space-y-5">
+        <StepHeader title={t('enrollment.auto_increase_page.title')} subtitle={t('enrollment.auto_increase_page.subtitle')} />
 
         <div className="grid gap-4 sm:grid-cols-2">
           {/* Fixed */}
-          <div className="flex flex-col rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-            <div className="mb-3 flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
-                <Minus className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-              </div>
-              <h3 className="text-gray-900 dark:text-white">{t('enrollment.auto_increase_page.fixed_title')}</h3>
+          <Card className="flex flex-col">
+            <div className="hidden min-h-[22px] sm:block" />
+            <div className="flex items-center gap-3 sm:mt-2">
+              <IconChip Icon={Minus} tone="slate" />
+              <h2 className={CARD_TITLE}>{t('enrollment.auto_increase_page.fixed_title')}</h2>
             </div>
-            <p className="text-gray-500 dark:text-gray-400" style={{ fontSize: '0.85rem' }}>
-              {t('enrollment.auto_increase_page.fixed_body', { pct: data.contributionPercent })}
-            </p>
+            <p className={cn('mt-3 text-sm leading-relaxed', BODY_TEXT)}>{t('enrollment.auto_increase_page.fixed_body', { pct: data.contributionPercent })}</p>
             <div className="mt-4 flex-1">
-              <p className="text-gray-400 dark:text-gray-500" style={{ fontSize: '0.75rem' }}>
-                {t('enrollment.auto_increase_page.projected_10y')}
-              </p>
-              <p className="text-gray-900 dark:text-white" style={{ fontSize: '2rem', fontWeight: 700 }}>
-                ${fixedProjection.toLocaleString(locale)}
-              </p>
+              <p className={SECTION_LABEL}>{t('enrollment.auto_increase_page.projected_10y')}</p>
+              <p className={cn('mt-1 text-[32px] font-extrabold leading-none tabular-nums', HEADING)}>${fixedProjection.toLocaleString(locale)}</p>
             </div>
-            <button
-              type="button"
-              onClick={() => handleSelect(false)}
-              className="mt-5 flex min-h-[2.75rem] w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50 active:scale-[0.98] dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-            >
+            <button type="button" onClick={() => handleSelect(false)} className={cn(PILL_SECONDARY, 'mt-5 w-full')}>
               {t('enrollment.auto_increase_page.skip_cta')}
             </button>
-          </div>
+          </Card>
 
           {/* Auto Increase - Recommended */}
-          <div className="relative flex flex-col rounded-2xl border-2 border-primary bg-white p-5 shadow-sm dark:bg-gray-900">
-            <span
-              className="absolute -top-3 left-4 rounded-full bg-primary px-3 py-0.5 text-white"
-              style={{ fontSize: '0.75rem', fontWeight: 600 }}
-            >
-              {t('enrollment.auto_increase_page.recommended')}
-            </span>
-            <div className="mb-3 mt-1 flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 dark:bg-primary/20">
-                <TrendingUp className="h-5 w-5 text-primary" />
-              </div>
-              <h3 className="text-gray-900 dark:text-white">{t('enrollment.auto_increase_page.enable_title')}</h3>
+          <Card tone="selected" className="flex flex-col">
+            <div className="flex min-h-[22px] items-center">
+              <span className={badge('blue')}>{t('enrollment.auto_increase_page.recommended')}</span>
             </div>
-            <p className="text-gray-500 dark:text-gray-400" style={{ fontSize: '0.85rem' }}>
+            <div className="mt-2 flex items-center gap-3">
+              <TitleBadge Icon={TrendingUp} />
+              <h2 className={CARD_TITLE}>{t('enrollment.auto_increase_page.enable_title')}</h2>
+            </div>
+            <p className={cn('mt-3 text-sm leading-relaxed', BODY_TEXT)}>
               {t('enrollment.auto_increase_page.enable_body', { amt: data.autoIncreaseAmount, max: data.autoIncreaseMax })}
             </p>
             <div className="mt-4 flex-1">
-              <p className="text-gray-400 dark:text-gray-500" style={{ fontSize: '0.75rem' }}>
-                {t('enrollment.auto_increase_page.projected_10y')}
-              </p>
-              <p className="text-primary" style={{ fontSize: '2rem', fontWeight: 700 }}>
-                ${autoProjection.toLocaleString(locale)}
-              </p>
+              <p className={SECTION_LABEL}>{t('enrollment.auto_increase_page.projected_10y')}</p>
+              <p className="mt-1 text-[32px] font-extrabold leading-none tabular-nums text-primary dark:text-blue-300">${autoProjection.toLocaleString(locale)}</p>
             </div>
-            <button
-              type="button"
-              onClick={() => handleSelect(true)}
-              className="btn-brand mt-5 flex min-h-[2.75rem] w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm active:scale-[0.98]"
-            >
+            <button type="button" onClick={() => handleSelect(true)} className={cn(PILL_PRIMARY, 'mt-5 w-full')}>
               {t('enrollment.auto_increase_page.enable_cta')} <ArrowRight className="h-4 w-4 shrink-0" />
             </button>
-          </div>
+          </Card>
         </div>
 
-        {/* Impact Banner — soft blue wash */}
-        <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-4 text-center dark:border-blue-500/20 dark:bg-blue-950/25">
-          <p className="text-text-primary dark:text-gray-200" style={{ fontSize: '0.9rem', fontWeight: 500 }}>
-            {t('enrollment.auto_increase_page.impact_banner', {
-              amount: `+$${difference.toLocaleString(locale)}`,
-            })}
+        {/* What auto-increase adds over ten years */}
+        <Card className="flex items-center gap-3 !py-4">
+          <IconChip Icon={TrendingUp} tone="emerald" />
+          <p className={cn('text-sm font-semibold', HEADING)}>
+            {t('enrollment.auto_increase_page.impact_banner', { amount: `+$${difference.toLocaleString(locale)}` })}
           </p>
-        </div>
+        </Card>
       </div>
 
       {/* Skip Confirmation Modal */}
       {showSkipModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" data-app-blocking-overlay>
           <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            className="absolute inset-0 bg-[#0B1533]/50 backdrop-blur-sm"
             onClick={() => setShowSkipModal(false)}
             aria-hidden
           />
@@ -173,7 +143,7 @@ export default function AutoIncrease() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="auto-increase-skip-title"
-            className="relative w-full max-w-lg rounded-[28px] border border-slate-200/90 bg-white p-6 text-left shadow-2xl sm:p-8 dark:border-gray-700 dark:bg-gray-900"
+            className="relative w-full max-w-lg rounded-[24px] bg-white p-6 text-left shadow-2xl ring-1 ring-slate-200/70 sm:p-8 dark:bg-[#0B1436] dark:ring-white/10"
             onClick={(e) => e.stopPropagation()}
           >
             <AutoIncreaseSkipPanel

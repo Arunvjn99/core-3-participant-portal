@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { RangeSlider } from '@/design-system/components/RangeSlider'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, ArrowRight, Minus, Plus, Scale, Shield, Sparkles, TrendingUp, Zap } from 'lucide-react'
 import { cn } from '@/lib/cn'
@@ -203,17 +204,7 @@ export function ChatQuestions({
                 </button>
               </div>
               <div className="px-1">
-                <input
-                  type="range"
-                  min={Math.max(age + 1, 50)}
-                  max={80}
-                  step={1}
-                  value={retire}
-                  onChange={(e) => setRetireAge(parseInt(e.target.value, 10))}
-                  aria-label={t('enrollment.agent.q_retire')}
-                  aria-valuetext={`${retire} ${t('enrollment.agent.years_old')}`}
-                  className="h-2 w-full cursor-pointer accent-blue-600"
-                />
+                <RangeSlider min={Math.max(age + 1, 50)} max={80} step={1} value={retire} onChange={setRetireAge} aria-label={t('enrollment.agent.q_retire')} aria-valuetext={`${retire} ${t('enrollment.agent.years_old')}`} />
                 <div className="mt-1 flex justify-between text-sm text-gray-500 dark:text-gray-400" aria-hidden>
                   <span>{Math.max(age + 1, 50)}</span>
                   <span>80</span>

@@ -1,4 +1,372 @@
 {
+  "next_actions": {
+    "add_beneficiary": "Agrega un beneficiario",
+    "add_beneficiary_sub": "Elige quién recibe tus ahorros.",
+    "sign_beneficiary": "Firma tu elección de beneficiarios",
+    "sign_beneficiary_sub": "Entra en vigor cuando firmes.",
+    "spouse_consent": "Obtén el consentimiento de tu cónyuge",
+    "spouse_consent_sub": "Necesario para tu elección de beneficiarios.",
+    "full_match": "Obtén el aporte completo del empleador",
+    "full_match_sub": "Estás dejando pasar {{amount}} al año.",
+    "verify_bank": "Verifica tu cuenta bancaria",
+    "verify_bank_sub": "Para poder enviarle pagos.",
+    "verify_address": "Confirma tu dirección",
+    "verify_address_sub": "Para que te lleguen el correo y los formularios de impuestos.",
+    "auto_increase": "Activa el aumento automático",
+    "auto_increase_sub": "Sube tu ahorro un poco cada año.",
+    "link_accounts": "Vincula tus otras cuentas",
+    "link_accounts_sub": "Ve todo tu ahorro para la jubilación junto.",
+    "review_risk": "Revisa tus inversiones",
+    "review_risk_sub": "Comprueba que tu combinación siga tus metas."
+  },
+  "faq": {
+    "nav_label": "Ayuda y preguntas frecuentes",
+    "title": "Ayuda y preguntas frecuentes",
+    "subtitle": "Respuestas sobre tu plan, por tema.",
+    "search_label": "Buscar preguntas",
+    "search_placeholder": "Busca preguntas, por ejemplo préstamo o aporte",
+    "topics_label": "Temas",
+    "all_topics": "Todos los temas",
+    "results_one": "{{count}} pregunta coincide con “{{query}}”",
+    "results_other": "{{count}} preguntas coinciden con “{{query}}”",
+    "no_results_title": "Ninguna pregunta coincide con tu búsqueda",
+    "no_results_body": "Prueba con otra palabra o pregunta al asistente Core AI.",
+    "clear_search": "Borrar búsqueda",
+    "help_title": "¿Aún necesitas ayuda?",
+    "help_body": "Abre una solicitud de servicio y el equipo del plan te responderá, o escribe a",
+    "help_request": "Abrir una solicitud de servicio",
+    "help_ai": "Preguntar a Core AI",
+    "category": {
+      "contributions": "Aportes",
+      "match_vesting": "Aporte del empleador y adquisición",
+      "investments": "Inversiones",
+      "loans_withdrawals": "Préstamos y retiros",
+      "rollovers": "Rollovers",
+      "account_security": "Cuenta y seguridad"
+    },
+    "items": {
+      "401k_basics": {
+        "q": "¿Qué es un 401(k)?",
+        "a": "Un **401(k)** es el plan de jubilación de tu empleador. Aportas de cada sueldo, de forma tradicional, Roth o ambas si tu plan lo ofrece, y las inversiones crecen con ventajas fiscales hasta que retires el dinero. Muchos empleadores **igualan** parte de lo que ahorras; obtener el aporte completo del empleador es un buen primer paso."
+      },
+      "contribution_limits": {
+        "q": "¿Cuáles son los límites de aporte?",
+        "a": "Cada año el IRS fija cuánto puedes aportar a un 401(k). Si tienes **50 años o más**, los aportes de **recuperación** te permiten ahorrar más cuando tu plan lo permite. El aporte del empleador sigue reglas distintas a tu límite personal."
+      },
+      "roth_vs_traditional": {
+        "q": "Aportes Roth o tradicionales",
+        "a": "El dinero **tradicional** entra antes de impuestos, así que tu ingreso gravable baja este año y pagas impuestos al retirar. El **Roth** se aporta después de impuestos y, si cumples las reglas, los retiros calificados pueden ser libres de impuestos. Depende de tu tasa de impuestos de hoy frente a la de mañana."
+      },
+      "change_rate": {
+        "q": "¿Cómo cambio mi tasa de aporte?",
+        "a": "Ve a **Inscripción** y abre el paso de Aporte, elige un nuevo porcentaje y envíalo. El cambio suele aplicarse desde el siguiente período de pago disponible."
+      },
+      "auto_increase": {
+        "q": "¿Qué es el aumento automático?",
+        "a": "El aumento automático sube tu tasa de aporte un poco cada año, hasta el tope que elijas. Puedes cambiar el monto o el tope, o desactivarlo, cuando quieras en **Inscripción**."
+      },
+      "how_match_works": {
+        "q": "¿Cómo funciona el aporte del empleador?",
+        "a": "Tu empleador agrega dinero a tu cuenta según lo que aportas, hasta un porcentaje fijo de tu sueldo. La tarjeta de límites de aporte del panel muestra ese aporte y cualquier monto que estés dejando pasar."
+      },
+      "full_match": {
+        "q": "¿Cómo obtengo el aporte completo del empleador?",
+        "a": "Aporta al menos el porcentaje de sueldo que tu empleador iguala. Si estás por debajo, el panel muestra cuánto dejas sin reclamar cada año y te lleva a subir tu tasa."
+      },
+      "vested_balance": {
+        "q": "¿Qué es mi saldo adquirido?",
+        "a": "Tu **saldo adquirido** es lo que ya es tuyo hoy, según el calendario de adquisición de tu plan. Tus propios aportes suelen ser tuyos desde el primer día; el dinero del empleador se adquiere con el tiempo. Los préstamos y retiros normalmente salen del saldo adquirido."
+      },
+      "leave_unvested": {
+        "q": "¿Qué pasa con el dinero no adquirido si me voy?",
+        "a": "Tus propios aportes siempre son tuyos. Los aportes del empleador que no se hayan adquirido en tu último día por lo general regresan al plan, según su calendario de adquisición."
+      },
+      "change_investments": {
+        "q": "¿Cómo cambio mis inversiones?",
+        "a": "Abre **Inversiones** para ver tus fondos y tu asignación. Puedes cambiar cómo se invierten los aportes futuros, o mover saldos existentes con una transferencia o un rebalanceo desde **Transacciones**."
+      },
+      "target_date": {
+        "q": "¿Qué es un fondo con fecha objetivo?",
+        "a": "Un fondo con fecha objetivo combina acciones y bonos y se vuelve más conservador a medida que se acerca su año objetivo. Eliges el fondo más cercano al año en que piensas jubilarte."
+      },
+      "rebalancing": {
+        "q": "¿Qué es rebalancear?",
+        "a": "Rebalancear mueve dinero entre tus fondos para volver a la combinación que elegiste, después de que el mercado la haya cambiado. Puedes hacerlo desde **Transacciones**."
+      },
+      "fees": {
+        "q": "¿Qué comisiones pago?",
+        "a": "Los planes cobran gastos de los fondos y pueden cobrar comisiones administrativas y por transacción. El **Informe de comisiones**, en Inversiones, muestra cada una en dólares para tu cuenta."
+      },
+      "plan_loans": {
+        "q": "¿Cómo funcionan los préstamos del 401(k)?",
+        "a": "Si tu plan ofrece **préstamos**, puedes pedir prestado de tu saldo **adquirido** dentro de los límites del IRS y del plan, a menudo hasta el menor entre el 50% de ese saldo o $50,000. Los pagos, con intereses, regresan a **tu** cuenta, normalmente desde tu sueldo. Si no pagas a tiempo o dejas el empleo con saldo pendiente, el resto puede contar como una distribución gravable."
+      },
+      "withdrawal_rules": {
+        "q": "¿Cuáles son las reglas de retiro?",
+        "a": "El dinero que sale de un 401(k) tradicional suele pagar impuesto sobre la renta. Si tienes menos de **59½**, a menudo hay un **impuesto adicional del 10%**, salvo que apliques a una excepción. El **Roth** funciona distinto para aportes y ganancias."
+      },
+      "hardship": {
+        "q": "¿Qué es un retiro por dificultad económica?",
+        "a": "Un retiro por dificultad te permite sacar dinero ante una necesidad económica inmediata y grave, como gastos médicos o evitar un desalojo, si tu plan lo permite. Paga impuestos, puede tener un **impuesto adicional del 10%** y no se puede devolver."
+      },
+      "track_request": {
+        "q": "¿Cómo sigo un préstamo o un retiro?",
+        "a": "Después de enviarlo, **Transacciones** muestra una línea de tiempo con cada etapa, como aprobado y fondos enviados, y la fecha esperada. También recibes una notificación cuando la etapa cambia."
+      },
+      "what_is_rollover": {
+        "q": "¿Qué es una transferencia de fondos (rollover)?",
+        "a": "Un rollover mueve ahorros de jubilación de un plan o IRA a otro sin pagar impuestos por el movimiento."
+      },
+      "roll_in": {
+        "q": "¿Puedo traer un 401(k) anterior a este plan?",
+        "a": "Sí, si tu plan acepta rollovers. Inicia uno desde **Transacciones**. Necesitarás los datos de la cuenta anterior, y el proveedor anterior envía el dinero a este plan."
+      },
+      "direct_vs_indirect": {
+        "q": "¿Rollover directo o indirecto?",
+        "a": "En un rollover **directo** el dinero va de un proveedor al otro y no se retienen impuestos. En uno **indirecto** recibes un cheque, normalmente se retiene el 20%, y tienes 60 días para depositar el monto completo y evitar impuestos."
+      },
+      "leaving_job": {
+        "q": "¿Qué opciones tengo si dejo mi empleo?",
+        "a": "Por lo general puedes dejar el dinero en el plan, pasarlo al plan de un nuevo empleador o a una IRA, o recibirlo en efectivo. El efectivo paga impuestos y puede tener un impuesto adicional del 10% antes de los 59½ años."
+      },
+      "beneficiary": {
+        "q": "¿Cómo agrego o cambio un beneficiario?",
+        "a": "Abre **Perfil** y luego Beneficiarios. Agrega personas, define sus porcentajes y firma la designación. Si estás casado(a) y nombras como primario a alguien que no es tu cónyuge, se necesita el consentimiento notariado de tu cónyuge."
+      },
+      "password": {
+        "q": "¿Cómo cambio mi contraseña?",
+        "a": "Abre **Perfil** y luego Contraseña. Si no puedes iniciar sesión, usa Olvidé mi contraseña en la página de inicio de sesión."
+      },
+      "documents": {
+        "q": "¿Dónde están mis estados de cuenta y formularios de impuestos?",
+        "a": "**Documentos** guarda estados de cuenta, formularios de impuestos, avisos del plan y confirmaciones. Puedes filtrar por tipo, descargar un PDF o generar un estado de cuenta del período que elijas."
+      },
+      "update_details": {
+        "q": "¿Cómo actualizo mi dirección o mis datos bancarios?",
+        "a": "Abre **Perfil**. Datos personales tiene tu dirección, que se verifica al guardar. Datos bancarios tiene la cuenta para pagos: confirmas tu identidad antes de cambiarla y luego verificas la cuenta nueva."
+      },
+      "other_accounts": {
+        "q": "¿Puedo ver aquí mis otras cuentas?",
+        "a": "Sí. **Cuentas vinculadas** te permite conectar o registrar cuentas que tienes en otros lugares, y muestra tu ahorro total para la jubilación y tu patrimonio neto."
+      }
+    }
+  },
+  "outside_assets": {
+    "nav_label": "Cuentas vinculadas",
+    "title": "Cuentas vinculadas",
+    "subtitle": "Tu ahorro para la jubilación y tu patrimonio neto en un solo lugar.",
+    "add": "Agregar cuenta",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "keep": "Conservar cuenta",
+    "edit": "Editar saldo",
+    "edit_aria": "Editar saldo de {{name}}",
+    "edit_title": "Actualizar saldo",
+    "remove": "Quitar",
+    "remove_aria": "Quitar {{name}}",
+    "remove_title": "¿Quitar esta cuenta?",
+    "remove_body_linked": "La conexión con esta institución termina y su saldo sale de tus totales. Puedes conectarla de nuevo después.",
+    "remove_body_manual": "Esta cuenta y su saldo salen de tus totales. Puedes agregarla de nuevo después.",
+    "accounts_title": "Tus cuentas",
+    "this_plan": "Este plan",
+    "total_retirement": "Ahorro total para la jubilación",
+    "total_retirement_note": "{{plan}} en este plan + {{outside}} en otros lugares",
+    "net_worth": "Patrimonio neto",
+    "net_worth_note": "{{assets}} en bienes − {{debts}} en deudas",
+    "mix_label": "Lo que tienes",
+    "updated": "Actualizado el {{date}}",
+    "notice_added": "Se agregó {{name}}.",
+    "notice_removed": "Se quitó {{name}}.",
+    "notice_updated": "Se actualizó {{name}}.",
+    "empty": {
+      "title": "Trae tus otras cuentas a la vista",
+      "body": "Este plan tiene {{balance}}. Agrega las cuentas que tienes en otros lugares para ver el panorama completo.",
+      "retirement_title": "Todo tu ahorro para la jubilación",
+      "retirement_body": "401(k) anteriores e IRA sumados a este plan.",
+      "net_worth_title": "Patrimonio neto",
+      "net_worth_body": "Lo que tienes menos lo que debes.",
+      "control_title": "Tú tienes el control",
+      "control_body": "Quita una cuenta cuando quieras.",
+      "cta_note": "Conecta una institución o registra un saldo a mano."
+    },
+    "form": {
+      "mode_label": "Cómo agregar la cuenta",
+      "mode_connect": "Conectar una institución",
+      "mode_manual": "Registrar a mano",
+      "institution": "Institución",
+      "institution_choose": "Elige una institución",
+      "type": "Tipo de cuenta",
+      "connect": "Conectar",
+      "connecting": "Conectando…",
+      "loading": "Cargando instituciones…",
+      "connect_note": "Inicias sesión con tu institución. Solo recibimos saldos, nunca tus datos de acceso.",
+      "nickname": "Nombre de la cuenta",
+      "nickname_hint": "Por ejemplo: 401(k) del empleador anterior",
+      "balance": "Saldo actual",
+      "balance_owed": "Monto adeudado",
+      "err_balance": "Escribe un monto, por ejemplo 12,500.",
+      "err_balance_max": "Escribe un monto menor de $1,000,000,000.",
+      "err_connect": "No pudimos conectar con esa institución. Inténtalo de nuevo o registra la cuenta a mano.",
+      "err_institution": "Elige una institución.",
+      "err_nickname": "Escribe un nombre para esta cuenta."
+    },
+    "group": {
+      "retirement": "Jubilación",
+      "assets": "Otros bienes",
+      "debts": "Deudas"
+    },
+    "slice": {
+      "plan": "Este plan",
+      "retirement": "Otra jubilación",
+      "cash": "Efectivo e inversiones",
+      "property": "Propiedades"
+    },
+    "source": {
+      "linked": "Conectada",
+      "manual": "Registrada por ti"
+    },
+    "type": {
+      "retirement_401k": "401(k)",
+      "ira": "IRA tradicional",
+      "roth_ira": "Roth IRA",
+      "brokerage": "Cuenta de inversión",
+      "savings": "Ahorros",
+      "checking": "Cuenta corriente",
+      "property": "Propiedad",
+      "mortgage": "Hipoteca",
+      "loan": "Préstamo",
+      "credit_card": "Tarjeta de crédito"
+    },
+    "card_title": "Todas tus cuentas",
+    "card_retirement": "Ahorro para la jubilación",
+    "card_invite": "Vincula las cuentas que tienes en otros lugares para ver tu ahorro total para la jubilación y tu patrimonio neto.",
+    "card_link": "Ver cuentas vinculadas",
+    "card_link_empty": "Vincular una cuenta"
+  },
+  "verify": {
+    "cancel": "Cancelar",
+    "continue": "Continuar",
+    "close": "Cerrar",
+    "done": "Listo",
+    "identity": {
+      "title": "Confirma que eres tú",
+      "intro": "Antes de cambiar datos bancarios o beneficiarios, confirma dos datos de tu registro. Toma cerca de un minuto.",
+      "last4": "Últimos 4 dígitos de tu SSN",
+      "dob": "Fecha de nacimiento",
+      "err_match": "Estos datos no coinciden con tu registro.",
+      "progress": "Pregunta {{n}} de {{total}}",
+      "q_street": "¿En cuál de estas calles has vivido?",
+      "q_city": "¿En cuál de estas ciudades has tenido una dirección?",
+      "q_hire_year": "¿En qué año empezaste con tu empleador actual?",
+      "finish": "Confirmar",
+      "passed_title": "Identidad confirmada",
+      "passed_body": "No te lo volveremos a pedir durante los próximos 15 minutos.",
+      "failed_title": "No pudimos confirmar que eres tú",
+      "failed_body_one": "Revisa tus respuestas e inténtalo de nuevo. Te queda {{count}} intento.",
+      "failed_body_other": "Revisa tus respuestas e inténtalo de nuevo. Te quedan {{count}} intentos.",
+      "try_again": "Intentar de nuevo",
+      "locked_title": "Demasiados intentos",
+      "locked_body": "Por tu seguridad, los cambios están en pausa. Abre una solicitud de servicio o llama a la línea de apoyo del plan para continuar."
+    },
+    "address": {
+      "corrected_title": "Confirma tu dirección",
+      "corrected_body": "Ajustamos tu dirección al formato postal. Elige cuál guardar.",
+      "suggested": "Sugerida",
+      "entered": "Como la escribiste",
+      "use": "Usar esta dirección",
+      "edit": "Editar dirección",
+      "keep": "Dejarla como está",
+      "unverified_title": "No pudimos verificar esta dirección",
+      "issue_zip_state_mismatch": "El código postal no corresponde al estado que escribiste. Revisa ambos e inténtalo de nuevo.",
+      "issue_missing_street_number": "La línea de la calle necesita un número de casa o edificio, o un apartado postal.",
+      "issue_unknown_state": "No reconocemos ese estado. Escribe el nombre completo o el código de dos letras.",
+      "issue_outside_us": "Las direcciones fuera de Estados Unidos no se pueden verificar automáticamente. Puedes dejarla como está.",
+      "badge_verified": "Dirección verificada",
+      "badge_unverified": "Sin verificar"
+    },
+    "bank": {
+      "title": "Verifica tu cuenta bancaria",
+      "intro": "Confirmamos que la cuenta es tuya antes de enviarle dinero.",
+      "instant": "Verificar al instante",
+      "instant_sub": "Revisamos la cuenta y el nombre del titular ahora mismo.",
+      "deposits": "Usar dos depósitos pequeños",
+      "deposits_sub": "Enviamos dos depósitos de menos de $1. Escribe los montos cuando lleguen, en 1 a 2 días hábiles.",
+      "failed_title": "La verificación instantánea no funcionó",
+      "failed_name_mismatch": "El nombre de la cuenta no coincide con el de tu registro del plan. Puedes verificar con dos depósitos pequeños.",
+      "failed_routing_not_found": "No encontramos un banco con ese número de ruta. Revisa el número o verifica con dos depósitos pequeños.",
+      "use_deposits": "Enviar dos depósitos",
+      "deposits_sent": "Se enviaron dos depósitos pequeños el {{date}}. Escribe ambos montos tal como aparecen en tu estado de cuenta.",
+      "amount_first": "Primer depósito ($)",
+      "amount_second": "Segundo depósito ($)",
+      "amount_error": "Esos montos no coinciden. Escribe dos montos distintos menores de $1.00.",
+      "later": "Lo haré después",
+      "confirm": "Confirmar montos",
+      "done_title": "Cuenta verificada",
+      "done_body": "Esta cuenta ya puede recibir pagos de préstamos y retiros.",
+      "status": "Verificación",
+      "status_verified": "Verificada el {{date}}",
+      "status_pending": "Depósitos enviados",
+      "status_unverified": "Sin verificar",
+      "verify_cta": "Verificar cuenta",
+      "enter_amounts": "Escribir montos"
+    },
+    "bene": {
+      "unsigned_title": "Tu elección de beneficiarios necesita tu firma",
+      "unsigned_body": "Entra en vigor cuando firmes electrónicamente.",
+      "changed_body": "Tus beneficiarios cambiaron desde tu última firma. Firma de nuevo para oficializar el cambio.",
+      "sign_cta": "Revisar y firmar",
+      "dialog_title": "Firma tu designación de beneficiarios",
+      "dialog_intro": "Revisa las personas y los porcentajes, y luego escribe tu nombre para firmar.",
+      "sign_label": "Escribe tu nombre legal completo",
+      "sign_hint": "Como aparece en tu registro: {{name}}",
+      "sign_error": "No coincide con el nombre de tu registro.",
+      "agree": "Confirmo estos beneficiarios y porcentajes, y acepto que escribir mi nombre es mi firma.",
+      "sign": "Firmar",
+      "consent_title": "Se necesita el consentimiento de tu cónyuge",
+      "consent_body": "Estás casado(a) y parte del porcentaje primario va a alguien que no es tu cónyuge.",
+      "consent_cta": "Solicitar consentimiento",
+      "consent_dialog_body": "Le enviaremos a tu cónyuge un enlace seguro para firmar el consentimiento en una videollamada con un notario en línea. Suele tomar unos 10 minutos.",
+      "spouse_email": "Correo electrónico de tu cónyuge",
+      "send": "Enviar solicitud",
+      "later": "Ahora no",
+      "waiting_title": "Esperando el consentimiento notariado de tu cónyuge",
+      "waiting_body": "Enviado a {{email}} el {{date}}. Tu designación entra en vigor cuando se firme.",
+      "check_status": "Consultar estado",
+      "complete_title": "Designación firmada y vigente",
+      "complete_body": "Firmada el {{signed}}.",
+      "complete_body_consent": "Firmada el {{signed}}. Consentimiento del cónyuge notariado el {{consent}}."
+    }
+  },
+  "comms": {
+    "title": "Preferencias de comunicación",
+    "sent_to": "Usamos {{email}} y {{phone}}.",
+    "change_contact": "Cambiar datos de contacto",
+    "delivery": "Estados de cuenta, formularios de impuestos y avisos del plan",
+    "delivery_paperless": "Sin papel",
+    "delivery_paperless_sub": "Por correo electrónico cuando estén listos, y guardados en Documentos.",
+    "delivery_mail": "En papel por correo",
+    "delivery_mail_sub": "Enviados a tu domicilio. También disponibles en Documentos.",
+    "topics": "Sobre qué te contactamos",
+    "topic": "Tema",
+    "email": "Correo",
+    "text": "SMS",
+    "required": "Obligatorio",
+    "topic_notices": "Avisos y divulgaciones del plan",
+    "topic_notices_sub": "Divulgación de comisiones, cambios del plan, avisos anuales",
+    "topic_statements": "Estados de cuenta y formularios de impuestos",
+    "topic_statements_sub": "Estados trimestrales, 1099-R",
+    "topic_transactions": "Avances de transacciones",
+    "topic_transactions_sub": "Préstamo aprobado, cheque en camino, fondos recibidos",
+    "topic_contributions": "Cambios en aportes",
+    "topic_contributions_sub": "Cambios de tasa, aumento automático, depósitos de nómina",
+    "topic_education": "Orientación y próximos pasos",
+    "topic_education_sub": "Recordatorios del aporte del empleador, consejos, artículos",
+    "topic_market": "Novedades del mercado",
+    "topic_market_sub": "Comentario semanal sobre tus fondos",
+    "portal_note": "Todo aparece también en tus notificaciones aquí en el portal.",
+    "text_consent": "Al guardar, aceptas recibir mensajes de texto en el número móvil de tu registro. Pueden aplicarse cargos por mensajes y datos. Puedes desactivar los SMS aquí cuando quieras.",
+    "save": "Guardar preferencias"
+  },
   "app_name": "Portal del Participante",
   "language": "Idioma",
   "lang": {
@@ -81,7 +449,7 @@
     "resend_no_email": "No pudimos determinar su correo. Inicie sesión de nuevo para solicitar un código.",
     "platform_name": "Plataforma de Inteligencia para la Jubilación",
     "platform_by": "por Congruent Solutions",
-    "copyright": "© Congruent Solutions, Inc. Todos los derechos reservados",
+    "copyright": "© {{year}} Congruent Solutions, Inc. Todos los derechos reservados.",
     "privacy_policy": "Política de privacidad"
   },
   "carousel": {
@@ -128,7 +496,7 @@
     "subtitle": "Active su 401(k) en unos pocos pasos. Personalizaremos la experiencia para usted.",
     "start_enrollment": "Personalizar mi plan",
     "learn_plan": "Conocer el plan",
-    "time_note": "Solo toma unos minutos",
+    "time_note": "Paso a paso, unos 5 min",
     "video_aria": "Vídeo de presentación de su plan de jubilación y la experiencia de inscripción",
     "greeting_morning": "Buenos días",
     "greeting_afternoon": "Buenas tardes",
@@ -141,7 +509,8 @@
     "modal_personalize_subtitle": "Personalicemos su viaje de jubilación.",
     "one_click_hint": "¿Poco tiempo?",
     "one_click": "Inscríbete en un clic",
-    "one_click_note": "Listo en segundos",
+    "one_click_note": "Configuración predeterminada del plan",
+    "one_click_time": "Toma menos de un minuto",
     "illustration_alt": "Carretera costera que avanza hacia el atardecer"
   },
   "learning": {
@@ -156,7 +525,7 @@
   },
   "advisor": {
     "title": "Hablar con un asesor",
-    "subtitle": "Obtenga orientación personalizada de un planificador de jubilación certificado. Reserve una sesión gratuita de 30 minutos.",
+    "subtitle": "Obtenga orientación personalizada de un planificador de jubilación certificado. Reserve una sesión de 30 minutos.",
     "browse": "Ver asesores",
     "meet_expert": "Conoce a un experto"
   },
@@ -201,7 +570,7 @@
     "leave_feedback": "Dejar comentarios"
   },
   "footer": {
-    "copyright": "© {{year}} Congruent Solutions Inc. Todos los derechos reservados.",
+    "copyright": "© {{year}} Congruent Solutions, Inc. Todos los derechos reservados.",
     "privacy": "Política de privacidad",
     "terms": "Términos de servicio",
     "help": "Centro de ayuda"
@@ -348,6 +717,8 @@
       "opt_15": "15%",
       "pro_tip": "Consejo",
       "per_month_from_pay": "al mes de tu sueldo",
+      "decrease": "Reducir aporte",
+      "increase": "Aumentar aporte",
       "match_simple": "Tu empleador añade {{amount}}/año",
       "match_more": "Ahorra el {{pct}} % para recibir los {{amount}}/año completos",
       "match_after_tax": "El ahorro después de impuestos no recibe aportación",
@@ -581,8 +952,8 @@
           "balance_change": "+2.4% this month"
         },
         "trad-401k": {
-          "name": "Traditional 401(k)",
-          "type": "Traditional 401(k)",
+          "name": "401(k) tradicional",
+          "type": "401(k) tradicional",
           "description": "Maximize your savings with pre-tax contributions. This plan allows you to defer taxes on your contributions and earnings until withdrawal."
         },
         "roth-ira": {
@@ -1433,7 +1804,7 @@
       "have_salary": "{{amount}} al año"
     },
     "rw": {
-      "plan_name": "Plan 401(k)",
+      "plan_name": "Plan de ahorro 401(k) de {{employer}}",
       "sample": "Muestra"
     },
     "core": {
@@ -1519,7 +1890,7 @@
       "style_conservative": "Conservador",
       "style_moderate": "Moderado",
       "style_aggressive": "Agresivo",
-      "match_tip": "Dinero extra de tu empleador, que se suma a tu cuenta además de lo que ahorras. Aporta el {{rate}} % de lo que contribuyes, hasta el {{cap}} % de tu sueldo. Con tu sueldo mensual de {{pay}}, ahorrar el {{cap}} % te da los {{amount}} completos al mes.",
+      "match_tip": "Ahorra {{save}} al mes ({{cap}} % de tu sueldo) y tu empleador añade otros {{amount}}. Antes de impuestos y Roth cuentan juntos, p. ej., {{half}} % antes de impuestos + {{half}} % Roth. Después de impuestos no se iguala.",
       "auto_enabled": "Activado",
       "row_invest": "Estilo de inversión",
       "row_options": "Opciones de la cuenta",
@@ -1554,8 +1925,8 @@
       "submit_error": "No pude enviar su inscripción. No se perdió nada y sus elecciones están tal como las dejó. Apruebe de nuevo para reintentar.",
       "consent": "Acepto los <terms>Términos y condiciones</terms> del <b>{{plan}}</b>.",
       "read_disclosures": "Leer la información ({{n}})",
-      "bene_warn_title": "Aún no has agregado beneficiarios",
-      "bene_warn_body": "Podrías perder tus ahorros si no agregas un beneficiario. Agregar uno solo toma un minuto.",
+      "bene_warn_title": "¿Quién debería recibir tus ahorros?",
+      "bene_warn_body": "Agrega un beneficiario para que tus ahorros vayan a las personas que elijas, no según las reglas predeterminadas del plan. Toma cerca de un minuto.",
       "bene_warn_skip": "Omitir por ahora",
       "src_pre": "Antes de impuestos",
       "src_roth": "Roth",
@@ -1664,6 +2035,26 @@
       "reset_toast": "Volvimos a los valores predeterminados de su plan.",
       "ready_lead": "Su plan está",
       "ready_word": "listo",
+      "match_tip_intro": "Tu empleador añade {{per}} por cada $1 que ahorras, hasta el {{cap}} % de tu sueldo.",
+      "match_tip_on": "Con tu sueldo mensual de {{pay}}:",
+      "match_col_you": "Ahorras",
+      "match_col_employer": "Empleador",
+      "match_col_total": "Total",
+      "match_max": "máx.",
+      "match_tip_sources": "Antes de impuestos y Roth cuentan juntos. Después de impuestos no se iguala.",
+      "plan_label": "Plan",
+      "first_on": "Primera aportación: {{date}}",
+      "plan_type": "Tipo de plan",
+      "agree": "Aceptar",
+      "sources_title": "Cómo se reparte tu {{total}} %",
+      "src_tip_preTax": "Reduce tu sueldo sujeto a impuestos ahora. Tributa al retirarlo.",
+      "src_tip_roth": "Tributa ahora. Libre de impuestos al retirarlo en la jubilación.",
+      "src_tip_afterTax": "Tributa ahora; solo el crecimiento tributa después. Sin aportación del empleador.",
+      "ready_tail": " para la inscripción",
+      "not_guaranteed": "No garantizado",
+      "proj_basis": "Basado en un crecimiento medio anual del {{rate}} %.",
+      "auto_tip": "Sube tu tasa de ahorro un poco cada año, hasta un límite. Puedes cambiarlo o detenerlo cuando quieras.",
+      "invest_tip": "Cómo se invierte tu dinero. Los estilos de crecimiento buscan más a largo plazo, pero suben y bajan más por el camino.",
       "building": "Preparando tu plan",
       "review_enroll": "Revise e inscríbase",
       "of_pay": "del salario",
@@ -2095,6 +2486,7 @@
   },
   "dashboard": {
     "overview": "Resumen",
+    "overview_sub": "Tu cuenta de jubilación de un vistazo: saldo, aportes, inversiones y próximos pasos.",
     "greeting_morning": "Buenos días",
     "greeting_afternoon": "Buenas tardes",
     "greeting_evening": "Buenas noches",
@@ -2129,6 +2521,31 @@
     "ql_statement": "Generar estado de cuenta"
   },
   "postDashboard": {
+    "actions_rest_done": "Todo lo demás está al día.",
+    "c_you": "Ahorras",
+    "c_employer": "Aporta tu empleador",
+    "c_total": "Total",
+    "per_mo": "/mes",
+    "c_of_pay": "{{pct}} % del sueldo",
+    "c_full_match": "Aportación completa",
+    "c_match_gap": "{{amount}}/mes sin reclamar",
+    "c_total_sub": "Entra cada mes",
+    "limit_left": "disponibles de {{limit}}",
+    "limit_pace": "{{ytd}} aportados hasta ahora · vas camino de {{projected}} este año",
+    "limit_pace_est": "Unos {{ytd}} aportados hasta ahora · vas camino de {{projected}} este año",
+    "loans_title": "Préstamos activos",
+    "loans_total": "Total pendiente",
+    "loan_general": "Uso general",
+    "loan_residential": "Compra de vivienda",
+    "loan_since": "desde {{date}}",
+    "loan_paid": "{{pct}} % pagado",
+    "loan_left_one": "{{count}} pago restante",
+    "loan_left_other": "{{count}} pagos restantes",
+    "loan_next_short": "Próximo {{amount}} · {{date}}",
+    "this_quarter": "este trimestre",
+    "actions_count": "{{count}} pendientes",
+    "contributions_title": "Tus aportaciones",
+    "library_cta": "Explorar la biblioteca",
     "summary_suffix": "Aquí está el resumen de tu jubilación.",
     "greeting_morning": "Buenos días, {{name}}.",
     "greeting_afternoon": "Buenas tardes, {{name}}.",
@@ -2363,6 +2780,7 @@
     }
   },
   "alerts": {
+    "sr_resolved_body": "Ref. {{ref}} · Resuelta el {{date}}",
     "section_label": "Notificaciones",
     "dismiss": "Descartar notificación",
     "empty": "Estás al día.",
@@ -2384,7 +2802,7 @@
     "adviser_message_body": "Abre la conversación para leerlo.",
     "adviser_meeting_title": "Próxima reunión con tu asesor",
     "sr_update_title": "Solicitud de servicio {{ref}}: {{stage}}",
-    "sr_resolved_title": "La solicitud de servicio {{ref}} está resuelta",
+    "sr_resolved_title": "Tu solicitud \"{{subject}}\" está completa",
     "cta_view_request": "Ver solicitud"
   },
   "documents": {
@@ -2646,6 +3064,7 @@
     "tab_history": "Historial",
     "src_preTax": "Antes de impuestos",
     "src_roth": "Roth",
+    "src_afterTax": "Después de impuestos",
     "def": {
       "title": "Aportación y aumento automático",
       "edit_title": "Editar aportación",
@@ -2657,6 +3076,7 @@
       "per_paycheck": "por pago",
       "explain_preTax": "Las aportaciones antes de impuestos reducen tus impuestos de este año. Las aportaciones y sus rendimientos tributan al retirarlos, pero no al transferirlos.",
       "explain_roth": "Las aportaciones Roth tributan el año en que aportas, pero no al retirarlas. Los rendimientos están libres de impuestos si se cumplen las reglas de edad y plazo.",
+      "explain_afterTax": "Los ahorros después de impuestos tributan ahora. Solo su crecimiento tributa al retirarlos, y tu empleador no los iguala.",
       "limit_warning": "Con esta tasa alcanzarás el límite del IRS de {{year}} ({{limit}}) antes de fin de año. Las aportaciones se detienen solas al alcanzarlo.",
       "err_zero": "Introduce una aportación mayor que 0 o date de baja del plan.",
       "err_max": "La aportación total no puede superar el {{max}}% del salario.",
@@ -3175,15 +3595,23 @@
     }
   },
   "pre_dashboard": {
+    "advisor_heading": "Habla con un experto en jubilación",
+    "advisor_available": "Disponible hoy",
+    "advisor_meta": "{{years}} años de experiencia · calificación {{rating}}",
+    "advisor_book": "Reserva una sesión",
+    "advisor_tips_title": "Consejos rápidos de {{name}}",
+    "advisor_tip1": "Ahorra al menos el {{cap}} % de tu sueldo para recibir toda la aportación del empleador.",
+    "advisor_tip2": "Ahorrar antes de impuestos reduce el impuesto sobre la renta que pagas hoy.",
+    "advisor_tip3": "Empieza poco a poco: subir tu aporte un 1 % al año suma con el tiempo.",
     "title": "Un mañana mejor",
     "title_accent": "empieza hoy.",
-    "why_title": "Por qué inscribirte ahora",
-    "why_sub": "Un 401(k) es una cuenta de jubilación que financias desde tu sueldo, y tu empleador también aporta.",
+    "why_title": "Prepárate para inscribirte",
+    "why_sub": "Aprende lo básico, haz una pregunta rápida o habla con un experto antes de empezar.",
     "learn_more_heading": "Conoce más sobre el plan",
     "plan_match_title": "Aportación del empleador",
     "plan_match_line": "{{employer}} por cada {{you}} que ahorras, hasta el {{cap}} %",
     "plan_tax_line": "Pagas impuestos sobre menos de tu sueldo",
-    "plan_advisor_line": "Sesión gratuita de 30 minutos",
+    "plan_advisor_line": "Sesión de 30 minutos",
     "match_title": "Tu empleador iguala lo que ahorras",
     "match_desc": "Por cada {{you}} que ahorras, tu empleador añade {{employer}}, hasta el {{cap}} % de tu sueldo.",
     "coin_you": "Tú",
@@ -3209,10 +3637,14 @@
     "chat_a2": "Tu empleador añade el {{rate}} % de lo que ahorras, hasta el {{cap}} % de tu sueldo.",
     "chat_q3": "¿Puedo cambiar mi tasa más adelante?",
     "chat_a3": "Sí. Puedes cambiar tu tasa de contribución después de inscribirte.",
+    "chat_q4": "¿Cuánto debería ahorrar?",
+    "chat_a4": "Ahorra al menos el {{cap}} % para recibir toda la aportación. Muchas personas llegan al 10–15 % con el tiempo.",
+    "chat_q5": "¿Cuándo puedo retirar dinero?",
+    "chat_a5": "Normalmente desde los 59½ años sin penalización. Tu plan también puede ofrecer préstamos.",
     "replay_animation": "Repetir animación",
     "pause_animation": "Pausar animación",
     "play_animation": "Reproducir animación",
-    "advisor_note": "Una sesión gratuita de 30 minutos con un profesional certificado.",
+    "advisor_note": "Una sesión de 30 minutos con un profesional certificado.",
     "advisor_role1": "Planificación financiera",
     "advisor_role2": "Asesoría patrimonial",
     "advisor_role3": "Ingresos de jubilación"

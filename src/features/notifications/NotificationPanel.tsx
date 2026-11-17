@@ -67,7 +67,7 @@ export function NotificationPanel({ open, onClose, notifications }: Notification
                   {t('nav.notifications_title')}
                 </h2>
                 {unreadCount > 0 && (
-                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                  <span className="rounded-full bg-[color:color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-2 py-0.5 text-xs font-semibold text-primary">
                     {t('nav.notifications_new', { count: unreadCount })}
                   </span>
                 )}
@@ -105,7 +105,7 @@ export function NotificationPanel({ open, onClose, notifications }: Notification
                     exit={reduce ? { opacity: 0 } : { opacity: 0, x: 40, transition: { duration: 0.18 } }}
                     transition={{ duration: reduce ? 0 : 0.28, delay: reduce ? 0 : 0.08 + i * 0.04, ease }}
                     className={`group relative rounded-xl border transition-colors ${
-                      unread ? 'border-primary/20 bg-primary/[0.04]' : 'border-border-default bg-surface-card'
+                      unread ? 'border-[color:color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color:color-mix(in_srgb,var(--color-primary)_4%,transparent)]' : 'border-border-default bg-surface-card'
                     } ${n.href ? 'hover:bg-surface-elevated' : ''}`}
                   >
                     {n.href ? (

@@ -1,12 +1,16 @@
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Eye, EyeOff } from 'lucide-react'
+import { BadgeCheck, Eye, EyeOff } from 'lucide-react'
 import { Input } from '@/design-system/components/Input'
 import { Select } from '@/design-system/components/Select'
 import { ACCOUNT_TYPES, digitsOnly, isAbaRouting, isAccountNumber, maskAccount, type BankDetails } from '../profileData'
 import { useProfileStore } from '../profileStore'
 import { FormActions, ProfileCard, ReadField, ReadGrid } from './ProfileCard'
 import { useOptions } from './useOptions'
+import { BankVerifyDialog } from '@/features/verification/BankVerifyDialog'
+import { useIdentityGate } from '@/features/verification/useIdentityGate'
+import { useVerificationStore } from '@/features/verification/verificationStore'
+import { getAppDateLocale } from '@/lib/dateLocale'
 
 export function BankDetailsPanel() {
   const { t } = useTranslation()
@@ -22,6 +26,11 @@ export function BankDetailsPanel() {
   const [draftAcct, setDraftAcct] = useState(accountNumber)
   const [draftRouting, setDraftRouting] = useState(routing)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const lastName = useProfileStore((s) => s.personal.lastName)
+  const verification = useVerificationStore((s) => s.bank)
+  const setVerification = useVerificationStore((s) => s.setBank)
+  const [verifying, setVerifying] = useState(false)
+  const { guard, dialog: identityDialog } = useIdentityGate()
 
   const typeOptions = useOptions('profile.d.acct_', ACCOUNT_TYPES)
 
@@ -46,16 +55,22 @@ export function BankDetailsPanel() {
       requestAnimationFrame(() => document.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus())
       return
     }
+    // A different account has to be verified again before money can be sent to it
+    const accountChanged = digitsOnly(draftAcct) !== accountNumber || digitsOnly(draftRouting) !== routing || draft.accountHolder.trim() !== bank.accountHolder
     save({ ...draft, accountHolder: draft.accountHolder.trim(), bankName: draft.bankName.trim() }, digitsOnly(draftAcct), digitsOnly(draftRouting))
     setEditing(false)
     setSaved(true)
+    if (accountChanged) {
+      setVerification({ status: 'unverified' })
+      setVerifying(true)
+    }
   }
 
   const inv = (k: string) => ({ error: errors[k], 'aria-invalid': errors[k] ? (true as const) : undefined })
 
   if (!editing) {
     return (
-      <ProfileCard title={t('profile.d.bank_title')} subtitle={t('profile.d.bank_sub')} onEdit={startEdit} saved={saved}>
+      <ProfileCard title={t('profile.d.bank_title')} subtitle={t('profile.d.bank_sub')} onEdit={() => guard(startEdit)} saved={saved}>
         <ReadGrid>
           <ReadField label={t('profile.d.acct_holder')}>{bank.accountHolder}</ReadField>
           <ReadField label={t('profile.d.bank_name')}>{bank.bankName}</ReadField>
@@ -69,7 +84,24 @@ export function BankDetailsPanel() {
             </span>
           </ReadField>
           <ReadField label={t('profile.d.routing')}><span className="tabular-nums">{routing}</span></ReadField>
+          <ReadField label={t('verify.bank.status')}>
+            {verification.status === 'verified' ? (
+              <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400">
+                <BadgeCheck className="h-4 w-4" aria-hidden />
+                {t('verify.bank.status_verified', { date: new Date(verification.verifiedAt).toLocaleDateString(getAppDateLocale(), { year: 'numeric', month: 'short', day: 'numeric' }) })}
+              </span>
+            ) : (
+              <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span className="font-semibold text-amber-700 dark:text-amber-300">{t(verification.status === 'pending_deposits' ? 'verify.bank.status_pending' : 'verify.bank.status_unverified')}</span>
+                <button type="button" onClick={() => setVerifying(true)} className="font-semibold text-primary hover:underline dark:text-blue-300">
+                  {t(verification.status === 'pending_deposits' ? 'verify.bank.enter_amounts' : 'verify.bank.verify_cta')}
+                </button>
+              </span>
+            )}
+          </ReadField>
         </ReadGrid>
+        {identityDialog}
+        <BankVerifyDialog open={verifying} onClose={() => setVerifying(false)} accountHolder={bank.accountHolder} routing={routing} participantLastName={lastName} />
       </ProfileCard>
     )
   }
