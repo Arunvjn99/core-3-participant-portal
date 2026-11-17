@@ -110,7 +110,7 @@ export default function ReviewEnrollment() {
   ]
 
   const handleConfirm = useCallback(async () => {
-    advanceStep({ confirmedAt: Date.now(), agreed: true }, 'review')
+    advanceStep({ confirmedAt: Date.now(), agreed: true, method: 'guided' }, 'review')
     useEnrollmentDraftStore.getState().setEnrollmentStatus('complete')
     const split = data.contributionSources
     const splitTotal = split.preTax + split.roth + split.afterTax || 100

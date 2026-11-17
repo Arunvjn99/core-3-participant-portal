@@ -381,7 +381,7 @@ export default function CoreEnrollment() {
       useEnrollmentDraftStore.setState((s) => ({
         currentStep: 8,
         highestCompletedStep: Math.max(s.highestCompletedStep, 7),
-        draftData: { ...s.draftData, review: { confirmedAt: conf.submittedAt, agreed: true } },
+        draftData: { ...s.draftData, review: { confirmedAt: conf.submittedAt, agreed: true, method: 'one_click' } },
         enrollmentStatus: 'complete',
       }))
       useElectionsStore.getState().applyEnrollment({

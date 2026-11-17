@@ -60,6 +60,8 @@ export interface ReadinessDraftData {
 export interface ReviewDraftData {
   confirmedAt: number
   agreed?: boolean
+  /** How they enrolled. One-click skips the readiness questions, so the dashboard asks for them afterwards. */
+  method?: 'one_click' | 'guided'
 }
 
 export interface SavingsDraftData {

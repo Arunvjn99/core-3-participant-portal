@@ -1,5 +1,7 @@
 {
   "next_actions": {
+    "check_readiness": "Revisa tu preparación para la jubilación",
+    "check_readiness_sub": "Unas preguntas rápidas, unos 2 minutos.",
     "done_beneficiary": "Beneficiarios registrados",
     "done_full_match": "Recibe el aporte completo del empleador",
     "done_verify_bank": "Cuenta bancaria verificada",
@@ -2593,6 +2595,13 @@
     "ql_statement": "Generar estado de cuenta"
   },
   "postDashboard": {
+    "readiness_pending_status": "Aún sin revisar",
+    "readiness_pending_body": "Te inscribiste con un clic, así que aún no te preguntamos por tus metas de jubilación.",
+    "readiness_pending_q1": "Cuándo te gustaría jubilarte",
+    "readiness_pending_q2": "Cuánto gastarás cada mes",
+    "readiness_pending_q3": "Ahorros que tienes en otras cuentas",
+    "readiness_pending_cta": "Revisar mi preparación",
+    "readiness_pending_time": "Unos 2 min",
     "rollover_title": "¿Quieres transferir tus fondos?",
     "rollover_body_known_one": "Tienes <b>{{amount}}</b> en otra cuenta de jubilación ({{names}}). Transferirla a tu {{plan}} mantiene tus ahorros en un solo lugar.",
     "rollover_body_known_other": "Tienes <b>{{amount}}</b> en {{count}} cuentas de jubilación más ({{names}}). Transferirlas a tu {{plan}} mantiene tus ahorros en un solo lugar.",

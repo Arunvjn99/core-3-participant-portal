@@ -3,9 +3,11 @@ import { useEnrollment } from '@/core/hooks/useEnrollment'
 import { useContributionLimits } from '@/features/contributions/useContributionLimits'
 import { useOutsideAssetsStore } from '@/features/outside-assets/outsideAssetsStore'
 import { useProfileStore } from '@/features/profile/profileStore'
+import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
+import { useRetirementGoal } from '@/features/retirement/retirementStore'
 import { addressKey, designationFingerprint, useVerificationStore } from '@/features/verification/verificationStore'
 
-export type NextActionId = 'add_beneficiary' | 'sign_beneficiary' | 'spouse_consent' | 'full_match' | 'verify_bank' | 'verify_address' | 'auto_increase' | 'link_accounts' | 'review_risk'
+export type NextActionId = 'add_beneficiary' | 'sign_beneficiary' | 'spouse_consent' | 'check_readiness' | 'full_match' | 'verify_bank' | 'verify_address' | 'auto_increase' | 'link_accounts' | 'review_risk'
 
 export interface NextAction {
   id: NextActionId
@@ -35,6 +37,10 @@ export function useNextBestActions(): { pending: NextAction[]; done: DoneActionI
   const bank = useVerificationStore((s) => s.bank)
   const addressVerifiedFor = useVerificationStore((s) => s.addressVerifiedFor)
   const linkedCount = useOutsideAssetsStore((s) => s.accounts.length)
+  // One-click enrollment skips the readiness questions; until they are answered, asking them comes first after anything required
+  const enrolledOneClick = useEnrollmentDraftStore((s) => s.draftData.review?.method === 'one_click')
+  const readinessCheckedAt = useRetirementGoal((s) => s.checkedAt)
+  const readinessPending = enrolledOneClick && !readinessCheckedAt
 
   return useMemo(() => {
     const actions: NextAction[] = []
@@ -49,6 +55,8 @@ export function useNextBestActions(): { pending: NextAction[]; done: DoneActionI
       if (consentNeeded && consent.status !== 'completed') actions.push({ id: 'spouse_consent', href: '/profile?section=beneficiary', required: true })
       else done.push('beneficiary')
     }
+
+    if (readinessPending) actions.push({ id: 'check_readiness', href: '/retirement-goal' })
 
     if (limits.match.gapPercent > 0) {
       actions.push({ id: 'full_match', href: '/enrollment/contribution', values: { amount: `$${limits.match.missedAnnual.toLocaleString()}` } })
@@ -65,5 +73,5 @@ export function useNextBestActions(): { pending: NextAction[]; done: DoneActionI
     // Always something useful to do, even when every item above is settled
     actions.push({ id: 'review_risk', href: '/investments' })
     return { pending: actions, done }
-  }, [beneficiaries, designation, personal, consent, limits, bank, addressVerifiedFor, data.autoIncrease, linkedCount])
+  }, [beneficiaries, designation, personal, consent, limits, bank, addressVerifiedFor, data.autoIncrease, linkedCount, readinessPending])
 }

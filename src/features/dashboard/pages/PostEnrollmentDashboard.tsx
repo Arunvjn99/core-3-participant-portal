@@ -20,6 +20,7 @@ import {
   Building2,
   Mail,
   CalendarDays,
+  Target,
   Lock,
   Zap,
   ChevronRight,
@@ -48,6 +49,8 @@ import { InfoTip } from '@/features/enrollment/flow/core/ui'
 import { PLAN_CONFIG } from '@/features/enrollment/agent/planConfig'
 import { ASSET_SLICES, accountName, formatMoney, summarize, type AssetSlice } from '@/features/outside-assets/summary'
 import { useProfileStore } from '@/features/profile/profileStore'
+import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
+import { useRetirementGoal } from '@/features/retirement/retirementStore'
 
 const ease = [0.22, 1, 0.36, 1] as const
 
@@ -135,6 +138,7 @@ const NEXT_ACTION_ICONS: Record<NextActionId, React.ComponentType<{ className?: 
   auto_increase: TrendingUp,
   link_accounts: Link2,
   review_risk: Shield,
+  check_readiness: Target,
 }
 
 /** Card surfaces from the pre-enrollment dashboard, so both dashboards share one look in light and dark. */
@@ -466,6 +470,10 @@ export default function PostEnrollmentDashboard() {
   const replacePct = data.salary > 0 ? Math.round((income.total / data.salary) * 100) : 0
   // On track above 70 (green), needs attention 50 to 70 (amber), off track under 50 (red)
   const band = READINESS_BANDS[readinessBandOf(readinessShown)]
+  // Enrolled in one click and not yet asked about retirement goals: the score would be a guess, so the card asks instead
+  const enrolledOneClick = useEnrollmentDraftStore((s) => s.draftData.review?.method === 'one_click')
+  const readinessCheckedAt = useRetirementGoal((s) => s.checkedAt)
+  const readinessPending = enrolledOneClick && !readinessCheckedAt
   // Soft shades of the band's colour run round the ring; a full ring is one even shade, so there is no join at the top
   const ringFull = readinessShown >= 100
   const ringSegments = useMemo(() => ringArcs(ringFull ? [band.ring[1], band.ring[1]] : [...band.ring]), [band, ringFull])
@@ -592,10 +600,12 @@ export default function PostEnrollmentDashboard() {
               <div className="mb-5">
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">{t('dashboard.totalBalance')}</p>
-                  <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold ${band.pill}`}>
-                    <span className={`h-1.5 w-1.5 rounded-full ${band.dot}`} aria-hidden />
-                    {t(band.labelKey)}
-                  </span>
+                  {!readinessPending && (
+                    <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold ${band.pill}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${band.dot}`} aria-hidden />
+                      {t(band.labelKey)}
+                    </span>
+                  )}
                 </div>
                 <p className="mt-1.5 text-[36px] font-bold leading-none tracking-tight tabular-nums text-text-primary">{money(Math.round(account.balance))}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -665,6 +675,42 @@ export default function PostEnrollmentDashboard() {
                 </div>
               </div>
 
+              {readinessPending ? (
+                <>
+              {/* Not checked yet: an empty dashed ring, why there's no score, what will be asked, and the way in */}
+              <div className="flex flex-1 flex-col items-center justify-center py-1 text-center">
+                <div className="relative h-[92px] w-[92px]" aria-hidden>
+                  <svg viewBox="0 0 120 120" className="block h-full w-full">
+                    <circle cx={60} cy={60} r={52} fill="none" strokeWidth={10} strokeDasharray="3 7" strokeLinecap="round" stroke={isDark ? 'rgba(255,255,255,0.18)' : '#CBD5E1'} />
+                  </svg>
+                  <span className="absolute inset-0 flex items-center justify-center text-[30px] font-medium text-slate-400 dark:text-slate-500">?</span>
+                </div>
+                <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-semibold text-slate-700 dark:bg-white/10 dark:text-slate-200">
+                  <span className="h-1.5 w-1.5 rounded-full bg-slate-500 dark:bg-slate-300" aria-hidden />
+                  {t('postDashboard.readiness_pending_status')}
+                </span>
+                <p className="mt-2 max-w-[290px] text-[13px] leading-snug text-text-secondary">{t('postDashboard.readiness_pending_body')}</p>
+              </div>
+
+              <ol className="mt-3 space-y-1.5 rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-200/70 dark:bg-white/5 dark:ring-white/10">
+                {(['readiness_pending_q1', 'readiness_pending_q2', 'readiness_pending_q3'] as const).map((k, i) => (
+                  <li key={k} className="flex items-center gap-2.5 text-[13px] text-text-primary">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white text-[11px] font-bold text-primary ring-1 ring-blue-100 dark:bg-white/10 dark:text-blue-300 dark:ring-white/10" aria-hidden>
+                      {i + 1}
+                    </span>
+                    {t(`postDashboard.${k}`)}
+                  </li>
+                ))}
+              </ol>
+
+              <Link to="/retirement-goal" className={`group mt-4 h-10 w-full gap-2 text-[14px] ${PILL_PRIMARY}`}>
+                <Target className="h-4 w-4" aria-hidden />
+                {t('postDashboard.readiness_pending_cta')}
+              </Link>
+              <p className="mt-1 text-center text-[12px] text-text-secondary">{t('postDashboard.readiness_pending_time')}</p>
+                </>
+              ) : (
+                <>
               <div className="flex flex-1 flex-col items-center justify-center py-2">
                 <div className="relative h-[148px] w-[148px]" role="img" aria-label={`${t('dashboard.readinessScore')}: ${readinessShown}/100, ${t(band.labelKey)}`}>
                   <svg viewBox={`0 0 ${RING_BOX} ${RING_BOX}`} className="block h-full w-full overflow-visible" aria-hidden>
@@ -719,23 +765,19 @@ export default function PostEnrollmentDashboard() {
                 </span>
               </div>
 
-              {/* One tip worked out from the participant's numbers, on one line; the whole panel opens the place to act on it */}
+              {/* One tip worked out from the participant's numbers, shown in full (it wraps rather than being cut);
+                  the whole panel still opens the place to act on it */}
               <Link
                 to={readinessTip.href}
-                title={t(`postDashboard.${readinessTip.key}`, readinessTip.values).replace(/<\/?b>/g, '')}
-                className={`group flex items-center gap-2 rounded-2xl px-3.5 py-2.5 ring-1 transition-shadow hover:shadow-[0_4px_12px_-6px_rgba(11,21,51,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${band.panel}`}
+                className={`group block rounded-2xl px-3.5 py-2.5 ring-1 transition-shadow hover:shadow-[0_4px_12px_-6px_rgba(11,21,51,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${band.panel}`}
               >
-                <span className="min-w-0 flex-1">
-                  <span className={`flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.08em] ${band.accent}`}>
-                    <Lightbulb className="h-3 w-3" aria-hidden />
-                    {t('postDashboard.tip_label')}
-                  </span>
-                  {/* One line: the tips are written short, and anything longer is cut with an ellipsis (the full text is the panel's title) */}
-                  <span className="mt-0.5 block truncate text-[13px] text-text-secondary">
-                    <Trans i18nKey={`postDashboard.${readinessTip.key}`} values={readinessTip.values} components={{ b: <span className="font-semibold text-text-primary" /> }} />
-                  </span>
+                <span className={`flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.08em] ${band.accent}`}>
+                  <Lightbulb className="h-3 w-3" aria-hidden />
+                  {t('postDashboard.tip_label')}
                 </span>
-                <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+                <span className="mt-0.5 block text-[13px] leading-snug text-text-secondary">
+                  <Trans i18nKey={`postDashboard.${readinessTip.key}`} values={readinessTip.values} components={{ b: <span className="font-semibold text-text-primary" /> }} />
+                </span>
               </Link>
 
               <Link to="/retirement-goal" className={`group mt-4 h-10 w-full gap-2 text-[14px] ${PILL_PRIMARY}`}>
@@ -743,6 +785,8 @@ export default function PostEnrollmentDashboard() {
                 {t('dashboard.launchSimulator')}
                 <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
               </Link>
+                </>
+              )}
             </SpecCard>
           </div>
 

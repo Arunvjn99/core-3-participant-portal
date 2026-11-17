@@ -1,5 +1,7 @@
 {
   "next_actions": {
+    "check_readiness": "Check your retirement readiness",
+    "check_readiness_sub": "A few quick questions, about 2 minutes.",
     "done_beneficiary": "Beneficiaries on file",
     "done_full_match": "Getting your full employer match",
     "done_verify_bank": "Bank account verified",
@@ -2572,6 +2574,13 @@
     "ql_statement": "Generate statement"
   },
   "postDashboard": {
+    "readiness_pending_status": "Not checked yet",
+    "readiness_pending_body": "You enrolled in one click, so we haven't asked about your retirement goals yet.",
+    "readiness_pending_q1": "When you'd like to retire",
+    "readiness_pending_q2": "What you'll spend each month",
+    "readiness_pending_q3": "Savings you have elsewhere",
+    "readiness_pending_cta": "Check my readiness",
+    "readiness_pending_time": "About 2 min",
     "rollover_title": "Do you want to roll over your funds?",
     "rollover_body_known_one": "You have <b>{{amount}}</b> in another retirement account ({{names}}). Rolling it into your {{plan}} keeps your savings in one place.",
     "rollover_body_known_other": "You have <b>{{amount}}</b> in {{count}} other retirement accounts ({{names}}). Rolling them into your {{plan}} keeps your savings in one place.",
