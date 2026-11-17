@@ -113,7 +113,7 @@ function PlanCard({ plan, index }: { plan: Plan & { name: string; balanceChange?
           {/* Balance straight on the card, no box inside the box */}
           <div className="mt-5 flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
             <span className="text-[14px] font-medium text-slate-600 dark:text-slate-300">{t('enrollment.manage_page.current_balance')}</span>
-            <span className="text-right">
+            <span className="text-left sm:text-right">
               <span className="block text-[28px] font-bold leading-none tracking-tight tabular-nums text-text-primary">{formatCurrency(plan.balance, locale)}</span>
               {plan.balanceChange && <span className="mt-1.5 block text-[13px] font-semibold text-emerald-800 dark:text-emerald-300">{plan.balanceChange}</span>}
             </span>

@@ -37,7 +37,7 @@ export function HistoryPanel() {
   return (
     <div className="space-y-3">
       <div>
-        <h3 className="text-base font-semibold text-gray-900 dark:text-white">{t('plan.hist.title')}</h3>
+        <h2 className="text-[16px] font-bold leading-tight text-text-primary">{t('plan.hist.title')}</h2>
         <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{t('plan.hist.sub')}</p>
       </div>
       {sorted.length === 0 ? (

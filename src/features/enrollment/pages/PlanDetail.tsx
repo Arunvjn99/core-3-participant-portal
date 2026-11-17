@@ -1,17 +1,9 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { motion } from 'framer-motion'
-import {
-  ArrowLeft,
-  Printer,
-  XCircle,
-  TrendingUp,
-  Wallet,
-  Activity,
-  FileText,
-  Eye,
-} from 'lucide-react'
+import { motion, useReducedMotion } from 'framer-motion'
+import { ArrowLeft, Printer, XCircle, FileText, Eye } from 'lucide-react'
 import { useState } from 'react'
+import { cn } from '@/lib/cn'
 import { getAppDateLocale } from '@/lib/dateLocale'
 import { PlanElections } from '@/features/plan/PlanElections'
 import { OptOutDialog } from '@/features/plan/OptOutDialog'
@@ -52,6 +44,13 @@ const ROTH_PLAN_CORE = {
   ],
 } as const
 
+/** The pre-enrollment dashboard's pieces: card surface, pills and one focus ring for every control */
+const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900'
+const CARD = 'rounded-[20px] bg-surface-card shadow-[0_12px_32px_-28px_rgba(11,21,51,0.45)] ring-1 ring-slate-200/70 dark:ring-white/10'
+const PILL_SECONDARY = `inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-white px-4 text-[14px] font-semibold text-slate-900 shadow-[0_2px_6px_-3px_rgba(11,21,51,0.12)] ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-white/5 dark:text-white dark:ring-white/15 dark:hover:bg-white/10 ${FOCUS}`
+/** A quiet red pill for the one action that stops contributions */
+const PILL_DANGER = `inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-white px-4 text-[14px] font-semibold text-red-700 ring-1 ring-red-200 transition-colors hover:bg-red-50 dark:bg-white/5 dark:text-red-300 dark:ring-red-400/30 dark:hover:bg-red-500/10 ${FOCUS}`
+
 function Section({
   title,
   action,
@@ -61,20 +60,18 @@ function Section({
   action?: { label: string; onClick?: () => void }
   children: React.ReactNode
 }) {
+  const reduce = useReducedMotion()
   return (
     <motion.section
-      initial={{ opacity: 0, y: 10 }}
+      initial={reduce ? false : { opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-[var(--border-default)] bg-[var(--surface-card)] p-6 dark:border-gray-700"
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      className={cn(CARD, 'p-5 sm:p-6')}
     >
-      <div className="mb-5 flex items-center justify-between">
-        <h2 className="text-base font-bold text-[var(--text-primary)]">{title}</h2>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-[18px] font-bold leading-tight text-text-primary">{title}</h2>
         {action && (
-          <button
-            type="button"
-            onClick={action.onClick}
-            className="btn-brand rounded-lg px-4 py-2 text-xs font-semibold"
-          >
+          <button type="button" onClick={action.onClick} className={cn(PILL_SECONDARY, 'h-9')}>
             {action.label}
           </button>
         )}
@@ -102,18 +99,22 @@ export default function PlanDetail() {
       minimumFractionDigits: 2,
     }).format(n)
 
+  const backLink = (
+    <button
+      type="button"
+      onClick={() => navigate('/enrollment/manage')}
+      className={cn('inline-flex min-h-10 items-center gap-1.5 rounded-md text-[14px] font-semibold text-slate-600 transition-colors hover:text-text-primary dark:text-slate-300 dark:hover:text-white', FOCUS)}
+    >
+      <ArrowLeft className="h-4 w-4" aria-hidden /> {t('enrollment.plan_detail.back')}
+    </button>
+  )
+
   if (!planId || planId !== 'roth-401k') {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center">
+      <div className="flex min-h-[50vh] items-center justify-center px-4">
         <div className="text-center">
-          <p className="text-lg font-semibold text-[var(--text-primary)]">{t('enrollment.plan_detail.not_found')}</p>
-          <button
-            type="button"
-            onClick={() => navigate('/enrollment/manage')}
-            className="mt-4 text-sm font-medium text-[var(--color-primary)] hover:underline"
-          >
-            {t('enrollment.plan_detail.back')}
-          </button>
+          <p className="text-[18px] font-bold text-text-primary">{t('enrollment.plan_detail.not_found')}</p>
+          <div className="mt-3">{backLink}</div>
         </div>
       </div>
     )
@@ -123,168 +124,141 @@ export default function PlanDetail() {
   const planName = t('enrollment.manage_page.plans.roth-401k.name')
   const planType = t('enrollment.manage_page.plans.roth-401k.type')
 
-  const healthColor =
+  // Dark enough shades to read as text on white, and the bar in the same family
+  const health =
     plan.healthScore >= 80
-      ? 'text-[var(--status-success)]'
+      ? { text: 'text-emerald-800 dark:text-emerald-300', bar: 'bg-emerald-600 dark:bg-emerald-400' }
       : plan.healthScore >= 60
-        ? 'text-[var(--status-warning)]'
-        : 'text-[var(--status-danger)]'
+        ? { text: 'text-amber-800 dark:text-amber-300', bar: 'bg-amber-500' }
+        : { text: 'text-red-700 dark:text-red-300', bar: 'bg-red-500' }
 
-  const healthBarColor =
-    plan.healthScore >= 80
-      ? 'bg-[var(--color-primary)]'
-      : plan.healthScore >= 60
-        ? 'bg-[var(--status-warning)]'
-        : 'bg-[var(--status-danger)]'
+  const stats = [
+    {
+      label: t('enrollment.plan_detail.total_balance'),
+      value: fmt(plan.totalBalance),
+      sub: tr('balance_change'),
+      subClass: 'font-semibold text-emerald-800 dark:text-emerald-300',
+    },
+    {
+      label: t('enrollment.plan_detail.vested'),
+      value: fmt(plan.vestedBalance),
+      sub: tr('vested_pct'),
+      subClass: 'text-slate-600 dark:text-slate-300',
+    },
+    {
+      label: t('enrollment.plan_detail.stat_my_contribution'),
+      value: optedOut ? '0%' : deferral.unit === 'percent' ? `${Math.round((deferral.preTax + deferral.roth) * 100) / 100}%` : `$${deferral.preTax + deferral.roth}`,
+      sub: tr('contrib_note'),
+      subClass: 'text-slate-600 dark:text-slate-300',
+    },
+  ]
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
-      <button
-        type="button"
-        onClick={() => navigate('/enrollment/manage')}
-        className="mb-6 flex items-center gap-1.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
-      >
-        <ArrowLeft className="h-4 w-4" /> {t('enrollment.plan_detail.back')}
-      </button>
+    <div className="mx-auto w-full max-w-[1040px] px-4 py-6 sm:px-6 lg:py-7">
+      <div className="mb-3">{backLink}</div>
 
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-              {planName}
-            </h1>
-            <span className="inline-flex items-center rounded-full bg-[var(--color-primary)] px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-white dark:bg-blue-600">
+      {/* Title in the dashboard's type, with its status; the actions sit to the right on wide screens */}
+      <header className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-[28px] font-bold leading-tight text-[#0B1533] dark:text-white">{planName}</h1>
+            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-[12px] font-semibold text-blue-800 ring-1 ring-inset ring-blue-200 dark:bg-blue-500/15 dark:text-blue-200 dark:ring-blue-400/30">
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-600 dark:bg-blue-300" aria-hidden />
               {t('enrollment.plan_detail.enrolled')}
             </span>
           </div>
-          <p className="mt-1 text-xs text-[var(--text-muted)]">
+          <p className="mt-1 text-[13px] text-slate-600 dark:text-slate-300">
             {t('enrollment.plan_detail.plan_id_label')} {plan.planId} &nbsp;·&nbsp; {planType}
           </p>
         </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => window.print()}
-            className="btn-brand flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold"
-          >
-            <Printer className="h-3.5 w-3.5" /> {t('enrollment.plan_detail.print')}
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={() => window.print()} className={PILL_SECONDARY}>
+            <Printer className="h-4 w-4" aria-hidden /> {t('enrollment.plan_detail.print')}
           </button>
-          <button
-            type="button"
-            onClick={() => setOptOutOpen(true)}
-            className="flex items-center gap-1.5 rounded-lg border border-[var(--status-danger)] px-4 py-2 text-xs font-semibold text-[var(--status-danger)] transition-colors hover:bg-[var(--status-danger-bg)] dark:border-red-500 dark:text-red-400"
-          >
-            <XCircle className="h-3.5 w-3.5" /> {t('enrollment.plan_detail.opt_out_plan')}
+          <button type="button" onClick={() => setOptOutOpen(true)} className={PILL_DANGER}>
+            <XCircle className="h-4 w-4" aria-hidden /> {t('enrollment.plan_detail.opt_out_plan')}
           </button>
         </div>
-      </div>
+      </header>
 
-      <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {(
-          [
-            {
-              icon: Wallet,
-              label: t('enrollment.plan_detail.total_balance'),
-              value: fmt(plan.totalBalance),
-              sub: tr('balance_change'),
-              subColor: 'text-[var(--status-success)]' as const,
-              isHealth: false as const,
-            },
-            {
-              icon: Wallet,
-              label: t('enrollment.plan_detail.vested'),
-              value: fmt(plan.vestedBalance),
-              sub: tr('vested_pct'),
-              subColor: 'text-[var(--text-muted)]' as const,
-              isHealth: false as const,
-            },
-            {
-              icon: TrendingUp,
-              label: t('enrollment.plan_detail.stat_my_contribution'),
-              value: optedOut ? '0%' : deferral.unit === 'percent' ? `${Math.round((deferral.preTax + deferral.roth) * 100) / 100}%` : `$${deferral.preTax + deferral.roth}`,
-              sub: tr('contrib_note'),
-              subColor: 'text-[var(--text-muted)]' as const,
-              isHealth: false as const,
-            },
-            {
-              icon: Activity,
-              label: t('enrollment.plan_detail.stat_health_score'),
-              value: `${plan.healthScore}/100`,
-              sub: '',
-              subColor: '' as const,
-              isHealth: true as const,
-            },
-          ] as const
-        ).map((stat, i) => (
+      {/* The four figures in one card, split by thin rules (two by two on phones) */}
+      <dl className={cn(CARD, 'mb-5 grid grid-cols-2 lg:grid-cols-4')}>
+        {stats.map((stat, i) => (
           <div
-            key={i}
-            className="rounded-xl border border-[var(--border-default)] bg-[var(--color-primary)] p-4 text-white dark:border-blue-800 dark:bg-blue-900"
+            key={stat.label}
+            className={cn(
+              'min-w-0 p-4 sm:p-5',
+              i % 2 === 1 && 'border-l border-slate-200/80 dark:border-white/10',
+              i >= 2 && 'border-t border-slate-200/80 lg:border-t-0 dark:border-white/10',
+              i === 2 && 'lg:border-l',
+            )}
           >
-            <p className="text-[10px] font-bold uppercase tracking-wider text-white/70">
-              {stat.label}
-            </p>
-            <p className={`mt-1 text-xl font-extrabold ${stat.isHealth ? healthColor : ''}`}>
-              {stat.value}
-            </p>
-            {stat.isHealth ? (
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/20">
-                <div
-                  className={`h-full rounded-full ${healthBarColor}`}
-                  style={{ width: `${plan.healthScore}%` }}
-                />
-              </div>
-            ) : stat.sub ? (
-              <p className={`mt-1 text-[11px] font-medium ${stat.subColor === 'text-[var(--status-success)]' ? 'text-emerald-300' : 'text-white/60'}`}>
-                {stat.sub}
-              </p>
-            ) : null}
+            <dt className="text-[12px] font-medium text-slate-600 dark:text-slate-300">{stat.label}</dt>
+            <dd className="mt-1 text-[20px] font-bold leading-tight tracking-tight tabular-nums text-text-primary sm:text-[22px]">{stat.value}</dd>
+            {stat.sub && <dd className={cn('mt-1 text-[12px]', stat.subClass)}>{stat.sub}</dd>}
           </div>
         ))}
-      </div>
+        <div className="min-w-0 border-l border-t border-slate-200/80 p-4 sm:p-5 lg:border-t-0 dark:border-white/10">
+          <dt className="text-[12px] font-medium text-slate-600 dark:text-slate-300">{t('enrollment.plan_detail.stat_health_score')}</dt>
+          <dd className={cn('mt-1 text-[20px] font-bold leading-tight tabular-nums sm:text-[22px]', health.text)}>{`${plan.healthScore}/100`}</dd>
+          <dd className="mt-2">
+            <span
+              className="block h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-white/10"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={plan.healthScore}
+              aria-label={t('enrollment.plan_detail.stat_health_score')}
+            >
+              <span className={cn('block h-full rounded-full', health.bar)} style={{ width: `${plan.healthScore}%` }} />
+            </span>
+          </dd>
+        </div>
+      </dl>
 
       <div className="flex flex-col gap-5">
         <PlanElections />
 
         <Section title={t('enrollment.plan_detail.beneficiaries')} action={{ label: t('enrollment.plan_detail.update'), onClick: () => navigate('/profile?section=beneficiary') }}>
-          <p className="mb-3 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-600 dark:text-slate-300">
             {t('enrollment.plan_detail.beneficiaries_primary')}
           </p>
-          {plan.beneficiaries.map((_, i) => (
-            <div
-              key={i}
-              className="flex items-center justify-between border-b border-[var(--border-light)] py-3 last:border-0 dark:border-gray-800"
-            >
-              <div>
-                <p className="text-sm font-semibold text-[var(--text-primary)]">{tr('bene_name')}</p>
-              </div>
-              <div className="flex items-center gap-6 text-sm text-[var(--text-secondary)]">
-                <span>{tr('bene_relation')}</span>
-                <span className="font-semibold text-[var(--text-primary)]">{tr('bene_pct')}</span>
-              </div>
-            </div>
-          ))}
+          <ul className="divide-y divide-slate-200/80 dark:divide-white/10">
+            {plan.beneficiaries.map((_, i) => (
+              <li key={i} className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 py-3">
+                <p className="text-[15px] font-semibold text-text-primary">{tr('bene_name')}</p>
+                <div className="flex items-center gap-6 text-[14px] text-slate-600 dark:text-slate-300">
+                  <span>{tr('bene_relation')}</span>
+                  <span className="font-semibold tabular-nums text-text-primary">{tr('bene_pct')}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
         </Section>
 
         <Section title={t('enrollment.plan_detail.documents')}>
-          {(['doc1', 'doc2'] as const).map((dk) => (
-            <div
-              key={dk}
-              className="flex items-center justify-between border-b border-[var(--border-light)] py-3 last:border-0 dark:border-gray-800"
-            >
-              <div className="flex items-center gap-2.5">
-                <FileText className="h-4 w-4 text-[var(--text-muted)]" />
-                <span className="text-sm font-medium text-[var(--text-primary)]">{tr(dk)}</span>
-              </div>
-              <button
-                type="button"
-                className="btn-brand flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold"
-              >
-                <Eye className="h-3 w-3" /> {t('enrollment.plan_detail.view')}
-              </button>
-            </div>
-          ))}
+          <ul className="divide-y divide-slate-200/80 dark:divide-white/10">
+            {(['doc1', 'doc2'] as const).map((dk) => (
+              <li key={dk} className="flex items-center justify-between gap-3 py-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300" aria-hidden>
+                    <FileText className="h-4 w-4" />
+                  </span>
+                  <span className="min-w-0 text-[14px] font-medium text-text-primary">{tr(dk)}</span>
+                </div>
+                {/* Opens the documents page; the label names the document for screen readers */}
+                <button
+                  type="button"
+                  onClick={() => navigate('/documents')}
+                  aria-label={`${t('enrollment.plan_detail.view')}: ${tr(dk)}`}
+                  className={cn(PILL_SECONDARY, 'h-9 shrink-0 px-3.5 text-[13px]')}
+                >
+                  <Eye className="h-3.5 w-3.5" aria-hidden /> {t('enrollment.plan_detail.view')}
+                </button>
+              </li>
+            ))}
+          </ul>
         </Section>
-
       </div>
       <OptOutDialog open={optOutOpen} onClose={() => setOptOutOpen(false)} />
     </div>

@@ -108,7 +108,7 @@ export function DeferralPanel() {
           </p>
         )}
         <div className="flex items-center justify-between gap-3">
-          <h3 className="text-base font-semibold text-gray-900 dark:text-white">{t('plan.def.title')}</h3>
+          <h2 className="text-[16px] font-bold leading-tight text-text-primary">{t('plan.def.title')}</h2>
           <button type="button" onClick={startEdit} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800">
             <Pencil className="h-3.5 w-3.5" aria-hidden /> {t('profile.d.edit')}
           </button>
@@ -130,7 +130,7 @@ export function DeferralPanel() {
         </dl>
 
         <div className="rounded-xl border border-gray-100 p-4 dark:border-gray-800">
-          <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{t('plan.def.auto_title')}</h4>
+          <h3 className="text-[14px] font-semibold text-text-primary">{t('plan.def.auto_title')}</h3>
           {!ai.enabled ? (
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('plan.def.auto_off')}</p>
           ) : (
@@ -157,7 +157,7 @@ export function DeferralPanel() {
   // ── Edit mode ──
   return (
     <form onSubmit={submit} noValidate className="space-y-6">
-      <h3 className="text-base font-semibold text-gray-900 dark:text-white">{t('plan.def.edit_title')}</h3>
+      <h2 className="text-[16px] font-bold leading-tight text-text-primary">{t('plan.def.edit_title')}</h2>
 
       <fieldset className="space-y-4">
         <legend className="text-sm font-semibold text-gray-900 dark:text-white">{t('plan.def.by_source')}</legend>

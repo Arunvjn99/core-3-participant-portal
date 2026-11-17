@@ -180,9 +180,9 @@ export function InvestmentsPanel() {
           </p>
         )}
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-[16px] font-bold leading-tight text-text-primary">
             {t('plan.inv.title')} · {election.applyAllSources ? t('plan.inv.same_all') : t('plan.inv.by_source')}
-          </h3>
+          </h2>
           <div className="flex gap-2">
             <button type="button" onClick={() => setShowFunds(true)} className={cn(outline, 'py-1.5')}>{t('plan.inv.view_funds')}</button>
             <button type="button" onClick={startEdit} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800">
@@ -221,7 +221,7 @@ export function InvestmentsPanel() {
         <AllocationTable allocation={shown} />
         <p className="text-xs text-gray-500 dark:text-gray-400">
           {t('plan.inv.sdb_promo')}{' '}
-          {!election.sdbOptedIn && <button type="button" onClick={startEdit} className="font-semibold text-blue-600 hover:underline dark:text-blue-400">{t('plan.inv.sdb_opt_in')}</button>}
+          {!election.sdbOptedIn && <button type="button" onClick={startEdit} className="inline-flex min-h-10 items-center rounded-md font-semibold text-blue-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:text-blue-300">{t('plan.inv.sdb_opt_in')}</button>}
         </p>
 
         <Modal open={showFunds} onClose={() => setShowFunds(false)} size="2xl" title={t('plan.inv.plan_investments')}>
@@ -245,7 +245,7 @@ export function InvestmentsPanel() {
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="text-base font-semibold text-gray-900 dark:text-white">{t('plan.inv.edit_title')}</h3>
+          <h2 className="text-[16px] font-bold leading-tight text-text-primary">{t('plan.inv.edit_title')}</h2>
           <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{t('plan.inv.edit_sub')}</p>
         </div>
         <button type="button" onClick={() => setShowFunds(true)} className={cn(outline, 'py-1.5')}>{t('plan.inv.view_funds')}</button>

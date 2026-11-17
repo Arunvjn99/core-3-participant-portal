@@ -38,7 +38,10 @@
   background-color: var(--brand-primary-light) !important;
 }
 
-*:focus-visible {
+/* Brand-colour the browser's focus outline, but only where an element keeps that outline. Elements marked
+   `outline-none` (Tailwind draws it as a transparent outline) show focus another way, usually a ring or a
+   highlighted border; recolouring their transparent outline used to paint a stray blue box inside fields. */
+*:focus-visible:not([class*='outline-none']) {
   outline-color: var(--brand-primary) !important;
 }
 
