@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { useUser } from '@/core/hooks/useUser'
-import { startingSavings } from '@/features/enrollment/enrollmentMath'
+import { clampRetirementAge, startingSavings } from '@/features/enrollment/enrollmentMath'
 
 export interface EnrollmentFormData {
   plan: 'traditional' | 'roth' | null
@@ -35,9 +35,10 @@ export function useEnrollment() {
 
   const personalization = useMemo<PersonalizationView>(() => {
     const d = store.draftData
+    const currentAge = d?.personalization?.currentAge ?? 35
     return {
-      retirementAge: d?.personalization?.retirementAge ?? 65,
-      currentAge: d?.personalization?.currentAge ?? 35,
+      retirementAge: clampRetirementAge(d?.personalization?.retirementAge ?? 65, currentAge),
+      currentAge,
       retirementLocation: d?.personalization?.selectedLocation ?? '',
       currentSavings: startingSavings(d?.personalization?.savingsAmount),
       investmentComfort: 'balanced',

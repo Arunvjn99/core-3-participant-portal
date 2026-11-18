@@ -19,8 +19,6 @@ import { cn } from '@/lib/cn'
 import { BODY_TEXT, Card, CARD_TITLE, HEADING, IconChip, MUTED_TEXT, PILL_PRIMARY, PILL_SECONDARY, RULE, SECTION_LABEL, StepHeader, TitleBadge, badge, card } from '@/features/enrollment/enrollmentUi'
 import { getGrowthRate, type RiskLevel } from '@/lib/retirementCalculations'
 import { annualEmployerMatch, projectBalance, retirementIncome } from '@/features/enrollment/enrollmentMath'
-import { useRetirementGoal } from '@/features/retirement/retirementStore'
-import { goalExtras } from '@/features/retirement/readinessExtras'
 import { useEnrollmentStepNav, type EnrollmentPrimaryLabel } from '@/features/enrollment/components/EnrollmentStepNavContext'
 
 /* ─── Types ─── */
@@ -295,9 +293,8 @@ function RetirementReadiness() {
     })
 
   const growthRate = getGrowthRate(data.riskLevel)
-  // The retirement goal saved on the Retirement readiness page (if any), so every screen scores the plan the same way
-  const savedGoal = useRetirementGoal()
-  const incomeExtras = { ...goalExtras(savedGoal, data.contributionSources, growthRate), retirementAge: personalization.retirementAge }
+  // Enrollment scores the plan against the standard goal (80% of pay); Social Security only counts from age 62
+  const incomeExtras = { retirementAge: personalization.retirementAge }
 
   /** Readiness score: % of the retirement income goal covered by savings income plus Social Security */
   const computeScore = (contribPct: number, autoInc: boolean, riskLevel: string) =>
@@ -305,7 +302,7 @@ function RetirementReadiness() {
       project(contribPct, autoInc ? { amount: data.autoIncreaseAmount, max: data.autoIncreaseMax } : null, getGrowthRate(riskLevel as RiskLevel)),
       yearsToRetirement,
       data.salary,
-      { ...incomeExtras, growthRate: getGrowthRate(riskLevel as RiskLevel) },
+      incomeExtras,
     ).readinessPct
 
   const projectedBalance = project(data.contributionPercent, currentAutoIncrease, growthRate)
@@ -507,7 +504,7 @@ function RetirementReadiness() {
               <IconChip Icon={Info} tone="blue" />
               <div className="min-w-0">
                 <h2 className={CARD_TITLE}>{t('enrollment.readiness.understanding_title')}</h2>
-                <p className={cn('mt-1 text-[13px] leading-relaxed', BODY_TEXT)}>{t('enrollment.readiness.understanding_body', { score })}</p>
+                <p className={cn('mt-1 text-[13px] leading-relaxed', BODY_TEXT)}>{t('enrollment.readiness.understanding_body', { score: income.goalPct })}</p>
               </div>
             </div>
             <h3 className={cn('mt-4 border-t pt-4 text-[14px] font-bold', RULE, HEADING)}>{t('enrollment.readiness.annual_summary_title')}</h3>

@@ -24,6 +24,20 @@ export function readinessScore(goalShare: number): number {
   return Math.min(100, Math.round(score))
 }
 
+/** Retirement ages the portal works with: an earlier age leaves too few years for any choice to matter */
+export const RETIREMENT_AGE_MIN = 50
+export const RETIREMENT_AGE_MAX = 80
+/** Allowed retirement ages for someone `currentAge` years old */
+export function retirementAgeRange(currentAge: number): [number, number] {
+  const min = Math.max(currentAge + 1, RETIREMENT_AGE_MIN)
+  return [min, Math.max(min, RETIREMENT_AGE_MAX)]
+}
+/** A saved retirement age brought into the allowed range (older test data could hold ages like 39) */
+export function clampRetirementAge(age: number, currentAge: number): number {
+  const [min, max] = retirementAgeRange(currentAge)
+  return Math.min(max, Math.max(min, Math.round(age)))
+}
+
 /** Earliest age Social Security retirement benefits can start */
 export const SOCIAL_SECURITY_START_AGE = 62
 

@@ -17,7 +17,7 @@ import {
 import { cn } from '@/lib/cn'
 import { RangeSlider } from '@/design-system/components/RangeSlider'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
-import { ACCOUNT_BALANCE } from '@/features/enrollment/enrollmentMath'
+import { ACCOUNT_BALANCE, retirementAgeRange } from '@/features/enrollment/enrollmentMath'
 import { ALL_US_STATES, POPULAR_LOCATIONS } from '@/lib/usStates'
 
 function getAgeInsight(retirementAge: number, _currentAge: number, yearsUntilRetirement: number) {
@@ -437,8 +437,8 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                       <div className="flex items-center justify-center gap-3">
                         <button
                           type="button"
-                          onClick={() => setRetirementAge((a) => Math.max(currentAge + 1, a - 1))}
-                          disabled={retirementAge <= currentAge + 1}
+                          onClick={() => setRetirementAge((a) => Math.max(retirementAgeRange(currentAge)[0], a - 1))}
+                          disabled={retirementAge <= retirementAgeRange(currentAge)[0]}
                           className={ROUND_BUTTON}
                         >
                           <Minus className="h-3.5 w-3.5" />
@@ -458,8 +458,8 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
 
                         <button
                           type="button"
-                          onClick={() => setRetirementAge((a) => Math.min(75, a + 1))}
-                          disabled={retirementAge >= 75}
+                          onClick={() => setRetirementAge((a) => Math.min(retirementAgeRange(currentAge)[1], a + 1))}
+                          disabled={retirementAge >= retirementAgeRange(currentAge)[1]}
                           className={ROUND_BUTTON}
                         >
                           <Plus className="h-3.5 w-3.5" />
@@ -470,15 +470,15 @@ export function EnrollmentPersonalizationModal({ isOpen, onClose, onComplete, us
                         <RangeSlider
                           value={retirementAge}
                           onChange={setRetirementAge}
-                          min={currentAge + 1}
-                          max={75}
+                          min={retirementAgeRange(currentAge)[0]}
+                          max={retirementAgeRange(currentAge)[1]}
                           step={1}
                           aria-label="At what age would you like to retire?"
                           aria-valuetext={`${retirementAge} years old`}
                         />
                         <div className="mt-1 flex justify-between px-2 text-[10px] text-slate-500 dark:text-slate-400">
-                          <span>{currentAge + 1}</span>
-                          <span>75</span>
+                          <span>{retirementAgeRange(currentAge)[0]}</span>
+                          <span>{retirementAgeRange(currentAge)[1]}</span>
                         </div>
                       </div>
 

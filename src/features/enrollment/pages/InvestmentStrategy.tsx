@@ -245,7 +245,7 @@ function CustomizeModal({ isOpen, onClose, initialAllocations, onSave }: { isOpe
   const unifiedTotal = getSourceTotal(allocs.unified)
   const allValid = unifiedTotal === 100
   return (
-    <div ref={backdropRef} onClick={(e) => { if (e.target === backdropRef.current) onClose() }} className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B1533]/50 p-4 backdrop-blur-sm">
+    <div ref={backdropRef} onClick={(e) => { if (e.target === backdropRef.current) onClose() }} className="fixed inset-0 z-[90] flex items-center justify-center bg-[#0B1533]/50 p-4 backdrop-blur-sm">
       <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-[24px] bg-white shadow-2xl ring-1 ring-slate-200/70 dark:bg-[#0B1436] dark:ring-white/10">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200/80 dark:border-white/10">
           <div><h2 className={cn('text-lg font-bold', HEADING)}>{t('enrollment.investment.modal_edit_title')}</h2><p className="mt-0.5 text-slate-500 dark:text-slate-400" style={{ fontSize: '0.78rem' }}>{t('enrollment.investment.modal_edit_sub')}</p></div>
@@ -346,8 +346,15 @@ function InvestmentStrategy() {
   const growthPct = Math.round(getGrowthRate(data.riskLevel) * 1000) / 10
   const yearsToRetirement = personalization.retirementAge - personalization.currentAge
 
-  /** Saves a custom mix with the risk level it works out to, so projections use the matching growth rate */
+  /** Saves a custom mix with the risk level it works out to, so projections use the matching growth rate.
+   *  The plan's own lineup, unedited, keeps the risk level already chosen. */
   const persistCustom = (allocs: PerSourceAllocations) => {
+    const mix = allocationMap(allocs.unified)
+    const planMix = allocationMap(recommendedFunds(data.riskLevel))
+    if (JSON.stringify(mix) === JSON.stringify(planMix)) {
+      updateData({ customAllocation: mix, useRecommendedPortfolio: false })
+      return
+    }
     const { riskKey } = computeRiskLevel(allocs.unified)
     updateData({
       customAllocation: allocationMap(allocs.unified),
@@ -405,6 +412,20 @@ function InvestmentStrategy() {
   const handleSaveCustom = (allocs: PerSourceAllocations) => { setCustomAllocations(allocs); persistCustom(allocs); setShowCustomizeModal(false) }
   const handleSaveInline = () => { if (inlineAllocs) { setCustomAllocations(inlineAllocs); persistCustom(inlineAllocs) } setEditingSource(null) }
   const handleCloseInline = () => { setEditingSource(null); setInlineAllocs(null) }
+  /** "Done" in the builder: choose "I Choose My Own Investments" with the mix built so far (the plan's funds if nothing was edited) */
+  const handleDoneBuilding = () => {
+    const allocs: PerSourceAllocations = customAllocations || {
+      sameForAll: true,
+      unified: defaultFunds.map((f) => ({ ...f })),
+      sources: { roth: defaultFunds.map((f) => ({ ...f })), preTax: defaultFunds.map((f) => ({ ...f })), afterTax: defaultFunds.map((f) => ({ ...f })) },
+    }
+    setCustomAllocations(allocs)
+    persistCustom(allocs)
+    setHasConfirmedPlanDefault(false)
+    setShowBuildPortfolioModal(false)
+    setEditingSource(null)
+    setInlineAllocs(null)
+  }
 
   const confirmPlanDefaultChoice = useCallback(() => {
     setHasConfirmedPlanDefault(true)
@@ -612,7 +633,7 @@ function InvestmentStrategy() {
 
         {/* Build Portfolio Modal */}
         {showBuildPortfolioModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B1533]/50 p-4 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[90] flex items-center justify-center bg-[#0B1533]/50 p-4 backdrop-blur-sm" role="dialog" aria-modal="true">
             <div className="flex max-h-[90vh] w-full max-w-7xl flex-col overflow-hidden rounded-[24px] bg-white shadow-2xl ring-1 ring-slate-200/70 dark:bg-[#0B1436] dark:ring-white/10">
               <div className="px-6 py-5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between">
                 <div>
@@ -653,7 +674,7 @@ function InvestmentStrategy() {
                 )}
               </div>
               <div className={cn('border-t px-6 py-4', RULE)}>
-                <button type="button" onClick={() => { setShowBuildPortfolioModal(false); setEditingSource(null); setInlineAllocs(null) }} className={cn(PILL_PRIMARY, 'w-full')}>{t('enrollment.investment.done')} <ChevronRight className="w-4 h-4" /></button>
+                <button type="button" onClick={handleDoneBuilding} className={cn(PILL_PRIMARY, 'w-full')}>{t('enrollment.investment.done')} <ChevronRight className="w-4 h-4" /></button>
               </div>
             </div>
           </div>

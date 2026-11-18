@@ -483,7 +483,7 @@
     "subtitle": "Activate your 401(k) in a few simple steps. We'll personalize the experience for you.",
     "start_enrollment": "Customize My Plan",
     "learn_plan": "Learn About The Plan",
-    "time_note": "Step by step, about 5 min",
+    "time_note": "Step by Step, About 5 Min",
     "video_aria": "Video introducing your retirement plan and enrollment experience",
     "greeting_morning": "Good Morning",
     "greeting_afternoon": "Good Afternoon",
@@ -497,7 +497,7 @@
     "one_click_hint": "Short on time?",
     "one_click": "Enroll In One Click",
     "one_click_note": "Plan default settings",
-    "one_click_time": "Takes Less Than A Minute",
+    "one_click_time": "Takes Less Than a Min",
     "illustration_alt": "Coastal Road Winding Toward The Sunset"
   },
   "learning": {
@@ -559,7 +559,7 @@
   "footer": {
     "copyright": "© {{year}} Congruent Solutions, Inc. All rights reserved.",
     "privacy": "Privacy Policy",
-    "terms": "Terms Of Service",
+    "terms": "Terms of Service",
     "help": "Help Center"
   },
   "legal": {
@@ -569,7 +569,7 @@
     "privacy_p1": "Congruent Solutions, Inc. (\"we\", \"us\", or \"our\") respects your privacy. This Privacy Policy describes how we collect, use, disclose, and safeguard your information when you use this participant portal and related retirement plan services.",
     "privacy_p2": "We collect information you provide directly (such as account registration details), information related to your employer-sponsored plan as permitted by law, and technical data such as device and usage information to operate and secure the service. We use this information to administer your plan, comply with legal obligations, communicate with you, and improve our services.",
     "privacy_p3": "We do not sell your personal information. We may share information with service providers who assist in plan administration, as required by law, or with your consent. You may have rights regarding access, correction, or deletion of certain information depending on your jurisdiction. For questions about this policy, contact your plan administrator or our support team.",
-    "terms_title": "Terms Of Service",
+    "terms_title": "Terms of Service",
     "terms_p1": "By accessing or using this participant portal, you agree to these Terms of Service. If you do not agree, do not use the service.",
     "terms_p2": "The portal is provided to help you view and manage your retirement plan information. Features may change over time. You are responsible for safeguarding your login credentials and for the accuracy of information you submit.",
     "terms_p3": "To the fullest extent permitted by applicable law, the service is provided \"as is\" without warranties of any kind. Nothing in these terms alters any rights or obligations set forth in your plan documents, summary plan description, or agreements between you, your employer, and the plan.",
@@ -670,7 +670,7 @@
       "ask_ai": "Ask AI",
       "compare_plans": "Compare Plans",
       "ai_recommendation": "AI Recommendation",
-      "ai_body": "Traditional 401(k) is ideal if you expect to be in a lower tax bracket in retirement — your contributions reduce your taxable income now. Roth 401(k) is better if you expect higher income later — you pay taxes now but withdraw tax-free. Most employees benefit from the Traditional plan due to the immediate tax savings and employer match.",
+      "ai_body": "Traditional 401(k) is ideal if you expect to be in a lower tax bracket in retirement, since your contributions reduce your taxable income now. Roth 401(k) is better if you expect higher income later: you pay taxes now but withdraw tax-free. Most employees benefit from the Traditional plan due to the immediate tax savings and employer match.",
       "compare_feature": "Feature",
       "compare_traditional": "Traditional",
       "compare_roth": "Roth",
@@ -3481,6 +3481,9 @@
     "kind_dividend": "Dividend Reinvestment"
   },
   "retirement": {
+    "err_age_range": "Choose an age from {{min}} to {{max}}.",
+    "err_min_spending": "Enter at least {{amount}} a month.",
+    "err_min_salary": "Enter at least {{amount}} a year.",
     "title": "Retirement Readiness",
     "subtitle": "See how your inputs affect your savings, income and risk. Change anything to see the effect right away.",
     "back": "Back To Dashboard",
@@ -3702,7 +3705,7 @@
     "advisor_heading": "Talk To A Retirement Expert",
     "advisor_available": "Available Today",
     "advisor_meta": "{{years}} years experience · {{rating}} rating",
-    "advisor_book": "Book A Session",
+    "advisor_book": "Book a session",
     "advisor_tips_title": "Quick Tips From {{name}}",
     "advisor_tip1": "Save at least {{cap}}% of your pay to get the full employer match.",
     "advisor_tip2": "Pre-tax savings lower the income tax you pay today.",

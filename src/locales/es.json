@@ -693,7 +693,7 @@
       "ask_ai": "Ask AI",
       "compare_plans": "Compare Plans",
       "ai_recommendation": "AI Recommendation",
-      "ai_body": "Traditional 401(k) is ideal if you expect to be in a lower tax bracket in retirement — your contributions reduce your taxable income now. Roth 401(k) is better if you expect higher income later — you pay taxes now but withdraw tax-free. Most employees benefit from the Traditional plan due to the immediate tax savings and employer match.",
+      "ai_body": "El 401(k) tradicional es ideal si esperas estar en un tramo de impuestos más bajo al jubilarte, ya que tus aportaciones reducen tu ingreso gravable ahora. El 401(k) Roth es mejor si esperas ganar más en el futuro: pagas impuestos ahora y retiras sin impuestos. La mayoría de los empleados se benefician del plan tradicional por el ahorro fiscal inmediato y la aportación del empleador.",
       "compare_feature": "Feature",
       "compare_traditional": "Traditional",
       "compare_roth": "Roth",
@@ -3502,6 +3502,9 @@
     "kind_dividend": "Reinversión de dividendos"
   },
   "retirement": {
+    "err_age_range": "Elige una edad entre {{min}} y {{max}}.",
+    "err_min_spending": "Ingresa al menos {{amount}} al mes.",
+    "err_min_salary": "Ingresa al menos {{amount}} al año.",
     "title": "Preparación para la jubilación",
     "subtitle": "Mira cómo tus datos afectan tu ahorro, tus ingresos y tu riesgo. Cambia lo que quieras para ver el efecto al instante.",
     "back": "Volver al panel",

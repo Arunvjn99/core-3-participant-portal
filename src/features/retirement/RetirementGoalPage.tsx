@@ -14,7 +14,7 @@ import { stateTaxRate, US_STATES } from './retirementModel'
 import { useRetirementGoal } from './retirementStore'
 import { ReadinessRing, ReadinessStatus } from './ReadinessRing'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
-import { projectBalance, retirementIncome } from '@/features/enrollment/enrollmentMath'
+import { projectBalance, retirementAgeRange, retirementIncome } from '@/features/enrollment/enrollmentMath'
 import { getGrowthRate } from '@/lib/retirementCalculations'
 
 const field = 'h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-[15px] text-text-primary transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-white/15 dark:bg-white/5 dark:text-white dark:focus:ring-blue-400/30'
@@ -30,6 +30,9 @@ const HINT = 'mt-1.5 text-[12px] leading-snug text-slate-600 dark:text-slate-300
 const ERROR = 'mt-1.5 text-[12px] font-medium text-red-700 dark:text-red-300'
 
 const parseMoney = (s: string) => Number(s.replace(/[^0-9.]/g, '')) || 0
+/** Lowest figures the readiness model accepts: below these the score stops meaning anything */
+const MIN_MONTHLY_SPENDING = 1_000
+const MIN_SALARY = 10_000
 
 export default function RetirementGoalPage() {
   const { t } = useTranslation()
@@ -42,6 +45,7 @@ export default function RetirementGoalPage() {
   const { data, personalization, updateData } = useEnrollment()
   /** The same age the dashboard counts years from, so "Years remaining" and the score agree */
   const currentAge = personalization.currentAge
+  const [minAge, maxAge] = retirementAgeRange(currentAge)
   /** Until a goal is saved, start from the dashboard's own goal: 80% of pay, nothing outside the plan */
   const startMonthly = goal.checkedAt ? goal.monthlySpending : Math.round((salarySaved * 0.8) / 12)
   const startOutside = goal.checkedAt ? goal.outsideSavings : 0
@@ -107,9 +111,9 @@ export default function RetirementGoalPage() {
   }
 
   const errors = {
-    monthly: parseMoney(monthly) <= 0 ? t('retirement.err_amount') : '',
-    salary: parseMoney(salary) <= 0 ? t('retirement.err_amount') : '',
-    age: retirementAge <= currentAge ? t('retirement.err_age', { age: currentAge }) : '',
+    monthly: parseMoney(monthly) < MIN_MONTHLY_SPENDING ? t('retirement.err_min_spending', { amount: money(MIN_MONTHLY_SPENDING) }) : '',
+    salary: parseMoney(salary) < MIN_SALARY ? t('retirement.err_min_salary', { amount: money(MIN_SALARY) }) : '',
+    age: retirementAge < minAge || retirementAge > maxAge ? t('retirement.err_age_range', { min: minAge, max: maxAge }) : '',
     rates: preTax + roth > 75 ? t('plan.def.err_max', { max: 75 }) : '',
   }
   const valid = !Object.values(errors).some(Boolean)
@@ -235,9 +239,9 @@ export default function RetirementGoalPage() {
               <div>
                 <p className={LABEL} id="rg-age-label">{t('retirement.planned_age')}</p>
                 <div className="flex items-center gap-3" role="group" aria-labelledby="rg-age-label">
-                  <button type="button" onClick={() => { setRetirementAge((a) => Math.max(currentAge + 1, a - 1)); setSaved(false) }} aria-label={t('enrollment.quick.decrease')} className={cn('flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-700 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-white/5 dark:text-white dark:ring-white/15 dark:hover:bg-white/10', FOCUS)}><Minus className="h-4 w-4" aria-hidden /></button>
+                  <button type="button" onClick={() => { setRetirementAge((a) => Math.max(minAge, a - 1)); setSaved(false) }} aria-label={t('enrollment.quick.decrease')} className={cn('flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-700 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-white/5 dark:text-white dark:ring-white/15 dark:hover:bg-white/10', FOCUS)}><Minus className="h-4 w-4" aria-hidden /></button>
                   <span className="w-12 text-center text-[20px] font-bold tabular-nums text-text-primary" aria-live="polite">{retirementAge}</span>
-                  <button type="button" onClick={() => { setRetirementAge((a) => Math.min(80, a + 1)); setSaved(false) }} aria-label={t('enrollment.quick.increase')} className={cn('flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-700 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-white/5 dark:text-white dark:ring-white/15 dark:hover:bg-white/10', FOCUS)}><Plus className="h-4 w-4" aria-hidden /></button>
+                  <button type="button" onClick={() => { setRetirementAge((a) => Math.min(maxAge, a + 1)); setSaved(false) }} aria-label={t('enrollment.quick.increase')} className={cn('flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-700 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-white/5 dark:text-white dark:ring-white/15 dark:hover:bg-white/10', FOCUS)}><Plus className="h-4 w-4" aria-hidden /></button>
                   <span className="text-[13px] text-slate-600 dark:text-slate-300">{t('retirement.years_from_now', { years: result.yearsRemaining })}</span>
                 </div>
                 {errors.age && <p role="alert" className={ERROR}>{errors.age}</p>}
