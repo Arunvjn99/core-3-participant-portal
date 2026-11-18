@@ -43,7 +43,8 @@ function MiniChart({ positive = true, compact = false }: { positive?: boolean; c
 
   return (
     <div style={{ padding: compact ? "8px 0" : "12px 0" }}>
-      <svg width="100%" viewBox={`0 0 ${w} ${h + 16}`} preserveAspectRatio="none">
+      <div className="relative">
+      <svg width="100%" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="block" style={{ height: compact ? 64 : 96 }}>
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={fillColor} stopOpacity="0.12" />
@@ -51,23 +52,21 @@ function MiniChart({ positive = true, compact = false }: { positive?: boolean; c
           </linearGradient>
         </defs>
         <polygon points={areaPoints} fill={`url(#${gradientId})`} />
-        <polyline points={linePoints} fill="none" stroke={lineColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx={points[points.length - 1][0]} cy={points[points.length - 1][1]} r="4" fill={lineColor} stroke="#fff" strokeWidth="2" />
-        {years.map((year, i) => (
-          <text
-            key={year}
-            x={i * (w / (years.length - 1))}
-            y={h + 14}
-            textAnchor={i === 0 ? "start" : i === years.length - 1 ? "end" : "middle"}
-            fill="var(--c-text-faint)"
-            fontSize="9"
-            fontWeight="500"
-            fontFamily="inherit"
-          >
-            {year}
-          </text>
-        ))}
+        <polyline points={linePoints} fill="none" stroke={lineColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
       </svg>
+      {/* End point, drawn outside the stretched chart so it stays a circle */}
+      <span
+        className="absolute h-2.5 w-2.5 -translate-y-1/2 translate-x-1/2 rounded-full ring-2 ring-white dark:ring-slate-900"
+        style={{ right: 0, top: `${(points[points.length - 1][1] / h) * 100}%`, backgroundColor: lineColor }}
+        aria-hidden
+      />
+      </div>
+      {/* Year labels as text, so they keep their size however wide the chart is drawn */}
+      <div className="mt-1 flex justify-between text-[11px] font-medium text-slate-600 dark:text-slate-300" aria-hidden>
+        {years.map((year) => (
+          <span key={year}>{year}</span>
+        ))}
+      </div>
     </div>
   );
 }
@@ -100,24 +99,7 @@ function RetirementImpactWidget({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut", delay }}
     >
-      <div
-        className="bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800"
-        style={{ borderRadius: 16, overflow: "hidden", position: "relative" }}
-      >
-        {/* Top accent bar */}
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 3,
-            background: showImpact && impactAmount! < 0
-              ? "linear-gradient(90deg, var(--status-danger), var(--status-warning))"
-              : "linear-gradient(90deg, var(--color-primary), var(--chart-sky))",
-            borderRadius: "16px 16px 0 0",
-          }}
-        />
+      <div className="relative overflow-hidden rounded-[20px] bg-surface-card shadow-[0_12px_32px_-28px_rgba(11,21,51,0.45)] ring-1 ring-slate-200/70 dark:ring-white/10">
 
         <div style={{ padding: compact ? "14px 18px" : "16px 20px" }}>
           {/* Projected Balance */}
@@ -175,7 +157,7 @@ function RetirementImpactWidget({
               />
             </div>
             <div
-              className="text-slate-400 dark:text-gray-500"
+              className="text-slate-600 dark:text-slate-300"
               style={{ fontSize: 11, marginTop: 3 }}
             >
               ${retirementGoal.toLocaleString()} retirement goal
@@ -186,7 +168,7 @@ function RetirementImpactWidget({
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
             <div>
               <div
-                className="text-slate-400 dark:text-gray-500"
+                className="text-slate-600 dark:text-slate-300"
                 style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 3 }}
               >
                 2026 Contributions
@@ -198,7 +180,7 @@ function RetirementImpactWidget({
                 {contributionPercent}%
               </div>
               <div
-                className="text-slate-400 dark:text-gray-500"
+                className="text-slate-600 dark:text-slate-300"
                 style={{ fontSize: 10 }}
               >
                 ${contributionsThisYear.toLocaleString()} / ${contributionLimit.toLocaleString()}
@@ -206,7 +188,7 @@ function RetirementImpactWidget({
             </div>
             <div>
               <div
-                className="text-slate-400 dark:text-gray-500"
+                className="text-slate-600 dark:text-slate-300"
                 style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 3 }}
               >
                 Years to Retire
@@ -218,7 +200,7 @@ function RetirementImpactWidget({
                 {yearsToRetire}
               </div>
               <div
-                className="text-slate-400 dark:text-gray-500"
+                className="text-slate-600 dark:text-slate-300"
                 style={{ fontSize: 10 }}
               >
                 Age {currentAge} → {targetAge}

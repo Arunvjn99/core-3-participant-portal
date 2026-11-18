@@ -7,7 +7,7 @@ import { useEnrollmentStepNav } from '@/features/enrollment/components/Enrollmen
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { AutoIncreaseSkipPanel } from '@/features/enrollment/components/AutoIncreaseSkipPanel'
-import { ArrowRight, TrendingUp, Minus } from 'lucide-react'
+import { TrendingUp, Minus, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { BODY_TEXT, Card, CARD_TITLE, HEADING, IconChip, PILL_PRIMARY, PILL_SECONDARY, SECTION_LABEL, StepHeader, TitleBadge, badge } from '@/features/enrollment/enrollmentUi'
 import { compareAutoIncrease } from '@/features/enrollment/enrollmentMath'
@@ -117,7 +117,7 @@ export default function AutoIncrease() {
               <p className="mt-1 text-[32px] font-extrabold leading-none tabular-nums text-primary dark:text-blue-300">${autoProjection.toLocaleString(locale)}</p>
             </div>
             <button type="button" onClick={() => handleSelect(true)} className={cn(PILL_PRIMARY, 'mt-5 w-full')}>
-              {t('enrollment.auto_increase_page.enable_cta')} <ArrowRight className="h-4 w-4 shrink-0" />
+              {t('enrollment.auto_increase_page.enable_cta')} <ChevronRight className="h-4 w-4 shrink-0" />
             </button>
           </Card>
         </div>

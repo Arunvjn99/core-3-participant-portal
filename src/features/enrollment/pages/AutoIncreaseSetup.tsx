@@ -10,6 +10,7 @@ import { getAppDateLocale } from '@/lib/dateLocale'
 import { getGrowthRate } from '@/lib/retirementCalculations'
 import { projectBalance } from '@/features/enrollment/enrollmentMath'
 import { PLAN_CONFIG } from '@/features/enrollment/agent/planConfig'
+import { InfoTip } from '@/features/enrollment/flow/core/ui'
 import { Calendar, Target, DollarSign, Info } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { BODY_TEXT, CARD_TITLE, HEADING, IconChip, MUTED_TEXT, RULE, SECTION_LABEL, StepHeader, TEXT_LINK, badge, card, chip, choice } from '@/features/enrollment/enrollmentUi'
@@ -244,7 +245,14 @@ export default function AutoIncreaseSetup() {
                 <IconChip Icon={Calendar} tone="blue" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-3">
-                    <p className={cn('text-sm font-bold', HEADING)}>{t('enrollment.auto_increase_setup.increase_label')}</p>
+                    <p className={cn('text-sm font-bold', HEADING)}>
+                      {t('enrollment.auto_increase_setup.increase_label')}{' '}
+                      {/* Why the steps stop at the plan's maximum */}
+                      <InfoTip
+                        label={t('enrollment.auto_increase_setup.increase_why_label', { max: amountMax })}
+                        text={t('enrollment.auto_increase_setup.increase_why', { min: amountMin, max: amountMax })}
+                      />
+                    </p>
                     <p className="shrink-0 text-base font-extrabold tabular-nums text-primary dark:text-blue-300">{t('enrollment.auto_increase_setup.per_cycle', { v: increaseAmount })}</p>
                   </div>
                   <div className="mt-3">

@@ -55,11 +55,11 @@ export function ActivityHistory() {
       </div>
 
       {visible.length === 0 ? (
-        <p className="py-8 text-center text-sm text-text-muted">{t('activity.none')}</p>
+        <p className="py-8 text-center text-sm text-slate-600 dark:text-slate-300">{t('activity.none')}</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[34rem] text-left text-sm">
-            <thead className="text-xs uppercase tracking-wide text-text-muted">
+            <thead className="text-xs uppercase tracking-wide text-slate-600 dark:text-slate-300">
               <tr className="border-b border-border-default">
                 <th scope="col" className="py-2 pr-3 font-semibold">{t('activity.col_date')}</th>
                 <th scope="col" className="py-2 pr-3 font-semibold">{t('activity.col_type')}</th>
@@ -80,7 +80,6 @@ export function ActivityHistory() {
           </table>
         </div>
       )}
-      <p className="mt-3 text-xs text-text-muted">{t('portfolio.sample_note')}</p>
       <GenerateStatementDialog open={generating} onClose={() => setGenerating(false)} defaultPlanId={planId} />
     </div>
   )

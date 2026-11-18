@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { ArrowRight, ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ChevronRight } from 'lucide-react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -112,7 +112,7 @@ function FlowNavButtons({
         style={{ padding: '10px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, boxShadow: '0 4px 12px var(--brand-primary-ring)' }}
       >
         {isSubmitting ? t('common.submitting') : nextLabel}
-        {!isSubmitting && <ArrowRight style={{ width: 16, height: 16 }} />}
+        {!isSubmitting && <ChevronRight style={{ width: 16, height: 16 }} />}
       </button>
     </div>
   )

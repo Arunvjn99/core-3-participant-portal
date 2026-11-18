@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useTransferFlow } from "./TransferFlowLayout";
 import { motion } from "framer-motion";
-import { ArrowRight, ArrowLeft, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { ArrowLeft, TrendingUp, TrendingDown, Minus, ChevronRight } from "lucide-react";
 
 const COLORS = ["var(--chart-blue)", "var(--chart-purple, #8b5cf6)", "var(--chart-green)", "var(--chart-amber, #f59e0b)"];
 
@@ -203,7 +203,7 @@ function TransferSourceFunds() {
           className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Select Destination
-          <ArrowRight style={{ width: 16, height: 16 }} />
+          <ChevronRight style={{ width: 16, height: 16 }} />
         </button>
       </div>
     </div>

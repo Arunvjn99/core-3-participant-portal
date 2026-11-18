@@ -70,7 +70,7 @@ function statements(now: number): DocumentItem[] {
         planId: plan.id,
         at: published,
         render: (t) => ({
-          title: t('documents.item.statement', label) + (DOC_PLANS.length > 1 ? ` — ${plan.planId}` : ''),
+          title: t('documents.item.statement', label) + (DOC_PLANS.length > 1 ? ` · ${plan.planId}` : ''),
           description: t('documents.item.statement_desc'),
         }),
       })

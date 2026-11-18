@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useRebalanceFlow } from "./RebalanceFlowLayout";
 import { motion } from "framer-motion";
-import { ArrowRight, RotateCcw, Info } from "lucide-react";
+import { RotateCcw, Info, ChevronRight } from "lucide-react";
 
 const COLORS = ["var(--chart-blue)", "var(--chart-teal)", "var(--chart-green)", "var(--status-warning)"];
 
@@ -217,7 +217,7 @@ function RebalanceAdjustAllocation() {
           className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Preview Trades
-          <ArrowRight style={{ width: 16, height: 16 }} />
+          <ChevronRight style={{ width: 16, height: 16 }} />
         </button>
       </div>
     </div>

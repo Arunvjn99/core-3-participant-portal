@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { ArrowLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { PILL_PRIMARY, PILL_SECONDARY } from '../enrollmentUi'
 
@@ -86,7 +86,7 @@ function EnrollmentStepFooterBar({ config }: { config: EnrollmentNavConfig | nul
         {showNext && config.onNext && (
           <button type="button" onClick={config.onNext} disabled={nextDisabled} className={cn(PILL_PRIMARY, 'ml-auto min-w-[132px]')}>
             {label}
-            <ArrowRight className="h-4 w-4" aria-hidden />
+            <ChevronRight className="h-4 w-4" aria-hidden />
           </button>
         )}
       </div>

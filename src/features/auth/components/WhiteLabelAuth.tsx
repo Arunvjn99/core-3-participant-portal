@@ -6,8 +6,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Eye, EyeOff, ChevronLeft, ChevronRight,
-  Check, X, Building2, ArrowRight, LogIn
+  Eye,
+  EyeOff,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  X,
+  Building2,
+  LogIn,
 } from 'lucide-react'
 import { signUpUser, signInUser, getAllCompanies } from '../../../lib/supabaseIntegration'
 import { LEGAL, ROUTES } from '@/lib/constants'
@@ -492,7 +498,7 @@ export default function WhiteLabelAuth() {
                         className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
                         style={primaryBtn}
                       >
-                        Create Account <ArrowRight className="w-4 h-4" />
+                        Create Account <ChevronRight className="w-4 h-4" />
                       </button>
                       <button
                         type="button"

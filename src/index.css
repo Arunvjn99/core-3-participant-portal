@@ -41,6 +41,28 @@
 /* Brand-colour the browser's focus outline, but only where an element keeps that outline. Elements marked
    `outline-none` (Tailwind draws it as a transparent outline) show focus another way, usually a ring or a
    highlighted border; recolouring their transparent outline used to paint a stray blue box inside fields. */
+/* Status ink for "in progress" pills on the pale blue tint: deeper blue in light, pale blue in dark */
+:root { --processing-ink: #1d4ed8; }
+.dark, html[data-theme="dark"] { --processing-ink: #bfdbfe; }
+
+/* Dropdowns: the browser's own arrow sits flush against the right edge and clips on rounded corners, so every
+   single-line select gets one drawn chevron, inset from the edge, with room kept for it after the text */
+select:not([multiple]):not([size]) {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 1rem 1rem;
+  padding-right: 2.5rem !important;
+  text-overflow: ellipsis;
+}
+.dark select:not([multiple]):not([size]),
+html[data-theme="dark"] select:not([multiple]):not([size]) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+select::-ms-expand { display: none; }
+
 *:focus-visible:not([class*='outline-none']) {
   outline-color: var(--brand-primary) !important;
 }

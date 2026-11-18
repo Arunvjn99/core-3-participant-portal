@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useLoanFlow } from "./LoanFlowLayout";
 import { motion } from "framer-motion";
-import { Info, ArrowRight, ArrowLeft } from "lucide-react";
+import { Info, ArrowLeft, ChevronRight } from "lucide-react";
 
 function LoanFees() {
   const navigate = useNavigate();
@@ -131,7 +131,7 @@ function LoanFees() {
           className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer"
         >
           Continue to Documents
-          <ArrowRight style={{ width: 16, height: 16 }} />
+          <ChevronRight style={{ width: 16, height: 16 }} />
         </button>
       </div>
     </div>

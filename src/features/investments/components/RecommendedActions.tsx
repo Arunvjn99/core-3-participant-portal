@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RefreshCw, TrendingUp, ShieldAlert, ArrowRight, Sparkles } from 'lucide-react'
+import { RefreshCw, TrendingUp, ShieldAlert, Sparkles, ChevronRight } from 'lucide-react'
 
 const ACTION_IDS = ['rebalance', 'contrib', 'risk'] as const
 
@@ -96,7 +96,7 @@ function RecommendedActions() {
                 className={`mt-auto flex w-full items-center justify-center gap-1 rounded-xl px-4 py-2.5 text-xs font-semibold text-white transition-colors ${action.ctaBg}`}
               >
                 {action.ctaLabel}
-                <ArrowRight className="h-3.5 w-3.5" />
+                <ChevronRight className="h-3.5 w-3.5" />
               </button>
             </div>
           )

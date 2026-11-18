@@ -2,7 +2,8 @@ import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { motion, useInView, useReducedMotion } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowRight, ArrowUp, ChevronRight, GraduationCap, Headset, Lightbulb, Sparkles, Star, Zap } from 'lucide-react'
+import { ADVISOR } from '@/features/advisors/advisorProfile'
+import { ArrowUp, ChevronRight, GraduationCap, Headset, Lightbulb, Sparkles, Star, Zap } from 'lucide-react'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { useAIStore } from '@/core/store/aiStore'
 import { useAuth } from '@/core/hooks/useAuth'
@@ -229,15 +230,7 @@ function AskCoreAiCard({ turns, onStart }: { turns: ChatTurn[]; onStart: () => v
 }
 
 // ─── Talk to an Advisor ──────────────────────────────────────────────────────
-/** The advisor shown before enrollment: the same person the enrolled dashboard shows as "Your Advisor". */
-const ADVISOR = {
-  name: 'Sarah Jenkins',
-  years: 12,
-  rating: 4.9,
-  photo: 'https://randomuser.me/api/portraits/women/44.jpg',
-  /** Shown if the photo can't load */
-  fallbackPhoto: '/media/advisor-avatar.png',
-}
+// The advisor shown before enrollment is the same person the enrolled dashboard shows as "Your Advisor" (ADVISOR)
 
 /** A whole card for the advisor: who she is, three quick tips in her words, and one way to book. */
 function AdvisorCard({ cap, onBook }: { cap: number; onBook: () => void }) {
@@ -424,7 +417,7 @@ export function PreEnrollmentDashboard() {
                     </span>
                   </span>
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-primary transition-transform group-hover:translate-x-0.5" aria-hidden>
-                    <ArrowRight className="h-5 w-5" />
+                    <ChevronRight className="h-5 w-5" />
                   </span>
                 </button>
                 {/* Secondary: guided enrollment */}
@@ -449,12 +442,11 @@ export function PreEnrollmentDashboard() {
             </div>
 
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)]">
-              {/* Enrich financial learning: the lead card, opens Enrich in a new tab */}
-              <Reveal className="group relative isolate flex min-h-[180px] overflow-hidden rounded-[20px] bg-[radial-gradient(90%_130%_at_0%_0%,#CBE7FF_0%,rgba(203,231,255,0)_62%),radial-gradient(70%_130%_at_100%_100%,#C9D0FF_0%,rgba(201,208,255,0)_68%),linear-gradient(#EEF2FF,#EEF2FF)] p-6 text-left shadow-[0_18px_40px_-28px_rgba(37,99,235,0.55)] ring-1 ring-blue-200/80 xl:min-h-[164px] xl:py-5 transition-shadow hover:shadow-[0_24px_48px_-26px_rgba(37,99,235,0.6)] md:col-span-2 xl:col-span-3 dark:bg-[radial-gradient(90%_130%_at_0%_0%,#173F7A_0%,rgba(23,63,122,0)_62%),radial-gradient(70%_130%_at_100%_100%,#3340B0_0%,rgba(51,64,176,0)_68%),linear-gradient(#0F1A48,#0F1A48)] dark:shadow-none dark:ring-blue-400/25">
-                {/* The coin art's periwinkle, glowing behind it so the image and card share one light */}
-                <span className="pointer-events-none absolute -right-10 top-1/2 -z-10 h-64 w-80 -translate-y-1/2 rounded-full bg-[#8C9BFF] opacity-35 blur-[70px] transition-opacity group-hover:opacity-50 dark:bg-[#5B6BFF] dark:opacity-45" aria-hidden />
+              {/* Enrich financial learning: the lead card, opens Enrich in a new tab.
+                  The page's blue card, with a chart illustration in the same blues */}
+              <Reveal className="group relative isolate flex min-h-[180px] overflow-clip rounded-[20px] bg-[radial-gradient(90%_130%_at_0%_0%,#CBE7FF_0%,rgba(203,231,255,0)_62%),linear-gradient(90deg,#EEF2FF_0%,#E4E9FF_100%)] p-6 text-left shadow-[0_18px_40px_-28px_rgba(37,99,235,0.55)] ring-1 ring-blue-200/80 xl:min-h-[164px] xl:py-5 transition-shadow hover:shadow-[0_24px_48px_-26px_rgba(37,99,235,0.6)] md:col-span-2 xl:col-span-3 dark:bg-[radial-gradient(90%_130%_at_0%_0%,#173F7A_0%,rgba(23,63,122,0)_62%),linear-gradient(90deg,#0F1A48_0%,#26358F_100%)] dark:shadow-none dark:ring-blue-400/25">
                 {/* Left: what it is and the way in */}
-                <div className="relative z-10 flex flex-1 flex-col items-start justify-center sm:max-w-[70%]">
+                <div className="relative z-10 flex flex-1 flex-col items-start justify-center sm:max-w-[60%]">
                   <span className="flex items-center gap-3">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_16px_-6px_rgba(37,99,235,0.6)]" aria-hidden>
                       <GraduationCap className="h-5 w-5" />
@@ -480,15 +472,10 @@ export function PreEnrollmentDashboard() {
                   </span>
                 </div>
 
-                {/* Right: the coin on the steps, its backdrop removed so it sits straight on the card; the left and the bright top-right corner fade into the card */}
-                <img
-                  src="/media/enrich-coin.png"
-                  alt=""
-                  width={300}
-                  height={180}
-                  className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[300px] max-w-none object-cover object-[center_8%] transition-transform duration-700 [mask-composite:intersect] [mask-image:linear-gradient(to_right,transparent_0%,black_30%),radial-gradient(60%_55%_at_100%_0%,transparent_0%,transparent_30%,black_95%)] [-webkit-mask-composite:source-in] group-hover:scale-[1.05] motion-reduce:transition-none sm:block"
-                  aria-hidden
-                />
+                {/* The art's periwinkle, glowing behind it so the picture and the card share one light */}
+                <span className="pointer-events-none absolute -right-10 top-1/2 -z-10 h-64 w-80 -translate-y-1/2 rounded-full bg-[#8C9BFF] opacity-35 blur-[70px] transition-opacity group-hover:opacity-50 dark:bg-[#5B6BFF] dark:opacity-45" aria-hidden />
+                {/* Right: the bar, line and pie chart on its podium (a vector drawing with a clear background, so it sits straight on the card in both themes) */}
+                <img src="/media/enrich-chart.svg" alt="" width={400} height={320} className="pointer-events-none absolute right-4 top-1/2 hidden h-[96%] w-auto max-w-none -translate-y-1/2 transition-transform duration-700 group-hover:scale-[1.04] motion-reduce:transition-none sm:block" aria-hidden />
               </Reveal>
 
               {/* Ask Core AI: the second feature, a tall column so the chat is always in view */}

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, useReducedMotion } from 'framer-motion'
-import { AlertCircle, ArrowLeft, ArrowRight, ArrowUp, Check, ChevronDown, Loader2, Lock, RotateCw, ShieldCheck } from 'lucide-react'
+import { AlertCircle, ArrowLeft, ArrowUp, Check, ChevronDown, Loader2, Lock, RotateCw, ShieldCheck, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { LEGAL } from '@/lib/constants'
 import { getAppDateLocale } from '@/lib/dateLocale'
@@ -411,7 +411,7 @@ export default function AgentEnrollment() {
             style={{ fontSize: '1.08rem', fontWeight: 700 }}
           >
             {t('enrollment.flow.enrol_now')}
-            <ArrowRight className="h-5 w-5" aria-hidden />
+            <ChevronRight className="h-5 w-5" aria-hidden />
           </button>
           <p className="mt-4 text-slate-400" style={{ fontSize: '0.82rem' }}>{t('enrollment.flow.welcome_note')}</p>
         </motion.section>

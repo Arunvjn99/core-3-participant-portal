@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { useBlocker, useNavigate } from 'react-router-dom'
 import { Trans, useTranslation } from 'react-i18next'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { AlertTriangle, ArrowRight, Check, FileText, Landmark, Loader2, Lock, Pencil, Printer, RotateCcw, RotateCw } from 'lucide-react'
+import { AlertTriangle, ArrowRight, Check, FileText, Landmark, Loader2, Lock, Pencil, Printer, RotateCcw, RotateCw, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { LEGAL, ROUTES } from '@/lib/constants'
 import { getAppDateLocale } from '@/lib/dateLocale'
@@ -773,7 +773,7 @@ export default function CoreEnrollment() {
     <>
       <button type="button" onClick={() => toCustomFlow(kind)} title={t('enrollment.core.more_options_title')} className="mr-auto inline-flex items-center gap-1 rounded-md text-[13px] font-semibold text-slate-600 transition-colors hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-gray-300 dark:hover:text-white">
         {t('enrollment.core.more_options')}
-        <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+        <ChevronRight className="h-3.5 w-3.5" aria-hidden />
       </button>
       <button type="button" onClick={cancelEdit} className="inline-flex h-10 items-center rounded-full bg-white px-5 text-[14px] font-semibold text-slate-900 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-gray-900 dark:text-white dark:ring-gray-700 dark:hover:bg-gray-800">
         {t('enrollment.core.cancel')}
@@ -1231,7 +1231,7 @@ export default function CoreEnrollment() {
               </motion.button>
               <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={() => setBeneWarn(true)} className="inline-flex h-14 items-center justify-center gap-1.5 rounded-2xl bg-white px-8 text-[17px] font-semibold text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.05)] ring-1 ring-slate-200 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:bg-gray-900 dark:text-white dark:ring-gray-700 dark:hover:bg-gray-800">
                 {t('enrollment.core.to_dashboard')}
-                <ArrowRight className="h-4 w-4" aria-hidden />
+                <ChevronRight className="h-4 w-4" aria-hidden />
               </motion.button>
             </motion.div>
           </div>

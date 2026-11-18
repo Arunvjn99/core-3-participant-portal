@@ -1,6 +1,6 @@
-import { useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Star } from 'lucide-react'
+import { ArrowLeft, Star } from 'lucide-react'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { cn } from '@/lib/cn'
 import { getAppDateLocale } from '@/lib/dateLocale'
@@ -17,6 +17,9 @@ const TABS: Tab[] = ['messages', 'meetings', 'recs']
 export default function AdvisorPage() {
   const { t } = useTranslation()
   const [params, setParams] = useSearchParams()
+  const location = useLocation()
+  // Opened from the enrollment Investment step: offer the way straight back to it
+  const fromInvestments = (location.state as { from?: string } | null)?.from === 'enrollment-investment'
   const { unread, nextMeeting, doneRecs } = useAdviser()
 
   const requested = params.get('tab')
@@ -27,6 +30,15 @@ export default function AdvisorPage() {
     <AnimatedPage>
       <div className="min-h-screen bg-surface-page">
         <div className="mx-auto max-w-[1100px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          {fromInvestments && (
+            <Link
+              to="/enrollment/investment"
+              className="mb-3 inline-flex min-h-10 items-center gap-1.5 rounded-md text-[14px] font-semibold text-slate-600 transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:text-slate-300 dark:hover:text-white dark:focus-visible:ring-offset-slate-900"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden />
+              {t('adviser.back_to_investments')}
+            </Link>
+          )}
           <header className="pb-5">
             <h1 className="text-[28px] font-bold leading-tight text-text-primary">{t('adviser.title')}</h1>
             <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-text-secondary">{t('adviser.subtitle')}</p>
@@ -44,7 +56,7 @@ export default function AdvisorPage() {
                       id={`adviser-tab-${id}`}
                       aria-selected={tab === id}
                       aria-controls="adviser-panel"
-                      onClick={() => setParams({ tab: id }, { replace: true })}
+                      onClick={() => setParams({ tab: id }, { replace: true, state: location.state })}
                       className={cn(
                         '-mb-px flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-[13px] font-medium transition-colors',
                         tab === id ? 'border-primary text-primary' : 'border-transparent text-text-secondary hover:text-text-primary',

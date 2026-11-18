@@ -24,19 +24,46 @@ export function readinessScore(goalShare: number): number {
   return Math.min(100, Math.round(score))
 }
 
+/** Earliest age Social Security retirement benefits can start */
+export const SOCIAL_SECURITY_START_AGE = 62
+
+/** What the Retirement readiness page adds on top of the basic projection; every field is optional. */
+export interface RetirementExtras {
+  /** Age at retirement: before 62 no Social Security is counted */
+  retirementAge?: number
+  /** The participant's own yearly spending goal in today's dollars; without it the goal is 80% of current pay */
+  annualGoal?: number
+  /** Savings held outside the plan today; they grow at `growthRate` alongside the 401(k) */
+  outsideSavings?: number
+  growthRate?: number
+  /** State income-tax rate on taxable (pre-tax) withdrawals, and the share of the 401(k) that is pre-tax */
+  stateTaxRate?: number
+  taxableShare?: number
+}
+
 /**
- * Yearly retirement income in today's dollars versus the goal of 80% of current pay.
- * Income = 4% a year from the projected balance (after inflation) plus an estimated Social Security benefit.
+ * Yearly retirement income in today's dollars versus the yearly goal (80% of current pay unless one is given).
+ * Income = 4% a year from the projected balance and any outside savings (after inflation), plus an estimated Social
+ * Security benefit from age 62, less state tax on the pre-tax part of the withdrawals.
  */
-export function retirementIncome(projectedBalance: number, years: number, salary: number) {
-  const todaysDollars = projectedBalance / Math.pow(1 + ASSUMED_INFLATION, Math.max(0, years))
-  const fromSavings = Math.round(todaysDollars * ASSUMPTIONS.withdrawalRate)
-  const socialSecurity = Math.round(Math.min(salary * ASSUMPTIONS.socialSecurityPctOfSalary, ASSUMPTIONS.socialSecurityMax))
-  const goal = Math.round(salary * RETIREMENT_INCOME_TARGET_RATIO)
-  const total = fromSavings + socialSecurity
+export function retirementIncome(projectedBalance: number, years: number, salary: number, extras: RetirementExtras = {}) {
+  const yrs = Math.max(0, years)
+  const deflate = (v: number) => v / Math.pow(1 + ASSUMED_INFLATION, yrs)
+  const todaysDollars = deflate(projectedBalance)
+  const outsideToday = extras.outsideSavings && extras.outsideSavings > 0 ? deflate(extras.outsideSavings * Math.pow(1 + (extras.growthRate ?? 0), yrs)) : 0
+  const fromPlan = todaysDollars * ASSUMPTIONS.withdrawalRate
+  const fromSavings = Math.round(fromPlan + outsideToday * ASSUMPTIONS.withdrawalRate)
+  const stateTax = Math.round(fromPlan * (extras.taxableShare ?? 1) * (extras.stateTaxRate ?? 0))
+  const socialSecurity =
+    extras.retirementAge !== undefined && extras.retirementAge < SOCIAL_SECURITY_START_AGE
+      ? 0
+      : Math.round(Math.min(salary * ASSUMPTIONS.socialSecurityPctOfSalary, ASSUMPTIONS.socialSecurityMax))
+  const goal = Math.round(extras.annualGoal && extras.annualGoal > 0 ? extras.annualGoal : salary * RETIREMENT_INCOME_TARGET_RATIO)
+  const total = Math.max(0, fromSavings + socialSecurity - stateTax)
   return {
     fromSavings,
     socialSecurity,
+    stateTax,
     total,
     goal,
     gap: Math.max(0, goal - total),

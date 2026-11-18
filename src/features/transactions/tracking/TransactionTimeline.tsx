@@ -46,12 +46,12 @@ export function TransactionTimeline({ timeline, ns = 'tracking' }: { timeline: T
                 <p
                   className={cn(
                     'text-[13px]',
-                    step.state === 'upcoming' ? 'text-text-muted' : 'font-semibold text-text-primary',
+                    step.state === 'upcoming' ? 'text-slate-500 dark:text-slate-400' : 'font-semibold text-text-primary',
                   )}
                 >
                   {t(`${ns}.stage.${step.key}`)}
                 </p>
-                <p className="text-[11px] text-text-muted">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
                   {step.state === 'upcoming' ? t('tracking.expected_on', { date: fmt(step.at) }) : fmt(step.at)}
                 </p>
               </div>

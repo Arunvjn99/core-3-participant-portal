@@ -2,7 +2,7 @@ import { Slider } from "../../components/ui/slider";
 import { useNavigate } from "react-router-dom";
 import { useState, type ChangeEvent, type CSSProperties } from "react";
 import { useLoanFlow } from "./LoanFlowLayout";
-import { DollarSign, Calendar, ArrowRight, ArrowLeft, ChevronDown } from "lucide-react";
+import { DollarSign, Calendar, ArrowLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 const LABEL = {
@@ -285,11 +285,6 @@ function LoanSimulator() {
                       </option>
                     ))}
                   </select>
-                  <ChevronDown
-                    className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2"
-                    style={{ color: "var(--input-placeholder)" }}
-                    aria-hidden
-                  />
                 </div>
               </div>
 
@@ -560,7 +555,7 @@ function LoanSimulator() {
           className="btn-brand flex cursor-pointer items-center gap-2 transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Continue to Configuration
-          <ArrowRight style={{ width: 16, height: 16 }} />
+          <ChevronRight style={{ width: 16, height: 16 }} />
         </button>
       </div>
     </div>

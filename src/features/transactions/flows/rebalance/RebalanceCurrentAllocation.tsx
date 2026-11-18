@@ -7,7 +7,7 @@ import {
   Cell,
   ResponsiveContainer,
   Tooltip } from "recharts";
-import { ArrowRight, ArrowLeft, Info } from "lucide-react";
+import { ArrowLeft, Info, ChevronRight } from "lucide-react";
 
 const COLORS = ["var(--chart-blue)", "var(--chart-teal)", "var(--chart-green)", "var(--status-warning)", "var(--color-primary)"];
 
@@ -215,7 +215,7 @@ function RebalanceCurrentAllocation() {
           className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer"
         >
           Adjust Target Allocation
-          <ArrowRight style={{ width: 16, height: 16 }} />
+          <ChevronRight style={{ width: 16, height: 16 }} />
         </button>
       </div>
     </div>

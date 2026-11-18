@@ -5,7 +5,7 @@ import { useEnrollment } from '@/core/hooks/useEnrollment'
 import { useEnrollmentStepNav } from '@/features/enrollment/components/EnrollmentStepNavContext'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { cn } from '@/lib/cn'
-import { Check, Sparkles, ArrowRight, MessageCircle, Landmark, HelpCircle } from 'lucide-react'
+import { Check, Sparkles, MessageCircle, Landmark, HelpCircle, ChevronRight } from 'lucide-react'
 import { BODY_TEXT, Card, CARD_TITLE, HEADING, MUTED_TEXT, PILL_PRIMARY, PILL_SECONDARY, RULE, StepHeader, TitleBadge, badge, card } from '@/features/enrollment/enrollmentUi'
 
 export default function PlanSelection() {
@@ -71,7 +71,7 @@ export default function PlanSelection() {
               </p>
             </div>
             <button type="button" onClick={() => confirmPlan(onlyPlan)} className={cn(PILL_PRIMARY, 'w-full')}>
-              {t('enrollment.plan.continue_contributions')} <ArrowRight className="h-4 w-4" />
+              {t('enrollment.plan.continue_contributions')} <ChevronRight className="h-4 w-4" />
             </button>
           </Card>
         </div>
@@ -155,7 +155,7 @@ export default function PlanSelection() {
                     </>
                   ) : (
                     <>
-                      {t('enrollment.plan.select_plan')} <ArrowRight className="h-4 w-4" />
+                      {t('enrollment.plan.select_plan')} <ChevronRight className="h-4 w-4" />
                     </>
                   )}
                 </button>

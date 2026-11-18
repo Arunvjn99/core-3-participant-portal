@@ -53,7 +53,15 @@ export function NotificationBanner() {
           </div>
         )
       })}
-      {hidden > 0 && <p className="px-1 text-[12px] text-text-muted">{t('alerts.more_in_bell', { count: hidden })}</p>}
+      {hidden > 0 && (
+        <Link
+          to="/notifications"
+          className="group ml-1 inline-flex min-h-8 items-center gap-0.5 rounded text-[13px] font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:text-blue-300"
+        >
+          {t('alerts.view_more', { count: hidden })}
+          <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+        </Link>
+      )}
     </section>
   )
 }

@@ -11,7 +11,6 @@ import {
   TrendingUp,
   X,
   Percent,
-  Award,
   Info,
   Globe,
 } from 'lucide-react'
@@ -20,6 +19,8 @@ import { cn } from '@/lib/cn'
 import { BODY_TEXT, Card, CARD_TITLE, HEADING, IconChip, MUTED_TEXT, PILL_PRIMARY, PILL_SECONDARY, RULE, SECTION_LABEL, StepHeader, TitleBadge, badge, card } from '@/features/enrollment/enrollmentUi'
 import { getGrowthRate, type RiskLevel } from '@/lib/retirementCalculations'
 import { annualEmployerMatch, projectBalance, retirementIncome } from '@/features/enrollment/enrollmentMath'
+import { useRetirementGoal } from '@/features/retirement/retirementStore'
+import { goalExtras } from '@/features/retirement/readinessExtras'
 import { useEnrollmentStepNav, type EnrollmentPrimaryLabel } from '@/features/enrollment/components/EnrollmentStepNavContext'
 
 /* ─── Types ─── */
@@ -294,6 +295,9 @@ function RetirementReadiness() {
     })
 
   const growthRate = getGrowthRate(data.riskLevel)
+  // The retirement goal saved on the Retirement readiness page (if any), so every screen scores the plan the same way
+  const savedGoal = useRetirementGoal()
+  const incomeExtras = { ...goalExtras(savedGoal, data.contributionSources, growthRate), retirementAge: personalization.retirementAge }
 
   /** Readiness score: % of the retirement income goal covered by savings income plus Social Security */
   const computeScore = (contribPct: number, autoInc: boolean, riskLevel: string) =>
@@ -301,13 +305,14 @@ function RetirementReadiness() {
       project(contribPct, autoInc ? { amount: data.autoIncreaseAmount, max: data.autoIncreaseMax } : null, getGrowthRate(riskLevel as RiskLevel)),
       yearsToRetirement,
       data.salary,
+      { ...incomeExtras, growthRate: getGrowthRate(riskLevel as RiskLevel) },
     ).readinessPct
 
   const projectedBalance = project(data.contributionPercent, currentAutoIncrease, growthRate)
   const score = computeScore(data.contributionPercent, data.autoIncrease, data.riskLevel)
 
   // Annual Funding Summary: yearly income goal vs. projected yearly income, both in today's dollars
-  const income = retirementIncome(projectedBalance, yearsToRetirement, data.salary)
+  const income = retirementIncome(projectedBalance, yearsToRetirement, data.salary, incomeExtras)
 
   const formatCurrency = (val: number) => {
     if (val >= 1_000_000) return `$${(val / 1_000_000).toFixed(2)}M`
@@ -496,7 +501,7 @@ function RetirementReadiness() {
             </div>
           </Card>
 
-          {/* Understanding Your Score */}
+          {/* Understanding Your Score and the yearly figures behind it, in one card */}
           <Card>
             <div className="flex items-start gap-3">
               <IconChip Icon={Info} tone="blue" />
@@ -505,11 +510,7 @@ function RetirementReadiness() {
                 <p className={cn('mt-1 text-[13px] leading-relaxed', BODY_TEXT)}>{t('enrollment.readiness.understanding_body', { score })}</p>
               </div>
             </div>
-          </Card>
-
-          {/* Annual Funding Summary */}
-          <Card>
-            <h2 className={CARD_TITLE}>{t('enrollment.readiness.annual_summary_title')}</h2>
+            <h3 className={cn('mt-4 border-t pt-4 text-[14px] font-bold', RULE, HEADING)}>{t('enrollment.readiness.annual_summary_title')}</h3>
             <dl className="mt-3 space-y-2.5">
               {[
                 { dot: 'bg-slate-400', label: t('enrollment.readiness.income_goal'), value: income.goal, color: HEADING },
@@ -539,12 +540,13 @@ function RetirementReadiness() {
         <div className="min-w-0 space-y-4">
           {suggestions.length > 0 && totalPotentialIncrease > 0 && (
             <Card tone="sky">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
+              {/* Heading and score side by side on one line; the score pill never breaks, and on a narrow card it moves under the heading instead of covering it */}
+              <div className="flex flex-wrap items-center justify-between gap-1.5">
+                <div className="flex min-w-0 items-center gap-2">
                   <TitleBadge Icon={Sparkles} />
-                  <p className={CARD_TITLE}>{t('enrollment.readiness.reco_title')}</p>
+                  <p className={cn(CARD_TITLE, 'whitespace-nowrap text-[15px]')}>{t('enrollment.readiness.reco_title')}</p>
                 </div>
-                <span className={badge('blue')}>{t('enrollment.readiness.reco_score', { score: potentialScore })}</span>
+                <span className={cn(badge('blue'), 'shrink-0 whitespace-nowrap')}>{t('enrollment.readiness.reco_score', { score: potentialScore })}</span>
               </div>
               <p className={cn('mt-3 text-[13px] leading-relaxed', BODY_TEXT)}>{t('enrollment.readiness.reco_body', { potentialScore, points: totalPotentialIncrease })}</p>
             </Card>
@@ -562,12 +564,6 @@ function RetirementReadiness() {
                   const isRecommended = index === 0
                   return (
                     <div key={suggestion.id} className={cn(card(isRecommended ? 'selected' : 'plain', false), 'p-5')}>
-                      {isRecommended && (
-                        <span className={cn(badge('blue'), 'mb-2.5')}>
-                          <Award className="h-3 w-3" aria-hidden />
-                          {t('enrollment.readiness.recommended_badge')}
-                        </span>
-                      )}
                       <div className="flex items-start gap-3">
                         <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 ring-1 ring-blue-100 dark:bg-blue-500/15 dark:ring-blue-400/20" aria-hidden>
                           {suggestion.icon}

@@ -9,8 +9,9 @@ import {
   Hash,
   DollarSign,
   Info,
-  ArrowRight,
-  CheckCircle2 } from "lucide-react";
+  CheckCircle2,
+  ChevronRight,
+} from "lucide-react";
 
 function RolloverPlanDetails() {
   const navigate = useNavigate();
@@ -338,7 +339,7 @@ function RolloverPlanDetails() {
           className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Continue
-          <ArrowRight style={{ width: 16, height: 16 }} />
+          <ChevronRight style={{ width: 16, height: 16 }} />
         </button>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowLeft, Sparkles, ChevronRight } from 'lucide-react'
 import { getAppDateLocale } from '@/lib/dateLocale'
 import { ALL_US_STATES } from '@/lib/usStates'
 import { ageFromBirth } from '../quickEnrollmentDefaults'
@@ -68,7 +68,7 @@ export function QuestionModal({
           )}
           <button type="button" onClick={next} disabled={!valid} className={primaryBtn} style={{ fontWeight: 700 }}>
             {last ? t('enrollment.flow.done_answering') : t('enrollment.agent.continue')}
-            {last ? <Sparkles className="h-4 w-4" aria-hidden /> : <ArrowRight className="h-4 w-4" aria-hidden />}
+            {last ? <Sparkles className="h-4 w-4" aria-hidden /> : <ChevronRight className="h-4 w-4" aria-hidden />}
           </button>
         </>
       }

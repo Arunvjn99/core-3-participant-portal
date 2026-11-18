@@ -57,11 +57,11 @@ function TrackerCard({ tx, timeline, defaultOpen }: { tx: TrackedTransaction; ti
             </span>
           </span>
         </span>
-        <ChevronDown className={cn('h-4 w-4 shrink-0 text-text-muted transition-transform', open && 'rotate-180')} aria-hidden />
+        <ChevronDown className={cn('h-4 w-4 shrink-0 text-slate-500 dark:text-slate-400 transition-transform', open && 'rotate-180')} aria-hidden />
       </button>
       {open && (
         <div className="border-t border-border-default px-4 pb-4 pt-4">
-          <p className="mb-3 text-[11px] text-text-muted">
+          <p className="mb-3 text-[11px] text-slate-500 dark:text-slate-400">
             {t('tracking.submitted_on', { date: fmt(tx.submittedAt) })}
           </p>
           <TransactionTimeline timeline={timeline} />
@@ -76,7 +76,7 @@ export function TransactionTracker() {
   const rows = useTrackedTransactions()
 
   if (rows.length === 0) {
-    return <p className="py-6 text-center text-sm text-text-muted">{t('tracking.empty')}</p>
+    return <p className="py-6 text-center text-sm text-slate-500 dark:text-slate-400">{t('tracking.empty')}</p>
   }
   return (
     <div className="flex flex-col gap-3">

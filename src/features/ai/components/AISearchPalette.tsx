@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Sparkles, ArrowRight, X, Zap, Search, MessageCircle, Navigation, Lightbulb } from 'lucide-react'
+import { Sparkles, X, Zap, Search, MessageCircle, Navigation, Lightbulb, ChevronRight } from 'lucide-react'
 import { useAIStore } from '@/core/store/aiStore'
 import { useNavigate } from 'react-router-dom'
 import { SEARCH_SCENARIOS } from '@/core/search/scenarios/data'
@@ -144,7 +144,7 @@ export function AISearchPalette() {
                     <p className="mb-1 text-sm font-semibold text-gray-900 dark:text-white">{faqMatch.question}</p>
                     <p className="text-sm text-gray-700 dark:text-gray-300">{faqMatch.shortAnswer}</p>
                     <button type="button" onClick={handleAskAI} className="mt-2 flex items-center gap-1 text-xs font-semibold text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300">
-                      Tell me more <ArrowRight className="h-3 w-3" />
+                      Tell me more <ChevronRight className="h-3 w-3" />
                     </button>
                   </div>
                 </div>
@@ -202,7 +202,7 @@ export function AISearchPalette() {
                       {QUICK_ACTIONS.map((action) => (
                         <button key={action.path} type="button" onClick={() => handleSelect(action.path)} className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800">
                           <div className="flex items-center gap-2.5"><action.icon className="h-4 w-4 text-gray-400 dark:text-gray-500" /><span>{action.label}</span></div>
-                          <ArrowRight className="h-4 w-4 text-gray-300 dark:text-gray-600" />
+                          <ChevronRight className="h-4 w-4 text-gray-300 dark:text-gray-600" />
                         </button>
                       ))}
                     </div>

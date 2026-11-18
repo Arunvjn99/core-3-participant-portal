@@ -3,7 +3,7 @@ import { useTransactionTracker } from "../../tracking/trackerStore";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useLoanFlow } from "./LoanFlowLayout";
-import { CheckCircle2, Clock, ArrowRight, ArrowLeft, DollarSign, Calendar, Percent, CreditCard, Shield } from "lucide-react";
+import { CheckCircle2, Clock, ArrowLeft, DollarSign, Calendar, Percent, CreditCard, Shield, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 function LoanReview() {
@@ -224,7 +224,7 @@ function LoanReview() {
           className="btn-brand flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "Submitting..." : "Submit Loan Request"}
-          {!isSubmitting && <ArrowRight className="h-4 w-4" />}
+          {!isSubmitting && <ChevronRight className="h-4 w-4" />}
         </button>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Upload, FileText, CheckCircle2, X, ArrowRight, ArrowLeft } from "lucide-react";
+import { Upload, FileText, CheckCircle2, X, ArrowLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface UploadedFile {
@@ -205,7 +205,7 @@ function LoanDocuments() {
           className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Continue to Review
-          <ArrowRight style={{ width: 16, height: 16 }} />
+          <ChevronRight style={{ width: 16, height: 16 }} />
         </button>
       </div>
     </div>

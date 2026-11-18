@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, useReducedMotion } from 'framer-motion'
-import { Shield, ChevronRight, AlertCircle, ArrowRight } from 'lucide-react'
+import { Shield, ChevronRight, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { getAppDateLocale } from '@/lib/dateLocale'
 import { useElectionsStore } from '@/features/plan/electionsStore'
@@ -133,7 +133,7 @@ function PlanCard({ plan, index }: { plan: Plan & { name: string; balanceChange?
           <div className="mt-auto pt-5">
             <button type="button" onClick={() => navigate('/enrollment/plan')} className={PILL_SECONDARY}>
               {t('enrollment.manage_page.start_enrolment')}
-              <ArrowRight className="h-4 w-4" aria-hidden />
+              <ChevronRight className="h-4 w-4" aria-hidden />
             </button>
           </div>
         </>

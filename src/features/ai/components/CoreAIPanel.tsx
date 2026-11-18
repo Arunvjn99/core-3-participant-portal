@@ -1,10 +1,40 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  X, Sparkles, Send, Mic, MicOff, Copy, ThumbsUp, ThumbsDown, Volume2, VolumeX,
-  Check, ChevronRight, DollarSign, Wallet, BarChart3, CheckCircle2, FileText,
-  AlertCircle, Building, Shield, ArrowRight, TrendingUp, RefreshCw, History,
-  Maximize2, Minimize2, Info, Briefcase, PieChart, Minus, Plus, ChevronUp, ChevronDown, Sun, Moon,
+  X,
+  Sparkles,
+  Send,
+  Mic,
+  MicOff,
+  Copy,
+  ThumbsUp,
+  ThumbsDown,
+  Volume2,
+  VolumeX,
+  Check,
+  ChevronRight,
+  DollarSign,
+  Wallet,
+  BarChart3,
+  CheckCircle2,
+  FileText,
+  AlertCircle,
+  Building,
+  Shield,
+  TrendingUp,
+  RefreshCw,
+  History,
+  Maximize2,
+  Minimize2,
+  Info,
+  Briefcase,
+  PieChart,
+  Minus,
+  Plus,
+  ChevronUp,
+  ChevronDown,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import { useAIStore } from '@/core/store/aiStore'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -357,7 +387,7 @@ function LoanSimulatorCard({ data, onStructured }: { data: LoanSimulatorCardPayl
         </div>
       </div>
       <button onClick={() => onStructured({ action: 'loan_simulator_continue', amount: amt, tenureMonths: tenure })} className={primaryBtnClass} style={cs.primaryBtn}>
-        Continue with {fmt(Math.round(emi))}/mo <ArrowRight className="h-4 w-4" />
+        Continue with {fmt(Math.round(emi))}/mo <ChevronRight className="h-4 w-4" />
       </button>
     </div>
   )
@@ -578,7 +608,7 @@ function PlanSelectionCard({ data, onStructured }: { data: PlanSelectionCardPayl
       </div>
       <button onClick={() => { const plan = data.plans.find((p) => p.id === selected); if (plan) onStructured({ action: 'plan_selected', planId: plan.id, planLabel: plan.label }) }}
         disabled={!selected} className={primaryBtnClass} style={cs.primaryBtn}>
-        Select this plan <ArrowRight className="h-4 w-4" />
+        Select this plan <ChevronRight className="h-4 w-4" />
       </button>
     </div>
   )
@@ -624,7 +654,7 @@ function EnrollmentContributionCard({ data, onStructured }: { data: EnrollmentCo
         <span className="text-sm font-bold" style={cs.text}>{fmt(annualContrib)}</span>
       </div>
       <button onClick={() => onStructured({ action: 'enrollment_contribution_set', planId: data.planId, planLabel: data.planLabel, contribution: contrib })} className={primaryBtnClass} style={cs.primaryBtn}>
-        Continue with {pct(contrib)} <ArrowRight className="h-4 w-4" />
+        Continue with {pct(contrib)} <ChevronRight className="h-4 w-4" />
       </button>
     </div>
   )
@@ -662,7 +692,7 @@ function EnrollmentInvestmentCard({ data, onStructured }: { data: EnrollmentInve
       </div>
       <button onClick={() => { const opt = data.investmentOptions.find((o) => o.value === selected); onStructured({ action: 'enrollment_investment_set', planId: data.planId, planLabel: data.planLabel, contribution: data.contribution, investment: opt?.label ?? selected }) }}
         disabled={!selected} className={primaryBtnClass} style={cs.primaryBtn}>
-        Continue <ArrowRight className="h-4 w-4" />
+        Continue <ChevronRight className="h-4 w-4" />
       </button>
     </div>
   )
@@ -844,7 +874,7 @@ function RebalanceCurrentCard({ data, onStructured }: { data: RebalanceCurrentCa
       </div>
       <button onClick={() => { const preset = REBALANCE_PRESETS.find((p) => p.id === selectedPreset); if (preset) onStructured({ action: 'rebalance_preset_selected', presetId: preset.id, presetLabel: preset.label }) }}
         disabled={!selectedPreset} className={primaryBtnClass} style={cs.primaryBtn}>
-        Review trades <ArrowRight className="h-4 w-4" />
+        Review trades <ChevronRight className="h-4 w-4" />
       </button>
     </div>
   )

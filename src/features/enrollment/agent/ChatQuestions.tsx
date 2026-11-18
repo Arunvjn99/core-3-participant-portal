@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { RangeSlider } from '@/design-system/components/RangeSlider'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, ArrowRight, Minus, Plus, Scale, Shield, Sparkles, TrendingUp, Zap } from 'lucide-react'
+import { ArrowLeft, Minus, Plus, Scale, Shield, Sparkles, TrendingUp, Zap, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { getAppDateLocale } from '@/lib/dateLocale'
 import { ALL_US_STATES } from '@/lib/usStates'
@@ -322,7 +322,7 @@ export function ChatQuestions({
                 style={{ fontSize: '1.02rem', fontWeight: 700 }}
               >
                 {last ? t('enrollment.agent.build_plan') : t('enrollment.agent.continue')}
-                {last ? <Sparkles className="h-5 w-5" aria-hidden /> : <ArrowRight className="h-5 w-5" aria-hidden />}
+                {last ? <Sparkles className="h-5 w-5" aria-hidden /> : <ChevronRight className="h-5 w-5" aria-hidden />}
               </button>
             </div>
           </form>

@@ -2,15 +2,14 @@ import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import { Bell, ChevronRight, X } from 'lucide-react'
+import { Bell, X, ChevronRight } from 'lucide-react'
 import { useDialogA11y } from '@/lib/useDialogA11y'
-import { getAppDateLocale } from '@/lib/dateLocale'
-import { useNow } from '@/lib/useNow'
-import { SEVERITY_STYLE } from './severityStyle'
+import { NotificationItem } from './NotificationItem'
 import type { useNotifications } from './useNotifications'
 
 const ease = [0.22, 1, 0.36, 1] as const
-const DAY_MS = 86_400_000
+/** How many the bell panel lists before pointing to the Notifications page for the rest. */
+export const PANEL_LIMIT = 5
 
 interface NotificationPanelProps {
   open: boolean
@@ -18,24 +17,14 @@ interface NotificationPanelProps {
   notifications: ReturnType<typeof useNotifications>
 }
 
-/** Slide-out panel from the right edge: the full list, with what's new marked until the panel closes. */
+/** Slide-out panel from the right edge: the latest notifications, with what's new marked until the panel closes. */
 export function NotificationPanel({ open, onClose, notifications }: NotificationPanelProps) {
   const { t } = useTranslation()
   const reduce = useReducedMotion()
   const ref = useDialogA11y<HTMLDivElement>(open, onClose)
-  const fmtDate = (ms: number) => new Date(ms).toLocaleDateString(getAppDateLocale(), { month: 'short', day: 'numeric' })
-  const now = useNow()
-  const fmtFull = (ms: number) => new Date(ms).toLocaleDateString(getAppDateLocale(), { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
   const { items, unreadCount, isUnread, dismiss } = notifications
-  /** "Today", "Yesterday", "5 days ago"… in the app language; months past 30 days. */
-  const fmtAgo = (ms: number) => {
-    const days = Math.max(0, Math.floor((now - ms) / DAY_MS))
-    if (days < 2) return new Intl.RelativeTimeFormat(getAppDateLocale(), { numeric: 'auto' }).format(-days, 'day')
-    const rtf = new Intl.RelativeTimeFormat(getAppDateLocale(), { numeric: 'always' })
-    if (days < 30) return rtf.format(-days, 'day')
-    if (days < 365) return rtf.format(-Math.floor(days / 30), 'month')
-    return rtf.format(-Math.floor(days / 365), 'year')
-  }
+  const shown = items.slice(0, PANEL_LIMIT)
+  const more = items.length - shown.length
 
   return createPortal(
     <AnimatePresence>
@@ -92,11 +81,7 @@ export function NotificationPanel({ open, onClose, notifications }: Notification
                 </li>
               )}
               <AnimatePresence initial={false}>
-              {items.map((n, i) => {
-                const { title, body } = n.render(t, fmtDate)
-                const { icon, Icon } = SEVERITY_STYLE[n.severity]
-                const unread = isUnread(n.id)
-                return (
+                {shown.map((n, i) => (
                   <motion.li
                     key={n.id}
                     layout={!reduce}
@@ -104,86 +89,26 @@ export function NotificationPanel({ open, onClose, notifications }: Notification
                     animate={{ opacity: 1, x: 0 }}
                     exit={reduce ? { opacity: 0 } : { opacity: 0, x: 40, transition: { duration: 0.18 } }}
                     transition={{ duration: reduce ? 0 : 0.28, delay: reduce ? 0 : 0.08 + i * 0.04, ease }}
-                    className={`group relative rounded-xl border transition-colors ${
-                      unread ? 'border-[color:color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color:color-mix(in_srgb,var(--color-primary)_4%,transparent)]' : 'border-border-default bg-surface-card'
-                    } ${n.href ? 'hover:bg-surface-elevated' : ''}`}
                   >
-                    {n.href ? (
-                      <Link to={n.href} onClick={onClose} className="flex gap-3 rounded-xl p-3.5 pr-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                      <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-elevated`}>
-                        <Icon className={`h-4 w-4 ${icon}`} aria-hidden />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="flex items-center gap-1.5">
-                          {unread && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden />}
-                          <span className="block text-sm font-semibold text-text-primary">{title}</span>
-                        </span>
-                        {body && <span className="mt-0.5 block text-[13px] leading-snug text-text-secondary">{body}</span>}
-                        <time
-                          dateTime={new Date(n.at).toISOString()}
-                          className="mt-2 flex flex-wrap items-center gap-1.5 text-xs"
-                        >
-                          <span
-                            className={`rounded-full px-2 py-0.5 font-semibold first-letter:uppercase ${
-                              now - n.at < DAY_MS ? 'bg-blue-700 text-white' : 'bg-surface-elevated text-text-primary'
-                            }`}
-                            aria-hidden
-                          >
-                            {fmtAgo(n.at)}
-                          </span>
-                          <span className="font-medium text-text-secondary" aria-hidden>
-                            {fmtDate(n.at)}
-                          </span>
-                          <span className="sr-only first-letter:uppercase">{`${fmtAgo(n.at)}, ${fmtFull(n.at)}`}</span>
-                        </time>
-                      </span>
-                        <ChevronRight className="absolute bottom-3.5 right-3 h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-text-primary" aria-hidden />
-                      </Link>
-                    ) : (
-                      <div className="flex gap-3 rounded-xl p-3.5 pr-10">
-                      <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-elevated`}>
-                        <Icon className={`h-4 w-4 ${icon}`} aria-hidden />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="flex items-center gap-1.5">
-                          {unread && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden />}
-                          <span className="block text-sm font-semibold text-text-primary">{title}</span>
-                        </span>
-                        {body && <span className="mt-0.5 block text-[13px] leading-snug text-text-secondary">{body}</span>}
-                        <time
-                          dateTime={new Date(n.at).toISOString()}
-                          className="mt-2 flex flex-wrap items-center gap-1.5 text-xs"
-                        >
-                          <span
-                            className={`rounded-full px-2 py-0.5 font-semibold first-letter:uppercase ${
-                              now - n.at < DAY_MS ? 'bg-blue-700 text-white' : 'bg-surface-elevated text-text-primary'
-                            }`}
-                            aria-hidden
-                          >
-                            {fmtAgo(n.at)}
-                          </span>
-                          <span className="font-medium text-text-secondary" aria-hidden>
-                            {fmtDate(n.at)}
-                          </span>
-                          <span className="sr-only first-letter:uppercase">{`${fmtAgo(n.at)}, ${fmtFull(n.at)}`}</span>
-                        </time>
-                      </span>
-                      </div>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => dismiss(n.id)}
-                      className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-md text-text-muted opacity-0 transition-opacity hover:bg-surface-page hover:text-text-primary focus-visible:opacity-100 group-hover:opacity-100"
-                      aria-label={t('alerts.dismiss')}
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
+                    <NotificationItem n={n} unread={isUnread(n.id)} onDismiss={() => dismiss(n.id)} onNavigate={onClose} />
                   </motion.li>
-                )
-              })}
+                ))}
               </AnimatePresence>
             </ul>
 
+            {/* Past the first few, the rest live on the Notifications page (which also has Clear all) */}
+            {more > 0 && (
+              <div className="border-t border-border-default px-4 py-3">
+                <Link
+                  to="/notifications"
+                  onClick={onClose}
+                  className="group flex h-10 w-full items-center justify-center gap-1.5 rounded-full text-[14px] font-semibold text-primary ring-1 ring-slate-200 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:text-blue-300 dark:ring-white/15 dark:hover:bg-white/5"
+                >
+                  {t('nav.notifications_view_more', { count: more })}
+                  <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+                </Link>
+              </div>
+            )}
           </motion.div>
         </div>
       )}

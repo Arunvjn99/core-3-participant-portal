@@ -16,8 +16,6 @@ import {
   Route,
 } from 'lucide-react'
 import { cn } from '@/lib/cn'
-import { Card } from '@/design-system/components/Card'
-import { Badge } from '@/design-system/components/Badge'
 import svgPaths from '@/features/transactions/svgPaths'
 import DraftTransactions from '@/features/transactions/components/DraftTransactions'
 import RecentTransactionsCompact from '@/features/transactions/components/RecentTransactionsCompact'
@@ -29,6 +27,11 @@ import { useTrackedTransactions } from '@/features/transactions/tracking/useTrac
 import { computeLoanEligible, computeWithdrawable, formatUsd } from '@/features/transactions/utils/transactionCenterAmounts'
 
 const CP = 'transactions.center_page.'
+
+/** The pre-enrollment dashboard's pieces: card surface, header badge, and one focus ring */
+const CARD = 'rounded-[20px] bg-surface-card shadow-[0_12px_32px_-28px_rgba(11,21,51,0.45)] ring-1 ring-slate-200/70 dark:ring-white/10'
+const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary'
+const BADGE_TILE = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_16px_-8px_rgba(11,21,51,0.45)]'
 
 /** Demo plan snapshot — replace with API / store when wired. */
 const DEMO_PLAN = {
@@ -74,37 +77,29 @@ function SectionHeader({
   title,
   subtitle,
   badge,
-  variant = 'default',
+  tone = 'bg-blue-600',
 }: {
   icon: ReactNode
   title: string
   subtitle?: string
   badge?: { text: string; color: string }
-  variant?: 'default' | 'ai'
+  /** Colour of the header's badge tile */
+  tone?: string
 }) {
   return (
-    <div
-      className={cn(
-        'mb-3 grid grid-cols-1 gap-x-4 gap-y-2 sm:mb-4',
-        subtitle ? 'sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center' : '',
-      )}
-    >
+    <div className="mb-3.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
       <div className="flex min-w-0 items-center gap-2.5">
-        <div className={cn('shrink-0', variant === 'ai' ? 'text-violet-500 dark:text-violet-400' : 'text-primary')}>
+        <span className={cn(BADGE_TILE, tone)} aria-hidden>
           {icon}
-        </div>
+        </span>
         <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
-          <h2 className="text-base font-bold tracking-[-0.3px] text-text-primary">{title}</h2>
+          <h2 className="text-[16px] font-bold text-text-primary">{title}</h2>
           {badge ? (
-            <span className={cn('rounded-md px-2.5 py-[3px] text-[11px] font-bold', badge.color)}>{badge.text}</span>
+            <span className={cn('rounded-full px-2.5 py-0.5 text-[12px] font-semibold ring-1', badge.color)}>{badge.text}</span>
           ) : null}
         </div>
       </div>
-      {subtitle ? (
-        <span className="hidden text-xs font-medium leading-snug text-text-muted sm:block sm:max-w-[min(100%,14rem)] sm:text-right">
-          {subtitle}
-        </span>
-      ) : null}
+      {subtitle ? <span className="text-[12px] font-medium text-slate-600 dark:text-slate-300">{subtitle}</span> : null}
     </div>
   )
 }
@@ -133,28 +128,24 @@ function QuickActionCard({
     <button
       type="button"
       onClick={item.onClick}
-      className="group relative flex min-w-[170px] flex-1 flex-col overflow-hidden rounded-[14px] border border-slate-100 bg-white pb-3 pl-5 pr-4 pt-4 text-left transition-all hover:border-[color:color-mix(in_srgb,var(--color-primary)_30%,transparent)] hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
+      className={cn('group flex h-full w-full flex-col bg-surface-card px-5 py-4 text-left transition-colors hover:bg-slate-50 dark:hover:bg-[#162048]', FOCUS)}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-br from-blue-50 to-blue-100 text-primary dark:from-blue-950/40 dark:to-blue-900/40">
+      <span className="flex items-center justify-between gap-2">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-700 ring-1 ring-blue-100 dark:bg-blue-500/15 dark:text-blue-200 dark:ring-blue-400/20" aria-hidden>
           {item.icon}
-        </div>
-        <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-300 transition-colors group-hover:text-primary dark:text-gray-600" aria-hidden />
-      </div>
-      <div className="mt-3 flex min-w-0 flex-1 flex-col">
-        <div className="flex flex-wrap items-center gap-1">
-          <span className="text-sm font-bold leading-snug text-text-primary">{item.title}</span>
-          {item.badge ? (
-            <Badge variant="default" className="text-[9px] font-semibold uppercase tracking-wide">
-              {badgeLabel(item.badge)}
-            </Badge>
-          ) : null}
-        </div>
-        <p className="mt-1 text-xs font-bold leading-snug text-primary">{item.keyLine}</p>
-        <p className="mt-0.5 line-clamp-1 text-[11px] leading-normal text-text-secondary">{item.supporting}</p>
-      </div>
-      {/* Bottom blue accent bar */}
-      <span className="absolute bottom-0 left-0 right-0 h-[2px] rounded-b-[14px] bg-primary" aria-hidden />
+        </span>
+        <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+      </span>
+      <span className="mt-3 flex flex-wrap items-center gap-1.5">
+        <span className="text-[14px] font-bold leading-tight text-text-primary">{item.title}</span>
+        {item.badge ? (
+          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-800 ring-1 ring-blue-200 dark:bg-blue-500/15 dark:text-blue-200 dark:ring-blue-400/30">
+            {badgeLabel(item.badge)}
+          </span>
+        ) : null}
+      </span>
+      <span className="mt-1 text-[13px] font-medium text-primary dark:text-blue-300">{item.keyLine}</span>
+      <span className="mt-0.5 text-[12px] leading-snug text-slate-600 dark:text-slate-300">{item.supporting}</span>
     </button>
   )
 }
@@ -178,71 +169,59 @@ function PlanSummaryCard({
       initial={{ opacity: 0, y: -12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: 'easeOut' }}
-      className="mb-6 sm:mb-8"
+      className="mb-5"
     >
-      <Card
-        padding="md"
-        className={cn(
-          'rounded-xl border border-[color:color-mix(in_srgb,var(--color-primary)_35%,transparent)] shadow-none',
-          'bg-[linear-gradient(135deg,color-mix(in_srgb,var(--color-primary)_14%,var(--surface-page))_0%,color-mix(in_srgb,var(--color-primary)_10%,var(--surface-elevated))_100%)]'
-        )}
-      >
+      <div className={cn(CARD, 'p-5 sm:p-6')}>
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-0">
           <div className="flex items-center gap-4">
-            <div
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[color:color-mix(in_srgb,var(--color-primary)_35%,transparent)] bg-surface-card"
-              aria-hidden
-            >
-              <ShieldIcon className="h-5 w-5 text-primary" />
-            </div>
+            <span className={cn(BADGE_TILE, 'h-11 w-11 bg-blue-600')} aria-hidden>
+              <ShieldIcon className="h-5 w-5" />
+            </span>
             <div>
-              <p className="text-[10.5px] font-bold uppercase leading-[14px] tracking-[0.5px] text-text-secondary">
+              <p className="text-[12px] font-medium text-slate-600 dark:text-slate-300">
                 {t('transactions.plan_name_label')}
               </p>
-              <p className="mt-0.5 text-[15px] font-extrabold leading-[22px] tracking-[-0.3px] text-text-primary">
+              <p className="mt-0.5 text-[16px] font-bold leading-snug text-text-primary">
                 {planName}
               </p>
               <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                <span className="text-[10px] font-semibold uppercase tracking-[0.5px] text-text-muted">
+                <span className="text-[12px] font-medium text-slate-600 dark:text-slate-300">
                   {t(`${CP}plan_balance_colon`)}
                 </span>
-                <span className="text-sm font-extrabold tracking-[-0.3px] text-primary">{planBalanceLabel}</span>
+                <span className="text-[14px] font-bold tabular-nums text-text-primary">{planBalanceLabel}</span>
               </div>
             </div>
           </div>
 
-          <div className="hidden h-14 w-px shrink-0 bg-[color:color-mix(in_srgb,var(--color-primary)_35%,transparent)] sm:mx-10 lg:mx-14 sm:block" aria-hidden />
-          <div className="h-px w-full shrink-0 bg-[color:color-mix(in_srgb,var(--color-primary)_35%,transparent)] sm:hidden" aria-hidden />
+          <div className="hidden h-14 w-px shrink-0 bg-slate-200/80 sm:mx-10 sm:block lg:mx-14 dark:bg-white/10" aria-hidden />
+          <div className="h-px w-full shrink-0 bg-slate-200/80 sm:hidden dark:bg-white/10" aria-hidden />
 
           <div className="flex flex-1 items-center gap-4">
-            <div
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[color:color-mix(in_srgb,var(--color-primary)_35%,transparent)] bg-surface-card"
-              aria-hidden
-            >
-              <ChartBarIcon className="h-5 w-5 text-primary" />
-            </div>
+            <span className={cn(BADGE_TILE, 'h-11 w-11 bg-emerald-600')} aria-hidden>
+              <ChartBarIcon className="h-5 w-5" />
+            </span>
             <div className="min-w-0 flex-1">
-              <p className="text-[10.5px] font-bold uppercase leading-[14px] tracking-[0.5px] text-text-secondary">
+              <p className="text-[12px] font-medium text-slate-600 dark:text-slate-300">
                 {t('transactions.vested_balance_label')}
               </p>
               <div className="mt-0.5 flex flex-wrap items-baseline gap-2.5">
-                <span className="text-[28px] font-extrabold leading-9 tracking-[-0.5px] text-text-primary">
+                <span className="text-[26px] font-bold leading-9 tabular-nums text-text-primary">
                   {vestedBalanceLabel}
                 </span>
-                <span className="text-xs font-semibold text-text-secondary">
+                <span className="text-[12px] font-semibold text-emerald-800 dark:text-emerald-300">
                   {t('transactions.vested_percent', { pct: vestedPct.toFixed(1) })}
                 </span>
               </div>
               <div
-                className="mt-2 h-[5px] w-full max-w-md overflow-hidden rounded bg-[color:color-mix(in_srgb,var(--color-primary)_15%,transparent)] dark:bg-[color:color-mix(in_srgb,var(--color-primary)_25%,transparent)]"
+                className="mt-2 h-2 w-full max-w-md overflow-hidden rounded-full bg-slate-100 dark:bg-white/10"
                 role="presentation"
               >
-                <div className="h-full rounded bg-primary" style={{ width: pctWidth }} />
+                <div className="h-full rounded-full bg-emerald-500" style={{ width: pctWidth }} />
               </div>
             </div>
           </div>
         </div>
-      </Card>
+      </div>
     </motion.div>
   )
 }
@@ -316,14 +295,10 @@ export default function TransactionCenter() {
 
   return (
     <div className="transactions-page w-full min-w-0" data-page="transaction-center">
-      <div className="mx-auto w-full max-w-[1200px] pb-8">
-        <header className="mb-6 sm:mb-8">
-          <h1 className="text-2xl font-bold tracking-tight text-text-primary sm:text-[28px] sm:leading-tight">
-            {t(`${CP}title`)}
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-text-secondary sm:text-[15px]">
-            {t(`${CP}subtitle`)}
-          </p>
+      <div className="mx-auto w-full max-w-[1040px] px-4 py-6 sm:px-6 lg:py-7">
+        <header className="mb-5">
+          <h1 className="text-[28px] font-bold leading-tight text-[#0B1533] dark:text-white">{t(`${CP}title`)}</h1>
+          <p className="mt-1 text-[15px] leading-snug text-text-secondary">{t(`${CP}subtitle`)}</p>
         </header>
 
         <PlanSummaryCard
@@ -333,7 +308,7 @@ export default function TransactionCenter() {
           vestedPct={vestedPct}
         />
 
-        <div className="space-y-6 sm:space-y-8">
+        <div className="space-y-5">
 
           {/* ── Quick Actions — full-width horizontal 5-card strip ── */}
           <motion.section
@@ -342,18 +317,17 @@ export default function TransactionCenter() {
             transition={{ duration: 0.6, ease: 'easeOut', delay: 0.06 }}
           >
             <SectionHeader
-              icon={<Sparkles className="h-4 w-4" />}
+              icon={<Sparkles className="h-[18px] w-[18px]" />}
               title={t(`${CP}what_like_to_do`)}
             />
-            <div
-              className="flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:overflow-x-visible lg:grid lg:grid-cols-5"
-              role="list"
-            >
-              {quickItems.map((item) => (
-                <div key={item.id} role="listitem" className="flex min-w-[170px] flex-1 lg:min-w-0">
-                  <QuickActionCard item={item} badgeLabel={badgeLabel} />
-                </div>
-              ))}
+            <div className={cn(CARD, 'overflow-hidden')}>
+              <div className="grid grid-cols-1 gap-px bg-slate-200/80 sm:grid-cols-2 lg:grid-cols-5 dark:bg-white/10" role="list">
+                {quickItems.map((item) => (
+                  <div key={item.id} role="listitem" className="flex">
+                    <QuickActionCard item={item} badgeLabel={badgeLabel} />
+                  </div>
+                ))}
+              </div>
             </div>
           </motion.section>
 
@@ -364,12 +338,12 @@ export default function TransactionCenter() {
             transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
           >
             <SectionHeader
-              icon={<Route className="h-4 w-4" />}
+              icon={<Route className="h-[18px] w-[18px]" />}
               title={t('tracking.title')}
               subtitle={t('tracking.subtitle')}
               badge={
                 activeRequests > 0
-                  ? { text: t('tracking.active_badge', { count: activeRequests }), color: 'bg-[color:color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-primary' }
+                  ? { text: t('tracking.active_badge', { count: activeRequests }), color: 'bg-blue-50 text-blue-800 ring-blue-200 dark:bg-blue-500/15 dark:text-blue-200 dark:ring-blue-400/30' }
                   : undefined
               }
             />
@@ -377,10 +351,10 @@ export default function TransactionCenter() {
           </motion.section>
 
           {/* ── Main 2-col grid ── */}
-          <div className="grid grid-cols-1 items-stretch gap-6 sm:gap-8 lg:grid-cols-[1fr_400px]">
+          <div className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">
 
             {/* LEFT — Retirement Outlook + Recent Transactions */}
-            <div className="flex flex-col gap-6 sm:gap-8">
+            <div className="flex flex-col gap-5">
 
               <motion.section
                 initial={{ opacity: 0, y: 12 }}
@@ -388,7 +362,8 @@ export default function TransactionCenter() {
                 transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
               >
                 <SectionHeader
-                  icon={<TrendingUp className="h-4 w-4" />}
+                  icon={<TrendingUp className="h-[18px] w-[18px]" />}
+                  tone="bg-emerald-600"
                   title="Retirement Outlook"
                   subtitle="Projected growth"
                 />
@@ -412,19 +387,19 @@ export default function TransactionCenter() {
                 transition={{ duration: 0.6, ease: 'easeOut', delay: 0.16 }}
               >
                 <SectionHeader
-                  icon={<ChartBar className="h-4 w-4" />}
+                  icon={<ChartBar className="h-[18px] w-[18px]" />}
                   title={t('transactions.recent_transactions')}
                   subtitle={t('transactions.last_90_days')}
                 />
-                <Card padding="md" className="flex-1 rounded-2xl border border-border-default">
+                <div className={cn(CARD, 'flex-1 p-5')}>
                   <RecentTransactionsCompact />
-                </Card>
+                </div>
               </motion.section>
 
             </div>
 
             {/* RIGHT — Draft Transactions only */}
-            <div className="flex flex-col gap-6 sm:gap-8">
+            <div className="flex flex-col gap-5">
 
               <motion.section
                 initial={{ opacity: 0, y: 12 }}
@@ -432,17 +407,18 @@ export default function TransactionCenter() {
                 transition={{ duration: 0.6, ease: 'easeOut', delay: 0.12 }}
               >
                 <SectionHeader
-                  icon={<FilePen className="h-4 w-4" />}
+                  icon={<FilePen className="h-[18px] w-[18px]" />}
+                  tone="bg-amber-500"
                   title={t('transactions.draft_transactions')}
                   badge={{
                     text: t('transactions.drafts_badge', { count: DRAFT_COUNT }),
-                    color: 'bg-[color:color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-primary',
+                    color: 'bg-amber-50 text-amber-900 ring-amber-200 dark:bg-amber-500/15 dark:text-amber-200 dark:ring-amber-400/30',
                   }}
                   subtitle={t('transactions.resume_subtitle')}
                 />
-                <Card padding="md" className="rounded-2xl border border-border-default">
+                <div className={cn(CARD, 'p-5')}>
                   <DraftTransactions />
-                </Card>
+                </div>
               </motion.section>
 
             </div>
@@ -455,13 +431,14 @@ export default function TransactionCenter() {
             transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
           >
             <SectionHeader
-              icon={<ChartBar className="h-4 w-4" />}
+              icon={<ChartBar className="h-[18px] w-[18px]" />}
+              tone="bg-slate-700"
               title={t('activity.title')}
               subtitle={t('activity.subtitle')}
             />
-            <Card padding="md" className="rounded-2xl border border-border-default">
+            <div className={cn(CARD, 'p-5')}>
               <ActivityHistory />
-            </Card>
+            </div>
           </motion.section>
 
           {/* ── Financial Guidance — full width ── */}
@@ -471,13 +448,13 @@ export default function TransactionCenter() {
             transition={{ duration: 0.6, ease: 'easeOut', delay: 0.24 }}
           >
             <SectionHeader
-              icon={<Sparkles className="h-4 w-4" />}
+              icon={<Sparkles className="h-[18px] w-[18px]" />}
+              tone="bg-violet-600"
               title={t('transactions.financial_guidance')}
               subtitle={t('transactions.personalized_insights')}
-              variant="ai"
               badge={{
                 text: t('transactions.ai_insights'),
-                color: 'bg-violet-500/10 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300',
+                color: 'bg-violet-50 text-violet-800 ring-violet-200 dark:bg-violet-500/15 dark:text-violet-200 dark:ring-violet-400/30',
               }}
             />
             <FinancialGuidanceCompact />

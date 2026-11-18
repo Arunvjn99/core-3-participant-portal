@@ -9,8 +9,8 @@ import {
   TrendingDown,
   Wallet,
   AlertCircle,
-  ArrowRight,
   ArrowLeft,
+  ChevronRight,
 } from 'lucide-react'
 
 function LoanEligibility() {
@@ -210,7 +210,7 @@ function LoanEligibility() {
           className="btn-brand flex flex-1 cursor-pointer items-center justify-center gap-2 transition-all duration-200 sm:flex-none"
         >
           {t('loan.eligibility_simulate')}
-          <ArrowRight style={{ width: 16, height: 16 }} />
+          <ChevronRight style={{ width: 16, height: 16 }} />
         </button>
       </div>
     </div>

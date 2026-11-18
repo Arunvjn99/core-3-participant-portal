@@ -51,73 +51,11 @@ import { ASSET_SLICES, accountName, formatMoney, summarize, type AssetSlice } fr
 import { useProfileStore } from '@/features/profile/profileStore'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { useRetirementGoal } from '@/features/retirement/retirementStore'
+import { ON_TRACK_MIN, READINESS_BANDS, readinessBandOf } from '@/features/retirement/readinessBands'
+import { goalExtras } from '@/features/retirement/readinessExtras'
+import { ReadinessRing, ReadinessStatus } from '@/features/retirement/ReadinessRing'
 
 const ease = [0.22, 1, 0.36, 1] as const
-
-/**
- * Readiness bands: above 70 is on track (green), 50 to 70 needs attention (amber), under 50 is off track (red). Each has soft ring shades (close together, so a full ring
- * shows no visible join at the top), a faint track and its status pill.
- */
-const READINESS_BANDS = {
-  good: {
-    labelKey: 'dashboard.onTrack',
-    ring: ['#8FD5A9', '#72C796', '#5DBA86'],
-    track: { light: 'rgba(77,175,122,0.13)', dark: 'rgba(111,199,147,0.16)' },
-    pill: 'bg-status-success-bg text-status-success',
-    panel: 'bg-emerald-50/60 ring-emerald-100/80 dark:bg-emerald-500/10 dark:ring-emerald-400/15',
-    accent: 'text-emerald-600 dark:text-emerald-300',
-    dot: 'bg-status-success',
-  },
-  fair: {
-    labelKey: 'postDashboard.status_needs_attention',
-    ring: ['#F2CF8A', '#EBBE6C', '#E2AE55'],
-    track: { light: 'rgba(221,162,74,0.15)', dark: 'rgba(237,190,106,0.16)' },
-    pill: 'bg-status-warning-bg text-status-warning',
-    panel: 'bg-amber-50/60 ring-amber-100/80 dark:bg-amber-500/10 dark:ring-amber-400/15',
-    accent: 'text-amber-600 dark:text-amber-300',
-    dot: 'bg-status-warning',
-  },
-  low: {
-    labelKey: 'postDashboard.status_off_track',
-    ring: ['#EFAAAA', '#E79393', '#DE7F7F'],
-    track: { light: 'rgba(217,115,115,0.13)', dark: 'rgba(233,147,147,0.16)' },
-    pill: 'bg-status-danger-bg text-status-danger',
-    panel: 'bg-rose-50/60 ring-rose-100/80 dark:bg-rose-500/10 dark:ring-rose-400/15',
-    accent: 'text-rose-600 dark:text-rose-300',
-    dot: 'bg-status-danger',
-  },
-} as const
-type ReadinessBand = keyof typeof READINESS_BANDS
-/** Lowest score that counts as on track (green) */
-const ON_TRACK_MIN = 71
-const readinessBandOf = (score: number): ReadinessBand => (score >= ON_TRACK_MIN ? 'good' : score >= 50 ? 'fair' : 'low')
-
-/** Readiness ring inside a 148px box: centre, radius and line width */
-const RING_BOX = 148
-const RING_C = 74
-const RING_R = 67
-const RING_W = 13
-const ringPoint = (turn: number, r = RING_R) => {
-  const angle = turn * 2 * Math.PI - Math.PI / 2
-  return `${(RING_C + r * Math.cos(angle)).toFixed(2)} ${(RING_C + r * Math.sin(angle)).toFixed(2)}`
-}
-/** Short arcs that make up the ring, each a step further from one colour to the other, so the colour runs around it */
-function ringArcs(stops: string[], steps = 72) {
-  const ch = (hex: string, i: number) => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16)
-  // Blend across the stops in turn, so a middle stop keeps the colour rich half way round
-  const mix = (k: number) => {
-    const pos = k * (stops.length - 1)
-    const at = Math.min(stops.length - 2, Math.floor(pos))
-    const f = pos - at
-    const [a, b] = [stops[at], stops[at + 1]]
-    return `rgb(${[0, 1, 2].map((i) => Math.round(ch(a, i) + (ch(b, i) - ch(a, i)) * f)).join(',')})`
-  }
-  return Array.from({ length: steps }, (_, i) => ({
-    // Each arc runs a hair past the next one's start so no seams show
-    d: `M${ringPoint(i / steps)} A${RING_R} ${RING_R} 0 0 1 ${ringPoint(Math.min(1, (i + 1.6) / steps))}`,
-    color: mix(i / (steps - 1)),
-  }))
-}
 
 /** The linked-accounts page's colours, so the two read as one */
 const ACCOUNT_SLICE_COLOR: Record<AssetSlice, string> = {
@@ -449,6 +387,9 @@ export default function PostEnrollmentDashboard() {
   const monthlyMatch = Math.round(annualMatch / 12)
   const monthlyTotal = monthlyYou + monthlyMatch
   const fullMatch = annualMatch + missedEmployerMatch(data.salary, data.contributionPercent, data.contributionSources)
+  // What the participant set on the Retirement readiness page (goal, outside savings, location), so both show one score
+  const savedGoal = useRetirementGoal()
+  const incomeExtras = { ...goalExtras(savedGoal, data.contributionSources, getGrowthRate(data.riskLevel)), retirementAge: personalization.retirementAge }
   const income = retirementIncome(
     projectBalance({
       startingBalance: personalization.currentSavings,
@@ -461,12 +402,10 @@ export default function PostEnrollmentDashboard() {
     }),
     yearsToRetirement,
     data.salary,
+    incomeExtras,
   )
   const readiness = income.readinessPct
   const readinessShown = Math.max(0, Math.min(100, Math.round(readiness)))
-  const reduceMotion = useReducedMotion()
-  // useId adds characters that break url(#…), so keep letters, digits and dashes only
-  const ringId = `ring-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`
   const replacePct = data.salary > 0 ? Math.round((income.total / data.salary) * 100) : 0
   // On track above 70 (green), needs attention 50 to 70 (amber), off track under 50 (red)
   const band = READINESS_BANDS[readinessBandOf(readinessShown)]
@@ -474,9 +413,6 @@ export default function PostEnrollmentDashboard() {
   const enrolledOneClick = useEnrollmentDraftStore((s) => s.draftData.review?.method === 'one_click')
   const readinessCheckedAt = useRetirementGoal((s) => s.checkedAt)
   const readinessPending = enrolledOneClick && !readinessCheckedAt
-  // Soft shades of the band's colour run round the ring; a full ring is one even shade, so there is no join at the top
-  const ringFull = readinessShown >= 100
-  const ringSegments = useMemo(() => ringArcs(ringFull ? [band.ring[1], band.ring[1]] : [...band.ring]), [band, ringFull])
   const contributionMonth = new Date().toLocaleDateString(locale, { month: 'long', year: 'numeric' })
   const limits = useContributionLimits()
   const monthlyGap = Math.round((fullMatch - annualMatch) / 12)
@@ -493,7 +429,7 @@ export default function PostEnrollmentDashboard() {
       autoIncrease: data.autoIncrease ? { amount: data.autoIncreaseAmount, max: data.autoIncreaseMax } : null,
     }
     const incomeAt = (ratePercent: number, autoIncrease = base.autoIncrease) =>
-      retirementIncome(projectBalance({ ...base, ratePercent, autoIncrease }), yearsToRetirement, data.salary)
+      retirementIncome(projectBalance({ ...base, ratePercent, autoIncrease }), yearsToRetirement, data.salary, incomeExtras)
     // Extra savings at retirement from a change, in today's dollars, rounded to the nearest $100
     const addedSavings = (ratePercent: number, autoIncrease = base.autoIncrease) => {
       const gain = projectBalance({ ...base, ratePercent, autoIncrease }) - projectBalance({ ...base, ratePercent: rate })
@@ -511,7 +447,7 @@ export default function PostEnrollmentDashboard() {
       if (extra) return { key: 'tip_on_track', values: { pct: extra, amount: perMonth((data.salary * extra) / 100) }, href: '/enrollment/contribution' }
       // Saving more alone won't get there in time: see whether retiring a little later would
       const laterYears = Array.from({ length: 10 }, (_, i) => i + 1).find(
-        (y) => retirementIncome(projectBalance({ ...base, ratePercent: rate, years: yearsToRetirement + y }), yearsToRetirement + y, data.salary).readinessPct >= ON_TRACK_MIN,
+        (y) => retirementIncome(projectBalance({ ...base, ratePercent: rate, years: yearsToRetirement + y }), yearsToRetirement + y, data.salary, { ...incomeExtras, retirementAge: personalization.retirementAge + y }).readinessPct >= ON_TRACK_MIN,
       )
       if (laterYears) return { key: 'tip_retire_later', values: { count: laterYears, age: personalization.retirementAge + laterYears }, href: '/retirement-goal' }
       // Otherwise, the biggest step that still moves the score
@@ -712,57 +648,9 @@ export default function PostEnrollmentDashboard() {
               ) : (
                 <>
               <div className="flex flex-1 flex-col items-center justify-center py-2">
-                <div className="relative h-[148px] w-[148px]" role="img" aria-label={`${t('dashboard.readinessScore')}: ${readinessShown}/100, ${t(band.labelKey)}`}>
-                  <svg viewBox={`0 0 ${RING_BOX} ${RING_BOX}`} className="block h-full w-full overflow-visible" aria-hidden>
-                    <defs>
-                      {/* Reveals the coloured ring up to the score; animates on load */}
-                      <mask id={`${ringId}-mask`} maskUnits="userSpaceOnUse" x={-10} y={-10} width={RING_BOX + 20} height={RING_BOX + 20}>
-                        <motion.circle
-                          cx={RING_C}
-                          cy={RING_C}
-                          r={RING_R}
-                          fill="none"
-                          stroke="#fff"
-                          strokeWidth={RING_W}
-                          strokeLinecap="round"
-                          transform={`rotate(-90 ${RING_C} ${RING_C})`}
-                          pathLength={1}
-                          initial={reduceMotion ? false : { pathLength: 0 }}
-                          animate={{ pathLength: Math.min(readinessShown, 100) / 100 }}
-                          transition={{ duration: 1.1, ease }}
-                        />
-                      </mask>
-                    </defs>
-                    {/* The empty part of the ring: the same colour, faint */}
-                    <circle
-                      cx={RING_C}
-                      cy={RING_C}
-                      r={RING_R}
-                      fill="none"
-                      strokeWidth={RING_W}
-                      stroke={isDark ? band.track.dark : band.track.light}
-                    />
-                    {/* The colour runs round the ring, light at the top and deeper as it goes */}
-                    <g mask={`url(#${ringId}-mask)`}>
-                      {ringSegments.map((seg) => (
-                        <path key={seg.d} d={seg.d} fill="none" stroke={seg.color} strokeWidth={RING_W} />
-                      ))}
-                    </g>
-                    {/* Rounded start in the starting colour, so the deeper end colour never peeks out behind it */}
-                    {/* A full ring has no start to round off, so it is left as one smooth band */}
-                    {readinessShown > 0 && !ringFull && <circle cx={RING_C} cy={RING_C - RING_R} r={RING_W / 2} fill={ringSegments[0].color} />}
-                  </svg>
-                  {/* Score in the middle */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-[38px] font-medium leading-none tracking-tight tabular-nums text-text-primary">{readinessShown}</span>
-                    <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-text-secondary">{t('postDashboard.readiness_of')}</span>
-                  </div>
-                </div>
+                <ReadinessRing score={readinessShown} />
                 {/* Status under the ring */}
-                <span className={`mt-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold ${band.pill}`}>
-                  <span className={`h-1.5 w-1.5 rounded-full ${band.dot}`} aria-hidden />
-                  {t(band.labelKey)}
-                </span>
+                <ReadinessStatus score={readinessShown} className="mt-3" />
               </div>
 
               {/* One tip worked out from the participant's numbers, shown in full (it wraps rather than being cut);
@@ -800,20 +688,20 @@ export default function PostEnrollmentDashboard() {
                       <TitleBadge Icon={Zap} color="bg-blue-600" />
                       <h2 className="text-[16px] font-bold text-text-primary">{t('dashboard.quickActions')}</h2>
                     </div>
-                    <div className="grid flex-1 grid-cols-1 divide-y divide-slate-200/80 border-t border-slate-200/80 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4 dark:divide-white/10 dark:border-white/10">
+                    <div className="grid flex-1 grid-cols-1 gap-px border-t border-slate-200/80 bg-slate-200/80 sm:grid-cols-2 dark:border-white/10 dark:bg-white/10">
                       {quickActions.map((tile) => (
                         <Link
                           key={tile.title}
                           to={tile.href}
-                          className="group flex flex-col justify-center px-5 py-4 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary dark:hover:bg-white/5"
+                          className="group flex items-center gap-3.5 bg-surface-card px-5 py-4 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary dark:hover:bg-[#162048]"
                         >
-                          <span className="flex items-center justify-between">
-                            <IconChip Icon={tile.Icon} tone={tile.tone} />
-                            <ChevronRight className="-mr-1 h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+                          <IconChip Icon={tile.Icon} tone={tile.tone} />
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-[14px] font-bold leading-tight text-text-primary">{tile.title}</span>
+                            <span className="mt-1 block text-[13px] font-medium text-primary dark:text-blue-300">{tile.sub}</span>
+                            <span className="mt-0.5 block text-[12px] text-text-secondary">{tile.hint}</span>
                           </span>
-                          <p className="mt-3 text-[14px] font-bold leading-tight text-text-primary">{tile.title}</p>
-                          <p className="mt-1 text-[13px] font-medium text-primary dark:text-blue-300">{tile.sub}</p>
-                          <p className="mt-0.5 text-[11px] text-text-secondary">{tile.hint}</p>
+                          <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
                         </Link>
                       ))}
                     </div>
@@ -1125,7 +1013,27 @@ export default function PostEnrollmentDashboard() {
                       </dl>
                     </>
                   ) : (
-                    <p className="text-[13px] leading-relaxed text-slate-600 dark:text-slate-300">{t('outside_assets.card_invite')}</p>
+                    <>
+                      <p className="text-[13px] leading-relaxed text-slate-600 dark:text-slate-300">{t('outside_assets.card_invite')}</p>
+                      {/* What the total will be made of: this plan now, the rest once linked */}
+                      <dl className="mt-3 space-y-1.5 border-t border-slate-200/80 pt-3 dark:border-white/10">
+                        {ASSET_SLICES.map((id) => ({ id: id as string, label: t(`outside_assets.slice.${id}`), value: allAccounts.slices[id], color: ACCOUNT_SLICE_COLOR[id] })).map((row) => (
+                          <div key={row.id} className="flex items-center justify-between gap-3 text-[13px]">
+                            <dt className="flex min-w-0 items-center gap-2 text-text-secondary">
+                              <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: row.id === 'plan' ? row.color : undefined }} aria-hidden>
+                                {row.id !== 'plan' && <span className="block h-2 w-2 rounded-full border border-dashed border-slate-400 dark:border-slate-500" />}
+                              </span>
+                              <span className="truncate">{row.label}</span>
+                            </dt>
+                            {row.id === 'plan' ? (
+                              <dd className="shrink-0 font-semibold tabular-nums text-text-primary">{formatMoney(row.value, locale)}</dd>
+                            ) : (
+                              <dd className="shrink-0 text-[12px] text-slate-600 dark:text-slate-300">{t('outside_assets.not_linked')}</dd>
+                            )}
+                          </div>
+                        ))}
+                      </dl>
+                    </>
                   )}
                   <Link to="/outside-assets" className={`group mt-auto self-start pt-3 text-[13px] ${TEXT_LINK}`}>
                     {outsideAccounts.length > 0 ? t('outside_assets.card_link') : t('outside_assets.card_link_empty')}

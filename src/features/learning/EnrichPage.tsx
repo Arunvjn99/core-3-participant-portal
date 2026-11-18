@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, ArrowRight, BookOpen, Clock } from 'lucide-react'
+import { ArrowLeft, BookOpen, Clock, ChevronRight } from 'lucide-react'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { cn } from '@/lib/cn'
 import { ARTICLES, FEATURED_PATH, TOPICS, type Topic } from './articles'
@@ -38,7 +38,7 @@ function ArticleView({ id }: { id: string }) {
         {(prev || next) && (
           <nav className="mt-6 flex justify-between gap-3 border-t border-gray-100 pt-4 dark:border-gray-800" aria-label={t('enrich.featured')}>
             {prev ? <Link to={`/enrich/${prev}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:underline dark:text-blue-400"><ArrowLeft className="h-4 w-4" aria-hidden />{t('enrich.previous')}</Link> : <span />}
-            {next && <Link to={`/enrich/${next}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:underline dark:text-blue-400">{t('enrich.next')}<ArrowRight className="h-4 w-4" aria-hidden /></Link>}
+            {next && <Link to={`/enrich/${next}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:underline dark:text-blue-400">{t('enrich.next')}<ChevronRight className="h-4 w-4" aria-hidden /></Link>}
           </nav>
         )}
       </article>
@@ -95,7 +95,7 @@ export default function EnrichPage() {
                   <span className="mt-1 flex-1 text-sm text-gray-600 dark:text-gray-300">{t(`enrich.articles.${a.id}.summary`)}</span>
                   <span className="mt-3 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                     <span>{t('enrich.min_read', { count: a.minutes })}</span>
-                    <span className="inline-flex items-center gap-1 font-semibold text-blue-600 dark:text-blue-400">{t('enrich.read')} <ArrowRight className="h-3.5 w-3.5" aria-hidden /></span>
+                    <span className="inline-flex items-center gap-1 font-semibold text-blue-600 dark:text-blue-400">{t('enrich.read')} <ChevronRight className="h-3.5 w-3.5" aria-hidden /></span>
                   </span>
                 </Link>
               </li>

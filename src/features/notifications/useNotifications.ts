@@ -15,6 +15,8 @@ export function useNotifications() {
   const read = useNotificationState((s) => s.read)
   const dismiss = useNotificationState((s) => s.dismiss)
   const markRead = useNotificationState((s) => s.markRead)
+  const dismissMany = useNotificationState((s) => s.dismissMany)
+  const restore = useNotificationState((s) => s.restore)
 
   const items = useMemo(
     () => buildNotifications({ tracked, limits, adviser: { unreadMessages: unread, upcomingMeetings: upcoming }, serviceRequests }).filter((n) => !dismissed.includes(n.id)),
@@ -28,5 +30,12 @@ export function useNotifications() {
     isUnread: (id: string) => !read.includes(id),
     dismiss,
     markAllRead: () => markRead(items.map((n) => n.id)),
+    /** Clears every notification shown now and returns their ids, so the caller can offer Undo. */
+    clearAll: () => {
+      const ids = items.map((n) => n.id)
+      dismissMany(ids)
+      return ids
+    },
+    restore,
   }
 }

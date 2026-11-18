@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { ADVISOR } from '@/features/advisors/advisorProfile'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { getAppDateLocale } from '@/lib/dateLocale'
 import {
-  ArrowRight,
   ChevronDown,
   ChevronUp,
   Pencil,
@@ -17,9 +17,10 @@ import {
   Trash2,
   Minus,
   Gauge,
-  Phone,
+  Star,
   Sparkles,
   Settings,
+  ChevronRight,
 } from 'lucide-react'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { cn } from '@/lib/cn'
@@ -516,12 +517,12 @@ function InvestmentStrategy() {
                 {customAllocations ? (
                   <button type="button" onClick={handleSelectPlanDefault} className={cn(PILL_SECONDARY, 'w-full')}>
                     {t('enrollment.investment.select_plan_default')}
-                    <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+                    <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
                   </button>
                 ) : !hasConfirmedPlanDefault ? (
                   <button type="button" onClick={confirmPlanDefaultChoice} className={cn(PILL_PRIMARY, 'w-full')}>
                     {t('enrollment.investment.select_plan_default')}
-                    <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+                    <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
                   </button>
                 ) : (
                   <div className={cn(PILL_PRIMARY, 'pointer-events-none w-full')} role="status">
@@ -548,7 +549,7 @@ function InvestmentStrategy() {
                 </div>
               ) : (
                 <button type="button" onClick={() => setShowBuildPortfolioModal(true)} className={cn(PILL_SECONDARY, 'mt-5 w-full')}>
-                  {t('enrollment.investment.customize_cta')} <ArrowRight className="h-4 w-4" />
+                  {t('enrollment.investment.customize_cta')} <ChevronRight className="h-4 w-4" />
                 </button>
               )}
             </Card>
@@ -556,19 +557,43 @@ function InvestmentStrategy() {
 
           {/* ── Advisor Card ── */}
           <Card tone="warm">
-            <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-              <TitleBadge Icon={Phone} color="bg-amber-500" />
-              <div className="min-w-0 flex-1">
-                <span className={badge('amber')}>{t('enrollment.investment.expert_help')}</span>
-                <h2 className={cn('mt-1.5', CARD_TITLE)}>{t('enrollment.investment.advisor_title')}</h2>
-                <p className={cn('mt-1 text-[13px] leading-relaxed', BODY_TEXT)}>{t('enrollment.investment.advisor_sub')}</p>
-                <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1">
-                  <span className={cn('flex items-center gap-1.5 text-xs', BODY_TEXT)}><Check className="h-3.5 w-3.5 text-emerald-500" strokeWidth={3} aria-hidden />{t('enrollment.investment.advisor_b1')}</span>
-                  <span className={cn('flex items-center gap-1.5 text-xs', BODY_TEXT)}><Check className="h-3.5 w-3.5 text-emerald-500" strokeWidth={3} aria-hidden />{t('enrollment.investment.advisor_b2')}</span>
+            <div className="flex flex-col gap-5 md:flex-row md:items-center md:gap-0">
+              {/* Who you'd talk to: the dashboard's advisor, with her photo, role and rating */}
+              <div className="flex items-center gap-3.5 md:w-[292px] md:shrink-0 md:border-r md:border-slate-200/80 md:pr-6 md:dark:border-white/10">
+                <span className="relative shrink-0">
+                  <img
+                    src={ADVISOR.photo}
+                    onError={(e) => {
+                      if (!e.currentTarget.src.endsWith(ADVISOR.fallbackPhoto)) e.currentTarget.src = ADVISOR.fallbackPhoto
+                    }}
+                    alt={ADVISOR.name}
+                    width={56}
+                    height={56}
+                    className="h-14 w-14 rounded-full object-cover ring-2 ring-white shadow-[0_8px_20px_-10px_rgba(11,21,51,0.55)] dark:ring-slate-900"
+                  />
+                  <span className="absolute bottom-0.5 right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white dark:bg-slate-900" aria-hidden>
+                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                  </span>
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[15px] font-bold leading-tight text-slate-900 dark:text-white">{ADVISOR.name}</p>
+                  <p className="mt-0.5 text-[13px] text-slate-600 dark:text-slate-300">{t('postDashboard.advisor_title_role')}</p>
+                  <p className="mt-1 flex items-center gap-1 text-[12px] text-slate-600 dark:text-slate-300">
+                    <Star className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" aria-hidden />
+                    {t('pre_dashboard.advisor_meta', { years: ADVISOR.years, rating: ADVISOR.rating })}
+                  </p>
                 </div>
               </div>
-              <button type="button" className={cn(PILL_SECONDARY, 'shrink-0')}>
-                {t('enrollment.investment.connect_now')} <ArrowRight className="h-4 w-4" />
+
+              {/* What she can help with: one heading and one line (the badge and ticks only repeated them) */}
+              <div className="min-w-0 flex-1 md:px-6">
+                <h2 className={CARD_TITLE}>{t('enrollment.investment.advisor_title')}</h2>
+                <p className={cn('mt-1 text-[13px] leading-relaxed', BODY_TEXT)}>{t('enrollment.investment.advisor_sub')}</p>
+              </div>
+
+              {/* Opens a conversation with her (it did nothing before) */}
+              <button type="button" onClick={() => navigate('/advisor?tab=messages', { state: { from: 'enrollment-investment' } })} className={cn(PILL_SECONDARY, 'shrink-0 self-start md:self-center')}>
+                {t('enrollment.investment.connect_now')} <ChevronRight className="h-4 w-4" />
               </button>
             </div>
           </Card>
@@ -628,7 +653,7 @@ function InvestmentStrategy() {
                 )}
               </div>
               <div className={cn('border-t px-6 py-4', RULE)}>
-                <button type="button" onClick={() => { setShowBuildPortfolioModal(false); setEditingSource(null); setInlineAllocs(null) }} className={cn(PILL_PRIMARY, 'w-full')}>{t('enrollment.investment.done')} <ArrowRight className="w-4 h-4" /></button>
+                <button type="button" onClick={() => { setShowBuildPortfolioModal(false); setEditingSource(null); setInlineAllocs(null) }} className={cn(PILL_PRIMARY, 'w-full')}>{t('enrollment.investment.done')} <ChevronRight className="w-4 h-4" /></button>
               </div>
             </div>
           </div>

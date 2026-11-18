@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" width="400" height="320">
+  <defs>
+    <linearGradient id="podTop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EDF0F8"/>
+    </linearGradient>
+    <linearGradient id="podSide" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#C9D0E4"/>
+      <stop offset="0.45" stop-color="#F3F5FB"/>
+      <stop offset="1" stop-color="#C3CBE2"/>
+    </linearGradient>
+    <linearGradient id="barFront" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5585FF"/>
+      <stop offset="1" stop-color="#2D57DD"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#E6ECFB" stop-opacity="0.55"/>
+    </linearGradient>
+    <linearGradient id="pieBlue" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2A4FCF"/>
+      <stop offset="1" stop-color="#3D68EE"/>
+    </linearGradient>
+    <linearGradient id="piePurple" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8A5CF0"/>
+      <stop offset="1" stop-color="#6A3FD6"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-50%" width="140%" height="200%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+  </defs>
+
+  <!-- Ground shadow -->
+  <ellipse cx="200" cy="292" rx="150" ry="12" fill="#0B1533" opacity="0.12" filter="url(#soft)"/>
+
+  <!-- Podium -->
+  <path d="M40 262 L40 282 A160 32 0 0 0 360 282 L360 262 Z" fill="url(#podSide)"/>
+  <ellipse cx="200" cy="262" rx="160" ry="32" fill="url(#podTop)"/>
+  <ellipse cx="200" cy="262" rx="160" ry="32" fill="none" stroke="#FFFFFF" stroke-width="1.5"/>
+
+  <!-- Glass panel with a grid -->
+  <rect x="88" y="34" width="236" height="188" rx="14" fill="url(#glass)" stroke="#C6D1EF" stroke-width="1.5"/>
+  <g stroke="#AFBDE6" stroke-width="1" opacity="0.75">
+    <path d="M102 56 H310 M102 80 H310 M102 104 H310 M102 128 H310 M102 152 H310 M102 176 H310 M102 200 H310"/>
+    <path d="M110 50 V206 M136 50 V206 M162 50 V206 M188 50 V206 M214 50 V206 M240 50 V206 M266 50 V206 M292 50 V206"/>
+  </g>
+
+  <!-- Contact shadow of the chart on the podium -->
+  <ellipse cx="200" cy="254" rx="118" ry="14" fill="#2D3E8F" opacity="0.14" filter="url(#soft)"/>
+
+  <!-- Bars: front, side, top -->
+  <g>
+    <path d="M100 170 H134 V252 H100 Z" fill="url(#barFront)"/>
+    <path d="M134 170 L143 164 V246 L134 252 Z" fill="#2242B4"/>
+    <path d="M100 170 L109 164 H143 L134 170 Z" fill="#8FB0FF"/>
+
+    <path d="M150 108 H184 V252 H150 Z" fill="url(#barFront)"/>
+    <path d="M184 108 L193 102 V246 L184 252 Z" fill="#2242B4"/>
+    <path d="M150 108 L159 102 H193 L184 108 Z" fill="#8FB0FF"/>
+
+    <path d="M200 162 H234 V252 H200 Z" fill="url(#barFront)"/>
+    <path d="M234 162 L243 156 V246 L234 252 Z" fill="#2242B4"/>
+    <path d="M200 162 L209 156 H243 L234 162 Z" fill="#8FB0FF"/>
+
+    <path d="M250 132 H284 V252 H250 Z" fill="url(#barFront)"/>
+    <path d="M284 132 L293 126 V246 L284 252 Z" fill="#2242B4"/>
+    <path d="M250 132 L259 126 H293 L284 132 Z" fill="#8FB0FF"/>
+  </g>
+
+  <!-- Rising arrow: a darker underside for depth, then the bright face -->
+  <g stroke-linejoin="round" stroke-linecap="round" fill="none">
+    <polyline points="114,203 167,153 217,185 290,96" stroke="#1592BC" stroke-width="13"/>
+    <polyline points="112,199 165,149 215,181 288,92" stroke="#32CBEC" stroke-width="12"/>
+  </g>
+  <path d="M311 72 L300.5 104 L276.5 84 Z" fill="#1592BC"/>
+  <path d="M308 68 L298 100 L274 80 Z" fill="#4FD9F2"/>
+
+  <!-- Pie chart in front -->
+  <path d="M202 236 A60 20 0 0 0 262 256 L262 274 A60 20 0 0 1 202 254 Z" fill="url(#pieBlue)"/>
+  <path d="M262 256 A60 20 0 0 0 322 236 L322 254 A60 20 0 0 1 262 274 Z" fill="url(#piePurple)"/>
+  <path d="M262 236 L262 216 A60 20 0 0 0 202 236 A60 20 0 0 0 262 256 Z" fill="#5B8AFF"/>
+  <path d="M262 236 L262 216 A60 20 0 0 1 262 256 Z" fill="#A47CFF"/>
+  <path d="M262 236 L262 216 A60 20 0 0 0 226 220 Z" fill="#7A72FA"/>
+  <g stroke="#FFFFFF" stroke-width="1.5" opacity="0.9" fill="none">
+    <path d="M262 216 V274"/>
+    <path d="M262 236 L226 220"/>
+  </g>
+</svg>

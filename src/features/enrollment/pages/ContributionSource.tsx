@@ -42,26 +42,29 @@ export default function ContributionSource() {
   const monthlyMatched = Math.round((salary * Math.min(matchable, matchCap)) / 100 / 12)
   const annualMatch = annualEmployerMatch(salary, percent, sources)
   const monthlyMatch = Math.round(annualMatch / 12)
-  // Dollar split that always adds up to the monthly total (any rounding cent goes to the largest share)
-  const [monthlyPreTax, monthlyRoth, monthlyAfterTax] = splitWhole(monthlyTotal, [sources.preTax, sources.roth, sources.afterTax])
+  const total = sources.preTax + sources.roth + sources.afterTax
+  // Dollar split: once fully assigned it adds up to the monthly total exactly (any rounding goes to the largest share);
+  // before that each source shows just its own part, so the unassigned share isn't counted anywhere
+  const shares = [sources.preTax, sources.roth, sources.afterTax]
+  const [monthlyPreTax, monthlyRoth, monthlyAfterTax] = total === 100 ? splitWhole(monthlyTotal, shares) : shares.map((s) => Math.round((monthlyTotal * s) / 100))
   const totalMonthlyInvestment = monthlyTotal + monthlyMatch
 
   // Plan's own default split — the "Reset" link restores this.
   const planDefault = { preTax: 60, roth: 40, afterTax: 0 }
 
-  /** Moving one slider shares what's left between the other two in their current proportion, always totalling 100. */
-  const rebalance = (value: number, moved: keyof typeof sources, first: keyof typeof sources, second: keyof typeof sources, fallback: keyof typeof sources) => {
-    const set = Math.min(100, Math.max(0, Math.round(value)))
-    const remaining = 100 - set
-    const others = sources[first] + sources[second]
-    const firstShare = others > 0 ? Math.round((remaining * sources[first]) / others) : fallback === first ? remaining : 0
-    updateData({ contributionSources: { ...sources, [moved]: set, [first]: firstShare, [second]: remaining - firstShare } })
+  /**
+   * Each slider moves on its own: the others stay where they are. A source can only rise as far as the others leave
+   * room, so the three never add up to more than 100%; Continue waits until they add up to exactly 100%.
+   */
+  const setSource = (moved: keyof typeof sources, value: number) => {
+    const others = total - sources[moved]
+    const set = Math.min(100 - others, Math.max(0, Math.round(value)))
+    if (set !== sources[moved]) updateData({ contributionSources: { ...sources, [moved]: set } })
   }
-  const handlePreTaxChange = (value: number) => rebalance(value, 'preTax', 'roth', 'afterTax', 'roth')
-  const handleRothChange = (value: number) => rebalance(value, 'roth', 'preTax', 'afterTax', 'preTax')
-  const handleAfterTaxChange = (value: number) => rebalance(value, 'afterTax', 'preTax', 'roth', 'preTax')
-
-  const total = sources.preTax + sources.roth + sources.afterTax
+  const handlePreTaxChange = (value: number) => setSource('preTax', value)
+  const handleRothChange = (value: number) => setSource('roth', value)
+  const handleAfterTaxChange = (value: number) => setSource('afterTax', value)
+  const left = Math.max(0, 100 - total)
 
   useEffect(() => {
     setStepNav({
@@ -201,6 +204,29 @@ export default function ContributionSource() {
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Running total: never above 100%; until it reaches 100% it says how much is left, and Continue waits */}
+              <div
+                role="status"
+                className={cn(
+                  'flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl px-3.5 py-2.5 text-[13px] ring-1',
+                  left > 0
+                    ? 'bg-amber-50 text-amber-900 ring-amber-200 dark:bg-amber-500/10 dark:text-amber-200 dark:ring-amber-400/25'
+                    : 'bg-emerald-50 text-emerald-900 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-200 dark:ring-emerald-400/25',
+                )}
+              >
+                <span className="font-semibold tabular-nums">{t('enrollment.source_page.total_line', { total })}</span>
+                <span className="flex items-center gap-1.5">
+                  {left > 0 ? (
+                    t('enrollment.source_page.left_to_assign', { left })
+                  ) : (
+                    <>
+                      <Check className="h-4 w-4 shrink-0" aria-hidden />
+                      {t('enrollment.source_page.all_assigned')}
+                    </>
+                  )}
+                </span>
               </div>
 
               {/* Links stay together at the bottom of the column */}
@@ -361,15 +387,15 @@ function AllocationDonut({
   centerLabel: string
   ariaLabel: string
 }) {
-  let start = 0
+  // Where each segment starts round the ring: the sum of the segments before it
+  const starts = segments.map((_, i) => segments.slice(0, i).reduce((sum, seg) => sum + Math.max(0, seg.value), 0))
   return (
     <div className="relative h-24 w-24 shrink-0" role="img" aria-label={ariaLabel}>
       <svg viewBox="0 0 42 42" className="h-full w-full -rotate-90" aria-hidden>
         <circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--slider-track)" strokeWidth="5" />
         {segments.map(({ value, color }, i) => {
           if (value <= 0) return null
-          const offset = -start
-          start += value
+          const offset = -starts[i]
           return (
             <circle
               key={i}

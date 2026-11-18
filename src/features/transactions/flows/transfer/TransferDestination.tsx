@@ -3,14 +3,15 @@ import { useState } from "react";
 import { useTransferFlow } from "./TransferFlowLayout";
 import { motion } from "framer-motion";
 import {
-  ArrowRight,
   ArrowLeft,
   CheckCircle2,
   TrendingUp,
   Shield,
   Globe,
   Landmark,
-  Target } from "lucide-react";
+  Target,
+  ChevronRight,
+} from "lucide-react";
 
 interface DestinationFund {
   id: string;
@@ -305,7 +306,7 @@ function TransferDestination() {
             boxShadow: "var(--shadow-btn)" }}
         >
           Enter Amount
-          <ArrowRight style={{ width: 16, height: 16 }} />
+          <ChevronRight style={{ width: 16, height: 16 }} />
         </button>
       </div>
     </div>

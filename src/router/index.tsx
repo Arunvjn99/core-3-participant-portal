@@ -86,6 +86,7 @@ const AccountSummaryPage = lazy(() => import('../features/portfolio/AccountSumma
 const RetirementGoalPage = lazy(() => import('../features/retirement/RetirementGoalPage'))
 const EnrichPage = lazy(() => import('../features/learning/EnrichPage'))
 const DocumentsPage = lazy(() => import('../features/documents/DocumentsPage'))
+const NotificationsPage = lazy(() => import('../features/notifications/NotificationsPage'))
 const FeeReportPage = lazy(() => import('../features/fees/FeeReportPage'))
 const OutsideAssetsPage = lazy(() => import('../features/outside-assets/OutsideAssetsPage'))
 const HelpCenterPage = lazy(() => import('../features/help/HelpCenterPage'))
@@ -260,6 +261,7 @@ export const router = createBrowserRouter([
           { path: 'investments', element: withSuspense(InvestmentsPage) },
           { path: 'fees', element: withSuspense(FeeReportPage) },
           { path: 'documents', element: withSuspense(DocumentsPage) },
+          { path: 'notifications', element: withSuspense(NotificationsPage) },
           { path: 'advisor', element: withSuspense(AdvisorPage) },
           { path: 'enrich', element: withSuspense(EnrichPage) },
           { path: 'enrich/:articleId', element: withSuspense(EnrichPage) },

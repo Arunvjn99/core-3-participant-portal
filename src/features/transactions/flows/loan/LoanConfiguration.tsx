@@ -11,12 +11,12 @@ import {
   ChevronDown,
   Landmark,
   Info,
-  ArrowRight,
   ArrowLeft,
   Check,
   DollarSign,
   Calendar,
   BarChart3,
+  ChevronRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -605,7 +605,7 @@ function LoanConfiguration() {
           className="btn-brand flex min-h-[2.75rem] cursor-pointer items-center gap-2 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Continue to Fees
-          <ArrowRight className="h-4 w-4" />
+          <ChevronRight className="h-4 w-4" />
         </button>
       </div>
     </div>

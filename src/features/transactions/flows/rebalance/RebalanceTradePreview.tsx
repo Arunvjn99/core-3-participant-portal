@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { useRebalanceFlow } from "./RebalanceFlowLayout";
 import { motion } from "framer-motion";
 import {
-  ArrowRight,
   ArrowUpRight,
   ArrowDownRight,
   Shield,
-  Clock } from "lucide-react";
+  Clock,
+  ChevronRight,
+} from "lucide-react";
 
 const COLORS = ["var(--chart-blue)", "var(--chart-teal)", "var(--chart-green)", "var(--status-warning)"];
 
@@ -282,7 +283,7 @@ function RebalanceTradePreview() {
           className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer"
         >
           Continue to Review
-          <ArrowRight style={{ width: 16, height: 16 }} />
+          <ChevronRight style={{ width: 16, height: 16 }} />
         </button>
       </div>
     </div>

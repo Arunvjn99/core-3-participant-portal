@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useTransferFlow } from "./TransferFlowLayout";
 import { motion } from "framer-motion";
-import { ArrowRight, ArrowLeft, DollarSign, Percent, Info, Hash } from "lucide-react";
+import { ArrowLeft, DollarSign, Percent, Info, Hash, ChevronRight } from "lucide-react";
 
 function TransferAmount() {
   const navigate = useNavigate();
@@ -297,7 +297,7 @@ function TransferAmount() {
           className="btn-brand flex items-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Preview Impact
-          <ArrowRight style={{ width: 16, height: 16 }} />
+          <ChevronRight style={{ width: 16, height: 16 }} />
         </button>
       </div>
     </div>

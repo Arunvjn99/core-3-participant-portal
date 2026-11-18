@@ -162,9 +162,10 @@ function RecentTransactionsCompact({ maxItems }: { maxItems?: number } = {}) {
       case 'Completed':
         return { bg: 'var(--status-success-tint)', color: 'var(--status-success-text)', dot: 'var(--status-success)' }
       case 'Processing':
-        return { bg: 'var(--c-blue-tint)', color: 'var(--brand-primary)', dot: 'var(--brand-primary)' }
+        // Blue text a shade deeper than the brand blue, so it reads on the tint in both themes
+        return { bg: 'var(--c-blue-tint)', color: 'var(--processing-ink, #1d4ed8)', dot: 'var(--brand-primary)' }
       case 'Cancelled':
-        return { bg: 'var(--c-subtle)', color: 'var(--c-text-muted)', dot: 'var(--c-text-faint)' }
+        return { bg: 'var(--c-subtle)', color: 'var(--c-text-muted)', dot: 'var(--text-secondary)' }
     }
   }
 
@@ -182,7 +183,7 @@ function RecentTransactionsCompact({ maxItems }: { maxItems?: number } = {}) {
               onClick={() => setSelectedFilter(filter)}
               className={`transition-all duration-200 ${
                 selectedFilter === filter
-                  ? 'border border-slate-200 bg-white text-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-blue-400'
+                  ? 'border border-slate-200 bg-white text-blue-700 dark:border-gray-600 dark:bg-gray-700 dark:text-blue-200'
                   : 'border border-transparent bg-transparent text-slate-500 dark:text-gray-400'
               }`}
               style={{
@@ -209,7 +210,7 @@ function RecentTransactionsCompact({ maxItems }: { maxItems?: number } = {}) {
               {t('transactions.recent_tx.filter_prefix')} {filterLabel(selectedFilter)}
             </span>
             <ChevronDown
-              className={`h-3.5 w-3.5 text-slate-400 transition-transform dark:text-gray-500 ${mobileFilterOpen ? 'rotate-180' : ''}`}
+              className={`h-3.5 w-3.5 text-slate-600 transition-transform dark:text-gray-500 ${mobileFilterOpen ? 'rotate-180' : ''}`}
             />
           </button>
           {mobileFilterOpen && (
@@ -241,7 +242,7 @@ function RecentTransactionsCompact({ maxItems }: { maxItems?: number } = {}) {
           )}
         </div>
 
-        <span className="hidden text-slate-400 dark:text-gray-500 sm:block" style={{ fontSize: 12, fontWeight: 500 }}>
+        <span className="hidden text-slate-600 dark:text-slate-300 sm:block" style={{ fontSize: 12, fontWeight: 500 }}>
           {t('transactions.recent_tx.showing', { count: filteredTransactions.length })}
         </span>
       </div>
@@ -271,7 +272,7 @@ function RecentTransactionsCompact({ maxItems }: { maxItems?: number } = {}) {
                     <p className="text-slate-900 dark:text-white" style={{ fontSize: 13, fontWeight: 700 }}>
                       {t(txTypeKey(transaction.type))}
                     </p>
-                    <p className="font-mono text-slate-400 dark:text-gray-500" style={{ fontSize: 10, fontWeight: 500 }}>
+                    <p className="font-mono text-slate-600 dark:text-slate-300" style={{ fontSize: 10, fontWeight: 500 }}>
                       {transaction.transactionId}
                     </p>
                   </div>
@@ -308,7 +309,7 @@ function RecentTransactionsCompact({ maxItems }: { maxItems?: number } = {}) {
               </p>
 
               <div className="flex items-center justify-between border-t border-slate-100 pt-2 dark:border-gray-800">
-                <span className="text-slate-400 dark:text-gray-500" style={{ fontSize: 11, fontWeight: 500 }}>
+                <span className="text-slate-600 dark:text-slate-300" style={{ fontSize: 11, fontWeight: 500 }}>
                   {transaction.date}
                 </span>
                 <div className="flex items-center gap-1">
@@ -336,14 +337,14 @@ function RecentTransactionsCompact({ maxItems }: { maxItems?: number } = {}) {
 
         {filteredTransactions.length === 0 && (
           <div className="py-8 text-center">
-            <p className="text-slate-400 dark:text-gray-500" style={{ fontSize: 13, fontWeight: 500 }}>
+            <p className="text-slate-600 dark:text-slate-300" style={{ fontSize: 13, fontWeight: 500 }}>
               {t('transactions.recent_tx.empty')}
             </p>
           </div>
         )}
 
         <div className="pt-1 text-center">
-          <span className="text-slate-400 dark:text-gray-500" style={{ fontSize: 11, fontWeight: 500 }}>
+          <span className="text-slate-600 dark:text-slate-300" style={{ fontSize: 11, fontWeight: 500 }}>
             {t('transactions.recent_tx.tx_count', { count: filteredTransactions.length })}
           </span>
         </div>
@@ -442,7 +443,7 @@ function RecentTransactionsCompact({ maxItems }: { maxItems?: number } = {}) {
 
         {filteredTransactions.length === 0 && (
           <div className="py-12 text-center">
-            <p className="text-slate-400 dark:text-gray-500" style={{ fontSize: 13, fontWeight: 500 }}>
+            <p className="text-slate-600 dark:text-slate-300" style={{ fontSize: 13, fontWeight: 500 }}>
               {t('transactions.recent_tx.empty')}
             </p>
           </div>

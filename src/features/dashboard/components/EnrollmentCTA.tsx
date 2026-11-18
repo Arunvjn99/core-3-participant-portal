@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
-import { ClipboardList, ArrowRight, Clock, Zap } from 'lucide-react'
+import { ClipboardList, Clock, Zap, ChevronRight } from 'lucide-react'
 import { Button } from '../../../design-system/components/Button'
 import { Badge } from '../../../design-system/components/Badge'
 import { fadeInUp } from '../../../design-system/motion/variants'
@@ -68,7 +68,7 @@ export function EnrollmentCTA() {
           className="flex items-center gap-2"
         >
           {isInProgress ? t('enrollment.cta.resume') : t('enrollment.cta.get_started')}
-          <ArrowRight className="h-4 w-4" />
+          <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
     </motion.div>
