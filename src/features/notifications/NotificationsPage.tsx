@@ -27,7 +27,7 @@ export default function NotificationsPage() {
 
   return (
     <AnimatedPage>
-      <div className="mx-auto w-full max-w-[760px] px-4 py-6 sm:px-6 lg:py-7">
+      <div className="w-full pb-6 pt-2 lg:pb-7 lg:pt-3">
         <Link to="/dashboard" className={cn('mb-3 inline-flex min-h-10 items-center gap-1.5 rounded-md text-[14px] font-semibold text-slate-600 transition-colors hover:text-text-primary dark:text-slate-300 dark:hover:text-white', FOCUS)}>
           <ArrowLeft className="h-4 w-4" aria-hidden /> {t('retirement.back')}
         </Link>

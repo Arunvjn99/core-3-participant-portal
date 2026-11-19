@@ -25,14 +25,14 @@ function TrackerCard({ tx, timeline, defaultOpen }: { tx: TrackedTransaction; ti
   const current = timeline.steps[timeline.currentIndex]
 
   return (
-    <div className="rounded-lg border border-border-default bg-surface-card">
+    <div className="border-t border-slate-200/80 first:border-t-0 dark:border-white/10">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="flex w-full items-center gap-3 p-4 text-left"
+        className="flex w-full items-center gap-3 rounded-xl py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-status-info-bg text-primary">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-700 ring-1 ring-blue-100 dark:bg-blue-500/15 dark:text-blue-200 dark:ring-blue-400/20">
           <Icon className="h-4 w-4" aria-hidden />
         </span>
         <span className="min-w-0 flex-1">
@@ -71,7 +71,8 @@ function TrackerCard({ tx, timeline, defaultOpen }: { tx: TrackedTransaction; ti
   )
 }
 
-export function TransactionTracker() {
+/** `openFirst`: show the newest request's timeline straight away (off keeps the list short) */
+export function TransactionTracker({ openFirst = true }: { openFirst?: boolean } = {}) {
   const { t } = useTranslation()
   const rows = useTrackedTransactions()
 
@@ -79,9 +80,9 @@ export function TransactionTracker() {
     return <p className="py-6 text-center text-sm text-slate-500 dark:text-slate-400">{t('tracking.empty')}</p>
   }
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col">
       {rows.map(({ tx, timeline }, i) => (
-        <TrackerCard key={tx.id} tx={tx} timeline={timeline} defaultOpen={i === 0} />
+        <TrackerCard key={tx.id} tx={tx} timeline={timeline} defaultOpen={openFirst && i === 0} />
       ))}
     </div>
   )

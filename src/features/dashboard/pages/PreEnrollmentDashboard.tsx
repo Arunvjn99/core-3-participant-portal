@@ -71,6 +71,9 @@ function useCardMotion<T extends HTMLElement>() {
     ref,
     reduce,
     running: inView && !reduce && !held,
+    /** On screen with motion allowed, whether or not the pointer is resting on it */
+    live: inView && !reduce,
+    held,
     hold: { onMouseEnter: () => setHeld(true), onMouseLeave: () => setHeld(false), onFocus: () => setHeld(true), onBlur: () => setHeld(false) },
   }
 }
@@ -88,7 +91,7 @@ interface Exchange {
   count: number
 }
 
-const EXCHANGE_DELAY: Record<ExchangePhase, number> = { arriving: 350, typing: 26, thinking: 650, answering: 45, reading: 2200 }
+const EXCHANGE_DELAY: Record<ExchangePhase, number> = { arriving: 200, typing: 18, thinking: 380, answering: 32, reading: 1800 }
 
 function nextExchange(e: Exchange, turns: ChatTurn[]): Exchange {
   const { q, a } = turns[e.turn % turns.length]
@@ -165,9 +168,11 @@ const HISTORY = 3
 
 function AskCoreAiCard({ turns, onStart }: { turns: ChatTurn[]; onStart: () => void }) {
   const { t } = useTranslation()
-  const { ref, running, hold } = useCardMotion<HTMLDivElement>()
-  // Opens on a conversation already under way, so the window is full from the first look
-  const [state, tick] = useReducer((e: Exchange) => nextExchange(e, turns), { turn: HISTORY, phase: 'reading', count: 0 })
+  const { ref, live, held, hold } = useCardMotion<HTMLDivElement>()
+  // Opens on a conversation already under way, so the window is full from the first look, and the next question starts right away
+  const [state, tick] = useReducer((e: Exchange) => nextExchange(e, turns), { turn: HISTORY, phase: 'arriving', count: 0 })
+  // Resting the pointer on the card pauses only between answers, never mid-reply, so it can't freeze on the thinking dots
+  const running = live && !(held && state.phase === 'reading')
 
   useEffect(() => {
     if (!running) return
@@ -375,7 +380,7 @@ export function PreEnrollmentDashboard() {
       />
 
       <div className="bg-surface-page font-sans text-text-primary">
-        <div className="mx-auto flex max-w-[1280px] flex-col gap-10 px-4 pb-12 pt-6 sm:px-6 lg:gap-8 lg:px-8 lg:pb-12 lg:pt-7 xl:gap-6 xl:pb-0 xl:pt-5">
+        <div className="w-full flex flex-col gap-10 pb-12 pt-2 lg:gap-8 lg:pb-12 lg:pt-3 xl:gap-6 xl:pb-0 xl:pt-3">
           {/* Banner: one message and one action, beside the story of bills paid and the road ahead */}
           <motion.section
             ref={heroRef}
@@ -444,7 +449,7 @@ export function PreEnrollmentDashboard() {
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)]">
               {/* Enrich financial learning: the lead card, opens Enrich in a new tab.
                   The page's blue card, with a chart illustration in the same blues */}
-              <Reveal className="group relative isolate flex min-h-[180px] overflow-clip rounded-[20px] bg-[radial-gradient(90%_130%_at_0%_0%,#CBE7FF_0%,rgba(203,231,255,0)_62%),linear-gradient(90deg,#EEF2FF_0%,#E4E9FF_100%)] p-6 text-left shadow-[0_18px_40px_-28px_rgba(37,99,235,0.55)] ring-1 ring-blue-200/80 xl:min-h-[164px] xl:py-5 transition-shadow hover:shadow-[0_24px_48px_-26px_rgba(37,99,235,0.6)] md:col-span-2 xl:col-span-3 dark:bg-[radial-gradient(90%_130%_at_0%_0%,#173F7A_0%,rgba(23,63,122,0)_62%),linear-gradient(90deg,#0F1A48_0%,#26358F_100%)] dark:shadow-none dark:ring-blue-400/25">
+              <Reveal className="group relative isolate flex min-h-[180px] overflow-clip rounded-[20px] bg-[radial-gradient(90%_130%_at_0%_0%,#CBE7FF_0%,rgba(203,231,255,0)_62%),linear-gradient(90deg,#EEF2FF_0%,#E4E9FF_100%)] p-6 text-left ring-1 ring-blue-100 xl:min-h-[164px] xl:py-5 md:col-span-2 xl:col-span-3 dark:bg-[radial-gradient(90%_130%_at_0%_0%,#173F7A_0%,rgba(23,63,122,0)_62%),linear-gradient(90deg,#0F1A48_0%,#26358F_100%)] dark:ring-blue-400/20">
                 {/* Left: what it is and the way in */}
                 <div className="relative z-10 flex flex-1 flex-col items-start justify-center sm:max-w-[60%]">
                   <span className="flex items-center gap-3">

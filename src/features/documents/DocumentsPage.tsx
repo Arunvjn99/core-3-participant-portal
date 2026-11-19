@@ -123,7 +123,7 @@ export default function DocumentsPage() {
 
   return (
     <AnimatedPage>
-      <div className="mx-auto w-full max-w-[1040px] px-4 py-6 sm:px-6 lg:py-7">
+      <div className="w-full pb-6 pt-2 lg:pb-7 lg:pt-3">
           <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
             <div>
               <h1 className="text-[28px] font-bold leading-tight text-[#0B1533] dark:text-white">{t('documents.title')}</h1>

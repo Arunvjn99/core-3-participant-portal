@@ -1,14 +1,15 @@
 import { useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, LayoutGrid, Lightbulb, Plus, Search, SlidersHorizontal, Target, X } from 'lucide-react'
+import { LayoutGrid, Lightbulb, Plus, Search, SlidersHorizontal, Target, X } from 'lucide-react'
 import { cn } from '@/lib/cn'
-import { CYCLES, PLAN_RULES, nextIncreaseDate, type InvestMode } from '@/features/plan/electionsData'
+import { CYCLES, nextIncreaseDate, type InvestMode } from '@/features/plan/electionsData'
 import { fundCatalog } from '../../investmentCatalog'
 import { PLAN_CONFIG, PLAN_LIMITS, employerMatch } from '../../agent/planConfig'
-import { AUTO_AMOUNTS, AUTO_CAPS, RISKS, clamp, fundColor, fundMeta, round2, rowsFor, type Election } from './model'
+import { RISKS, clamp, fundColor, fundMeta, round2, rowsFor, type Election } from './model'
 import { useTheme } from '@/core/hooks/useTheme'
-import { InfoTip, Pills, Segmented, Stepper, Switch } from './ui'
+import { RangeSlider } from '@/design-system/components/RangeSlider'
+import { InfoTip, Segmented, Stepper, Switch } from './ui'
 
 interface Ctx {
   salary: number
@@ -48,13 +49,6 @@ export function ContributionEditor({ value, onChange, ctx }: { value: Election; 
   const fullMatch = employerMatch(ctx.salary, cap)
   const dollarsFor = (pct: number) => round2((ctx.salary * pct) / 100 / ctx.periods)
   const set = (preTax: number, roth: number) => onChange({ ...value, preTax: round2(preTax), roth: round2(roth) })
-  const presets = [
-    { key: 'match', label: t('enrollment.core.ed.preset_match', { rate: cap }), pre: cap, ro: 0 },
-    { key: 'roth', label: t('enrollment.core.ed.preset_roth', { rate: cap }), pre: 0, ro: cap },
-    { key: 'split', label: t('enrollment.core.ed.preset_split', { half: cap / 2 }), pre: cap / 2, ro: cap / 2 },
-    { key: 'plan', label: t('enrollment.core.ed.preset_plan', { rate: PLAN_RULES.defaultRate.preTax }), pre: PLAN_RULES.defaultRate.preTax, ro: PLAN_RULES.defaultRate.roth },
-  ]
-  const active = presets.find((p) => p.pre === value.preTax && p.ro === value.roth)?.key ?? null
   const outOfRange = total < min || total > max
   /** Points short of the full match: only pre-tax and Roth count toward it */
   const matchGap = round2(Math.max(0, cap - (value.preTax + value.roth)))
@@ -86,54 +80,50 @@ export function ContributionEditor({ value, onChange, ctx }: { value: Election; 
           <span className="text-[28px] font-semibold tracking-[-0.02em] text-slate-900 dark:text-white">{total}%</span>
           <span className="text-[14px] text-slate-500 dark:text-gray-400">{t('enrollment.core.per_check', { amount: money(perCheck) })}</span>
         </p>
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.p
-            key={match >= fullMatch ? 'full' : 'gap'}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.18 }}
-            className={cn('mt-2 flex items-center gap-1.5 text-[13px] font-medium', match >= fullMatch ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400')}
-          >
-            {match >= fullMatch ? <Check className="h-3.5 w-3.5" aria-hidden /> : <Target className="h-3.5 w-3.5" aria-hidden />}
-            {match >= fullMatch ? t('enrollment.core.ed.full_match', { amount: money(match) }) : t('enrollment.core.ed.match_gap', { amount: money(fullMatch - match), rate: cap })}
-          </motion.p>
+        {/* Only shown when short of the full match, as a nudge */}
+        <AnimatePresence initial={false}>
+          {match < fullMatch && (
+            <motion.p
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.18 }}
+              className="mt-2 flex items-center gap-1.5 text-[13px] font-medium text-amber-700 dark:text-amber-400"
+            >
+              <Target className="h-3.5 w-3.5" aria-hidden />
+              {t('enrollment.core.ed.match_gap', { amount: money(fullMatch - match), rate: cap })}
+            </motion.p>
+          )}
         </AnimatePresence>
       </div>
 
-      <Field title={t('enrollment.core.ed.quick')}>
-        <Pills label={t('enrollment.core.ed.quick')} value={active} options={presets.map((p) => ({ value: p.key, label: p.label }))} onChange={(k) => {
-          const p = presets.find((x) => x.key === k)
-          if (p) set(p.pre, p.ro)
-        }} />
-        {/* Pro tip under the quick picks while some employer match is left unclaimed */}
-        <AnimatePresence initial={false}>
-          {showMatchTip && (
-            <motion.div key="match-tip" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
-              <div className="mt-3 rounded-2xl bg-amber-50/80 p-3.5 ring-1 ring-amber-100 dark:bg-amber-500/10 dark:ring-amber-400/20">
-                <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-amber-700 dark:text-amber-300">
-                  <Lightbulb className="h-3.5 w-3.5" aria-hidden />
-                  {t('enrollment.core.pro_tip')}
-                </p>
-                <p className="mt-1.5 text-[13px] leading-[1.5] text-slate-700 dark:text-gray-200">
-                  <Trans
-                    i18nKey="enrollment.core.match_protip"
-                    values={{ gap: matchGap, amount: money((fullMatch - match) / 12), cost: money(dollarsFor(matchGap)) }}
-                    components={{ b: <strong className="font-semibold text-slate-900 dark:text-white" /> }}
-                  />
-                </p>
-                <button
-                  type="button"
-                  onClick={() => set(value.preTax + matchGap, value.roth)}
-                  className="mt-2.5 inline-flex h-8 items-center rounded-full bg-white px-3.5 text-[13px] font-semibold text-slate-900 ring-1 ring-amber-200 transition-colors hover:bg-amber-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-gray-900 dark:text-white dark:ring-amber-400/30 dark:hover:bg-gray-800"
-                >
-                  {t('enrollment.core.match_protip_cta')}
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </Field>
+      {/* Pro tip while some employer match is left unclaimed */}
+      <AnimatePresence initial={false}>
+        {showMatchTip && (
+          <motion.div key="match-tip" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+            <div className="rounded-2xl bg-amber-50/80 p-3.5 ring-1 ring-amber-100 dark:bg-amber-500/10 dark:ring-amber-400/20">
+              <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-amber-700 dark:text-amber-300">
+                <Lightbulb className="h-3.5 w-3.5" aria-hidden />
+                {t('enrollment.core.pro_tip')}
+              </p>
+              <p className="mt-1.5 text-[13px] leading-[1.5] text-slate-700 dark:text-gray-200">
+                <Trans
+                  i18nKey="enrollment.core.match_protip"
+                  values={{ gap: matchGap, amount: money((fullMatch - match) / 12), cost: money(dollarsFor(matchGap)) }}
+                  components={{ b: <strong className="font-semibold text-slate-900 dark:text-white" /> }}
+                />
+              </p>
+              <button
+                type="button"
+                onClick={() => set(value.preTax + matchGap, value.roth)}
+                className="mt-2.5 inline-flex h-8 items-center rounded-full bg-white px-3.5 text-[13px] font-semibold text-slate-900 ring-1 ring-amber-200 transition-colors hover:bg-amber-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-gray-900 dark:text-white dark:ring-amber-400/30 dark:hover:bg-gray-800"
+              >
+                {t('enrollment.core.match_protip_cta')}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Field title={t('enrollment.core.ed.by_source')}>
         <Segmented size="sm" label={t('plan.def.unit')} value={value.unit} onChange={(u) => onChange({ ...value, unit: u })} options={[{ value: 'percent', label: t('enrollment.quick.unit_percent') }, { value: 'dollar', label: t('enrollment.quick.unit_dollar') }]} />
@@ -156,8 +146,10 @@ export function AutoIncreaseEditor({ value, onChange, ctx }: { value: Election; 
   const both = value.preTax > 0 && value.roth > 0
   const sources: ('preTax' | 'roth')[] = a.sourceWise && both ? ['preTax', 'roth'] : ['preTax']
   const next = nextIncreaseDate(a.cycle, ctx.now, ctx.now).toLocaleDateString(ctx.locale, { month: 'long', day: 'numeric', year: 'numeric' })
-  const amounts = AUTO_AMOUNTS.filter((n) => n >= PLAN_LIMITS.autoAmount[0] && n <= PLAN_LIMITS.autoAmount[1])
-  const caps = AUTO_CAPS.filter((n) => n >= PLAN_LIMITS.autoCap[0] && n <= PLAN_LIMITS.autoCap[1])
+  const [stepMin, stepMax] = PLAN_LIMITS.autoAmount
+  const [capMin, capMax] = PLAN_LIMITS.autoCap
+  const sliderValue = 'text-[15px] font-semibold tabular-nums text-slate-900 dark:text-white'
+  const sliderEnds = 'mt-1.5 flex justify-between text-[12px] tabular-nums text-slate-500 dark:text-gray-400'
 
   return (
     <div className="space-y-6">
@@ -192,24 +184,35 @@ export function AutoIncreaseEditor({ value, onChange, ctx }: { value: Election; 
             {sources.map((k) => (
               <div key={k} className="space-y-4">
                 {sources.length > 1 && <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-slate-400">{t(`plan.src_${k}`)}</p>}
-                <Field title={t('enrollment.core.ed.raise_by')}>
-                  <Pills label={t('enrollment.core.ed.raise_by')} value={a.amount[k]} options={amounts.map((n) => ({ value: n, label: `+${n}%` }))} onChange={(n) => setAuto({ amount: a.sourceWise ? { ...a.amount, [k]: n } : { preTax: n, roth: n } })} />
+                <Field title={t('enrollment.core.ed.raise_by')} aside={<span className={sliderValue}>{`+${a.amount[k]}%`}</span>}>
+                  <RangeSlider
+                    min={stepMin}
+                    max={stepMax}
+                    step={1}
+                    value={a.amount[k]}
+                    color="#059669"
+                    onChange={(n) => setAuto({ amount: a.sourceWise ? { ...a.amount, [k]: n } : { preTax: n, roth: n } })}
+                    aria-label={sources.length > 1 ? `${t(`plan.src_${k}`)}: ${t('enrollment.core.ed.raise_by')}` : t('enrollment.core.ed.raise_by')}
+                    aria-valuetext={`+${a.amount[k]}%`}
+                  />
+                  <div className={sliderEnds} aria-hidden><span>{`+${stepMin}%`}</span><span>{`+${stepMax}%`}</span></div>
                 </Field>
-                <Field title={t('enrollment.core.ed.stop_at')}>
-                  <Pills label={t('enrollment.core.ed.stop_at')} value={a.cap[k]} options={caps.map((n) => ({ value: n, label: `${n}%` }))} onChange={(n) => setAuto({ cap: a.sourceWise ? { ...a.cap, [k]: n } : { preTax: n, roth: n } })} />
+                <Field title={t('enrollment.core.ed.stop_at')} aside={<span className={sliderValue}>{`${a.cap[k]}%`}</span>}>
+                  <RangeSlider
+                    min={capMin}
+                    max={capMax}
+                    step={1}
+                    value={a.cap[k]}
+                    color="#D97706"
+                    onChange={(n) => setAuto({ cap: a.sourceWise ? { ...a.cap, [k]: n } : { preTax: n, roth: n } })}
+                    aria-label={sources.length > 1 ? `${t(`plan.src_${k}`)}: ${t('enrollment.core.ed.stop_at')}` : t('enrollment.core.ed.stop_at')}
+                    aria-valuetext={`${a.cap[k]}%`}
+                  />
+                  <div className={sliderEnds} aria-hidden><span>{`${capMin}%`}</span><span>{`${capMax}%`}</span></div>
                 </Field>
               </div>
             ))}
 
-            {both && (
-              <div className="flex items-center justify-between gap-4">
-                <p className={cn(label, 'flex items-center gap-1')}>
-                  {t('enrollment.quick.source_wise')}
-                  <InfoTip label={t('enrollment.quick.source_wise')} text={t('enrollment.core.ed.source_tip')} />
-                </p>
-                <Switch checked={a.sourceWise} onChange={(v) => setAuto({ sourceWise: v })} label={t('enrollment.quick.source_wise')} />
-              </div>
-            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -218,7 +221,7 @@ export function AutoIncreaseEditor({ value, onChange, ctx }: { value: Election; 
 }
 
 // ── Investments ──
-export function InvestmentsEditor({ value, onChange, onViewAll }: { value: Election; onChange: (e: Election) => void; onViewAll: () => void }) {
+export function InvestmentsEditor({ value, onChange }: { value: Election; onChange: (e: Election) => void }) {
   const { t } = useTranslation()
   const isDark = useTheme().resolvedMode === 'dark'
   const [query, setQuery] = useState('')
@@ -330,9 +333,6 @@ export function InvestmentsEditor({ value, onChange, onViewAll }: { value: Elect
           <Switch checked={value.sdb} onChange={(v) => onChange({ ...value, sdb: v })} label={t('plan.inv.sdb')} />
         </div>
         {value.sdb && <p className="rounded-lg bg-amber-50 px-3 py-2 text-[12px] leading-[1.5] text-amber-900 dark:bg-amber-950/30 dark:text-amber-200">{t('plan.sdb_funds.note')}</p>}
-        <button type="button" onClick={onViewAll} className="text-[13px] font-medium text-blue-700 hover:underline dark:text-blue-300">
-          {t('plan.inv.view_funds')}
-        </button>
       </div>
     </div>
   )

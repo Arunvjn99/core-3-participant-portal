@@ -27,7 +27,7 @@ export default function ServiceRequestsPage() {
   return (
     <AnimatedPage>
       <div className="min-h-screen bg-surface-page">
-        <div className="mx-auto max-w-[860px] px-4 py-6 sm:px-6 lg:py-8">
+        <div className="w-full pb-6 pt-2 lg:pb-8 lg:pt-3">
           <header className="flex flex-col gap-3 pb-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h1 className="text-[28px] font-bold leading-tight text-text-primary">{t('support.title')}</h1>

@@ -154,7 +154,7 @@ export default function PlanDetail() {
   ]
 
   return (
-    <div className="mx-auto w-full max-w-[1040px] px-4 py-6 sm:px-6 lg:py-7">
+    <div className="w-full pb-6 pt-2 lg:pb-7 lg:pt-3">
       <div className="mb-3">{backLink}</div>
 
       {/* Title in the dashboard's type, with its status; the actions sit to the right on wide screens */}

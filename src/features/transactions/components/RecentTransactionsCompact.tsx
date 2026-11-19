@@ -243,7 +243,7 @@ function RecentTransactionsCompact({ maxItems }: { maxItems?: number } = {}) {
         </div>
 
         <span className="hidden text-slate-600 dark:text-slate-300 sm:block" style={{ fontSize: 12, fontWeight: 500 }}>
-          {t('transactions.recent_tx.showing', { count: filteredTransactions.length })}
+          {t('transactions.recent_tx.showing', { count: displayedTransactions.length })}
         </span>
       </div>
 

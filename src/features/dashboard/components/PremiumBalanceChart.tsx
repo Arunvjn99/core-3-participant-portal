@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
-import { curveLinear, line as d3Line } from 'd3-shape'
+import { curveMonotoneX, line as d3Line } from 'd3-shape'
 import { motion, useMotionValue, useSpring, useMotionValueEvent } from 'framer-motion'
 
 export type BalancePoint = { value: number }
@@ -14,7 +14,9 @@ function niceStep(range: number): number {
   const p = 10 ** Math.floor(Math.log10(raw))
   return [1, 2, 2.5, 5, 10].map((m) => m * p).find((x) => x >= raw) ?? raw
 }
-const STROKE_W = 2.25
+const STROKE_W = 2.5
+/** The line's colour runs from warm on the left to the brand blue on the right */
+const SWEEP = ['#F59E0B', '#F43F5E', '#A855F7', '#3B82F6']
 
 function buildPoints(
   values: number[],
@@ -79,7 +81,7 @@ export function PremiumBalanceChart({ data, className = '', isDark = false, axes
   const vmax = axes ? Math.ceil(maxV / step) * step : maxV + (maxV - minV) * 0.06
   const yTicks = axes ? Array.from({ length: Math.round((vmax - vmin) / step) + 1 }, (_, i) => vmin + i * step) : []
 
-  const viewH = axes ? 190 : 120
+  const viewH = axes ? 168 : 120
   const innerW = Math.max(1, width - pad.left - pad.right)
   const innerH = viewH - pad.top - pad.bottom
   const yOf = (v: number) => pad.top + innerH - ((v - vmin) / (vmax - vmin || 1)) * innerH
@@ -94,19 +96,23 @@ export function PremiumBalanceChart({ data, className = '', isDark = false, axes
 
   const gridStroke = 'var(--chart-grid)'
   const gridStrokeMuted = 'var(--chart-grid-muted)'
-  // Brand blue line; the hover guide is a quiet neutral
-  const STROKE = isDark ? '#60a5fa' : '#1e40af'
-  const fillTop = isDark ? 'rgba(96, 165, 250, 0.2)' : 'rgba(30, 64, 175, 0.12)'
-  const gradId = `pb-fill-${useId().replace(/:/g, '')}`
-  const hoverLineStroke = isDark ? 'rgba(148, 163, 184, 0.45)' : 'rgba(100, 116, 139, 0.3)'
-  const dotFillCenter = isDark ? 'var(--surface-card)' : 'var(--surface-card)'
+  // A warm-to-blue sweep along the line and a soft tint of the same colours under it; the hover guide is a solid dark rule
+  const uid = useId().replace(/[^a-zA-Z0-9_-]/g, '')
+  const strokeId = `pb-stroke-${uid}`
+  const gradId = `pb-fill-${uid}`
+  const fadeId = `pb-fade-${uid}`
+  const maskId = `pb-mask-${uid}`
+  const STROKE = `url(#${strokeId})`
+  const END_DOT = SWEEP[SWEEP.length - 1]
+  const hoverLineStroke = isDark ? 'rgba(226, 232, 240, 0.7)' : '#0B1533'
+  const dotFillCenter = 'var(--surface-card)'
 
   const linePathD = useMemo(() => {
     if (points.length < 2) return ''
     const gen = d3Line<{ x: number; y: number }>()
       .x((d) => d.x + pad.left)
       .y((d) => d.y + pad.top)
-      .curve(curveLinear)
+      .curve(curveMonotoneX)
     return gen(points) ?? ''
   }, [points, pad])
 
@@ -170,7 +176,7 @@ export function PremiumBalanceChart({ data, className = '', isDark = false, axes
   return (
     <motion.div
       ref={containerRef}
-      className={`relative w-full select-none ${axes ? 'h-[212px]' : 'h-[120px]'} ${className}`}
+      className={`relative w-full select-none ${axes ? 'h-[190px]' : 'h-[120px]'} ${className}`}
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.85, ease: [0.4, 0, 0.2, 1] }}
@@ -209,14 +215,27 @@ export function PremiumBalanceChart({ data, className = '', isDark = false, axes
           </>
         )}
 
-        {/* A soft fill under the line that fades out toward the bottom */}
+        {/* The sweep for the line, and the same colours under it fading out toward the bottom */}
         <defs>
-          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={fillTop} />
-            <stop offset="100%" stopColor={fillTop} stopOpacity={0} />
+          <linearGradient id={strokeId} x1={pad.left} y1="0" x2={width - pad.right} y2="0" gradientUnits="userSpaceOnUse">
+            {SWEEP.map((c, i) => (
+              <stop key={c} offset={`${(i / (SWEEP.length - 1)) * 100}%`} stopColor={c} />
+            ))}
           </linearGradient>
+          <linearGradient id={gradId} x1={pad.left} y1="0" x2={width - pad.right} y2="0" gradientUnits="userSpaceOnUse">
+            {SWEEP.map((c, i) => (
+              <stop key={c} offset={`${(i / (SWEEP.length - 1)) * 100}%`} stopColor={c} stopOpacity={isDark ? 0.32 : 0.22} />
+            ))}
+          </linearGradient>
+          <linearGradient id={fadeId} x1="0" y1={pad.top} x2="0" y2={pad.top + innerH} gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#fff" stopOpacity={1} />
+            <stop offset="100%" stopColor="#fff" stopOpacity={0} />
+          </linearGradient>
+          <mask id={maskId} maskUnits="userSpaceOnUse" x={0} y={0} width={width} height={viewH}>
+            <rect x={0} y={0} width={width} height={viewH} fill={`url(#${fadeId})`} />
+          </mask>
         </defs>
-        <motion.path d={areaPathD} fill={`url(#${gradId})`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5, duration: 0.6 }} />
+        <motion.path d={areaPathD} fill={`url(#${gradId})`} mask={`url(#${maskId})`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5, duration: 0.6 }} />
 
         {/* Invisible path for geometry + hit testing */}
         <path
@@ -250,10 +269,10 @@ export function PremiumBalanceChart({ data, className = '', isDark = false, axes
           <motion.circle
             cx={points[points.length - 1].x + pad.left}
             cy={points[points.length - 1].y + pad.top}
-            r={4}
-            fill={STROKE}
+            r={4.5}
+            fill={END_DOT}
             stroke={dotFillCenter}
-            strokeWidth={1.5}
+            strokeWidth={2}
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.9, type: 'spring', stiffness: 400, damping: 20 }}
@@ -263,15 +282,9 @@ export function PremiumBalanceChart({ data, className = '', isDark = false, axes
 
         {hover && dotPt && (
           <>
-            <line
-              x1={smoothXNum}
-              y1={pad.top}
-              x2={smoothXNum}
-              y2={pad.top + innerH}
-              stroke={hoverLineStroke}
-              strokeWidth={1}
-            />
-            <circle cx={dotPt.x} cy={dotPt.y} r={4} fill={STROKE} stroke={dotFillCenter} strokeWidth={1.5} />
+            {/* A solid guide from the point down to the axis, as in a pinned reading */}
+            <line x1={smoothXNum} y1={dotPt.y} x2={smoothXNum} y2={pad.top + innerH} stroke={hoverLineStroke} strokeWidth={1.25} />
+            <circle cx={dotPt.x} cy={dotPt.y} r={5} fill={dotFillCenter} stroke={hoverLineStroke} strokeWidth={2} />
           </>
         )}
 
@@ -295,8 +308,9 @@ export function PremiumBalanceChart({ data, className = '', isDark = false, axes
           {xTicks.map((i) => (
             <span
               key={i}
-              className="pointer-events-none absolute bottom-0 whitespace-nowrap text-[11px] leading-none text-text-muted"
-              style={{ left: pad.left + (i / Math.max(lastIdx, 1)) * innerW, transform: `translateX(${i === 0 ? '0' : i === lastIdx ? '-100%' : '-50%'})` }}
+              className="pointer-events-none absolute bottom-0 whitespace-nowrap text-[11px] leading-none text-text-muted transition-opacity duration-150"
+              // Steps aside while the hovered month's pill sits over it
+              style={{ left: pad.left + (i / Math.max(lastIdx, 1)) * innerW, transform: `translateX(${i === 0 ? '0' : i === lastIdx ? '-100%' : '-50%'})`, opacity: hover && dotPt && Math.abs(pad.left + (i / Math.max(lastIdx, 1)) * innerW - smoothXNum) < 48 ? 0 : 1 }}
               aria-hidden
             >
               {axes.xLabels[i]}
@@ -307,22 +321,36 @@ export function PremiumBalanceChart({ data, className = '', isDark = false, axes
 
       {hover && tipValue && dotPt && (
         <motion.div
-          className="pointer-events-none absolute z-10 whitespace-nowrap rounded-md border border-border-default bg-surface-card px-2 py-1 text-[11px] shadow-[0_4px_12px_-6px_rgba(11,21,51,0.25)]"
-          style={{ left: smoothXNum, top: Math.max(0, dotPt.y - 32), x: smoothXNum > width - 90 ? '-100%' : smoothXNum < pad.left + 60 ? '0%' : '-50%' }}
+          className="pointer-events-none absolute z-10 whitespace-nowrap rounded-full bg-[#0B1533] px-2.5 py-1 text-[11px] text-white shadow-[0_8px_18px_-8px_rgba(11,21,51,0.6)] dark:bg-white dark:text-[#0B1533]"
+          style={{ left: smoothXNum, top: Math.max(0, dotPt.y - 36), x: smoothXNum > width - 90 ? '-100%' : smoothXNum < pad.left + 60 ? '0%' : '-50%' }}
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.15 }}
         >
           {tipValue.includes(' · ') ? (
             <>
-              <span className="text-text-secondary">{tipValue.split(' · ')[0]} · </span>
-              <span className="font-semibold text-[#1e40af] dark:text-blue-300">{tipValue.split(' · ')[1]}</span>
+              <span className="text-white/75 dark:text-[#0B1533]/70">{tipValue.split(' · ')[0]} · </span>
+              <span className="font-semibold">{tipValue.split(' · ')[1]}</span>
             </>
           ) : (
-            <span className="font-semibold text-[#1e40af] dark:text-blue-300">{tipValue}</span>
+            <span className="font-semibold">{tipValue}</span>
           )}
         </motion.div>
       )}
+      {/* The month under the cursor, lifted onto a white pill over the time axis */}
+      {axes && hover && dotPt && (() => {
+        const idx = Math.round(((smoothXNum - pad.left) / innerW) * lastIdx)
+        const label = axes.xLabels[Math.max(0, Math.min(lastIdx, idx))]
+        return label ? (
+          <span
+            className="pointer-events-none absolute bottom-[-4px] z-10 whitespace-nowrap rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold leading-none text-text-primary shadow-[0_4px_10px_-4px_rgba(11,21,51,0.35)] ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-white/15"
+            style={{ left: smoothXNum, transform: `translateX(${smoothXNum > width - 50 ? '-100%' : smoothXNum < pad.left + 30 ? '0' : '-50%'})` }}
+            aria-hidden
+          >
+            {label}
+          </span>
+        ) : null
+      })()}
     </motion.div>
   )
 }

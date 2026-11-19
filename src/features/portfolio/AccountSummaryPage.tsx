@@ -67,7 +67,7 @@ export default function AccountSummaryPage() {
 
   return (
     <AnimatedPage>
-      <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
+      <div className="w-full pb-8 pt-2">
         <nav className="mb-3 text-sm text-gray-500 dark:text-gray-400" aria-label="Breadcrumb">
           <Link to="/post-enrollment-dashboard" className="hover:underline">{t('portfolio.dashboard')}</Link> <span aria-hidden>›</span> <span className="text-gray-900 dark:text-white">{t('portfolio.summary.title')}</span>
         </nav>

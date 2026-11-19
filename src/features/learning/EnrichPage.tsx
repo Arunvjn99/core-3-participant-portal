@@ -58,7 +58,7 @@ export default function EnrichPage() {
 
   return (
     <AnimatedPage>
-      <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
+      <div className="w-full pb-8 pt-2">
         <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">{t('enrich.title')}</p>
         <h1 className="mt-0.5 text-2xl font-bold text-gray-900 dark:text-white">{t('enrich.subtitle')}</h1>
         <p className="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">{t('enrich.intro')}</p>

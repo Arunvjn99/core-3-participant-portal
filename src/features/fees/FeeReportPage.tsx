@@ -43,7 +43,7 @@ export default function FeeReportPage() {
   return (
     <AnimatedPage>
       <div className="min-h-screen bg-surface-page">
-        <div className="mx-auto max-w-[1100px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <div className="w-full pb-6 pt-2 lg:pb-8 lg:pt-3">
           <Link to="/investments" className="mb-3 inline-flex items-center gap-1.5 text-[13px] font-medium text-text-secondary hover:text-text-primary">
             <ArrowLeft className="h-4 w-4" aria-hidden />
             {t('fees.back')}

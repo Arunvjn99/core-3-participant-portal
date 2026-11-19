@@ -52,9 +52,10 @@ function FinancialGuidanceCompact() {
             transition={{ delay: idx * 0.08, duration: 0.45, ease: 'easeOut' }}
             whileHover={{ y: -2 }}
             className={cn(
-              'group relative flex min-h-0 min-w-0 cursor-pointer flex-col overflow-hidden rounded-2xl border border-border-default',
-              'bg-surface-card p-5 shadow-card transition-shadow duration-200',
-              'hover:border-violet-500/35 hover:shadow-[0_8px_24px_rgba(139,92,246,0.12)]',
+              // A soft tile inside the guidance card (no box within a box); lifts onto white on hover
+              'group relative flex min-h-0 min-w-0 cursor-pointer flex-col overflow-hidden rounded-2xl',
+              'bg-slate-50 p-5 ring-1 ring-slate-200/60 transition-[background-color,box-shadow] duration-200 dark:bg-white/[0.04] dark:ring-white/10',
+              'hover:bg-white hover:shadow-[0_12px_28px_-18px_rgba(139,92,246,0.45)] hover:ring-violet-300/60 dark:hover:bg-white/[0.07]',
             )}
           >
             <div

@@ -29,7 +29,7 @@ export default function AdvisorPage() {
   return (
     <AnimatedPage>
       <div className="min-h-screen bg-surface-page">
-        <div className="mx-auto max-w-[1100px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <div className="w-full pb-6 pt-2 lg:pb-8 lg:pt-3">
           {fromInvestments && (
             <Link
               to="/enrollment/investment"

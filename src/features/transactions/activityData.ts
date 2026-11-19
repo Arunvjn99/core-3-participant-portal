@@ -1,5 +1,6 @@
 import { PERIODS } from '@/features/plan/electionsData'
 import type { Deferral } from '@/features/plan/electionsData'
+import { activeLoans, recentLoanPaymentDates } from './planLoans'
 
 /** Account activity (contributions, repayments, dividends). SAMPLE DATA derived from the participant's current deferral election. */
 export type ActivityKind = 'deferral' | 'employer' | 'loan_repayment' | 'dividend'
@@ -54,13 +55,11 @@ export function buildActivity(opts: { deferral: Deferral; salary: number; freque
     if (myDeferral > 0) rows.push({ id: `def-${i}`, at, kind: 'deferral', planId: '401k', amount: myDeferral })
     if (employer > 0) rows.push({ id: `emp-${i}`, at, kind: 'employer', planId: '401k', amount: employer })
   })
-  // An existing loan is being repaid monthly (matches the Active Loan card on the dashboard).
-  const nowDate = new Date(now)
-  // Latest repayment is on the 28th of this month, or last month if the 28th hasn't happened yet.
-  const lastMonth = new Date(nowDate.getFullYear(), nowDate.getMonth(), 28).getTime() > now ? nowDate.getMonth() - 1 : nowDate.getMonth()
-  for (let i = 0; i < 3; i++) {
-    rows.push({ id: `loan-${i}`, at: new Date(nowDate.getFullYear(), lastMonth - i, 28).getTime(), kind: 'loan_repayment', planId: '401k', amount: 212.5 })
-  }
+  // Each plan loan is repaid monthly, from the same records as the dashboard's loan card
+  const loans = activeLoans(now)
+  recentLoanPaymentDates(now, 3).forEach((at, i) => {
+    loans.forEach((loan) => rows.push({ id: `loan-${loan.ref}-${i}`, at, kind: 'loan_repayment', planId: loan.planId, amount: loan.payment }))
+  })
   // Quarterly dividend reinvestment and a yearly profit-sharing contribution.
   for (let i = 0; i < 2; i++) {
     const q = Math.floor(new Date(now).getMonth() / 3) - i

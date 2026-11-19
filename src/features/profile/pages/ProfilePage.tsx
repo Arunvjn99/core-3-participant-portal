@@ -61,7 +61,7 @@ export function ProfilePage() {
 
   return (
     <AnimatedPage>
-      <div className="mx-auto w-full max-w-[1040px] px-4 py-6 sm:px-6 lg:py-7">
+      <div className="w-full pb-6 pt-2 lg:pb-7 lg:pt-3">
         <header className="mb-5">
           <h1 className="text-[28px] font-bold leading-tight text-[#0B1533] dark:text-white">{t('profile.title')}</h1>
           <p className="mt-1 text-[15px] leading-snug text-text-secondary">{t('profile.d.subtitle')}</p>

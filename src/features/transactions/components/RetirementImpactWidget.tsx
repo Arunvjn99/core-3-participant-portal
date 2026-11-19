@@ -3,6 +3,8 @@ import { TrendingUp, CheckCircle2, AlertTriangle, Target } from "lucide-react";
 import { useId } from "react";
 
 interface RetirementImpactWidgetProps {
+  /** Drop the widget's own card, for use inside another card */
+  bare?: boolean;
   estimatedValue?: number;
   ytdChange?: number;
   contributionsThisYear?: number;
@@ -85,6 +87,7 @@ function RetirementImpactWidget({
   impactLabel,
   compact = false,
   delay = 0,
+  bare = false,
 }: RetirementImpactWidgetProps) {
   const contributionPercent = Math.round((contributionsThisYear / contributionLimit) * 1000) / 10;
   const showImpact = impactAmount !== undefined && impactAmount !== 0;
@@ -99,9 +102,9 @@ function RetirementImpactWidget({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut", delay }}
     >
-      <div className="relative overflow-hidden rounded-[20px] bg-surface-card shadow-[0_12px_32px_-28px_rgba(11,21,51,0.45)] ring-1 ring-slate-200/70 dark:ring-white/10">
+      <div className={bare ? "relative" : "relative overflow-hidden rounded-[20px] bg-surface-card shadow-[0_12px_32px_-28px_rgba(11,21,51,0.45)] ring-1 ring-slate-200/70 dark:ring-white/10"}>
 
-        <div style={{ padding: compact ? "14px 18px" : "16px 20px" }}>
+        <div style={{ padding: bare ? 0 : compact ? "14px 18px" : "16px 20px" }}>
           {/* Projected Balance */}
           <div style={{ marginBottom: 10 }}>
             <div

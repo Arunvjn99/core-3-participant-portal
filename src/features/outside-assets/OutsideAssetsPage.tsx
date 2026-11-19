@@ -75,7 +75,7 @@ export default function OutsideAssetsPage() {
   return (
     <AnimatedPage>
       <div className="min-h-screen bg-surface-page">
-        <div className="mx-auto max-w-[960px] space-y-5 px-4 pb-24 pt-6 sm:px-6 lg:pt-7">
+        <div className="w-full space-y-5 pb-24 pt-2 lg:pt-3">
           <StepHeader title={t('outside_assets.title')} subtitle={t('outside_assets.subtitle')} aside={accounts.length > 0 ? addButton : undefined} />
 
           <p role="status" className="sr-only">{notice}</p>

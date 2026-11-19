@@ -30,7 +30,7 @@ export default function InvestmentsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50/80 dark:bg-gray-950">
-      <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
+      <div className="w-full pb-5 pt-2 sm:pb-8 sm:pt-3">
         <div className="mb-5 sm:mb-6">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>

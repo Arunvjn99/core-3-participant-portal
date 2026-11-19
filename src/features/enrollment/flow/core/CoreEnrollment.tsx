@@ -149,21 +149,52 @@ export default function CoreEnrollment() {
   const wait = (ms: number) => pause(reduce ? 0 : ms)
 
   /**
+   * The pre-tax and Roth rates after each yearly raise, until they stop rising (at most `limit` raises).
+   * One step for all: the total contribution, after-tax included, rises until it reaches Stop At, the same rule the
+   * rest of the portal uses. Source by source: pre-tax and Roth each rise by their own step up to their own stop rate.
+   * After-tax never changes.
+   */
+  const autoRaises = (e: Election, limit: number) => {
+    const out: { preTax: number; roth: number }[] = []
+    if (!e.auto.enabled) return out
+    const bySource = e.auto.sourceWise && e.preTax > 0 && e.roth > 0
+    let pre = e.preTax
+    let ro = e.roth
+    while (out.length < limit) {
+      let nextPre = pre
+      let nextRo = ro
+      if (bySource) {
+        nextPre = Math.min(round2(pre + e.auto.amount.preTax), Math.max(e.auto.cap.preTax, pre))
+        nextRo = Math.min(round2(ro + e.auto.amount.roth), Math.max(e.auto.cap.roth, ro))
+      } else {
+        const add = Math.min(e.auto.amount.preTax, Math.max(0, round2(e.auto.cap.preTax - (pre + ro + e.afterTax))))
+        // The raise goes to pre-tax, or to Roth for someone saving only in Roth
+        if (pre > 0 || ro === 0) nextPre = round2(pre + add)
+        else nextRo = round2(ro + add)
+      }
+      if (nextPre === pre && nextRo === ro) break
+      pre = nextPre
+      ro = nextRo
+      out.push({ preTax: pre, roth: ro })
+    }
+    return out
+  }
+
+  /**
    * Balance at the end of each year from today to retirement, one point per year.
    * Each year adds your contributions and the employer match at that year's rate, then grows at the mix's average return;
-   * with auto-increase on, the rate rises by the step each plan year until it reaches the cap.
+   * with auto-increase on, the rate follows the yearly raises above.
    */
   const projectPath = (e: Election) => {
     const growth = GROWTH_RATES[e.risk]
-    const step = e.auto.enabled ? e.auto.amount.preTax : 0
-    const ceiling = Math.max(e.auto.cap.preTax, e.preTax + e.roth)
-    let rate = e.preTax + e.roth
+    const raises = autoRaises(e, years)
     let balance = savings
     const out = [balance]
     for (let y = 0; y < years; y++) {
-      balance = (balance + (salary * (rate + e.afterTax)) / 100 + employerMatch(salary, rate)) * (1 + growth)
+      const r = y === 0 || raises.length === 0 ? { preTax: e.preTax, roth: e.roth } : raises[Math.min(y, raises.length) - 1]
+      const deferralRate = r.preTax + r.roth
+      balance = (balance + (salary * (deferralRate + e.afterTax)) / 100 + employerMatch(salary, deferralRate)) * (1 + growth)
       out.push(balance)
-      rate = Math.min(rate + step, ceiling)
     }
     return out
   }
@@ -202,7 +233,9 @@ export default function CoreEnrollment() {
   ]
   /** The bar is the whole contribution, split by source, so it is always full */
   const barMax = f.total || 1
-  const nextRate = round2(Math.min(deferral + election.auto.amount.preTax, Math.max(election.auto.cap.preTax, deferral)) + election.afterTax)
+  const firstRaise = autoRaises(election, 1)[0]
+  /** The total after the next raise; equal to today's total when there's no room left to rise */
+  const nextRate = firstRaise ? round2(firstRaise.preTax + firstRaise.roth + election.afterTax) : f.total
   const series = projectPath(election)
   const seriesMax = Math.max(...series) || 1
   // Round axis values: about four steps of 1, 2, 2.5 or 5 times a power of ten, topping just above the largest balance
@@ -267,14 +300,6 @@ export default function CoreEnrollment() {
     mergeDraftSection('autoIncrease', { enabled: e.auto.enabled, amount: e.auto.amount.preTax, max: e.auto.cap.preTax })
     mergeDraftSection('investment', { riskLevel: e.risk, useRecommended: e.mode !== 'own', customAllocation: allocation })
     return allocation
-  }
-  /** "More options": carry the plan as it stands into the step-by-step flow, at that panel's step */
-  const toCustomFlow = (kind: EditKind) => {
-    writeDraft(election)
-    setSnapshot(null)
-    setSheet(null)
-    leaving.current = true
-    navigate(kind === 'contribution' ? '/enrollment/contribution' : kind === 'auto' ? '/enrollment/auto-increase' : '/enrollment/investment')
   }
   // Leaving with unsaved edits (Cancel, browser back, a link) asks first; closing the tab gets the browser's own prompt
   const blocker = useBlocker(({ currentLocation, nextLocation }) => !leaving.current && stage === 'review' && changeCount > 0 && currentLocation.pathname !== nextLocation.pathname)
@@ -490,17 +515,8 @@ export default function CoreEnrollment() {
   const perYear = (pct: number) => (salary * pct) / 100
   const monthlyIn = (salary * f.total) / 100 / 12
   const autoSchedule = (() => {
-    if (!election.auto.enabled) return []
-    const rows: { year: number; rate: number }[] = []
-    const ceiling = Math.max(election.auto.cap.preTax, deferral)
-    let rate = deferral
-    let year = nextAuto.getFullYear()
-    while (rate < ceiling && rows.length < 12) {
-      rate = Math.min(round2(rate + election.auto.amount.preTax), ceiling)
-      rows.push({ year, rate: round2(rate + election.afterTax) })
-      year += 1
-    }
-    return rows
+    const first = nextAuto.getFullYear()
+    return autoRaises(election, 12).map((r, i) => ({ year: first + i, rate: round2(r.preTax + r.roth + election.afterTax) }))
   })()
   const byAssetClass = Object.entries(
     f.rows.reduce<Record<string, number>>((acc, r) => {
@@ -641,7 +657,7 @@ export default function CoreEnrollment() {
                 </tbody>
               </table>
             )}
-            {autoSchedule.length > 0 && election.afterTax > 0 && sumNote(t('enrollment.core.sum_schedule_note', { after: election.afterTax, cap: election.auto.cap.preTax }))}
+            {autoSchedule.length > 0 && election.afterTax > 0 && !election.auto.sourceWise && sumNote(t('enrollment.core.sum_schedule_note', { after: election.afterTax, cap: election.auto.cap.preTax }))}
           </>
         ))}
 
@@ -768,13 +784,9 @@ export default function CoreEnrollment() {
     canEdit && edited[kind] ? (
       <span className="ml-1.5 inline-flex shrink-0 items-center rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">{t('enrollment.core.edited')}</span>
     ) : null
-  /** Panel footer: the step-by-step flow on the left, Cancel and Done on the right */
+  /** Panel footer: Cancel and Done */
   const editFooter = (kind: EditKind, invalid: boolean) => (
     <>
-      <button type="button" onClick={() => toCustomFlow(kind)} title={t('enrollment.core.more_options_title')} className="mr-auto inline-flex items-center gap-1 rounded-md text-[13px] font-semibold text-slate-600 transition-colors hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-gray-300 dark:hover:text-white">
-        {t('enrollment.core.more_options')}
-        <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-      </button>
       <button type="button" onClick={cancelEdit} className="inline-flex h-10 items-center rounded-full bg-white px-5 text-[14px] font-semibold text-slate-900 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-gray-900 dark:text-white dark:ring-gray-700 dark:hover:bg-gray-800">
         {t('enrollment.core.cancel')}
       </button>
@@ -1074,24 +1086,29 @@ export default function CoreEnrollment() {
                       </div>
                       {ready ? (
                         <>
-                          <p className="mt-1.5 flex items-center gap-1.5 text-[24px] font-semibold tracking-[-0.02em] text-slate-900 dark:text-white">
-                            {`${f.total}%`}
+                          {/* The rates with their status beside them; the yearly step sits on the line below */}
+                          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                            <p className="flex items-center gap-1.5 text-[24px] font-semibold tracking-[-0.02em] text-slate-900 dark:text-white">
+                              {`${f.total}%`}
+                              {election.auto.enabled && nextRate > f.total && (
+                                <>
+                                  <ArrowRight className="h-5 w-5" strokeWidth={2.5} aria-hidden />
+                                  {`${nextRate}%`}
+                                </>
+                              )}
+                            </p>
                             {election.auto.enabled && (
-                              <>
-                                <ArrowRight className="h-5 w-5" strokeWidth={2.5} aria-hidden />
-                                {`${nextRate}%`}
-                              </>
-                            )}
-                          </p>
-                          {/* Status leads the detail line, so the figures above stay clean */}
-                          {election.auto.enabled ? (
-                            <p className="mt-1 flex flex-wrap items-center gap-x-1.5 text-[14px] text-slate-500 dark:text-gray-400">
-                              <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-800 dark:text-emerald-300">
+                              <span className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-emerald-800 dark:text-emerald-300">
                                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" aria-hidden />
                                 {t('enrollment.core.auto_enabled')}
                               </span>
-                              <span aria-hidden>·</span>
-                              {t('enrollment.core.auto_each', { amount: election.auto.amount.preTax, year: nextAuto.getFullYear() })}
+                            )}
+                          </div>
+                          {election.auto.enabled ? (
+                            <p className="mt-1 text-[14px] text-slate-500 dark:text-gray-400">
+                              {nextRate > f.total
+                                ? t('enrollment.core.auto_each', { amount: round2(nextRate - f.total), year: nextAuto.getFullYear() })
+                                : t('enrollment.core.auto_at_stop', { max: election.auto.cap.preTax })}
                             </p>
                           ) : (
                             <p className="mt-1 text-[14px] text-slate-500 dark:text-gray-400">{t('enrollment.core.auto_off_short')}</p>
@@ -1362,7 +1379,7 @@ export default function CoreEnrollment() {
         <AutoIncreaseEditor value={election} onChange={setElection} ctx={editCtx} />
       </Sheet>
       <Sheet preview open={sheet === 'invest'} onClose={cancelEdit} title={t('enrollment.core.sheet_invest')} subtitle={t('enrollment.core.sheet_sub')} footer={editFooter('invest', fundsError)}>
-        <InvestmentsEditor value={election} onChange={setElection} onViewAll={() => setShowFunds(true)} />
+        <InvestmentsEditor value={election} onChange={setElection} />
       </Sheet>
 
       {/* Leaving with edits that aren't approved yet */}

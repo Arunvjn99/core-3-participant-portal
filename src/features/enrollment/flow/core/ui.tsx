@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, animate, motion, useReducedMotion } from 'framer-motion'
@@ -310,32 +310,90 @@ export function Stepper({ value, onChange, min, max, step = 1, label, prefix, su
 }
 
 /** A short explanation on hover, focus or tap. */
+/** Only one tooltip shows at a time: opening one closes the rest */
+const TIP_OPEN_EVENT = 'core-infotip-open'
+const TIP_GAP = 8
+const TIP_EDGE = 12
+
+/**
+ * An info icon whose tooltip opens on hover, focus or tap. The tooltip is drawn above everything (so a panel's edge
+ * never cuts it off), kept inside the window, and flips below the icon when there's no room above.
+ */
 export function InfoTip({ label, text, side = 'top', wide = false, align = 'center' }: { label: string; text: React.ReactNode; side?: 'top' | 'bottom'; /** Room for a small table */ wide?: boolean; /** 'end' lines the tooltip's right edge up with the icon, for icons near a card's right edge */ align?: 'center' | 'end' }) {
   const [open, setOpen] = useState(false)
+  const id = useId()
+  const btn = useRef<HTMLButtonElement>(null)
+  const tip = useRef<HTMLSpanElement>(null)
+
+  const show = () => {
+    window.dispatchEvent(new CustomEvent(TIP_OPEN_EVENT, { detail: id }))
+    setOpen(true)
+  }
+
+  useEffect(() => {
+    const onOther = (e: Event) => {
+      if ((e as CustomEvent<string>).detail !== id) setOpen(false)
+    }
+    window.addEventListener(TIP_OPEN_EVENT, onOther)
+    return () => window.removeEventListener(TIP_OPEN_EVENT, onOther)
+  }, [id])
+
+  // Place it next to the icon, clamped to the window; close it if the page scrolls or resizes underneath
+  useLayoutEffect(() => {
+    if (!open || !btn.current || !tip.current) return
+    const b = btn.current.getBoundingClientRect()
+    const el = tip.current
+    const w = Math.min(wide ? 300 : 256, window.innerWidth - TIP_EDGE * 2)
+    el.style.width = `${w}px`
+    const h = el.offsetHeight
+    const want = align === 'end' ? b.right + 8 - w : b.left + b.width / 2 - w / 2
+    const left = Math.min(Math.max(want, TIP_EDGE), window.innerWidth - w - TIP_EDGE)
+    const above = b.top - TIP_GAP - h
+    const below = b.bottom + TIP_GAP
+    const fitsAbove = above >= TIP_EDGE
+    const fitsBelow = below + h <= window.innerHeight - TIP_EDGE
+    const top = side === 'top' ? (fitsAbove || !fitsBelow ? above : below) : fitsBelow || !fitsAbove ? below : above
+    el.style.left = `${left}px`
+    el.style.top = `${Math.max(top, TIP_EDGE)}px`
+    el.style.visibility = 'visible'
+    const close = () => setOpen(false)
+    window.addEventListener('scroll', close, true)
+    window.addEventListener('resize', close)
+    return () => {
+      window.removeEventListener('scroll', close, true)
+      window.removeEventListener('resize', close)
+    }
+  }, [open, side, wide, align])
+
   return (
-    <span className="group relative inline-flex align-middle" onMouseLeave={() => setOpen(false)}>
+    <span className="relative inline-flex align-middle" onMouseEnter={show} onMouseLeave={() => setOpen(false)}>
       <button
+        ref={btn}
         type="button"
         aria-label={label}
         aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
+        aria-describedby={open ? id : undefined}
+        onClick={show}
+        onFocus={show}
+        onBlur={() => setOpen(false)}
         onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
         className="inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-400 transition-colors hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:hover:text-gray-200"
       >
         <Info className="h-3.5 w-3.5" aria-hidden />
       </button>
-      <span
-        role="tooltip"
-        className={cn(
-          'pointer-events-none absolute z-30 rounded-lg bg-slate-900 px-3 py-2 text-left text-[12px] font-normal leading-[1.5] text-white shadow-xl group-hover:block group-focus-within:block dark:bg-gray-800',
-          // A wide tooltip opens rightward from about the start of its label, so a card's edge doesn't cut it off; a narrow one centres on the icon
-          wide ? '-left-28 w-[300px]' : align === 'end' ? '-right-2 w-64' : 'left-1/2 w-64 -translate-x-1/2',
-          side === 'top' ? 'bottom-full mb-2' : 'top-full mt-2',
-          open ? 'block' : 'hidden',
+      {open &&
+        createPortal(
+          <span
+            ref={tip}
+            id={id}
+            role="tooltip"
+            style={{ visibility: 'hidden' }}
+            className="pointer-events-none fixed left-0 top-0 z-[200] block rounded-lg bg-slate-900 px-3 py-2 text-left text-[12px] font-normal leading-[1.5] text-white shadow-xl dark:bg-gray-800"
+          >
+            {text}
+          </span>,
+          document.body,
         )}
-      >
-        {text}
-      </span>
     </span>
   )
 }

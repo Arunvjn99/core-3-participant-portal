@@ -10,7 +10,6 @@ import {
   HandCoins,
   DollarSign,
   RefreshCcw,
-  Calendar,
   PieChart,
   CreditCard,
   CheckSquare,
@@ -49,7 +48,7 @@ import { InfoTip } from '@/features/enrollment/flow/core/ui'
 import { PLAN_CONFIG } from '@/features/enrollment/agent/planConfig'
 import { ASSET_SLICES, accountName, formatMoney, summarize, type AssetSlice } from '@/features/outside-assets/summary'
 import { useProfileStore } from '@/features/profile/profileStore'
-import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
+import { LOAN_PAYMENT_DAY, activeLoans } from '@/features/transactions/planLoans'
 import { useRetirementGoal } from '@/features/retirement/retirementStore'
 import { ON_TRACK_MIN, READINESS_BANDS, readinessBandOf } from '@/features/retirement/readinessBands'
 import { goalExtras } from '@/features/retirement/readinessExtras'
@@ -162,20 +161,6 @@ function IconChip({ Icon, tone, small }: { Icon: IconType; tone: keyof typeof CH
   )
 }
 
-/** Active plan loans. One shows in full; two or more show as rows with a total. */
-interface ActiveLoan {
-  ref: string
-  purpose: 'general' | 'residential'
-  originated: string
-  balance: number
-  payment: number
-  paidPct: number
-  paymentsLeft: number
-}
-const ACTIVE_LOANS: ActiveLoan[] = [
-  { ref: 'LOAN-2024-001', purpose: 'general', originated: '2022-01-15', balance: 2450, payment: 125, paidPct: 60, paymentsLeft: 14 },
-  { ref: 'LOAN-2025-014', purpose: 'residential', originated: '2025-03-01', balance: 18200, payment: 310, paidPct: 18, paymentsLeft: 59 },
-]
 
 /** Shape of the balance line; scaled so its last point equals the account balance. */
 const balanceChartShape = [
@@ -410,9 +395,6 @@ export default function PostEnrollmentDashboard() {
   // On track above 70 (green), needs attention 50 to 70 (amber), off track under 50 (red)
   const band = READINESS_BANDS[readinessBandOf(readinessShown)]
   // Enrolled in one click and not yet asked about retirement goals: the score would be a guess, so the card asks instead
-  const enrolledOneClick = useEnrollmentDraftStore((s) => s.draftData.review?.method === 'one_click')
-  const readinessCheckedAt = useRetirementGoal((s) => s.checkedAt)
-  const readinessPending = enrolledOneClick && !readinessCheckedAt
   const contributionMonth = new Date().toLocaleDateString(locale, { month: 'long', year: 'numeric' })
   const limits = useContributionLimits()
   const monthlyGap = Math.round((fullMatch - annualMatch) / 12)
@@ -470,11 +452,13 @@ export default function PostEnrollmentDashboard() {
   // Loan payments come out on the 15th: the next one is this month's if it hasn't passed, otherwise next month's
   const nextLoanDue = (() => {
     const now = new Date()
-    const due = new Date(now.getFullYear(), now.getMonth(), 15)
-    if (now.getDate() > 15) due.setMonth(due.getMonth() + 1)
+    const due = new Date(now.getFullYear(), now.getMonth(), LOAN_PAYMENT_DAY)
+    if (now.getDate() > LOAN_PAYMENT_DAY) due.setMonth(due.getMonth() + 1)
     return due.toLocaleDateString(locale, { month: 'short', day: 'numeric' })
   })()
-  const loansTotal = ACTIVE_LOANS.reduce((sum, l) => sum + l.balance, 0)
+  // The plan's loans, worked out from their records: one shows in full, two or more as rows with a total
+  const loans = useMemo(() => activeLoans(), [])
+  const loansTotal = loans.reduce((sum, l) => sum + l.balance, 0)
 
   const riskDot: Record<typeof data.riskLevel, string> = {
     conservative: 'bg-emerald-500',
@@ -516,51 +500,81 @@ export default function PostEnrollmentDashboard() {
   return (
     <AnimatedPage className="min-h-full">
       <div className="min-h-screen bg-surface-page font-sans text-text-primary">
-        <div className="mx-auto max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8 lg:py-7">
-          {/* Page title: plain text on the page, no card and no artwork */}
-          <header className="mb-5">
-            <h1 className="text-[28px] font-bold leading-tight text-[#0B1533] dark:text-white">{t('dashboard.overview')}</h1>
-            <p className="mt-1 text-[15px] leading-snug text-text-secondary">{t('dashboard.overview_sub')}</p>
-          </header>
-
+        <div className="w-full pb-6 pt-2 lg:pb-7 lg:pt-3">
           {/* First thing on the page: an offer to bring money from an old plan or IRA into this one */}
           <RolloverPrompt />
 
           <NotificationBanner />
 
+          {/* Overview and balance with this month's contributions, beside readiness; the two always the same height */}
           {/* Balance and readiness share a row, so they are always the same height */}
-          <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-12">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
             {/* Card 1: Total balance */}
             <SpecCard className="relative flex flex-col overflow-hidden lg:col-span-8">
-              {/* Label and status share the top line; the amount; then this quarter's change and the way into the details */}
-              <div className="mb-5">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">{t('dashboard.totalBalance')}</p>
-                  {!readinessPending && (
-                    <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold ${band.pill}`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${band.dot}`} aria-hidden />
-                      {t(band.labelKey)}
+              {/* Overview heading and the balance on the left; this month's contributions in the top-right corner */}
+              <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
+                  <h1 className="text-[22px] font-bold leading-tight text-[#0B1533] dark:text-white">{t('dashboard.overview')}</h1>
+                  <p className="mt-0.5 text-[13px] leading-snug text-text-secondary">{t('dashboard.overview_sub')}</p>
+                  <p className="mt-4 text-[11px] font-semibold uppercase tracking-wide text-text-secondary">{t('dashboard.totalBalance')}</p>
+                  <p className="mt-1.5 text-[36px] font-bold leading-none tracking-tight tabular-nums text-text-primary">{money(Math.round(account.balance))}</p>
+                  <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+                    <span className="inline-flex items-center gap-2 text-[13px] text-text-secondary">
+                      <span className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[12px] font-semibold tabular-nums ${quarterReturn >= 0 ? 'bg-status-success-bg text-status-success' : 'bg-status-danger-bg text-status-danger'}`}>
+                        <TrendingUp className={`h-3.5 w-3.5 shrink-0 ${quarterReturn < 0 ? 'rotate-180' : ''}`} aria-hidden />
+                        {`${quarterReturn >= 0 ? '+' : ''}${quarterReturn}%`}
+                      </span>
+                      {t('postDashboard.this_quarter')}
                     </span>
-                  )}
+                    <span className="hidden h-4 w-px bg-slate-200 sm:block dark:bg-white/10" aria-hidden />
+                    <Link to="/account-summary" className={`group/summary text-[13px] ${TEXT_LINK}`}>
+                      {t('portfolio.view_summary')}
+                      <ChevronRight className="h-4 w-4 transition-transform group-hover/summary:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+                    </Link>
+                  </div>
                 </div>
-                <p className="mt-1.5 text-[36px] font-bold leading-none tracking-tight tabular-nums text-text-primary">{money(Math.round(account.balance))}</p>
-                <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
-                  <span className="inline-flex items-center gap-2 text-[13px] text-text-secondary">
-                    <span className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[12px] font-semibold tabular-nums ${quarterReturn >= 0 ? 'bg-status-success-bg text-status-success' : 'bg-status-danger-bg text-status-danger'}`}>
-                      <TrendingUp className={`h-3.5 w-3.5 shrink-0 ${quarterReturn < 0 ? 'rotate-180' : ''}`} aria-hidden />
-                      {`${quarterReturn >= 0 ? '+' : ''}${quarterReturn}%`}
-                    </span>
-                    {t('postDashboard.this_quarter')}
-                  </span>
-                  <span className="hidden h-4 w-px bg-slate-200 sm:block dark:bg-white/10" aria-hidden />
-                  <Link to="/account-summary" className={`group/summary text-[13px] ${TEXT_LINK}`}>
-                    {t('portfolio.view_summary')}
-                    <ChevronRight className="h-4 w-4 transition-transform group-hover/summary:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
-                  </Link>
+
+                {/* Your contributions this month: yours, your employer's and the total, set off by a thin rule (no panel in the card) */}
+                <div className="shrink-0 border-t border-slate-200/80 pt-3 sm:w-[248px] sm:border-l sm:border-t-0 sm:pl-5 sm:pt-0 dark:border-white/10">
+                  <p className="flex items-baseline justify-between gap-2 text-[12px] text-text-secondary">
+                    <span className="font-semibold text-text-primary">{t('postDashboard.contributions_title')}</span>
+                    <span>{contributionMonth}</span>
+                  </p>
+                  <dl className="mt-2 space-y-1.5 text-[13px]">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <dt className="flex items-center gap-1.5 text-text-secondary"><span className="h-2 w-2 rounded-full bg-primary" aria-hidden />{t('postDashboard.c_you')}</dt>
+                      <dd className="font-semibold tabular-nums text-text-primary">{money(monthlyYou)}<span className="font-normal text-text-secondary">{t('postDashboard.per_mo')}</span></dd>
+                    </div>
+                    <div className="flex items-baseline justify-between gap-3">
+                      <dt className="flex items-center gap-1.5 text-text-secondary"><span className="h-2 w-2 rounded-full bg-status-success" aria-hidden />{t('postDashboard.c_employer')}</dt>
+                      <dd className="font-semibold tabular-nums text-status-success">{`+${money(monthlyMatch)}`}<span className="font-normal text-text-secondary">{t('postDashboard.per_mo')}</span></dd>
+                    </div>
+                    <div className="flex items-baseline justify-between gap-3 border-t border-slate-200/80 pt-1.5 dark:border-white/10">
+                      <dt className="flex items-center gap-1.5 font-semibold text-text-primary"><span className="h-2 w-2" aria-hidden />{t('postDashboard.c_total')}</dt>
+                      <dd className="font-bold tabular-nums text-text-primary">{money(monthlyTotal)}<span className="font-normal text-text-secondary">{t('postDashboard.per_mo')}</span></dd>
+                    </div>
+                  </dl>
+                  {/* How the total splits, yours and your employer's */}
+                  <div className="mt-2.5 flex h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10" role="img" aria-label={`${t('postDashboard.c_you')} ${money(monthlyYou)}, ${t('postDashboard.c_employer')} ${money(monthlyMatch)}`}>
+                    <span className="h-full bg-primary" style={{ width: `${monthlyTotal > 0 ? (monthlyYou / monthlyTotal) * 100 : 0}%` }} />
+                    <span className="h-full bg-status-success" style={{ width: `${monthlyTotal > 0 ? (monthlyMatch / monthlyTotal) * 100 : 0}%` }} />
+                  </div>
+                  {monthlyGap > 0 && (
+                    <div className="mt-2 flex items-center gap-1 text-[12px] text-status-warning">
+                      <MatchGapTip
+                        label={t('postDashboard.c_match_gap', { amount: money(monthlyGap) })}
+                        from={data.contributionPercent}
+                        to={data.contributionPercent + limits.match.gapPercent}
+                        youMore={money(Math.round((data.salary * limits.match.gapPercent) / 100 / 12))}
+                        employerMore={money(monthlyGap)}
+                        yearly={money(Math.round(fullMatch - annualMatch))}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="mb-5 w-full">
+              <div className="mb-4 w-full">
                 <PremiumBalanceChart data={balanceChartData} isDark={isDark} axes={{ xLabels: balanceMonths, formatY: (v) => `$${Math.round(v / 1000)}K` }} />
               </div>
 
@@ -611,42 +625,6 @@ export default function PostEnrollmentDashboard() {
                 </div>
               </div>
 
-              {readinessPending ? (
-                <>
-              {/* Not checked yet: an empty dashed ring, why there's no score, what will be asked, and the way in */}
-              <div className="flex flex-1 flex-col items-center justify-center py-1 text-center">
-                <div className="relative h-[92px] w-[92px]" aria-hidden>
-                  <svg viewBox="0 0 120 120" className="block h-full w-full">
-                    <circle cx={60} cy={60} r={52} fill="none" strokeWidth={10} strokeDasharray="3 7" strokeLinecap="round" stroke={isDark ? 'rgba(255,255,255,0.18)' : '#CBD5E1'} />
-                  </svg>
-                  <span className="absolute inset-0 flex items-center justify-center text-[30px] font-medium text-slate-400 dark:text-slate-500">?</span>
-                </div>
-                <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-semibold text-slate-700 dark:bg-white/10 dark:text-slate-200">
-                  <span className="h-1.5 w-1.5 rounded-full bg-slate-500 dark:bg-slate-300" aria-hidden />
-                  {t('postDashboard.readiness_pending_status')}
-                </span>
-                <p className="mt-2 max-w-[290px] text-[13px] leading-snug text-text-secondary">{t('postDashboard.readiness_pending_body')}</p>
-              </div>
-
-              <ol className="mt-3 space-y-1.5 rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-200/70 dark:bg-white/5 dark:ring-white/10">
-                {(['readiness_pending_q1', 'readiness_pending_q2', 'readiness_pending_q3'] as const).map((k, i) => (
-                  <li key={k} className="flex items-center gap-2.5 text-[13px] text-text-primary">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white text-[11px] font-bold text-primary ring-1 ring-blue-100 dark:bg-white/10 dark:text-blue-300 dark:ring-white/10" aria-hidden>
-                      {i + 1}
-                    </span>
-                    {t(`postDashboard.${k}`)}
-                  </li>
-                ))}
-              </ol>
-
-              <Link to="/retirement-goal" className={`group mt-4 h-10 w-full gap-2 text-[14px] ${PILL_PRIMARY}`}>
-                <Target className="h-4 w-4" aria-hidden />
-                {t('postDashboard.readiness_pending_cta')}
-              </Link>
-              <p className="mt-1 text-center text-[12px] text-text-secondary">{t('postDashboard.readiness_pending_time')}</p>
-                </>
-              ) : (
-                <>
               <div className="flex flex-1 flex-col items-center justify-center py-2">
                 <ReadinessRing score={readinessShown} />
                 {/* Status under the ring */}
@@ -673,35 +651,65 @@ export default function PostEnrollmentDashboard() {
                 {t('dashboard.launchSimulator')}
                 <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
               </Link>
-                </>
-              )}
             </SpecCard>
           </div>
 
-          {/* Rows that pair a wide card with a narrow one, so each pair lines up top and bottom; the library spans the last row */}
-          <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-12">
+          {/* Learning comes straight after the balance */}
+            <div className="mt-4 grid min-w-0">
+                {/* Financial wellness library: the Enrich card's look, coin art and all */}
+                  <SpecCard tone="blue" className="group relative isolate flex min-h-[188px] overflow-hidden transition-shadow hover:shadow-[0_24px_48px_-28px_rgba(37,99,235,0.45)]">
+                    {/* The coin art's periwinkle, glowing behind it so the image and card share one light */}
+                    <span className="pointer-events-none absolute -right-10 top-1/2 -z-10 h-64 w-80 -translate-y-1/2 rounded-full bg-[#8C9BFF] opacity-25 blur-[70px] transition-opacity group-hover:opacity-40 dark:bg-[#5B6BFF] dark:opacity-35" aria-hidden />
+                    <div className="relative z-10 flex flex-1 flex-col items-start sm:max-w-[56%]">
+                      <div className="flex items-center gap-2.5">
+                        <TitleBadge Icon={GraduationCap} color="bg-blue-600" />
+                        <h2 className="text-[16px] font-bold text-text-primary">{t('dashboard.learningHub')}</h2>
+                      </div>
+                      <h3 className="mt-4 text-[20px] font-bold leading-tight text-slate-900 dark:text-white">{t('enrich.subtitle')}</h3>
+                      <p className="mb-5 mt-2 max-w-[380px] text-[14px] leading-relaxed text-slate-600 dark:text-slate-300">
+                        {t('enrich.intro')}
+                      </p>
+                      <Link to="/enrich" className={`group/cta mt-auto ${PILL_SECONDARY}`}>
+                        {t('postDashboard.library_cta')}
+                        <ChevronRight className="h-4 w-4 transition-transform group-hover/cta:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+                      </Link>
+                    </div>
+
+                    {/* The coin on the steps, faded into the card on its left and its bright top-right corner */}
+                    <img
+                      src="/media/enrich-coin.png"
+                      alt=""
+                      width={300}
+                      height={180}
+                      className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[320px] max-w-none object-cover object-[center_8%] transition-transform duration-700 [mask-composite:intersect] [mask-image:linear-gradient(to_right,transparent_0%,black_30%),radial-gradient(60%_55%_at_100%_0%,transparent_0%,transparent_30%,black_95%)] [-webkit-mask-composite:source-in] group-hover:scale-[1.05] motion-reduce:transition-none sm:block"
+                      aria-hidden
+                    />
+                  </SpecCard>
+            </div>
+
+          {/* Rows of cards that line up top and bottom: wide and narrow, two halves, then three across */}
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
             <div className="grid min-w-0 lg:col-span-8">
-                {/* Card 2: Quick Actions — one card, 4 tiles with dividers */}
-                  {/* The tiles fill whatever height the row gives them, with their content centred, so no blank band sits under them */}
+                {/* Quick Actions: one card, four tiles in a row split by thin rules */}
                   <SpecCard noPadding className="flex flex-col overflow-hidden">
                     <div className="flex items-center gap-2.5 px-5 pb-3.5 pt-5">
                       <TitleBadge Icon={Zap} color="bg-blue-600" />
                       <h2 className="text-[16px] font-bold text-text-primary">{t('dashboard.quickActions')}</h2>
                     </div>
-                    <div className="grid flex-1 grid-cols-1 gap-px border-t border-slate-200/80 bg-slate-200/80 sm:grid-cols-2 dark:border-white/10 dark:bg-white/10">
+                    <div className="grid flex-1 grid-cols-1 divide-y divide-slate-200/80 border-t border-slate-200/80 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4 dark:divide-white/10 dark:border-white/10">
                       {quickActions.map((tile) => (
                         <Link
                           key={tile.title}
                           to={tile.href}
-                          className="group flex items-center gap-3.5 bg-surface-card px-5 py-4 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary dark:hover:bg-[#162048]"
+                          className="group flex flex-col justify-center px-5 py-4 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary dark:hover:bg-white/5"
                         >
-                          <IconChip Icon={tile.Icon} tone={tile.tone} />
-                          <span className="min-w-0 flex-1">
-                            <span className="block text-[14px] font-bold leading-tight text-text-primary">{tile.title}</span>
-                            <span className="mt-1 block text-[13px] font-medium text-primary dark:text-blue-300">{tile.sub}</span>
-                            <span className="mt-0.5 block text-[12px] text-text-secondary">{tile.hint}</span>
+                          <span className="flex items-center justify-between">
+                            <IconChip Icon={tile.Icon} tone={tile.tone} />
+                            <ChevronRight className="-mr-1 h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
                           </span>
-                          <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+                          <p className="mt-3 text-[14px] font-bold leading-tight text-text-primary">{tile.title}</p>
+                          <p className="mt-1 text-[13px] font-medium text-primary dark:text-blue-300">{tile.sub}</p>
+                          <p className="mt-0.5 text-[12px] text-text-secondary">{tile.hint}</p>
                         </Link>
                       ))}
                     </div>
@@ -709,45 +717,46 @@ export default function PostEnrollmentDashboard() {
             </div>
 
             <div className="grid min-w-0 lg:col-span-4">
-                {/* Next Best Actions */}
+                {/* Next Best Actions: the two most important, each a boxed card; a required one is tinted */}
                 <SpecCard className="flex flex-col">
-                  <div className="mb-1.5 flex items-center justify-between gap-2">
+                  <div className="mb-3 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5">
                       <TitleBadge Icon={CheckSquare} color="bg-emerald-600" />
-                      <span className="text-[16px] font-bold text-text-primary">{t('dashboard.nextBestActions')}</span>
+                      <h2 className="text-[16px] font-bold text-text-primary">{t('dashboard.nextBestActions')}</h2>
                     </div>
-                    <span className="text-[12px] font-medium text-text-secondary">{t('postDashboard.actions_count', { count: Math.min(nextActions.length, 3) })}</span>
+                    <span className="text-[12px] font-medium text-text-secondary">{t('postDashboard.actions_count', { count: Math.min(nextActions.length, 2) })}</span>
                   </div>
-                  {/* Up to three, most important first; each whole row is the link */}
-                  <ul className="-mx-2 divide-y divide-slate-200/80 dark:divide-white/10">
-                    {nextActions.slice(0, 3).map((action, i) => {
+                  <ul className="flex flex-1 flex-col gap-3">
+                    {nextActions.slice(0, 2).map((action) => {
                       const ActionIcon = NEXT_ACTION_ICONS[action.id]
                       return (
-                        <li key={action.id}>
+                        <li key={action.id} className="flex flex-1">
                           <Link
                             to={action.href}
-                            className="group flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary dark:hover:bg-white/5"
+                            className={`group flex w-full items-center gap-3 rounded-2xl border p-4 transition-shadow hover:shadow-[0_6px_16px_-10px_rgba(11,21,51,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${action.required ? 'border-status-danger/20 bg-status-danger-bg' : 'border-border-default bg-surface-elevated'}`}
                           >
-                            <IconChip Icon={ActionIcon} tone={action.required ? 'rose' : i === 0 ? 'blue' : 'slate'} small />
+                            <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${action.required ? 'bg-status-danger/15 text-status-danger' : 'bg-surface-page text-text-secondary'}`} aria-hidden>
+                              <ActionIcon className="h-5 w-5" />
+                            </span>
                             <span className="min-w-0 flex-1">
                               <span className="flex flex-wrap items-center gap-2">
-                                <span className="text-[14px] font-semibold text-text-primary">{t(`next_actions.${action.id}`, action.values)}</span>
+                                <span className="text-[13px] font-bold text-text-primary">{t(`next_actions.${action.id}`, action.values)}</span>
                                 {action.required && (
-                                  <span className="rounded-full bg-status-danger-bg px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-status-danger">{t('postDashboard.badge_required')}</span>
+                                  <span className="rounded bg-status-danger/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-status-danger">{t('postDashboard.badge_required')}</span>
                                 )}
                               </span>
-                              <span className="mt-0.5 block text-[12px] text-text-secondary">{t(`next_actions.${action.id}_sub`, action.values)}</span>
+                              <span className="mt-1 block text-[12px] text-text-secondary">{t(`next_actions.${action.id}_sub`, action.values)}</span>
                             </span>
                             <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
                           </Link>
                         </li>
                       )
                     })}
-                    {/* With fewer than three to do, things already settled fill the list, marked done */}
-                    {doneActions.slice(0, Math.max(0, 3 - nextActions.length)).map((id: DoneActionId) => (
-                      <li key={id} className="flex items-center gap-3 px-2 py-2.5">
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-status-success-bg text-status-success" aria-hidden>
-                          <Check className="h-3.5 w-3.5" />
+                    {/* With fewer than two to do, things already settled fill the space, marked done */}
+                    {doneActions.slice(0, Math.max(0, 2 - nextActions.length)).map((id: DoneActionId) => (
+                      <li key={id} className="flex flex-1 items-center gap-3 rounded-2xl border border-border-default bg-surface-elevated p-4">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-status-success-bg text-status-success" aria-hidden>
+                          <Check className="h-5 w-5" />
                         </span>
                         <span className="min-w-0 flex-1 text-[13px] text-text-secondary">{t(`next_actions.done_${id}`)}</span>
                       </li>
@@ -756,138 +765,149 @@ export default function PostEnrollmentDashboard() {
                 </SpecCard>
             </div>
 
-            <div className="grid min-w-0 lg:col-span-8">
-                {/* Your contributions: this month's three figures, how the total splits, then this year's limit */}
+            <div className="grid min-w-0 lg:col-span-6">
+                {/* Card 4: Portfolio Allocation — header, bar centred in the space, figures along the bottom */}
                 <SpecCard className="flex flex-col">
-                  <div className="mb-4 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2.5">
-                      <TitleBadge Icon={Calendar} color="bg-emerald-600" />
-                      <span className="whitespace-nowrap text-[16px] font-bold text-text-primary">{t('postDashboard.contributions_title')}</span>
+                  <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2.5">
+                        <TitleBadge Icon={PieChart} color="bg-blue-600" />
+                        <span className="text-[16px] font-bold text-text-primary">{t('dashboard.portfolioAllocation')}</span>
+                      </div>
+                      <p className="mt-0.5 pl-[46px] text-[12px] text-text-secondary">{t('postDashboard.current_asset_mix')}</p>
                     </div>
-                    <span className="text-[12px] text-text-secondary">{contributionMonth}</span>
+                    <div className="flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-text-secondary dark:bg-white/10">
+                      <span className={`h-2 w-2 rounded-full ${riskDot[data.riskLevel]}`} aria-hidden />
+                      {t(`enrollment.investment.risk_short_${data.riskLevel}`)}
+                    </div>
                   </div>
-
-                  {/* Phones: one row per figure, label left and amount right. Wider screens: three columns split by thin rules */}
-                  <dl className="grid grid-cols-1 divide-y divide-slate-200/80 sm:grid-cols-3 sm:divide-x sm:divide-y-0 dark:divide-white/10">
-                    {[
-                      {
-                        key: 'you',
-                        dot: 'bg-primary',
-                        label: t('postDashboard.c_you'),
-                        value: money(monthlyYou),
-                        valueClass: 'text-text-primary',
-                        sub: <>{t('postDashboard.c_of_pay', { pct: data.contributionPercent })}</>,
-                        subClass: 'text-text-secondary',
-                      },
-                      {
-                        key: 'employer',
-                        dot: 'bg-status-success',
-                        label: t('postDashboard.c_employer'),
-                        value: `+${money(monthlyMatch)}`,
-                        valueClass: 'text-status-success',
-                        sub:
-                          monthlyGap > 0 ? (
-                            <MatchGapTip
-                              label={t('postDashboard.c_match_gap', { amount: money(monthlyGap) })}
-                              from={data.contributionPercent}
-                              to={data.contributionPercent + limits.match.gapPercent}
-                              youMore={money(Math.round((data.salary * limits.match.gapPercent) / 100 / 12))}
-                              employerMore={money(monthlyGap)}
-                              yearly={money(Math.round(fullMatch - annualMatch))}
-                            />
-                          ) : (
-                            <>
-                              <Check className="h-3.5 w-3.5" aria-hidden />
-                              {t('postDashboard.c_full_match')}
-                            </>
-                          ),
-                        subClass: monthlyGap > 0 ? 'text-status-warning' : 'text-status-success',
-                      },
-                      {
-                        key: 'total',
-                        dot: null,
-                        label: t('postDashboard.c_total'),
-                        value: money(monthlyTotal),
-                        valueClass: 'text-text-primary',
-                        sub: <>{t('postDashboard.c_total_sub')}</>,
-                        subClass: 'text-text-secondary',
-                      },
-                    ].map((fig) => (
-                      <div key={fig.key} className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0 sm:block sm:px-4 sm:py-0 sm:first:pl-0 sm:last:pr-0">
-                        <div className="min-w-0">
-                          <dt className="flex items-center gap-1.5 text-[13px] text-text-secondary">
-                            {fig.dot && <span className={`h-2 w-2 rounded-full ${fig.dot}`} aria-hidden />}
-                            {fig.label}
-                          </dt>
-                          {/* On phones the detail sits under the label */}
-                          <dd className={`mt-0.5 flex items-center gap-1 text-[12px] sm:hidden ${fig.subClass}`}>{fig.sub}</dd>
+                  <div className="flex flex-1 flex-col justify-center py-3">
+                  {/* Scale labels sit exactly over their quarter marks */}
+                  <div className="relative mb-1.5 h-3 text-[11px] leading-none text-text-muted" aria-hidden>
+                    {[0, 25, 50, 75, 100].map((v) => (
+                      <span key={v} className="absolute top-0" style={{ left: `${v}%`, transform: `translateX(${v === 0 ? '0' : v === 100 ? '-100%' : '-50%'})` }}>
+                        {v}%
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex h-3 w-full gap-0.5 overflow-hidden rounded-full">
+                    {portfolioSegments.map((s) => (
+                      <div
+                        key={s.key}
+                        style={{ width: `${s.pct}%`, backgroundColor: s.color }}
+                        title={`${s.label} ${s.pct}%`}
+                      />
+                    ))}
+                  </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 border-t border-slate-200/80 pt-4 sm:grid-cols-4 dark:border-white/10">
+                    {portfolioSegments.map((s) => (
+                      <div key={s.key}>
+                        <div className="flex items-center gap-1.5">
+                          <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: s.color }} />
+                          <span className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary">
+                            {s.label}
+                          </span>
                         </div>
-                        <dd className={`shrink-0 text-[18px] font-semibold tabular-nums tracking-tight sm:mt-1 sm:text-[22px] ${fig.valueClass}`}>
-                          {fig.value}
-                          <span className="ml-0.5 text-[13px] font-normal text-text-secondary">{t('postDashboard.per_mo')}</span>
-                        </dd>
-                        <dd className={`mt-0.5 hidden items-center gap-1 text-[12px] sm:flex ${fig.subClass}`}>{fig.sub}</dd>
+                        <p className="mt-1 text-[16px] font-bold text-text-primary">{s.pct}%</p>
+                        <p className="text-[12px] text-text-secondary">{s.amount}</p>
                       </div>
                     ))}
-                  </dl>
-
-                  {/* How the monthly total splits: yours and your employer's */}
-                  <div className="mt-4 flex h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10" role="img" aria-label={`${t('postDashboard.c_you')} ${money(monthlyYou)}, ${t('postDashboard.c_employer')} ${money(monthlyMatch)}`}>
-                    <span className="h-full bg-primary" style={{ width: `${monthlyTotal > 0 ? (monthlyYou / monthlyTotal) * 100 : 0}%` }} />
-                    <span className="h-full bg-status-success" style={{ width: `${monthlyTotal > 0 ? (monthlyMatch / monthlyTotal) * 100 : 0}%` }} />
                   </div>
+                </SpecCard>
+            </div>
 
-                  {/* This year's limit */}
-                  <div className="mt-auto pt-5">
-                    <div className="border-t border-slate-200/80 pt-4 dark:border-white/10">
-                      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                        <p className="text-[13px] text-text-secondary">{t('contributionLimits.title', { year: limits.year })}</p>
-                        <Link to="/enrollment/contribution" className={`group text-[12px] ${TEXT_LINK}`}>
-                          {t('contributionLimits.change')}
-                          <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
-                        </Link>
-                      </div>
-                      <p className="mt-1 flex flex-wrap items-baseline gap-x-2">
-                        <span className="text-[18px] font-semibold tabular-nums text-text-primary">{money(limits.remaining)}</span>
-                        <span className="text-[13px] text-text-secondary">{t('postDashboard.limit_left', { limit: money(limits.employeeLimit) })}</span>
-                      </p>
-                      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(limits.percentUsed)} aria-label={t('contributionLimits.title', { year: limits.year })}>
-                        <div className="h-full rounded-full bg-primary" style={{ width: `${limits.percentUsed}%` }} />
-                      </div>
-                      <p className="mt-2 text-[12px] text-text-secondary">
-                        {limits.reachesLimit
-                          ? t('contributionLimits.status_reaches')
-                          : t(limits.ytdIsEstimate ? 'postDashboard.limit_pace_est' : 'postDashboard.limit_pace', { ytd: money(limits.ytdEmployee), projected: money(limits.projectedYearEnd) })}
-                      </p>
+            <div className="grid min-w-0 lg:col-span-6">
+                {/* Recent Activity */}
+                <SpecCard>
+                  <div className="mb-4 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <TitleBadge Icon={History} color="bg-blue-600" />
+                      <h3 className="text-[16px] font-bold text-text-primary">{t('dashboard.recentActivity')}</h3>
                     </div>
+                    <Link to="/transactions" className={`group text-[13px] ${TEXT_LINK}`}>
+                      {t('dashboard.viewAll')}
+                      <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+                    </Link>
                   </div>
+                  <ul className="divide-y divide-slate-200/80 dark:divide-white/10">
+                    <li className="flex items-center gap-3.5 py-3 first:pt-0">
+                      <IconChip Icon={ArrowDownLeft} tone="emerald" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_contribution')}</p>
+                        <p className="text-[12px] text-text-secondary">{t('postDashboard.activity_payroll')}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[14px] font-bold text-status-success">+{money(monthlyYou, true)}</p>
+                        <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct')}</p>
+                      </div>
+                    </li>
+                    <li className="flex items-center gap-3.5 py-3">
+                      <IconChip Icon={Building2} tone="blue" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_employer_match')}</p>
+                        <p className="text-[12px] text-text-secondary">{t('postDashboard.activity_safe_harbor')}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[14px] font-bold text-status-success">+{money(monthlyMatch, true)}</p>
+                        <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct')}</p>
+                      </div>
+                    </li>
+                    {loans.length > 0 && (
+                      <li className="flex items-center gap-3.5 py-3">
+                        <IconChip Icon={CreditCard} tone="amber" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_loan_repayment')}</p>
+                          <p className="text-[12px] text-text-secondary">{t(`postDashboard.loan_${loans[0].purpose}`)}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[14px] font-bold tabular-nums text-text-primary">{money(loans[0].payment, true)}</p>
+                          <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct')}</p>
+                        </div>
+                      </li>
+                    )}
+                    <li className="flex items-center gap-3.5 py-3 last:pb-0">
+                      <IconChip Icon={RefreshCcw} tone="slate" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_rebalance')}</p>
+                        <p className="text-[12px] text-text-secondary">{t('postDashboard.activity_auto_quarterly')}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[14px] font-medium text-text-secondary">{t('common.completed')}</p>
+                        <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct1')}</p>
+                      </div>
+                    </li>
+                  </ul>
                 </SpecCard>
             </div>
 
             <div className="grid min-w-0 lg:col-span-4">
                 {/* Active loans: one shows in full; two or more show as rows with the total underneath */}
                 <SpecCard className="flex flex-col">
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2.5">
+                  <div className="mb-3 flex items-start justify-between gap-2">
+                    <div className="flex min-w-0 items-center gap-2.5">
                       <TitleBadge Icon={CreditCard} color="bg-blue-600" />
-                      <span className="text-[16px] font-bold text-text-primary">{t(ACTIVE_LOANS.length > 1 ? 'postDashboard.loans_title' : 'dashboard.activeLoan')}</span>
+                      <div className="min-w-0">
+                        <h2 className="text-[16px] font-bold leading-tight text-text-primary">{t(loans.length > 1 ? 'postDashboard.loans_title' : 'dashboard.activeLoan')}</h2>
+                        {loans[0] && <p className="mt-0.5 truncate text-[12px] text-text-secondary">{t('postDashboard.loans_from_plan', { plan: loans[0].planName })}</p>}
+                      </div>
                     </div>
-                    {ACTIVE_LOANS.length > 1 && (
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[12px] font-semibold tabular-nums text-text-secondary dark:bg-white/10">{ACTIVE_LOANS.length}</span>
+                    {loans.length > 1 && (
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[12px] font-semibold tabular-nums text-text-secondary dark:bg-white/10">{loans.length}</span>
                     )}
                   </div>
 
-                  {ACTIVE_LOANS.length === 1 ? (
-                    ACTIVE_LOANS.map((loan) => (
+                  {loans.length === 1 ? (
+                    loans.map((loan) => (
                       <div key={loan.ref}>
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
                             <p className="text-[14px] font-semibold text-text-primary">{t(`postDashboard.loan_${loan.purpose}`)}</p>
-                            <p className="mt-0.5 text-[11px] text-text-muted">
-                              <span className="font-mono">{loan.ref}</span> · {t('postDashboard.loan_since', { date: new Date(loan.originated).toLocaleDateString(locale, { month: 'short', year: 'numeric' }) })}
+                            <p className="mt-0.5 text-[12px] text-text-secondary">
+                              {loan.ref} · {t('postDashboard.loan_since', { date: new Date(`${loan.originated}T00:00:00`).toLocaleDateString(locale, { month: 'short', year: 'numeric' }) })}
                             </p>
                           </div>
-                          <span className="shrink-0 rounded-full bg-status-success-bg px-2 py-0.5 text-[11px] font-semibold text-status-success">{t('common.active')}</span>
+                          <span className="shrink-0 rounded-full bg-status-success-bg px-2 py-0.5 text-[12px] font-semibold text-status-success">{t('common.active')}</span>
                         </div>
                         <div className="mt-4 grid grid-cols-2 gap-4 border-t border-slate-200/80 pt-4 dark:border-white/10">
                           <div>
@@ -902,7 +922,7 @@ export default function PostEnrollmentDashboard() {
                         <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
                           <div className="h-full rounded-full bg-status-success" style={{ width: `${loan.paidPct}%` }} />
                         </div>
-                        <div className="mt-1.5 flex justify-between text-[11px] text-text-secondary">
+                        <div className="mt-1.5 flex justify-between text-[12px] text-text-secondary">
                           <span>{t('postDashboard.loan_paid', { pct: loan.paidPct })}</span>
                           <span>{t('postDashboard.loan_left', { count: loan.paymentsLeft })}</span>
                         </div>
@@ -911,20 +931,20 @@ export default function PostEnrollmentDashboard() {
                   ) : (
                     <>
                       <ul className="flex flex-1 flex-col divide-y divide-slate-200/80 dark:divide-white/10">
-                        {ACTIVE_LOANS.map((loan) => (
+                        {loans.map((loan) => (
                           <li key={loan.ref} className="flex flex-1 flex-col justify-center py-3 first:pt-0">
                             <div className="flex items-baseline justify-between gap-2">
                               <p className="min-w-0 truncate text-[14px] font-semibold text-text-primary">{t(`postDashboard.loan_${loan.purpose}`)}</p>
                               <p className="shrink-0 text-[15px] font-semibold tabular-nums text-text-primary">{money(loan.balance)}</p>
                             </div>
-                            <div className="mt-0.5 flex items-baseline justify-between gap-2 text-[11px] text-text-secondary">
-                              <span className="font-mono text-text-muted">{loan.ref}</span>
+                            <div className="mt-0.5 flex items-baseline justify-between gap-2 text-[12px] text-text-secondary">
+                              <span>{loan.ref}</span>
                               <span>{t('postDashboard.loan_next_short', { amount: money(loan.payment), date: nextLoanDue })}</span>
                             </div>
                             <div className="mt-2 h-1 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={loan.paidPct} aria-label={t('postDashboard.loan_paid', { pct: loan.paidPct })}>
                               <div className="h-full rounded-full bg-status-success" style={{ width: `${loan.paidPct}%` }} />
                             </div>
-                            <div className="mt-1.5 flex justify-between text-[11px] text-text-secondary">
+                            <div className="mt-1.5 flex justify-between text-[12px] text-text-secondary">
                               <span>{t('postDashboard.loan_paid', { pct: loan.paidPct })}</span>
                               <span>{t('postDashboard.loan_left', { count: loan.paymentsLeft })}</span>
                             </div>
@@ -937,55 +957,6 @@ export default function PostEnrollmentDashboard() {
                       </div>
                     </>
                   )}
-                </SpecCard>
-            </div>
-
-            <div className="grid min-w-0 lg:col-span-8">
-                {/* Card 4: Portfolio Allocation */}
-                <SpecCard>
-                  <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-2.5">
-                        <TitleBadge Icon={PieChart} color="bg-blue-600" />
-                        <span className="text-[16px] font-bold text-text-primary">{t('dashboard.portfolioAllocation')}</span>
-                      </div>
-                      <p className="mt-0.5 pl-[46px] text-[12px] text-text-secondary">{t('postDashboard.current_asset_mix')}</p>
-                    </div>
-                    <div className="flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-text-secondary dark:bg-white/10">
-                      <span className={`h-2 w-2 rounded-full ${riskDot[data.riskLevel]}`} aria-hidden />
-                      {t(`enrollment.investment.risk_short_${data.riskLevel}`)}
-                    </div>
-                  </div>
-                  <div className="mb-1 flex justify-between px-0.5 text-[11px] text-text-muted">
-                    <span>0%</span>
-                    <span>25%</span>
-                    <span>50%</span>
-                    <span>75%</span>
-                    <span>100%</span>
-                  </div>
-                  <div className="flex h-3 w-full gap-0.5 overflow-hidden rounded-full">
-                    {portfolioSegments.map((s) => (
-                      <div
-                        key={s.key}
-                        style={{ width: `${s.pct}%`, backgroundColor: s.color }}
-                        title={`${s.label} ${s.pct}%`}
-                      />
-                    ))}
-                  </div>
-                  <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                    {portfolioSegments.map((s) => (
-                      <div key={s.key}>
-                        <div className="flex items-center gap-1.5">
-                          <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: s.color }} />
-                          <span className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary">
-                            {s.label}
-                          </span>
-                        </div>
-                        <p className="mt-1 text-[16px] font-bold text-text-primary">{s.pct}%</p>
-                        <p className="text-[12px] text-text-secondary">{s.amount}</p>
-                      </div>
-                    ))}
-                  </div>
                 </SpecCard>
             </div>
 
@@ -1042,70 +1013,6 @@ export default function PostEnrollmentDashboard() {
                 </SpecCard>
             </div>
 
-            <div className="grid min-w-0 lg:col-span-8">
-                {/* Recent Activity */}
-                <SpecCard>
-                  <div className="mb-4 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2.5">
-                      <TitleBadge Icon={History} color="bg-blue-600" />
-                      <h3 className="text-[16px] font-bold text-text-primary">{t('dashboard.recentActivity')}</h3>
-                    </div>
-                    <Link to="/transactions" className={`group text-[13px] ${TEXT_LINK}`}>
-                      {t('dashboard.viewAll')}
-                      <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
-                    </Link>
-                  </div>
-                  <ul className="divide-y divide-slate-200/80 dark:divide-white/10">
-                    <li className="flex items-center gap-3.5 py-3 first:pt-0">
-                      <IconChip Icon={ArrowDownLeft} tone="emerald" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_contribution')}</p>
-                        <p className="text-[12px] text-text-secondary">{t('postDashboard.activity_payroll')}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[14px] font-bold text-status-success">+{money(monthlyYou, true)}</p>
-                        <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct')}</p>
-                      </div>
-                    </li>
-                    <li className="flex items-center gap-3.5 py-3">
-                      <IconChip Icon={Building2} tone="blue" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_employer_match')}</p>
-                        <p className="text-[12px] text-text-secondary">{t('postDashboard.activity_safe_harbor')}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[14px] font-bold text-status-success">+{money(monthlyMatch, true)}</p>
-                        <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct')}</p>
-                      </div>
-                    </li>
-                    {ACTIVE_LOANS.length > 0 && (
-                      <li className="flex items-center gap-3.5 py-3">
-                        <IconChip Icon={CreditCard} tone="amber" />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_loan_repayment')}</p>
-                          <p className="text-[12px] text-text-secondary">{t(`postDashboard.loan_${ACTIVE_LOANS[0].purpose}`)}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-[14px] font-bold tabular-nums text-text-primary">{money(ACTIVE_LOANS[0].payment, true)}</p>
-                          <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct')}</p>
-                        </div>
-                      </li>
-                    )}
-                    <li className="flex items-center gap-3.5 py-3 last:pb-0">
-                      <IconChip Icon={RefreshCcw} tone="slate" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_rebalance')}</p>
-                        <p className="text-[12px] text-text-secondary">{t('postDashboard.activity_auto_quarterly')}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[14px] font-medium text-text-secondary">{t('common.completed')}</p>
-                        <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct1')}</p>
-                      </div>
-                    </li>
-                  </ul>
-                </SpecCard>
-            </div>
-
             <div className="grid min-w-0 lg:col-span-4">
                 {/* Your Advisor: the plan widget's wash, a face, the numbers between two thin rules */}
                 <SpecCard tone="warm">
@@ -1150,38 +1057,6 @@ export default function PostEnrollmentDashboard() {
                     </Link>
                   </div>
                 </SpecCard>
-            </div>
-
-            <div className="grid min-w-0 lg:col-span-12">
-                {/* Financial wellness library: the Enrich card's look, coin art and all */}
-                  <SpecCard tone="blue" className="group relative isolate flex min-h-[208px] overflow-hidden pb-6 transition-shadow hover:shadow-[0_24px_48px_-28px_rgba(37,99,235,0.45)]">
-                    {/* The coin art's periwinkle, glowing behind it so the image and card share one light */}
-                    <span className="pointer-events-none absolute -right-10 top-1/2 -z-10 h-64 w-80 -translate-y-1/2 rounded-full bg-[#8C9BFF] opacity-25 blur-[70px] transition-opacity group-hover:opacity-40 dark:bg-[#5B6BFF] dark:opacity-35" aria-hidden />
-                    <div className="relative z-10 flex flex-1 flex-col items-start sm:max-w-[56%]">
-                      <div className="flex items-center gap-2.5">
-                        <TitleBadge Icon={GraduationCap} color="bg-blue-600" />
-                        <h2 className="text-[16px] font-bold text-text-primary">{t('dashboard.learningHub')}</h2>
-                      </div>
-                      <h3 className="mt-4 text-[20px] font-bold leading-tight text-slate-900 dark:text-white">{t('enrich.subtitle')}</h3>
-                      <p className="mb-5 mt-2 max-w-[380px] text-[14px] leading-relaxed text-slate-600 dark:text-slate-300">
-                        {t('enrich.intro')}
-                      </p>
-                      <Link to="/enrich" className={`group/cta mt-auto ${PILL_SECONDARY}`}>
-                        {t('postDashboard.library_cta')}
-                        <ChevronRight className="h-4 w-4 transition-transform group-hover/cta:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
-                      </Link>
-                    </div>
-
-                    {/* The coin on the steps, faded into the card on its left and its bright top-right corner */}
-                    <img
-                      src="/media/enrich-coin.png"
-                      alt=""
-                      width={300}
-                      height={180}
-                      className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[320px] max-w-none object-cover object-[center_8%] transition-transform duration-700 [mask-composite:intersect] [mask-image:linear-gradient(to_right,transparent_0%,black_30%),radial-gradient(60%_55%_at_100%_0%,transparent_0%,transparent_30%,black_95%)] [-webkit-mask-composite:source-in] group-hover:scale-[1.05] motion-reduce:transition-none sm:block"
-                      aria-hidden
-                    />
-                  </SpecCard>
             </div>
           </div>
         </div>

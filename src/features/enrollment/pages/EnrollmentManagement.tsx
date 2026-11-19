@@ -210,7 +210,7 @@ export default function EnrollmentManagement() {
   ]
 
   return (
-    <div className="mx-auto w-full max-w-[1040px] px-4 py-6 sm:px-6 lg:py-7">
+    <div className="w-full pb-6 pt-2 lg:pb-7 lg:pt-3">
       {/* Page title in the dashboard's type: plain on the page, no card */}
       <header className="mb-5">
         <div className="flex items-center gap-3">
