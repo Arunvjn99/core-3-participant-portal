@@ -12,7 +12,7 @@ const PRIMARY = `inline-flex h-10 items-center justify-center rounded-full bg-bl
 const SECONDARY = `inline-flex h-10 items-center justify-center rounded-full bg-white px-5 text-[14px] font-semibold text-slate-900 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-white/5 dark:text-white dark:ring-white/15 dark:hover:bg-white/10 ${FOCUS}`
 
 /** Ring colour and text colour for each style */
-/** The score bands, as styleFromScore draws them */
+/** The three styles, in order from steadiest to most growth */
 const SPECTRUM: { style: RiskStyle; from: number; to: number }[] = [
   { style: 'conservative', from: 0, to: 40 },
   { style: 'moderate', from: 41, to: 70 },
@@ -33,8 +33,7 @@ const STYLE_TONE: Record<RiskStyle, { ring: string; text: string }> = {
 }
 
 /**
- * Consent, then five statements one at a time on an agree/disagree scale, then the investment style with a score
- * out of 100. Nothing is saved until the participant chooses Use This Style.
+ * Consent, then five statements one at a time on an agree/disagree scale, then the investment style they point to. Nothing is saved until the participant chooses Use This Style.
  * `inline` draws it straight into the surface that holds it (such as an edit panel) instead of a modal, so it never
  * stacks a popup on top of another layer.
  */
@@ -60,10 +59,6 @@ export function RiskQuestionnaire({ open, onClose, onComplete, inline = false }:
   const tone = STYLE_TONE[style]
   const next = () => (step < QUESTIONS.length - 1 ? setStep(step + 1) : setStage('result'))
   const back = () => (step > 0 ? setStep(step - 1) : setStage('consent'))
-
-  // The result ring: the score as a share of a full circle
-  const R = 40
-  const C = 2 * Math.PI * R
 
   const body = (
     <>
@@ -136,17 +131,11 @@ export function RiskQuestionnaire({ open, onClose, onComplete, inline = false }:
 
       {stage === 'result' && (
         <div className="text-center">
-          {/* The score as a ring, the style named under it */}
-          <div className="relative mx-auto h-28 w-28">
-            <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90" aria-hidden>
-              <circle cx="50" cy="50" r={R} fill="none" strokeWidth="7" className="stroke-slate-100 dark:stroke-white/10" />
-              <circle cx="50" cy="50" r={R} fill="none" strokeWidth="7" strokeLinecap="round" stroke={tone.ring} strokeDasharray={C} strokeDashoffset={C * (1 - score / 100)} className="transition-[stroke-dashoffset] duration-700 motion-reduce:transition-none" />
-            </svg>
-            <span className={cn('absolute inset-0 m-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-50 dark:bg-white/[0.06]', tone.text)}>
-              <AppIcon icon={Gauge} size="shortcut" />
-            </span>
-          </div>
-          <p className={cn('mt-4 text-[12px] font-bold uppercase tracking-[0.08em]', tone.text)}>{t('plan.risk.score_line', { style: t(`plan.risk.style_${style}`), score })}</p>
+          {/* The style, named: no score, since the questionnaire only places you in a style */}
+          <span className={cn('mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 dark:bg-white/[0.06]', tone.text)} aria-hidden>
+            <AppIcon icon={Gauge} size="shortcut" />
+          </span>
+          <p className={cn('mt-4 text-[12px] font-bold uppercase tracking-[0.08em]', tone.text)}>{t('plan.risk.your_style')}</p>
           <p className="mt-1.5 text-[22px] font-bold text-slate-900 dark:text-white">{t('plan.risk.investor', { style: t(`plan.risk.style_${style}`) })}</p>
           <p className="mx-auto mt-2 max-w-[440px] text-[14px] leading-relaxed text-slate-600 dark:text-slate-300">{t(`plan.risk.style_${style}_desc`)}</p>
           <p className="mx-auto mt-3 max-w-[440px] text-[12px] text-slate-500 dark:text-slate-400">{t('plan.risk.result_why')} {t('plan.risk.disclaimer')}</p>
@@ -186,12 +175,7 @@ function InlineQuestionnaire({ onClose, onComplete }: { onClose: () => void; onC
   const tone = STYLE_TONE[style]
   const total = QUESTIONS.length
   const answered = QUESTIONS.filter((q) => answers[q]).length
-  /** The style to apply: the matched one, unless another card is picked */
-  const [picked, setPicked] = useState<RiskStyle>('moderate')
-  const showResult = () => {
-    setPicked(style)
-    setStage('result')
-  }
+  const showResult = () => setStage('result')
 
   const back = () => (stage === 'result' ? setStage('questions') : onClose())
 
@@ -281,64 +265,44 @@ function InlineQuestionnaire({ onClose, onComplete }: { onClose: () => void; onC
 
       {stage === 'result' && (
         <div className="mt-4">
-          {/* Who you are as an investor, in words, then where your score sits on the scale */}
-          <p className={cn('text-[12px] font-bold uppercase tracking-[0.08em]', tone.text)}>{t('plan.risk.score_of', { score })}</p>
+          {/* Who you are as an investor, in words, and how to change it */}
+          <p className={cn('text-[12px] font-bold uppercase tracking-[0.08em]', tone.text)}>{t('plan.risk.your_style')}</p>
           <p className="mt-1 text-[22px] font-bold leading-tight text-slate-900 dark:text-white">{t('plan.risk.result_title', { style: t(`plan.risk.style_${style}`) })}</p>
+          <p className="mt-1.5 text-[14px] text-slate-600 dark:text-slate-300">{t('plan.risk.change_hint')}</p>
 
-          <div className="mt-5" aria-hidden>
-            <div className="relative">
-              <div className="flex h-2.5 overflow-hidden rounded-full">
-                {SPECTRUM.map((band) => (
-                  <span key={band.style} className="h-full" style={{ width: `${band.to - band.from}%`, backgroundColor: STYLE_TONE[band.style].ring, opacity: band.style === style ? 1 : 0.3 }} />
-                ))}
-              </div>
-              <span className="absolute top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-white bg-slate-900 shadow-md dark:border-gray-900 dark:bg-white" style={{ left: `${Math.min(98, Math.max(2, score))}%` }} />
-            </div>
-            <div className="mt-1.5 flex text-[11px] text-slate-500 dark:text-slate-400">
-              {SPECTRUM.map((band) => (
-                <span key={band.style} className={cn('text-center', band.style === style && 'font-semibold text-slate-900 dark:text-white')} style={{ width: `${band.to - band.from}%` }}>
-                  {`${band.from}–${band.to}`}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* The three styles side by side: yours is marked, and any of them can be picked */}
-          <div className="mt-5 grid gap-3 sm:grid-cols-3" role="radiogroup" aria-label={t('plan.risk.pick_style')}>
+          {/* The three styles side by side for context; only your match can be applied. A different style means
+              retaking the questionnaire, so the choice always rests on the answers */}
+          <ul className="mt-5 grid gap-3 sm:grid-cols-3">
             {SPECTRUM.map(({ style: st }) => {
-              const on = picked === st
+              const mine = st === style
               const split = SPLIT[st]
               return (
-                <button
+                <li
                   key={st}
-                  type="button"
-                  role="radio"
-                  aria-checked={on}
-                  onClick={() => setPicked(st)}
+                  aria-current={mine ? 'true' : undefined}
                   className={cn(
-                    'flex flex-col rounded-2xl p-4 text-left ring-1 transition-colors',
-                    FOCUS,
-                    on ? 'bg-blue-50/60 ring-2 ring-blue-600 dark:bg-blue-500/10 dark:ring-blue-400' : 'ring-slate-200 hover:ring-slate-300 dark:ring-white/15',
+                    'flex flex-col rounded-2xl p-4 ring-1',
+                    mine ? 'bg-blue-50/60 ring-2 ring-blue-600 dark:bg-blue-500/10 dark:ring-blue-400' : 'opacity-60 ring-slate-200 dark:ring-white/15',
                   )}
                 >
                   <span className="flex items-center justify-between gap-2">
                     <span className={cn('text-[15px] font-bold', STYLE_TONE[st].text)}>{t(`plan.risk.style_${st}`)}</span>
-                    {st === style && <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-semibold text-white dark:bg-white dark:text-slate-900">{t('plan.risk.your_match')}</span>}
+                    {mine && <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-semibold text-white dark:bg-white dark:text-slate-900">{t('plan.risk.your_match')}</span>}
                   </span>
                   <span className="mt-1 text-[12px] leading-snug text-slate-600 dark:text-slate-300">{t(`plan.risk.style_${st}_short`)}</span>
                   <span className="mt-3 flex h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10" aria-hidden>
                     <span className="h-full bg-blue-600 dark:bg-blue-400" style={{ width: `${split.stocks}%` }} />
                   </span>
                   <span className="mt-1.5 text-[11px] tabular-nums text-slate-500 dark:text-slate-400">{t('plan.risk.split', { stocks: split.stocks, bonds: split.bonds })}</span>
-                </button>
+                </li>
               )
             })}
-          </div>
+          </ul>
 
           <p className="mt-4 text-[12px] text-slate-500 dark:text-slate-400">{t('plan.risk.disclaimer')}</p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <button type="button" onClick={() => onComplete(picked)} className={PRIMARY}>{t('plan.risk.use_named', { style: t(`plan.risk.style_${picked}`) })}</button>
-            <button type="button" onClick={() => setStage('questions')} className={cn('inline-flex h-10 items-center rounded-full px-4 text-[14px] font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/10', FOCUS)}>{t('plan.risk.change_answers')}</button>
+            <button type="button" onClick={() => onComplete(style)} className={PRIMARY}>{t('plan.risk.use_named', { style: t(`plan.risk.style_${style}`) })}</button>
+            <button type="button" onClick={() => { setAnswers({}); setStage('questions') }} className={cn('inline-flex h-10 items-center rounded-full px-4 text-[14px] font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/10', FOCUS)}>{t('plan.risk.retake_quiz')}</button>
           </div>
         </div>
       )}
