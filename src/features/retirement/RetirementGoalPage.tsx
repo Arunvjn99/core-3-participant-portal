@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, Check, Minus, Plus, Target } from 'lucide-react'
+import { ArrowLeft, Check, Minus, Plus } from 'lucide-react'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { Modal } from '@/design-system/components/Modal'
 import { RangeSlider } from '@/design-system/components/RangeSlider'
@@ -9,7 +9,7 @@ import { cn } from '@/lib/cn'
 import { getAppDateLocale } from '@/lib/dateLocale'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
 import { useElectionsStore } from '@/features/plan/electionsStore'
-import { PLANS } from '@/features/portfolio/portfolioData'
+import { useParticipantBasics } from '@/features/enrollment/useParticipantBasics'
 import { stateTaxRate, US_STATES } from './retirementModel'
 import { useRetirementGoal } from './retirementStore'
 import { ReadinessRing, ReadinessStatus } from './ReadinessRing'
@@ -23,8 +23,6 @@ const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:rin
 const CARD = 'rounded-[20px] bg-surface-card shadow-[0_12px_32px_-28px_rgba(11,21,51,0.45)] ring-1 ring-slate-200/70 dark:ring-white/10'
 const PILL_PRIMARY = `inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-primary px-5 text-[14px] font-semibold text-white shadow-[0_6px_14px_-8px_rgba(37,99,235,0.5)] transition-[filter] hover:brightness-110 disabled:pointer-events-none disabled:opacity-50 dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)] ${FOCUS}`
 const PILL_SECONDARY = `inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-white px-5 text-[14px] font-semibold text-slate-900 shadow-[0_2px_6px_-3px_rgba(11,21,51,0.12)] ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-white/5 dark:text-white dark:ring-white/15 dark:hover:bg-white/10 ${FOCUS}`
-/** The dashboard's card-header badge: a small coloured tile with a white icon */
-const BADGE = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_16px_-8px_rgba(11,21,51,0.45)]'
 const LABEL = 'mb-1.5 block text-[14px] font-semibold text-text-primary'
 const HINT = 'mt-1.5 text-[12px] leading-snug text-slate-600 dark:text-slate-300'
 const ERROR = 'mt-1.5 text-[12px] font-medium text-red-700 dark:text-red-300'
@@ -37,6 +35,8 @@ const MIN_SALARY = 10_000
 export default function RetirementGoalPage() {
   const { t } = useTranslation()
   const locale = getAppDateLocale()
+  /** The participant's own plan, named as it is everywhere else */
+  const planName = t('enrollment.rw.plan_name', { employer: useParticipantBasics().employer })
   const goal = useRetirementGoal()
   const elections = useElectionsStore()
   const mergeDraft = useEnrollmentDraftStore((s) => s.mergeDraftSection)
@@ -60,7 +60,6 @@ export default function RetirementGoalPage() {
   const [monthly, setMonthly] = useState(String(startMonthly))
   const [salary, setSalary] = useState(String(salarySaved))
   const [outside, setOutside] = useState(String(startOutside))
-  const [planId, setPlanId] = useState(PLANS[0].id)
   const [preTax, setPreTax] = useState(startPreTax)
   const [roth, setRoth] = useState(startRoth)
   const [auto, setAuto] = useState(data.autoIncrease)
@@ -68,7 +67,6 @@ export default function RetirementGoalPage() {
   const [saved, setSaved] = useState(false)
 
   const money = (v: number) => `$${Math.round(v).toLocaleString(locale)}`
-  const plan = PLANS.find((p) => p.id === planId) ?? PLANS[0]
 
   /**
    * One projection for everything on the page (score, expense, income, shortfall, years), using the same model as the
@@ -81,8 +79,8 @@ export default function RetirementGoalPage() {
     const years = Math.max(0, retirementAge - currentAge)
     const sources = rate > 0 ? { preTax: (preTax / rate) * 100, roth: (roth / rate) * 100, afterTax: (afterTax / rate) * 100 } : data.contributionSources
     const growthRate = getGrowthRate(data.riskLevel)
-    // The main plan starts from the same balance as the dashboard; another plan starts from its own balance
-    const startingBalance = plan.id === PLANS[0].id ? personalization.currentSavings : plan.balance
+    // Starts from the same balance as the dashboard, so the score here and there agree
+    const startingBalance = personalization.currentSavings
     const balance = projectBalance({
       startingBalance,
       salary: pay,
@@ -101,8 +99,11 @@ export default function RetirementGoalPage() {
       taxableShare: rate > 0 ? preTax / rate : 1,
     })
     return { years, income }
-  }, [salary, preTax, roth, afterTax, retirementAge, currentAge, auto, monthly, outside, location, plan, personalization.currentSavings, data.contributionSources, data.riskLevel, data.autoIncreaseAmount, data.autoIncreaseMax])
+  }, [salary, preTax, roth, afterTax, retirementAge, currentAge, auto, monthly, outside, location, personalization.currentSavings, data.contributionSources, data.riskLevel, data.autoIncreaseAmount, data.autoIncreaseMax])
   const score = projection.income.readinessPct
+  /** The score the page opened with, so every change shows how far it moves the score */
+  const [startScore] = useState(score)
+  const scoreDelta = Math.round(score - startScore)
   const result = {
     yearsRemaining: projection.years,
     expectedExpense: projection.income.goal,
@@ -175,6 +176,27 @@ export default function RetirementGoalPage() {
     </div>
   )
 
+  /** A numbered step heading, with one line saying what it's for */
+  const step = (n: number, title: string, sub: string) => (
+    <div className="flex items-start gap-3">
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-[13px] font-bold text-blue-700 dark:bg-blue-500/25 dark:text-blue-200" aria-hidden>{n}</span>
+      <div>
+        <h2 className="text-[16px] font-bold leading-tight text-text-primary">{title}</h2>
+        <p className="mt-0.5 text-[13px] text-slate-600 dark:text-slate-300">{sub}</p>
+      </div>
+    </div>
+  )
+  const moneyField = (id: string, label: string, value: string, set: (v: string) => void, err: string, hint: string) => (
+    <div>
+      <label htmlFor={id} className={LABEL}>{label}</label>
+      <span className="relative block">
+        <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[15px] text-slate-500 dark:text-slate-400">$</span>
+        <input id={id} inputMode="numeric" value={Number(value || 0).toLocaleString(locale)} aria-invalid={err ? true : undefined} onChange={(e) => { set(String(parseMoney(e.target.value))); setSaved(false) }} className={cn(field, 'pl-7 tabular-nums', err && 'border-red-500 focus:border-red-500 focus:ring-red-200')} />
+      </span>
+      {err ? <p role="alert" className={ERROR}>{err}</p> : <p className={HINT}>{hint}</p>}
+    </div>
+  )
+
   return (
     <AnimatedPage>
       <div className="w-full pb-6 pt-2 lg:pb-7 lg:pt-3">
@@ -187,13 +209,17 @@ export default function RetirementGoalPage() {
         </header>
 
         <form noValidate onSubmit={(e) => { e.preventDefault(); update() }} className="grid items-start gap-5 lg:grid-cols-5">
-          <section className={cn(CARD, 'p-5 sm:p-6 lg:col-span-2')} aria-live="polite">
+          <section className={cn(CARD, 'p-5 sm:p-6 lg:sticky lg:top-20 lg:col-span-2')} aria-live="polite">
             <div className="flex flex-wrap items-center gap-5">
               <ReadinessRing score={score} />
               <div className="min-w-0 flex-1">
                 <p className="text-[16px] font-bold leading-snug text-text-primary">{t('dashboard.readinessScore')}</p>
-                <p className="mt-0.5 text-[13px] text-slate-600 dark:text-slate-300">{t('postDashboard.readiness_sub')}</p>
                 <ReadinessStatus score={score} className="mt-3" />
+                {scoreDelta !== 0 && (
+                  <p className={cn('mt-2 text-[13px] font-semibold', scoreDelta > 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-300')}>
+                    {t(scoreDelta > 0 ? 'retirement.delta_up' : 'retirement.delta_down', { count: Math.abs(scoreDelta) })}
+                  </p>
+                )}
               </div>
             </div>
             <dl className="mt-5 divide-y divide-slate-200/80 border-y border-slate-200/80 text-[14px] dark:divide-white/10 dark:border-white/10">
@@ -220,65 +246,45 @@ export default function RetirementGoalPage() {
             </p>
           </section>
 
-          <section className={cn(CARD, 'space-y-5 p-5 sm:p-6 lg:col-span-3')} aria-labelledby="rg-target">
-              <div className="flex items-center gap-2.5">
-                <span className={cn(BADGE, 'bg-blue-600')} aria-hidden><Target className="h-[18px] w-[18px]" /></span>
-                <h2 id="rg-target" className="text-[16px] font-bold text-text-primary">{t('retirement.target')}</h2>
-              </div>
-
-              <div>
-                <label htmlFor="rg-location" className={LABEL}>{t('retirement.location')}</label>
-                <select id="rg-location" value={location} onChange={(e) => { setLocation(e.target.value); setSaved(false) }} className={field}>
-                  {US_STATES.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-                <p className={HINT}>{t('retirement.location_hint')} {taxRate === 0 ? t('retirement.no_state_tax') : t('retirement.state_tax_est', { pct: Math.round(taxRate * 100) })}</p>
-              </div>
-
-              <div>
-                <p className={LABEL} id="rg-age-label">{t('retirement.planned_age')}</p>
-                <div className="flex items-center gap-3" role="group" aria-labelledby="rg-age-label">
-                  <button type="button" onClick={() => { setRetirementAge((a) => Math.max(minAge, a - 1)); setSaved(false) }} aria-label={t('enrollment.quick.decrease')} className={cn('flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-700 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-white/5 dark:text-white dark:ring-white/15 dark:hover:bg-white/10', FOCUS)}><Minus className="h-4 w-4" aria-hidden /></button>
-                  <span className="w-12 text-center text-[20px] font-bold tabular-nums text-text-primary" aria-live="polite">{retirementAge}</span>
-                  <button type="button" onClick={() => { setRetirementAge((a) => Math.min(maxAge, a + 1)); setSaved(false) }} aria-label={t('enrollment.quick.increase')} className={cn('flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-700 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-white/5 dark:text-white dark:ring-white/15 dark:hover:bg-white/10', FOCUS)}><Plus className="h-4 w-4" aria-hidden /></button>
-                  <span className="text-[13px] text-slate-600 dark:text-slate-300">{t('retirement.years_from_now', { years: result.yearsRemaining })}</span>
-                </div>
-                {errors.age && <p role="alert" className={ERROR}>{errors.age}</p>}
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                {([
-                  ['rg-monthly', t('retirement.monthly_spending'), monthly, setMonthly, errors.monthly, t('retirement.spending_hint', { amount: money(parseMoney(monthly) * 12) })],
-                  ['rg-salary', t('retirement.annual_salary'), salary, setSalary, errors.salary, t('retirement.salary_hint')],
-                  ['rg-outside', t('retirement.outside_savings'), outside, setOutside, '', t('retirement.outside_hint')],
-                ] as const).map(([id, label, value, set, err, hint]) => (
-                  <div key={id} className={id === 'rg-outside' ? 'sm:col-span-2' : ''}>
-                    <label htmlFor={id} className={LABEL}>{label}</label>
-                    <span className="relative block">
-                      <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[15px] text-slate-500 dark:text-slate-400">$</span>
-                      <input id={id} inputMode="numeric" value={Number(value || 0).toLocaleString(locale)} aria-invalid={err ? true : undefined} onChange={(e) => { set(String(parseMoney(e.target.value))); setSaved(false) }} className={cn(field, 'pl-7 tabular-nums', err && 'border-red-500 focus:border-red-500 focus:ring-red-200')} />
-                    </span>
-                    {err ? <p role="alert" className={ERROR}>{err}</p> : <p className={HINT}>{hint}</p>}
+          <section className={cn(CARD, 'p-5 sm:p-6 lg:col-span-3')} aria-label={t('retirement.form_label')}>
+            {/* Three short steps, each a plain question: what you want, what you have, what you save */}
+            <ol className="space-y-6">
+              <li className="space-y-4">
+                {step(1, t('retirement.step_goal'), t('retirement.step_goal_sub'))}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <p className={LABEL} id="rg-age-label">{t('retirement.planned_age')}</p>
+                    <div className="flex items-center gap-3" role="group" aria-labelledby="rg-age-label">
+                      <button type="button" onClick={() => { setRetirementAge((a) => Math.max(minAge, a - 1)); setSaved(false) }} aria-label={t('enrollment.quick.decrease')} className={cn('flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-700 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-white/5 dark:text-white dark:ring-white/15 dark:hover:bg-white/10', FOCUS)}><Minus className="h-4 w-4" aria-hidden /></button>
+                      <span className="w-12 text-center text-[20px] font-bold tabular-nums text-text-primary" aria-live="polite">{retirementAge}</span>
+                      <button type="button" onClick={() => { setRetirementAge((a) => Math.min(maxAge, a + 1)); setSaved(false) }} aria-label={t('enrollment.quick.increase')} className={cn('flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-700 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-white/5 dark:text-white dark:ring-white/15 dark:hover:bg-white/10', FOCUS)}><Plus className="h-4 w-4" aria-hidden /></button>
+                    </div>
+                    {errors.age ? <p role="alert" className={ERROR}>{errors.age}</p> : <p className={HINT}>{t('retirement.years_from_now', { years: result.yearsRemaining })}</p>}
                   </div>
-                ))}
-              </div>
-
-              <div>
-                <label htmlFor="rg-plan" className={LABEL}>{t('retirement.plan')}</label>
-                <select id="rg-plan" value={planId} onChange={(e) => setPlanId(e.target.value)} className={field}>
-                  {PLANS.map((p) => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
-                </select>
-              </div>
-
-
-              <div role="group" aria-labelledby="rg-deferral" className="space-y-5 border-t border-slate-200/80 pt-5 dark:border-white/10">
-              <h3 id="rg-deferral" className="text-[16px] font-bold text-text-primary">{t('plan.def.title')}</h3>
-                <div>
-                  {slider(preTax, setPreTax, t('retirement.pretax_deferral'), t('retirement.pretax_hint'), 'var(--chart-blue)')}
+                  {moneyField('rg-monthly', t('retirement.monthly_spending'), monthly, setMonthly, errors.monthly, t('retirement.spending_hint', { amount: money(parseMoney(monthly) * 12) }))}
+                  <div className="sm:col-span-2">
+                    <label htmlFor="rg-location" className={LABEL}>{t('retirement.location')}</label>
+                    <select id="rg-location" value={location} onChange={(e) => { setLocation(e.target.value); setSaved(false) }} className={field}>
+                      {US_STATES.map((st) => (
+                        <option key={st} value={st}>{st}</option>
+                      ))}
+                    </select>
+                    <p className={HINT}>{taxRate === 0 ? t('retirement.no_state_tax') : t('retirement.state_tax_est', { pct: Math.round(taxRate * 100) })}</p>
+                  </div>
                 </div>
+              </li>
+
+              <li className="space-y-4 border-t border-slate-200/80 pt-6 dark:border-white/10">
+                {step(2, t('retirement.step_have'), t('retirement.step_have_sub'))}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {moneyField('rg-salary', t('retirement.annual_salary'), salary, setSalary, errors.salary, t('retirement.salary_hint'))}
+                  {moneyField('rg-outside', t('retirement.outside_savings'), outside, setOutside, '', t('retirement.outside_hint'))}
+                </div>
+              </li>
+
+              <li className="space-y-5 border-t border-slate-200/80 pt-6 dark:border-white/10">
+                {step(3, t('retirement.step_save'), t('retirement.step_save_sub', { plan: planName }))}
+                {slider(preTax, setPreTax, t('retirement.pretax_deferral'), t('retirement.pretax_hint'), 'var(--chart-blue)')}
                 {slider(roth, setRoth, t('retirement.roth_deferral'), t('retirement.roth_hint'), 'var(--accent-purple)')}
                 {errors.rates && <p role="alert" className={ERROR}>{errors.rates}</p>}
                 <label className="flex cursor-pointer items-start gap-3 rounded-xl bg-slate-50 p-3.5 ring-1 ring-slate-200/70 dark:bg-white/5 dark:ring-white/10">
@@ -288,8 +294,10 @@ export default function RetirementGoalPage() {
                     <span className="mt-0.5 block text-[12px] text-slate-600 dark:text-slate-300">{t('retirement.auto_hint', { amount: elections.autoIncrease.amount.preTax, cap: elections.autoIncrease.cap.preTax })}</span>
                   </span>
                 </label>
-              </div>
+              </li>
+            </ol>
 
+            <div className="mt-6 space-y-3">
               {saved && (
                 <p role="status" className="flex items-center gap-1.5 text-[14px] font-semibold text-emerald-800 dark:text-emerald-300">
                   <Check className="h-4 w-4" aria-hidden />
@@ -300,6 +308,7 @@ export default function RetirementGoalPage() {
                 <button type="button" onClick={cancel} className={PILL_SECONDARY}>{t('profile.d.cancel')}</button>
                 <button type="submit" disabled={!valid} className={PILL_PRIMARY}>{t('retirement.update')}</button>
               </div>
+            </div>
           </section>
         </form>
       </div>

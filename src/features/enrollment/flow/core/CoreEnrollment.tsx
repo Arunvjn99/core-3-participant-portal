@@ -1470,7 +1470,7 @@ export default function CoreEnrollment() {
       <Sheet preview open={sheet === 'auto'} onClose={cancelEdit} title={t('enrollment.core.sheet_auto')} subtitle={t('enrollment.core.sheet_sub')} footer={editFooter('auto', false)}>
         <AutoIncreaseEditor value={election} onChange={setElection} ctx={editCtx} />
       </Sheet>
-      <Sheet preview wide={investQuiz ? false : 'md'} open={sheet === 'invest'} onClose={cancelEdit} title={t('enrollment.core.sheet_invest')} subtitle={t('enrollment.core.sheet_sub')} footer={investQuiz ? undefined : editFooter('invest', fundsError)}>
+      <Sheet preview wide="md" open={sheet === 'invest'} onClose={cancelEdit} title={t('enrollment.core.sheet_invest')} subtitle={t('enrollment.core.sheet_sub')} footer={investQuiz ? undefined : editFooter('invest', fundsError)}>
         <InvestmentsEditor value={election} onChange={setElection} ctx={editCtx} onQuizChange={setInvestQuiz} />
       </Sheet>
 

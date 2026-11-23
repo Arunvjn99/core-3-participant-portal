@@ -62,9 +62,10 @@ const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:rin
  */
 export function WebSummary(p: WebSummaryProps) {
   const { t } = useTranslation()
-  const [period, setPeriod] = useState<Period>('paycheck')
+  const [period, setPeriod] = useState<Period>('month')
+  /** With monthly paychecks, per paycheck and per month are the same figure, so only one is offered */
+  const periodsShown: Period[] = p.periods === 12 ? ['month', 'year'] : ['paycheck', 'month', 'year']
   const [activeFlow, setActiveFlow] = useState<string | null>(null)
-  const [year, setYear] = useState(0)
 
   const per = period === 'paycheck' ? p.periods : period === 'month' ? 12 : 1
   const ofYear = (v: number) => v / per
@@ -72,16 +73,15 @@ export function WebSummary(p: WebSummaryProps) {
   const yearlyYou = (p.salary * p.total) / 100
   const yearlyIn = yearlyYou + p.match
 
-  // Where your savings come from: each source of your own pay, in one bar. The employer's match is not your
-  // savings, so it stays in the Employer Match card and the totals above, not here.
-  const flow = p.sources
-    .filter((s) => s.pct > 0)
-    .map((s) => ({ key: s.key, label: s.label, amount: (p.salary * s.pct) / 100, note: t('enrollment.core.web.pct_of_pay', { pct: s.pct }), bar: s.bar }))
-  const flowTotal = flow.reduce((sum, s) => sum + s.amount, 0) || 1
+  // What goes into the account: each source of your own pay, then your employer's match, as on the printed summary
+  const flow = [
+    ...p.sources.filter((src) => src.pct > 0).map((src) => ({ key: src.key, label: src.label, amount: (p.salary * src.pct) / 100, note: t('enrollment.core.web.pct_of_pay', { pct: src.pct }), bar: src.bar })),
+    ...(p.match > 0 ? [{ key: 'match', label: t('enrollment.core.web.employer'), amount: p.match, note: t('enrollment.core.web.free_money', { cap: p.cap }), bar: 'bg-emerald-500' }] : []),
+  ]
+  const flowTotal = flow.reduce((sum, row) => sum + row.amount, 0) || 1
   const [hoverClass, setHoverClass] = useState<string | null>(null)
   const matchedRate = Math.min(p.deferral, p.cap)
   const schedule = p.auto.schedule
-  const picked = schedule[Math.min(year, schedule.length - 1)]
 
   return (
     <div className="mx-auto w-full max-w-[920px] space-y-4">
@@ -89,7 +89,7 @@ export function WebSummary(p: WebSummaryProps) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-[13px] text-text-secondary">{t('enrollment.core.web.intro')}</p>
         <div role="group" aria-label={t('enrollment.core.web.period_label')} className="inline-flex rounded-full bg-slate-100 p-1 dark:bg-white/[0.08]">
-          {(['paycheck', 'month', 'year'] as Period[]).map((k) => (
+          {periodsShown.map((k) => (
             <button
               key={k}
               type="button"
@@ -111,12 +111,12 @@ export function WebSummary(p: WebSummaryProps) {
           { label: t('enrollment.core.web.kpi_total'), value: p.money(ofYear(yearlyIn)), sub: periodWord },
           { label: t('enrollment.core.m_proj', { age: p.retireAge }), value: p.compact(p.projected), sub: t('enrollment.core.not_guaranteed') },
         ].map((k, i) => (
-          <div key={k.label} className={cn(CARD, 'relative overflow-hidden p-4 sm:p-4')}>
+          <div key={k.label} className={cn(CARD, 'flex flex-col p-4 sm:p-4')}>
             <dt className="text-[12px] font-medium text-text-secondary">{k.label}</dt>
             <dd className={cn('mt-1 text-[22px] font-bold tabular-nums tracking-tight text-text-primary', k.tone)}>{k.value}</dd>
             <dd className="text-[12px] text-text-secondary">{k.sub}</dd>
-            {/* The projection tile carries its own small growth line */}
-            {i === 3 && <Sparkline points={p.series} label={t('enrollment.core.chart_label')} />}
+            {/* The projection tile carries its own small growth line, from today to retirement */}
+            {i === 3 && <Sparkline points={p.series} label={t('enrollment.core.chart_label')} from={t('enrollment.core.web.auto_today')} to={t('enrollment.core.web.age', { age: p.retireAge })} />}
           </div>
         ))}
       </dl>
@@ -127,7 +127,7 @@ export function WebSummary(p: WebSummaryProps) {
           <IconTile name="contributions" />
           <div>
             <h3 id="web-flow" className={CARD_TITLE}>{t('enrollment.core.web.flow_title')}</h3>
-            <p className="text-[13px] text-text-secondary">{t('enrollment.core.web.flow_sub', { amount: p.money(ofYear(yearlyYou)), period: periodWord })}</p>
+            <p className="text-[13px] text-text-secondary">{t('enrollment.core.web.flow_sub', { you: p.money(ofYear(yearlyYou)), employer: p.money(ofYear(p.match)), period: periodWord })}</p>
           </div>
         </div>
         <div className="mt-4 flex h-4 w-full gap-[2px] overflow-hidden rounded-full" aria-hidden>
@@ -220,37 +220,39 @@ export function WebSummary(p: WebSummaryProps) {
               </p>
             </div>
           </div>
-          {p.auto.enabled && schedule.length > 0 && picked ? (
+          {p.auto.enabled && schedule.length > 0 ? (
             <>
-              <div className="mt-5 flex h-28 items-end gap-1.5" role="group" aria-label={t('enrollment.core.web.auto_pick')}>
-                {schedule.map((row, i) => (
-                  <button
-                    key={row.year}
-                    type="button"
-                    aria-pressed={i === year}
-                    aria-label={t('enrollment.core.web.auto_year', { year: row.year, rate: row.rate })}
-                    onClick={() => setYear(i)}
-                    onMouseEnter={() => setYear(i)}
-                    onFocus={() => setYear(i)}
-                    className={cn('group/bar flex h-full min-w-0 max-w-[48px] flex-1 flex-col justify-end rounded-t-md', FOCUS)}
-                  >
-                    <span
-                      className={cn('w-full rounded-t-[4px] transition-colors', i === year ? 'bg-[#2563EB] dark:bg-blue-400' : 'bg-blue-200 group-hover/bar:bg-blue-300 dark:bg-blue-500/30')}
-                      style={{ height: `${Math.max(8, (row.rate / p.auto.stopAt) * 100)}%` }}
-                    />
-                  </button>
-                ))}
-              </div>
-              {/* Each year under its own bar */}
-              <div className="mt-1.5 flex gap-1.5 text-[10px] tabular-nums text-text-secondary" aria-hidden>
-                {schedule.map((row, i) => (
-                  <span key={row.year} className={cn('min-w-0 max-w-[48px] flex-1 text-center', i === year && 'font-semibold text-text-primary')}>
-                    {`'${String(row.year).slice(2)}`}
-                  </span>
-                ))}
-              </div>
-              <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2.5 text-[13px] text-text-primary dark:bg-white/[0.05]" aria-live="polite">
-                {t('enrollment.core.web.auto_detail', { year: picked.year, rate: picked.rate, amount: p.money((p.salary * picked.rate) / 100 / p.periods) })}
+              <table className="mt-4 w-full text-[13px]">
+                <caption className="sr-only">{t('enrollment.core.sum_schedule')}</caption>
+                <thead>
+                  <tr className="border-b border-slate-200 text-left text-[12px] text-text-secondary dark:border-white/10">
+                    <th scope="col" className="py-1.5 pr-3 font-semibold">{t('enrollment.core.web.auto_when')}</th>
+                    <th scope="col" className="py-1.5 pr-3 font-semibold">{t('enrollment.core.web.auto_rate')}</th>
+                    <th scope="col" className="py-1.5 text-right font-semibold">{t('enrollment.core.web.auto_amount', { period: periodWord })}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[{ year: 0, rate: p.total }, ...schedule].map((row, i) => (
+                    <tr key={row.year} className="border-b border-slate-100 last:border-0 dark:border-white/[0.06]">
+                      <th scope="row" className={cn('py-2 pr-3 text-left', i === 0 ? 'font-semibold text-text-primary' : 'font-medium text-text-primary')}>
+                        {i === 0 ? t('enrollment.core.web.auto_today') : row.year}
+                      </th>
+                      <td className="py-2 pr-3">
+                        <span className="flex items-center gap-2">
+                          <span className="h-1.5 w-16 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10" aria-hidden>
+                            <span className={cn('block h-full rounded-full', i === 0 ? 'bg-slate-400' : 'bg-[#2563EB] dark:bg-blue-400')} style={{ width: `${Math.min(100, (row.rate / p.auto.stopAt) * 100)}%` }} />
+                          </span>
+                          <span className="font-semibold tabular-nums text-text-primary">{`${row.rate}%`}</span>
+                        </span>
+                      </td>
+                      <td className="py-2 text-right font-semibold tabular-nums text-text-primary">{p.money(ofYear((p.salary * row.rate) / 100))}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {/* How each amount is worked out */}
+              <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2.5 text-[12px] text-text-secondary dark:bg-white/[0.05]">
+                {t('enrollment.core.web.auto_how', { pay: p.money(ofYear(p.salary)), period: periodWord, cap: p.auto.stopAt })}
               </p>
             </>
           ) : null}
@@ -350,20 +352,24 @@ export function WebSummary(p: WebSummaryProps) {
   )
 }
 
-/** A small growth line for a tile: the balance from today to retirement, filled underneath */
-function Sparkline({ points, label }: { points: number[]; label: string }) {
+/** A small growth line for a tile: the balance from today to retirement, filled underneath, its two ends labelled */
+function Sparkline({ points, label, from, to }: { points: number[]; label: string; from: string; to: string }) {
   if (points.length < 2) return null
-  const W = 120
-  const H = 40
+  const W = 200
+  const H = 36
   const max = Math.max(...points) || 1
-  const xy = points.map((v, i) => [(i / (points.length - 1)) * W, H - 2 - (v / max) * (H - 6)] as const)
+  const xy = points.map((v, i) => [(i / (points.length - 1)) * W, H - 3 - (v / max) * (H - 8)] as const)
   const line = xy.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ')
-  const [ex, ey] = xy[xy.length - 1]
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="pointer-events-none absolute bottom-3 right-3 h-10 w-[45%] max-w-[130px]" role="img" aria-label={label} preserveAspectRatio="none">
-      <path d={`${line} L${W},${H} L0,${H} Z`} className="fill-blue-500/10 dark:fill-blue-400/15" />
-      <path d={line} fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" className="stroke-blue-600 dark:stroke-blue-400" />
-      <circle cx={ex} cy={ey} r="2.5" className="fill-blue-600 dark:fill-blue-400" />
-    </svg>
+    <div className="mt-auto pt-2">
+      <svg viewBox={`0 0 ${W} ${H}`} className="block h-9 w-full" role="img" aria-label={label} preserveAspectRatio="none">
+        <path d={`${line} L${W},${H} L0,${H} Z`} className="fill-blue-500/10 dark:fill-blue-400/15" />
+        <path d={line} fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" className="stroke-blue-600 dark:stroke-blue-400" />
+      </svg>
+      <div className="mt-1 flex justify-between text-[10px] text-text-secondary" aria-hidden>
+        <span>{from}</span>
+        <span>{to}</span>
+      </div>
+    </div>
   )
 }

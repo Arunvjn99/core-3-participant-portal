@@ -17,7 +17,7 @@ import {
   Shield,
   ArrowDownLeft,
   Building2,
-  Mail,
+  MessagesSquare,
   CalendarDays,
   Target,
   Lock,
@@ -548,11 +548,10 @@ export default function PostEnrollmentDashboard() {
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,13fr)_minmax(0,7fr)]">
             {/* Card 1: Total balance */}
             <SpecCard className="relative flex flex-col overflow-hidden">
-              {/* Overview heading, then two sides in the same type: the balance on the left, this month's contributions on the right */}
+              {/* The balance leads; this month's contributions sit beside it, one step down, as supporting detail */}
               <div className="mb-3">
-                <h1 className="text-[22px] font-bold leading-tight text-[#0B1533] dark:text-white">{t('dashboard.overview')}</h1>
-                <p className="mt-0.5 text-[13px] leading-snug text-text-secondary">{t('dashboard.overview_sub')}</p>
-                <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <h1 className="sr-only">{t('dashboard.overview')}</h1>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <p className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">{t('dashboard.totalBalance')}</p>
                     <p className="mt-1.5 text-[36px] font-bold leading-none tracking-tight tabular-nums text-text-primary">{money(Math.round(account.balance))}</p>
@@ -571,13 +570,13 @@ export default function PostEnrollmentDashboard() {
                       </Link>
                     </div>
                   </div>
-                  <div className="min-w-0 sm:text-right">
+                  <div className="min-w-0 rounded-2xl bg-slate-50 px-4 py-3 sm:text-right dark:bg-white/[0.04]">
                     <p className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">{t('postDashboard.contributions_title')}</p>
-                    <p className="mt-1.5 text-[28px] font-bold leading-none tracking-tight tabular-nums text-text-primary">
+                    <p className="mt-1 text-[20px] font-bold leading-none tracking-tight tabular-nums text-text-primary">
                       {money(monthlyTotal)}
-                      <span className="text-[15px] font-medium tracking-normal text-text-secondary">{t('postDashboard.per_mo')}</span>
+                      <span className="text-[13px] font-medium tracking-normal text-text-secondary">{t('postDashboard.per_mo')}</span>
                     </p>
-                    <p className="mt-3 flex min-h-[24px] flex-wrap items-center gap-x-1.5 text-[13px] text-text-secondary sm:justify-end">
+                    <p className="mt-2 flex flex-wrap items-center gap-x-1.5 text-[12px] text-text-secondary sm:justify-end">
                       <span>{t('postDashboard.c_you')}</span>
                       <span className="font-semibold tabular-nums text-text-primary">{money(monthlyYou)}</span>
                       <span aria-hidden>·</span>
@@ -917,16 +916,11 @@ export default function PostEnrollmentDashboard() {
                     <p className="mt-3 text-[13px] leading-relaxed text-slate-600 dark:text-slate-300">
                       {t('postDashboard.advisor_bio')}
                     </p>
-                    <div className="mt-3 flex flex-wrap gap-2.5">
-                      <Link to="/advisor?tab=messages" className={`flex-auto whitespace-nowrap ${PILL_SECONDARY}`}>
-                        <AppIcon icon={Mail} />
-                        {t('dashboard.message')}
-                      </Link>
-                      <Link to="/advisor?tab=meetings" className={`flex-auto gap-1.5 whitespace-nowrap ${PILL_SECONDARY}`}>
-                        <AppIcon icon={CalendarDays} />
-                        {t('dashboard.scheduleCall')}
-                      </Link>
-                    </div>
+                    {/* One way in: the adviser page holds both messages and booking a call */}
+                    <Link to="/advisor" className={`mt-3 w-full whitespace-nowrap ${PILL_SECONDARY}`}>
+                      <AppIcon icon={MessagesSquare} />
+                      {t('postDashboard.advisor_cta', { name: 'Sarah' })}
+                    </Link>
                   </SpecCard>
               </div>
               <div className="order-4 grid min-w-0 lg:order-none">

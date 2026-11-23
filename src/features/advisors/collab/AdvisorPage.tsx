@@ -30,15 +30,14 @@ export default function AdvisorPage() {
     <AnimatedPage>
       <div className="min-h-screen bg-surface-page">
         <div className="w-full pb-6 pt-2 lg:pb-8 lg:pt-3">
-          {fromInvestments && (
-            <Link
-              to="/enrollment/investment"
-              className="mb-3 inline-flex min-h-10 items-center gap-1.5 rounded-md text-[14px] font-semibold text-slate-600 transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:text-slate-300 dark:hover:text-white dark:focus-visible:ring-offset-slate-900"
-            >
-              <ArrowLeft className="h-4 w-4" aria-hidden />
-              {t('adviser.back_to_investments')}
-            </Link>
-          )}
+          {/* Back to where it was opened from: the enrollment Investment step, otherwise the dashboard */}
+          <Link
+            to={fromInvestments ? '/enrollment/investment' : '/dashboard'}
+            className="mb-3 inline-flex min-h-10 items-center gap-1.5 rounded-md text-[14px] font-semibold text-slate-600 transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:text-slate-300 dark:hover:text-white dark:focus-visible:ring-offset-slate-900"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            {fromInvestments ? t('adviser.back_to_investments') : t('adviser.back_to_dashboard')}
+          </Link>
           <header className="pb-5">
             <h1 className="text-[28px] font-bold leading-tight text-text-primary">{t('adviser.title')}</h1>
             <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-text-secondary">{t('adviser.subtitle')}</p>
