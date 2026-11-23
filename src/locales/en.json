@@ -1,4 +1,71 @@
 {
+  "advisor_modal": {
+    "title_list": "Available Advisors",
+    "title_book": "Book A Session",
+    "done_title": "Booking Confirmed",
+    "back": "Back",
+    "close": "Close",
+    "for_plans": "Advisors for your {{plans}}.",
+    "and": " and ",
+    "filter_label": "Show advisors for",
+    "filter_all": "All Your Plans",
+    "plan_401k": "401(k) Savings Plan",
+    "plan_457b": "457(b) Deferred Compensation Plan",
+    "plan_tag_401k": "401(k)",
+    "plan_tag_457b": "457(b)",
+    "covers": "Covers",
+    "focus_line": "{{focus}} · {{years}} yrs experience",
+    "next_times": "Next Available",
+    "slot_short": "{{day}}, {{time}}",
+    "book": "See All Times",
+    "empty": "No advisors are available for this plan right now.",
+    "select_plan": "Plan To Discuss",
+    "select_date": "Select Date",
+    "select_time": "Select Time",
+    "open_count_one": "{{count}} time open",
+    "open_count_other": "{{count}} times open",
+    "slot_taken": "{{time}}, already booked",
+    "time_note": "Times are in your local time. Each session is 30 minutes.",
+    "meeting_type": "Meeting Type",
+    "video": "Video Call",
+    "phone": "Phone Call",
+    "topic": "Topic (Optional)",
+    "topic_ph": "What would you like to discuss?",
+    "confirm": "Choose A Time",
+    "confirm_at": "Confirm {{day}} At {{time}}",
+    "confirming": "Confirming…",
+    "err_time": "Choose a time to continue.",
+    "err_save": "We couldn't confirm the booking. Please try again.",
+    "done_body": "Your session with <b>{{name}}</b> is scheduled.",
+    "done_when": "{{date}} at {{time}}",
+    "done_type_video": "Video call · 30 minutes",
+    "done_type_phone": "Phone call · 30 minutes",
+    "done_plan": "About your {{plan}}",
+    "done_email": "A confirmation is on its way to your email.",
+    "done": "Done",
+    "dir": {
+      "sarah": {
+        "title": "Certified Financial Planner",
+        "focus": "401(k) Planning",
+        "bio": "Helps you get the most from your 401(k): the match, Pre-Tax or Roth, and how much to save."
+      },
+      "elena": {
+        "title": "Multi-Plan Retirement Advisor",
+        "focus": "401(k) And 457(b) Together",
+        "bio": "Plans across more than one account, such as a 401(k) with a 457(b), so your savings and limits work together."
+      },
+      "marcus": {
+        "title": "Wealth Management Advisor",
+        "focus": "401(k) Investments",
+        "bio": "Focuses on the funds in your 401(k): diversification, risk and long-term growth."
+      },
+      "priya": {
+        "title": "Deferred Compensation Specialist",
+        "focus": "457(b) Plans",
+        "bio": "Explains how a 457(b) works: its separate limit, withdrawals and taxes in retirement."
+      }
+    }
+  },
   "plan2": {
     "tabs_label": "Your plans",
     "tab_main": "401(k) Plan",

@@ -1,4 +1,71 @@
 {
+  "advisor_modal": {
+    "title_list": "Asesores disponibles",
+    "title_book": "Reservar una sesión",
+    "done_title": "Reserva confirmada",
+    "back": "Atrás",
+    "close": "Cerrar",
+    "for_plans": "Asesores para tu {{plans}}.",
+    "and": " y tu ",
+    "filter_label": "Mostrar asesores para",
+    "filter_all": "Todos tus planes",
+    "plan_401k": "Plan de ahorro 401(k)",
+    "plan_457b": "Plan de compensación diferida 457(b)",
+    "plan_tag_401k": "401(k)",
+    "plan_tag_457b": "457(b)",
+    "covers": "Cubre",
+    "focus_line": "{{focus}} · {{years}} años de experiencia",
+    "next_times": "Próximos horarios",
+    "slot_short": "{{day}}, {{time}}",
+    "book": "Ver todos los horarios",
+    "empty": "No hay asesores disponibles para este plan en este momento.",
+    "select_plan": "Plan a tratar",
+    "select_date": "Elige la fecha",
+    "select_time": "Elige la hora",
+    "open_count_one": "{{count}} horario libre",
+    "open_count_other": "{{count}} horarios libres",
+    "slot_taken": "{{time}}, ya reservado",
+    "time_note": "Los horarios están en tu hora local. Cada sesión dura 30 minutos.",
+    "meeting_type": "Tipo de reunión",
+    "video": "Videollamada",
+    "phone": "Llamada telefónica",
+    "topic": "Tema (opcional)",
+    "topic_ph": "¿De qué te gustaría hablar?",
+    "confirm": "Elige un horario",
+    "confirm_at": "Confirmar {{day}} a las {{time}}",
+    "confirming": "Confirmando…",
+    "err_time": "Elige un horario para continuar.",
+    "err_save": "No pudimos confirmar la reserva. Inténtalo de nuevo.",
+    "done_body": "Tu sesión con <b>{{name}}</b> está programada.",
+    "done_when": "{{date}} a las {{time}}",
+    "done_type_video": "Videollamada · 30 minutos",
+    "done_type_phone": "Llamada telefónica · 30 minutos",
+    "done_plan": "Sobre tu {{plan}}",
+    "done_email": "Te enviamos una confirmación a tu correo.",
+    "done": "Listo",
+    "dir": {
+      "sarah": {
+        "title": "Planificadora financiera certificada",
+        "focus": "Planificación del 401(k)",
+        "bio": "Te ayuda a sacar el máximo de tu 401(k): la igualación, antes de impuestos o Roth, y cuánto ahorrar."
+      },
+      "elena": {
+        "title": "Asesora de jubilación para varios planes",
+        "focus": "401(k) y 457(b) juntos",
+        "bio": "Planifica con más de una cuenta, como un 401(k) con un 457(b), para que tus ahorros y límites funcionen juntos."
+      },
+      "marcus": {
+        "title": "Asesor de gestión patrimonial",
+        "focus": "Inversiones del 401(k)",
+        "bio": "Se centra en los fondos de tu 401(k): diversificación, riesgo y crecimiento a largo plazo."
+      },
+      "priya": {
+        "title": "Especialista en compensación diferida",
+        "focus": "Planes 457(b)",
+        "bio": "Explica cómo funciona un 457(b): su límite aparte, los retiros y los impuestos en la jubilación."
+      }
+    }
+  },
   "plan2": {
     "tabs_label": "Tus planes",
     "tab_main": "Plan 401(k)",
