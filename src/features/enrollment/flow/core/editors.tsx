@@ -1,12 +1,15 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Trans, useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
-import { LayoutGrid, Lightbulb, Plus, Search, SlidersHorizontal, Target, X } from 'lucide-react'
+import { Check, DollarSign, Lightbulb, Plus, Search, Shield, Target, TrendingUp, X, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/cn'
-import { CYCLES, nextIncreaseDate, type InvestMode } from '@/features/plan/electionsData'
+import { CYCLES, STYLE_TO_RISK, nextIncreaseDate, type InvestMode } from '@/features/plan/electionsData'
+import { RiskQuestionnaire } from '@/features/plan/RiskQuestionnaire'
+import { AppIcon, IconTile, type IconTileTone } from '@/design-system/icons'
 import { fundCatalog } from '../../investmentCatalog'
 import { PLAN_CONFIG, PLAN_LIMITS, employerMatch } from '../../agent/planConfig'
-import { RISKS, clamp, fundColor, fundMeta, round2, rowsFor, type Election } from './model'
+import { clamp, fundColor, fundMeta, round2, rowsFor, type Election } from './model'
 import { useTheme } from '@/core/hooks/useTheme'
 import { RangeSlider } from '@/design-system/components/RangeSlider'
 import { InfoTip, Segmented, Stepper, Switch } from './ui'
@@ -36,6 +39,13 @@ function Field({ title, tip, children, aside }: { title: string; tip?: { label: 
   )
 }
 
+/** The three sources side by side, as the full enrollment flow explains them */
+const SOURCE_GUIDE: { key: 'pre' | 'roth' | 'after'; icon: LucideIcon; tone: IconTileTone }[] = [
+  { key: 'pre', icon: TrendingUp, tone: 'blue' },
+  { key: 'roth', icon: Shield, tone: 'violet' },
+  { key: 'after', icon: DollarSign, tone: 'amber' },
+]
+
 // ── Contribution ──
 export function ContributionEditor({ value, onChange, ctx }: { value: Election; onChange: (e: Election) => void; ctx: Ctx }) {
   const { t } = useTranslation()
@@ -53,6 +63,10 @@ export function ContributionEditor({ value, onChange, ctx }: { value: Election; 
   /** Points short of the full match: only pre-tax and Roth count toward it */
   const matchGap = round2(Math.max(0, cap - (value.preTax + value.roth)))
   const showMatchTip = match < fullMatch && matchGap > 0 && total + matchGap <= max
+  /** Pre-Tax alone is under the match, though Roth already makes up the rest: moving savings into Pre-Tax keeps the
+   *  full match and the same total, and lowers taxable pay now */
+  const deferral = round2(value.preTax + value.roth)
+  const showPreTaxTip = !showMatchTip && value.preTax < cap && deferral >= cap && value.roth > 0
 
   const source = (key: 'preTax' | 'roth' | 'afterTax') => {
     const pct = value[key]
@@ -97,6 +111,34 @@ export function ContributionEditor({ value, onChange, ctx }: { value: Election; 
         </AnimatePresence>
       </div>
 
+      {/* Pro tip: Pre-Tax is under the match, but Roth already fills the gap */}
+      <AnimatePresence initial={false}>
+        {showPreTaxTip && (
+          <motion.div key="pretax-tip" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+            <div className="rounded-2xl bg-amber-50/80 p-3.5 ring-1 ring-amber-100 dark:bg-amber-500/10 dark:ring-amber-400/20">
+              <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-amber-700 dark:text-amber-300">
+                <AppIcon icon={Lightbulb} size="inline" />
+                {t('enrollment.core.pro_tip')}
+              </p>
+              <p className="mt-1.5 text-[13px] leading-[1.5] text-slate-700 dark:text-gray-200">
+                <Trans
+                  i18nKey="enrollment.core.match_protip_pre"
+                  values={{ cap, pre: value.preTax }}
+                  components={{ b: <strong className="font-semibold text-slate-900 dark:text-white" /> }}
+                />
+              </p>
+              <button
+                type="button"
+                onClick={() => set(cap, deferral - cap)}
+                className="mt-2.5 inline-flex h-8 items-center rounded-full bg-white px-3.5 text-[13px] font-semibold text-slate-900 ring-1 ring-amber-200 transition-colors hover:bg-amber-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-gray-900 dark:text-white dark:ring-amber-400/30 dark:hover:bg-gray-800"
+              >
+                {t('enrollment.core.match_protip_pre_cta', { cap })}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Pro tip while some employer match is left unclaimed */}
       <AnimatePresence initial={false}>
         {showMatchTip && (
@@ -133,6 +175,29 @@ export function ContributionEditor({ value, onChange, ctx }: { value: Election; 
           {source('afterTax')}
         </div>
         {outOfRange && <p role="alert" className="mt-1 text-[12px] font-medium text-red-600">{t('enrollment.feed.err_rate', { min, max, total })}</p>}
+
+        {/* Understanding the difference: each source with its colour, icon and three plain points */}
+        <div className="mt-5">
+          <p className="text-[14px] font-semibold text-slate-900 dark:text-white">{t('enrollment.source_page.understanding_title')}</p>
+          <ul className="mt-3 space-y-3">
+            {SOURCE_GUIDE.map(({ key, icon, tone }) => (
+              <li key={key} className="rounded-2xl p-3.5 ring-1 ring-slate-200/80 dark:ring-gray-700">
+                <span className="flex items-center gap-3">
+                  <IconTile icon={icon} tone={tone} />
+                  <span className="text-[15px] font-semibold text-slate-900 dark:text-white">{t(`enrollment.source_page.card_${key}_title`)}</span>
+                </span>
+                <ul className="mt-2.5 space-y-1.5">
+                  {[1, 2, 3].map((n) => (
+                    <li key={n} className="flex items-start gap-2 text-[13px] leading-snug text-slate-700 dark:text-gray-200">
+                      <AppIcon icon={Check} size="inline" className="mt-px text-emerald-600 dark:text-emerald-400" />
+                      {t(`enrollment.source_page.card_${key}_p${n}`)}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </div>
       </Field>
     </div>
   )
@@ -225,31 +290,36 @@ export function InvestmentsEditor({ value, onChange }: { value: Election; onChan
   const { t } = useTranslation()
   const isDark = useTheme().resolvedMode === 'dark'
   const [query, setQuery] = useState('')
+  const [quiz, setQuiz] = useState(false)
   const rows = rowsFor(value)
   const total = rows.reduce((s, r) => s + r.pct, 0)
-  const approaches: { value: InvestMode; icon: typeof Target; title: string; desc: string }[] = [
-    { value: 'risk_style', icon: Target, title: t('enrollment.core.ed.mode_risk'), desc: t('enrollment.core.ed.mode_risk_d') },
-    { value: 'plan_selected', icon: LayoutGrid, title: t('enrollment.core.ed.mode_plan'), desc: t('enrollment.core.ed.mode_plan_d') },
-    { value: 'own', icon: SlidersHorizontal, title: t('enrollment.core.ed.mode_own'), desc: t('enrollment.core.ed.mode_own_d') },
+  const approaches: { value: InvestMode; title: string; desc: string }[] = [
+    { value: 'risk_style', title: t('enrollment.core.ed.mode_risk'), desc: t('enrollment.core.ed.mode_risk_d') },
+    { value: 'plan_selected', title: t('enrollment.core.ed.mode_plan'), desc: t('enrollment.core.ed.mode_plan_d') },
+    { value: 'own', title: t('enrollment.core.ed.mode_own'), desc: t('enrollment.core.ed.mode_own_d') },
   ]
-  const setMode = (m: InvestMode) => onChange({ ...value, mode: m, ownRows: m === 'own' && value.mode !== 'own' ? rows.map((r) => ({ ...r })) : value.ownRows })
+  const setMode = (m: InvestMode) => {
+    onChange({ ...value, mode: m, ownRows: m === 'own' && value.mode !== 'own' ? rows.map((r) => ({ ...r })) : value.ownRows })
+    // Matching a risk level starts with the questionnaire, unless it has already been answered
+    if (m === 'risk_style' && value.mode !== 'risk_style' && !value.riskStyle) setQuiz(true)
+  }
   const setPct = (ticker: string, pct: number) => onChange({ ...value, ownRows: value.ownRows.map((r) => (r.ticker === ticker ? { ...r, pct: clamp(Math.round(pct), 0, 100) } : r)) })
   const addable = fundCatalog.filter((c) => !value.ownRows.some((r) => r.ticker === c.ticker) && (!query.trim() || `${c.name} ${c.ticker}`.toLowerCase().includes(query.trim().toLowerCase())))
 
   return (
     <div className="space-y-6">
       <Field title={t('enrollment.core.ed.approach')}>
-        <div className="space-y-1.5" role="radiogroup" aria-label={t('enrollment.core.ed.approach')}>
-          {approaches.map(({ value: m, icon: Icon, title, desc }) => {
+        <div className="divide-y divide-slate-100 rounded-xl ring-1 ring-slate-200 dark:divide-gray-800 dark:ring-gray-700" role="radiogroup" aria-label={t('enrollment.core.ed.approach')}>
+          {approaches.map(({ value: m, title, desc }) => {
             const on = value.mode === m
             return (
-              <button key={m} type="button" role="radio" aria-checked={on} onClick={() => setMode(m)} className={cn('flex w-full items-start gap-3 rounded-xl border px-3.5 py-3 text-left transition-colors', on ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/30' : 'border-slate-200 hover:border-slate-300 dark:border-gray-700')}>
-                <span className={cn('mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', on ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500 dark:bg-gray-800')}>
-                  <Icon className="h-4 w-4" aria-hidden />
+              <button key={m} type="button" role="radio" aria-checked={on} onClick={() => setMode(m)} className="flex w-full items-start gap-3 px-3.5 py-3 text-left first:rounded-t-xl last:rounded-b-xl hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 dark:hover:bg-gray-800/60">
+                <span className={cn('mt-0.5 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full ring-1', on ? 'bg-blue-600 ring-blue-600' : 'ring-slate-300 dark:ring-gray-600')} aria-hidden>
+                  {on && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-[14px] font-medium text-slate-900 dark:text-white">{title}</span>
-                  <span className={hint}>{desc}</span>
+                  <span className={cn('block text-[14px] text-slate-900 dark:text-white', on ? 'font-semibold' : 'font-medium')}>{title}</span>
+                  {on && <span className={cn(hint, 'block')}>{desc}</span>}
                 </span>
               </button>
             )
@@ -258,9 +328,27 @@ export function InvestmentsEditor({ value, onChange }: { value: Election; onChan
       </Field>
 
       {value.mode === 'risk_style' && (
-        <Field title={t('enrollment.core.ed.risk')}>
-          <Segmented size="sm" label={t('enrollment.core.ed.risk')} value={value.risk} onChange={(r) => onChange({ ...value, risk: r })} options={RISKS.map((r) => ({ value: r, label: t(`enrollment.investment.level_${r}`) }))} />
-        </Field>
+        /* No level to pick by hand: the questionnaire sets it, and can be taken again */
+        <p className={cn(hint, '-mt-3')}>
+          {value.riskStyle ? t('enrollment.core.ed.quiz_result', { style: t(`enrollment.investment.level_${STYLE_TO_RISK[value.riskStyle]}`) }) : t('enrollment.core.ed.quiz_prompt')}{' '}
+          <button type="button" onClick={() => setQuiz(true)} className="inline-flex min-h-6 items-center font-semibold text-blue-700 underline-offset-2 hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-blue-300">
+            {value.riskStyle ? t('enrollment.core.ed.quiz_retake') : t('plan.inv.take_questionnaire')}
+          </button>
+        </p>
+      )}
+      {/* Above the edit panel: rendered on the page body, stacked over the panel */}
+      {createPortal(
+        <div className="relative z-[100]">
+          <RiskQuestionnaire
+            open={quiz}
+            onClose={() => setQuiz(false)}
+            onComplete={(style) => {
+              onChange({ ...value, mode: 'risk_style', risk: STYLE_TO_RISK[style], riskStyle: style })
+              setQuiz(false)
+            }}
+          />
+        </div>,
+        document.body,
       )}
 
       <Field
@@ -318,6 +406,7 @@ export function InvestmentsEditor({ value, onChange }: { value: Election; onChan
       )}
 
       <div className="space-y-4 border-t border-slate-100 pt-5 dark:border-gray-800">
+        <p className="text-[14px] font-semibold text-slate-900 dark:text-white">{t('enrollment.core.ed.plan_settings')}</p>
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className={label}>{t('plan.inv.auto_rebalance')}</p>

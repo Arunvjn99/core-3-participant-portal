@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ADVISOR } from '@/features/advisors/advisorProfile'
+import { AdvisorAvatar } from '@/features/advisors/AdvisorAvatar'
+import { AppIcon } from '@/design-system/icons'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { getAppDateLocale } from '@/lib/dateLocale'
@@ -580,19 +582,10 @@ function InvestmentStrategy() {
           <Card tone="warm">
             <div className="flex flex-col gap-5 md:flex-row md:items-center md:gap-0">
               {/* Who you'd talk to: the dashboard's advisor, with her photo, role and rating */}
-              <div className="flex items-center gap-3.5 md:w-[292px] md:shrink-0 md:border-r md:border-slate-200/80 md:pr-6 md:dark:border-white/10">
+              <div className="flex items-center gap-3 md:w-[292px] md:shrink-0 md:border-r md:border-slate-200/80 md:pr-6 md:dark:border-white/10">
                 <span className="relative shrink-0">
-                  <img
-                    src={ADVISOR.photo}
-                    onError={(e) => {
-                      if (!e.currentTarget.src.endsWith(ADVISOR.fallbackPhoto)) e.currentTarget.src = ADVISOR.fallbackPhoto
-                    }}
-                    alt={ADVISOR.name}
-                    width={56}
-                    height={56}
-                    className="h-14 w-14 rounded-full object-cover ring-2 ring-white shadow-[0_8px_20px_-10px_rgba(11,21,51,0.55)] dark:ring-slate-900"
-                  />
-                  <span className="absolute bottom-0.5 right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white dark:bg-slate-900" aria-hidden>
+                  <AdvisorAvatar />
+                  <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white dark:bg-slate-900" aria-hidden>
                     <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
                   </span>
                 </span>
@@ -600,7 +593,7 @@ function InvestmentStrategy() {
                   <p className="text-[15px] font-bold leading-tight text-slate-900 dark:text-white">{ADVISOR.name}</p>
                   <p className="mt-0.5 text-[13px] text-slate-600 dark:text-slate-300">{t('postDashboard.advisor_title_role')}</p>
                   <p className="mt-1 flex items-center gap-1 text-[12px] text-slate-600 dark:text-slate-300">
-                    <Star className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" aria-hidden />
+                    <AppIcon icon={Star} size="inline" className="text-amber-500 dark:text-amber-300" />
                     {t('pre_dashboard.advisor_meta', { years: ADVISOR.years, rating: ADVISOR.rating })}
                   </p>
                 </div>
@@ -614,7 +607,7 @@ function InvestmentStrategy() {
 
               {/* Opens a conversation with her (it did nothing before) */}
               <button type="button" onClick={() => navigate('/advisor?tab=messages', { state: { from: 'enrollment-investment' } })} className={cn(PILL_SECONDARY, 'shrink-0 self-start md:self-center')}>
-                {t('enrollment.investment.connect_now')} <ChevronRight className="h-4 w-4" />
+                {t('enrollment.investment.connect_now')} <AppIcon icon={ChevronRight} />
               </button>
             </div>
           </Card>

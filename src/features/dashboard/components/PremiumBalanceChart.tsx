@@ -81,7 +81,7 @@ export function PremiumBalanceChart({ data, className = '', isDark = false, axes
   const vmax = axes ? Math.ceil(maxV / step) * step : maxV + (maxV - minV) * 0.06
   const yTicks = axes ? Array.from({ length: Math.round((vmax - vmin) / step) + 1 }, (_, i) => vmin + i * step) : []
 
-  const viewH = axes ? 168 : 120
+  const viewH = axes ? 140 : 120
   const innerW = Math.max(1, width - pad.left - pad.right)
   const innerH = viewH - pad.top - pad.bottom
   const yOf = (v: number) => pad.top + innerH - ((v - vmin) / (vmax - vmin || 1)) * innerH
@@ -176,7 +176,7 @@ export function PremiumBalanceChart({ data, className = '', isDark = false, axes
   return (
     <motion.div
       ref={containerRef}
-      className={`relative w-full select-none ${axes ? 'h-[190px]' : 'h-[120px]'} ${className}`}
+      className={`relative w-full select-none ${axes ? 'h-[162px]' : 'h-[120px]'} ${className}`}
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.85, ease: [0.4, 0, 0.2, 1] }}

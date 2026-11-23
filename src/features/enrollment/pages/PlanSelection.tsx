@@ -7,12 +7,16 @@ import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { cn } from '@/lib/cn'
 import { Check, Sparkles, MessageCircle, Landmark, HelpCircle, ChevronRight } from 'lucide-react'
 import { BODY_TEXT, Card, CARD_TITLE, HEADING, MUTED_TEXT, PILL_PRIMARY, PILL_SECONDARY, RULE, StepHeader, TitleBadge, badge, card } from '@/features/enrollment/enrollmentUi'
+import { SecondPlanCard } from '@/features/plan/SecondPlanCard'
+import { useParticipantBasics } from '@/features/enrollment/useParticipantBasics'
+import { getAppDateLocale } from '@/lib/dateLocale'
 
 export default function PlanSelection() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { setStepNav } = useEnrollmentStepNav()
   const { data, updateData } = useEnrollment()
+  const basics = useParticipantBasics()
   const [showAI, setShowAI] = useState(false)
   const [showCompare, setShowCompare] = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
@@ -102,6 +106,8 @@ export default function PlanSelection() {
     <AnimatedPage>
       <div className="space-y-5">
         <StepHeader title={t('enrollment.plan.choose_title')} subtitle={t('enrollment.plan.choose_subtitle')} />
+        {/* A second plan they're also eligible for: chosen here, alongside the type of 401(k) below */}
+        <SecondPlanCard employer={basics.employer} salary={basics.salary} periods={basics.periods} locale={getAppDateLocale()} />
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {plans.map((plan) => {

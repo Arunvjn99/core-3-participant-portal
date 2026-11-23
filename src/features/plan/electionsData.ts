@@ -112,12 +112,24 @@ export const PERIODS: Record<string, number> = { weekly: 52, biweekly: 26, semim
 /** Map the risk-questionnaire result to a catalogue risk level. */
 export const STYLE_TO_RISK: Record<RiskStyle, RiskKey> = { conservative: 'conservative', moderate: 'balanced', aggressive: 'aggressive' }
 
-export const QUESTIONS = ['horizon', 'drop', 'experience', 'goal', 'income'] as const
-export const ANSWER_KEYS = ['a1', 'a2', 'a3', 'a4'] as const
+/** The risk questionnaire: five statements, each answered from Strongly Agree (5) to Strongly Disagree (1) */
+export const QUESTIONS = ['keep', 'calm', 'growth', 'hold', 'stable'] as const
+export const LIKERT = [5, 4, 3, 2, 1] as const
+/** Agreeing with these points to a lower appetite for risk, so their scale is turned around */
+const REVERSED = new Set<string>(['stable'])
 
-/** Sum of 1–4 per answer: 5–9 conservative, 10–15 moderate, 16–20 aggressive. */
+/** Answers as a score from 0 (most cautious) to 100 (most growth-seeking) */
+export function riskScore(answers: Record<string, number>): number {
+  const sum = QUESTIONS.reduce((s, q) => {
+    const v = answers[q] ?? 3
+    return s + (REVERSED.has(q) ? 6 - v : v)
+  }, 0)
+  return Math.round(((sum - QUESTIONS.length) / (QUESTIONS.length * 4)) * 100)
+}
+
+/** 0 to 40 conservative, 41 to 70 moderate, above 70 aggressive */
 export function styleFromScore(score: number): RiskStyle {
-  if (score <= 9) return 'conservative'
-  if (score <= 15) return 'moderate'
+  if (score <= 40) return 'conservative'
+  if (score <= 70) return 'moderate'
   return 'aggressive'
 }

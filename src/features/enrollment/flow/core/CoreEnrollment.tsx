@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { useBlocker, useNavigate } from 'react-router-dom'
 import { Trans, useTranslation } from 'react-i18next'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { AlertTriangle, ArrowRight, Check, FileText, Landmark, Loader2, Lock, Pencil, Printer, RotateCcw, RotateCw, ChevronRight } from 'lucide-react'
+import { AlertTriangle, ArrowRight, Check, FileText, Landmark, Loader2, Lock, MonitorSmartphone, Pencil, Printer, RotateCcw, RotateCw, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { LEGAL, ROUTES } from '@/lib/constants'
 import { getAppDateLocale } from '@/lib/dateLocale'
@@ -23,6 +23,10 @@ import { checkEligibility, getPlanRules, submitEnrollment } from '../../agent/en
 import { blendedFee, fundColor, fundMeta, pause, round2, rowsFor, type Election } from './model'
 import { AgentMark, AnimatedNumber, ConfettiField, DrawnCheck, EdgeGlow, InfoTip, ProjectionChart, Sheet, Shimmer } from './ui'
 import { AutoIncreaseEditor, ContributionEditor, InvestmentsEditor } from './editors'
+import { WebSummary } from './WebSummary'
+import { AppIcon } from '@/design-system/icons'
+import { SecondPlanCard } from '@/features/plan/SecondPlanCard'
+import { useSecondPlan } from '@/features/plan/secondPlan'
 
 /**
  * One-click enrollment: Core AI builds a plan from the details already on file and opens straight on it. The participant
@@ -99,6 +103,11 @@ export default function CoreEnrollment() {
   const { saveCompleteEnrollment } = useEnrollmentSave()
   const { employer, periods, birthYear, birthMonth, birthDay, age, knownSalary, salary, retireAge, years, savings } = useParticipantBasics()
   const planName = t('enrollment.rw.plan_name', { employer })
+  /** A second plan (457(b)) they're also eligible for, if any; Enroll Now covers it when included */
+  const secondPlan = useSecondPlan()
+  /** With two plans, which one the plan card is showing */
+  const [activePlan, setActivePlan] = useState<'main' | 'second'>('main')
+  const showSecond = !!secondPlan && activePlan === 'second'
 
   const money = (v: number) => `$${Math.round(v).toLocaleString(locale)}`
   const compact = (v: number) => (v >= 1_000_000 ? `$${(v / 1_000_000).toFixed(1)}M` : `$${Math.round(v / 1_000).toLocaleString(locale)}K`)
@@ -134,6 +143,8 @@ export default function CoreEnrollment() {
   /** The plan as it was when an edit panel opened, so Cancel can put it back */
   const [snapshot, setSnapshot] = useState<Election | null>(null)
   const [sheet, setSheet] = useState<SheetKind>(null)
+  /** The full summary opens as an interactive page; the printable form is the other view */
+  const [summaryView, setSummaryView] = useState<'web' | 'print'>('web')
   /** Set just before leaving on purpose (to the step-by-step flow), so the discard prompt doesn't stop it */
   const leaving = useRef(false)
   const [showFunds, setShowFunds] = useState(false)
@@ -863,25 +874,66 @@ export default function CoreEnrollment() {
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300" aria-hidden>
                       <Landmark className="h-[18px] w-[18px]" />
                     </span>
-                    <p className="min-w-0 flex-1 basis-[180px] truncate text-[17px] font-semibold tracking-[-0.01em] text-slate-900 dark:text-white">{planName}</p>
+                    {secondPlan ? (
+                      /* Two plans: a tab for each, with whether it's included, so both are in view and one click switches the details */
+                      <div role="tablist" aria-label={t('plan2.tabs_label')} className="flex min-w-0 flex-1 basis-[320px] gap-1 rounded-xl bg-slate-100 p-1 dark:bg-white/[0.06]">
+                        {([
+                          { key: 'main', name: t('plan2.tab_main'), status: t('plan2.status_included'), on: true },
+                          { key: 'second', name: t('plan2.tab_second'), status: secondPlan.enrolled ? t('plan2.status_included') : t('plan2.status_not_included'), on: secondPlan.enrolled },
+                        ] as const).map((tab) => {
+                          const active = activePlan === tab.key
+                          return (
+                            <button
+                              key={tab.key}
+                              type="button"
+                              role="tab"
+                              aria-selected={active}
+                              aria-controls="plan-panel"
+                              onClick={() => setActivePlan(tab.key)}
+                              className={cn(
+                                'min-w-0 flex-1 rounded-lg px-3 py-1.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
+                                active ? 'bg-white shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-white/10' : 'hover:bg-white/60 dark:hover:bg-white/5',
+                              )}
+                            >
+                              <span className={cn('block truncate text-[14px] font-semibold', active ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-gray-300')}>{tab.name}</span>
+                              <span className={cn('flex items-center gap-1 text-[12px]', tab.on ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-gray-400')}>
+                                <span className={cn('h-1.5 w-1.5 rounded-full', tab.on ? 'bg-emerald-500' : 'bg-slate-400')} aria-hidden />
+                                {tab.status}
+                              </span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    ) : (
+                      <p className="min-w-0 flex-1 basis-[180px] truncate text-[17px] font-semibold tracking-[-0.01em] text-slate-900 dark:text-white">{planName}</p>
+                    )}
                     {/* Plan type: beside the name on wider screens, under it on narrow ones */}
                     <span className="inline-flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-slate-600 dark:text-gray-300">
                       <span className="text-slate-500 dark:text-gray-400">{t('enrollment.core.plan_type')}</span>
-                      <span className="font-semibold text-slate-900 dark:text-white">{t(PLAN_CONFIG.plan.nameKey)}</span>
+                      <span className="font-semibold text-slate-900 dark:text-white">{showSecond ? t('plan2.type') : t(PLAN_CONFIG.plan.nameKey)}</span>
                     </span>
                     {/* Optional: every detail in one place, to check or print; enrolling doesn't need it */}
                     {ready && (
                       <button
                         type="button"
-                        onClick={() => setSheet('summary')}
+                        onClick={() => {
+                          setSummaryView('web')
+                          setSheet('summary')
+                        }}
                         className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[13px] font-semibold text-blue-700 ring-1 ring-inset ring-blue-200 transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-blue-300 dark:ring-blue-400/30 dark:hover:bg-blue-500/10"
                       >
-                        <FileText className="h-3.5 w-3.5" aria-hidden />
+                        <AppIcon icon={FileText} size="inline" />
                         {t('enrollment.core.summary_open')}
                       </button>
                     )}
                   </div>
 
+                  {showSecond ? (
+                    <div id="plan-panel" role="tabpanel">
+                      <SecondPlanCard bare employer={employer} salary={salary} periods={periods} locale={locale} />
+                    </div>
+                  ) : (
+                  <div id="plan-panel" role={secondPlan ? 'tabpanel' : undefined}>
                   <div className="grid md:grid-cols-[1.05fr_1fr]">
                     {/* You save */}
                     <section className="p-5 sm:p-6">
@@ -899,7 +951,7 @@ export default function CoreEnrollment() {
                               <span className="text-[34px] font-semibold tracking-[-0.03em] text-slate-900 sm:text-[40px] dark:text-white">
                                 <AnimatedNumber countUp delay={0.35} value={f.perCheck} format={money} />
                               </span>
-                              <span className="ml-1 text-[16px] text-slate-400">{t('enrollment.core.per_paycheck')}</span>
+                              <span className="ml-1 text-[16px] text-slate-400">{t('enrollment.core.save_unit')}</span>
                             </span>
                             <span className="text-[15px] font-semibold text-blue-900 dark:text-blue-200">
                               <AnimatedNumber countUp delay={0.3} value={f.total} format={(v) => `${round2(v)}%`} /> {t('enrollment.core.of_pay')}
@@ -908,7 +960,7 @@ export default function CoreEnrollment() {
                           <p className="mt-1 text-[14px] text-slate-500 dark:text-gray-400">
                             <Trans
                               i18nKey="enrollment.core.pay_line"
-                              values={{ pay: money(salary / 12), amount: money((salary * f.total) / 100 / 12) }}
+                              values={{ amount: money(f.perCheck), pay: money(salary / periods), yearly: money((salary * f.total) / 100) }}
                               components={{ b: <strong className="font-semibold text-slate-900 dark:text-white" /> }}
                             />
                           </p>
@@ -1150,6 +1202,8 @@ export default function CoreEnrollment() {
                     </section>
                   </div>
 
+                  </div>
+                  )}
                 </motion.article>
 
                 {submitError && stage === 'review' && (
@@ -1174,7 +1228,7 @@ export default function CoreEnrollment() {
                       <span className="text-[14px] leading-[1.55] text-slate-600 dark:text-gray-300">
                         <Trans
                           i18nKey="enrollment.core.consent"
-                          values={{ plan: planName }}
+                          values={{ plan: secondPlan?.enrolled ? t('plan2.both_plans', { plan: planName, second: t('plan2.name', { employer }) }) : planName }}
                           components={{
                             terms: (
                               <button type="button" onClick={(e) => { e.preventDefault(); setSheet('disclosures') }} className="font-semibold text-blue-700 underline underline-offset-2 hover:text-blue-800 dark:text-blue-300" />
@@ -1338,27 +1392,75 @@ export default function CoreEnrollment() {
           >
             <div ref={summaryRef} role="dialog" aria-modal="true" aria-labelledby="sum-doc-title" className="flex min-h-0 flex-1 flex-col">
               <div className="flex shrink-0 items-center justify-between gap-3 border-b border-white/10 bg-slate-900 px-4 py-3 text-white sm:px-6">
-                <p className="min-w-0 truncate text-[14px] font-semibold">{t('enrollment.core.summary_title')}</p>
+                <p className="hidden min-w-0 truncate text-[14px] font-semibold md:block">{t('enrollment.core.summary_title')}</p>
+                {/* Web view: the plan to explore; print view: the form, as it prints */}
+                <div role="group" aria-label={t('enrollment.core.web.views_label')} className="inline-flex shrink-0 rounded-full bg-white/10 p-1">
+                  {(['web', 'print'] as const).map((v) => (
+                    <button
+                      key={v}
+                      type="button"
+                      aria-pressed={summaryView === v}
+                      onClick={() => setSummaryView(v)}
+                      className={cn('inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white', summaryView === v ? 'bg-white text-slate-900' : 'text-white/80 hover:text-white')}
+                    >
+                      <AppIcon icon={v === 'web' ? MonitorSmartphone : FileText} size="inline" />
+                      {t(`enrollment.core.web.view_${v}`)}
+                    </button>
+                  ))}
+                </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <button type="button" onClick={() => setSheet(null)} className="inline-flex h-9 items-center rounded-full px-4 text-[14px] font-semibold text-white ring-1 ring-white/25 transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
                     {t('enrollment.core.close')}
                   </button>
-                  <button type="button" onClick={printSummary} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-white px-4 text-[14px] font-semibold text-slate-900 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">
-                    <Printer className="h-4 w-4" aria-hidden />
-                    {t('enrollment.core.summary_print')}
-                  </button>
+                  {summaryView === 'print' && (
+                    <button type="button" onClick={printSummary} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-white px-4 text-[14px] font-semibold text-slate-900 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900">
+                      <AppIcon icon={Printer} size="inline" />
+                      <span className="hidden sm:inline">{t('enrollment.core.summary_print')}</span>
+                    </button>
+                  )}
                 </div>
               </div>
-              <div className="min-h-0 flex-1 overflow-y-auto px-3 py-6 sm:px-6 sm:py-10" onClick={(e) => e.target === e.currentTarget && setSheet(null)}>
-                <motion.div
-                  initial={reduce ? false : { opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.25, ease }}
-                  className="mx-auto w-full max-w-[816px] shadow-[0_24px_60px_-20px_rgba(0,0,0,0.6)]"
-                >
-                  {summaryDoc}
-                </motion.div>
-              </div>
+              {summaryView === 'web' ? (
+                <div className="min-h-0 flex-1 overflow-y-auto bg-surface-page px-3 py-6 sm:px-6 sm:py-8">
+                  <motion.div key="web" initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, ease }}>
+                    <WebSummary
+                      money={money}
+                      compact={compact}
+                      salary={salary}
+                      periods={periods}
+                      total={f.total}
+                      sources={sources}
+                      match={f.match}
+                      fullMatch={fullMatch}
+                      deferral={deferral}
+                      cap={cap}
+                      matchIntro={t('enrollment.core.match_tip_intro', { per: matchPer, cap })}
+                      auto={{ enabled: election.auto.enabled, raiseBy: election.auto.amount.preTax, stopAt: election.auto.cap.preTax, nextDate: dateLong(nextAuto), schedule: autoSchedule }}
+                      funds={f.rows.map((r, i) => ({ ticker: r.ticker, name: fundMeta(r.ticker)?.name ?? r.ticker, assetClass: fundMeta(r.ticker)?.assetClass ?? '', pct: r.pct, color: fundColor(i) }))}
+                      byAssetClass={byAssetClass}
+                      investLabel={f.invest}
+                      growthPct={growthPct}
+                      series={series}
+                      age={age}
+                      retireAge={retireAge}
+                      projected={f.projected}
+                      yMax={yMax}
+                    />
+                  </motion.div>
+                </div>
+              ) : (
+                <div className="min-h-0 flex-1 overflow-y-auto px-3 py-6 sm:px-6 sm:py-10" onClick={(e) => e.target === e.currentTarget && setSheet(null)}>
+                  <motion.div
+                    key="print"
+                    initial={reduce ? false : { opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25, ease }}
+                    className="mx-auto w-full max-w-[816px] shadow-[0_24px_60px_-20px_rgba(0,0,0,0.6)]"
+                  >
+                    {summaryDoc}
+                  </motion.div>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

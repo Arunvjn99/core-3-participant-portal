@@ -1,11 +1,14 @@
 import { Outlet, useRouteError, isRouteErrorResponse } from 'react-router-dom'
 import { GlobalAskCoreAILayer } from '@/features/ai/components/GlobalAskCoreAILayer'
+import { DemoParticipantPicker } from '@/features/demo/DemoParticipantPicker'
 
 export function RootLayout() {
   return (
     <>
       <Outlet />
       <GlobalAskCoreAILayer />
+      {/* Prototype demo: on every page, from sign-in through enrollment */}
+      <DemoParticipantPicker />
     </>
   )
 }

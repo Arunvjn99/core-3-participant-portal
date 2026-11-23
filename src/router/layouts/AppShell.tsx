@@ -2,11 +2,6 @@ import { useEffect, useState, useRef } from 'react'
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard,
-  ClipboardList,
-  ArrowLeftRight,
-  TrendingUp,
-  User,
   Search,
   Bell,
   LogOut,
@@ -17,9 +12,9 @@ import {
   Globe,
   ChevronDown,
   Check,
-  FileText,
   CircleHelp,
 } from 'lucide-react'
+import { APP_ICONS, AppIcon } from '@/design-system/icons'
 import { useTranslation } from 'react-i18next'
 import { LANGUAGE_MENU_LANGS, type LanguageMenuLang } from '@/core/i18n'
 import { useAuth } from '@/core/hooks/useAuth'
@@ -40,17 +35,17 @@ function getNavItems(isEnrolled: boolean) {
     {
       labelKey: isEnrolled ? 'nav.post_enrollment_dashboard' : 'nav.pre_enrollment_dashboard',
       href: isEnrolled ? ROUTES.POST_ENROLLMENT_DASHBOARD : ROUTES.PRE_ENROLLMENT_DASHBOARD,
-      icon: LayoutDashboard,
+      icon: APP_ICONS.home,
     },
     {
       labelKey: 'nav.enrollment',
       href: isEnrolled ? '/enrollment/manage' : '/enrollment/plan',
-      icon: ClipboardList,
+      icon: APP_ICONS.contributions,
     },
-    { labelKey: 'nav.transactions', href: '/transactions', icon: ArrowLeftRight },
-    { labelKey: 'nav.investments', href: '/investments', icon: TrendingUp },
-    { labelKey: 'nav.documents', href: '/documents', icon: FileText },
-    { labelKey: 'nav.profile', href: '/profile', icon: User },
+    { labelKey: 'nav.transactions', href: '/transactions', icon: APP_ICONS.transactions },
+    { labelKey: 'nav.investments', href: '/investments', icon: APP_ICONS.investments },
+    { labelKey: 'nav.documents', href: '/documents', icon: APP_ICONS.documents },
+    { labelKey: 'nav.profile', href: '/profile', icon: APP_ICONS.profile },
   ]
   // Before enrolling, a first-time user only needs their dashboard and profile
   return isEnrolled ? items : items.filter((i) => i.href === ROUTES.PRE_ENROLLMENT_DASHBOARD || i.href === '/profile')
@@ -91,7 +86,7 @@ export function AppShell() {
   useEffect(() => {
     async function loadDisplayName() {
       if (!supabase) {
-        setUserDisplayName(user?.email?.split('@')[0] || '')
+        setUserDisplayName((user?.user_metadata?.full_name as string | undefined) || user?.email?.split('@')[0] || '')
         return
       }
       const {
@@ -229,13 +224,13 @@ export function AppShell() {
                     key={item.href}
                     to={item.href}
                     data-brand-nav-active={active ? '' : undefined}
-                    className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-all xl:px-3 ${
+                    className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-all ${
                       active
                         ? ''
                         : 'text-text-secondary hover:bg-surface-elevated hover:text-text-primary dark:hover:text-text-primary'
                     }`}
                   >
-                    <item.icon className="hidden h-4 w-4 shrink-0 xl:block" />
+                    <AppIcon icon={item.icon} className="hidden xl:block" />
                     <span>{t(item.labelKey)}</span>
                   </Link>
                 )
@@ -249,7 +244,7 @@ export function AppShell() {
                 className="hidden group h-9 w-9 items-center justify-center rounded-lg text-text-muted transition-[color,background-color,transform] duration-200 hover:bg-surface-elevated hover:text-primary active:scale-90 motion-reduce:active:scale-100 dark:hover:text-blue-300 sm:flex"
                 aria-label={t('nav.open_search')}
               >
-                <Search className="h-4 w-4 transition-transform duration-300 ease-out motion-reduce:transform-none motion-reduce:transition-none group-hover:-rotate-12 group-hover:scale-110" />
+                <AppIcon icon={Search} className="transition-transform duration-300 ease-out motion-reduce:transform-none motion-reduce:transition-none group-hover:-rotate-12 group-hover:scale-110" />
               </button>
               {/* Help Center: from tablet width up; on phones it is in the menu, as the bar has no room */}
               <LegalHrefLink
@@ -258,7 +253,7 @@ export function AppShell() {
                 title={t('footer.help')}
                 className="hidden group h-9 w-9 items-center justify-center rounded-lg text-text-muted transition-[color,background-color,transform] duration-200 hover:bg-surface-elevated hover:text-primary active:scale-90 motion-reduce:active:scale-100 dark:hover:text-blue-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:flex"
               >
-                <CircleHelp className="h-4 w-4 group-hover:animate-[header-icon-wobble_0.6s_ease-in-out] motion-reduce:!animate-none" aria-hidden />
+                <AppIcon icon={CircleHelp} className="group-hover:animate-[header-icon-wobble_0.6s_ease-in-out] motion-reduce:!animate-none" />
               </LegalHrefLink>
               <button
                 type="button"
@@ -267,9 +262,9 @@ export function AppShell() {
                 aria-label={t('nav.toggle_theme')}
               >
                 {resolvedMode === 'dark' ? (
-                  <Sun className="h-4 w-4 animate-[header-theme-swap_0.45s_ease-out] transition-transform duration-300 ease-out motion-reduce:transform-none motion-reduce:transition-none duration-500 group-hover:rotate-90 motion-reduce:animate-none" />
+                  <AppIcon icon={Sun} className="animate-[header-theme-swap_0.45s_ease-out] transition-transform duration-300 ease-out motion-reduce:transform-none motion-reduce:transition-none duration-500 group-hover:rotate-90 motion-reduce:animate-none" />
                 ) : (
-                  <Moon className="h-4 w-4 animate-[header-theme-swap_0.45s_ease-out] transition-transform duration-300 ease-out motion-reduce:transform-none motion-reduce:transition-none group-hover:-rotate-[25deg] group-hover:scale-110 motion-reduce:animate-none" />
+                  <AppIcon icon={Moon} className="animate-[header-theme-swap_0.45s_ease-out] transition-transform duration-300 ease-out motion-reduce:transform-none motion-reduce:transition-none group-hover:-rotate-[25deg] group-hover:scale-110 motion-reduce:animate-none" />
                 )}
               </button>
               <div className="relative">
@@ -285,7 +280,7 @@ export function AppShell() {
                   aria-expanded={notificationsOpen}
                   aria-haspopup="dialog"
                 >
-                  <Bell className="h-4 w-4 origin-top group-hover:animate-[header-bell-ring_0.7s_ease-in-out] motion-reduce:!animate-none" />
+                  <AppIcon icon={Bell} className="origin-top group-hover:animate-[header-bell-ring_0.7s_ease-in-out] motion-reduce:!animate-none" />
                   {hasUnreadNotifications && (
                     <span
                       className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full border-2 border-surface-card"
@@ -308,7 +303,7 @@ export function AppShell() {
                   aria-expanded={langMenuOpen}
                   aria-haspopup="listbox"
                 >
-                  <Globe className="h-4 w-4 shrink-0 transition-transform duration-700 ease-in-out group-hover:rotate-180 motion-reduce:transform-none motion-reduce:transition-none" aria-hidden />
+                  <AppIcon icon={Globe} className="transition-transform duration-700 ease-in-out group-hover:rotate-180 motion-reduce:transform-none motion-reduce:transition-none" />
                   {/* Below wide screens the globe shows alone, so the header fits; the name is still in the button's label */}
                   <span className="hidden min-w-0 truncate text-sm font-medium text-text-primary xl:block">
                     {t(`lang.${menuLang}`)}
@@ -373,9 +368,10 @@ export function AppShell() {
                   >
                     {avatarLetter}
                   </span>
-                  <ChevronDown
-                    className={`h-4 w-4 shrink-0 text-slate-600 transition-transform dark:text-slate-300 ${userMenuOpen ? 'rotate-180' : 'group-hover:translate-y-0.5'} motion-reduce:transition-none`}
-                    aria-hidden
+                  <AppIcon
+                    icon={ChevronDown}
+                    size="inline"
+                    className={`text-slate-600 transition-transform dark:text-slate-300 ${userMenuOpen ? 'rotate-180' : 'group-hover:translate-y-0.5'} motion-reduce:transition-none`}
                   />
                 </button>
                 {userMenuOpen && (
@@ -460,7 +456,7 @@ export function AppShell() {
                 aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={mobileMenuOpen}
               >
-                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                {mobileMenuOpen ? <AppIcon icon={X} size="item" /> : <AppIcon icon={Menu} size="item" />}
               </button>
             </div>
           </div>
@@ -481,7 +477,7 @@ export function AppShell() {
                       active ? 'font-semibold' : 'text-text-primary hover:bg-surface-elevated'
                     }`}
                   >
-                    <item.icon className="h-5 w-5 shrink-0" />
+                    <AppIcon icon={item.icon} size="item" />
                     <span className="text-sm font-medium">{t(item.labelKey)}</span>
                   </Link>
                 )
@@ -493,7 +489,7 @@ export function AppShell() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-text-primary transition-all hover:bg-surface-elevated sm:hidden"
                 >
-                  <CircleHelp className="h-5 w-5 shrink-0" aria-hidden />
+                  <AppIcon icon={CircleHelp} size="item" />
                   <span className="text-sm font-medium">{t('footer.help')}</span>
                 </LegalHrefLink>
                 <button
@@ -504,7 +500,7 @@ export function AppShell() {
                   }}
                   className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-text-primary transition-all hover:bg-surface-elevated"
                 >
-                  <LogOut className="h-5 w-5 shrink-0" />
+                  <AppIcon icon={LogOut} size="item" />
                   <span className="text-sm font-medium">{t('nav.sign_out')}</span>
                 </button>
               </div>

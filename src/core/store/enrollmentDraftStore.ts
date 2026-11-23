@@ -22,6 +22,16 @@ export interface PlanDraftData {
   type?: 'traditional' | 'roth'
 }
 
+/** A second plan the participant is also eligible for (a 457(b)): whether they join it, and at what rate */
+export interface SecondPlanDraftData {
+  offered: boolean
+  enrolled: boolean
+  /** Percent of pay saved in this plan */
+  rate: number
+  /** Balance already in it, for someone enrolled before */
+  balance?: number
+}
+
 export interface ContributionDraftData {
   /** legacy */
   rate?: number
@@ -78,6 +88,7 @@ export interface EnrollmentDraftData {
   readiness?: ReadinessDraftData
   review?: ReviewDraftData
   savings?: SavingsDraftData
+  secondPlan?: SecondPlanDraftData
 }
 
 // ─── Store ──────────────────────────────────────────────────────────────────────
@@ -115,6 +126,7 @@ const DRAFT_KEYS = new Set<keyof EnrollmentDraftData>([
   'readiness',
   'review',
   'savings',
+  'secondPlan',
 ])
 
 export const useEnrollmentDraftStore = create<EnrollmentDraftStore>()(

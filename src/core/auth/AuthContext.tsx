@@ -1,8 +1,9 @@
-import { createContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { User, Session } from '@supabase/supabase-js'
 import type { AuthContextValue } from '../types/auth.types'
 import { getSession, signInWithPassword, signUpWithPassword, signOut as authSignOut, subscribeAuthStateChange } from './authService'
 import { ENV } from '../../lib/constants'
+import { useDemoPersona } from '@/features/demo/demoStore'
 
 export const AuthContext = createContext<AuthContextValue | null>(null)
 
@@ -90,8 +91,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(DEMO_USER)
   }
 
+  // Prototype demo: the signed-in name and email follow the demo participant picked
+  const persona = useDemoPersona()
+  const shownUser = useMemo(
+    () => (ENV.LOCAL_DEMO_BYPASS && user && persona ? ({ ...user, email: persona.email, user_metadata: { ...user.user_metadata, full_name: `${persona.firstName} ${persona.lastName}` } } as User) : user),
+    [user, persona],
+  )
+
   return (
-    <AuthContext.Provider value={{ user, session, loading, signIn, signUp, signOut, signInDemo }}>
+    <AuthContext.Provider value={{ user: shownUser, session, loading, signIn, signUp, signOut, signInDemo }}>
       {children}
     </AuthContext.Provider>
   )

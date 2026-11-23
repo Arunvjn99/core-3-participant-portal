@@ -3,7 +3,9 @@ import { motion, useInView, useReducedMotion } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ADVISOR } from '@/features/advisors/advisorProfile'
-import { ArrowUp, ChevronRight, GraduationCap, Headset, Lightbulb, Sparkles, Star, Zap } from 'lucide-react'
+import { AdvisorAvatar } from '@/features/advisors/AdvisorAvatar'
+import { AppIcon, ICON_COLOR, IconTile } from '@/design-system/icons'
+import { ArrowUp, ChevronRight, GraduationCap, Headset, Lightbulb, Star, Zap } from 'lucide-react'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { useAIStore } from '@/core/store/aiStore'
 import { useAuth } from '@/core/hooks/useAuth'
@@ -13,6 +15,9 @@ import { HeroRideScene } from '../components/HeroRideScene'
 import AdvisorModal from '@/features/advisors/AdvisorModal'
 import { PLAN_CONFIG } from '@/features/enrollment/agent/planConfig'
 import { formatFirstNameForDisplay, getAuthenticatedFirstName } from '@/lib/userDisplayName'
+import { useDemoPersona } from '@/features/demo/demoStore'
+import { PersonaNotice } from '@/features/demo/PersonaNotice'
+import { personaDates } from '@/features/demo/personas'
 
 /**
  * The dashboard before enrollment. A first-time user has no data worth charting, so the banner carries one message and one
@@ -129,9 +134,7 @@ function ChatMessages({ turn, state, running }: { turn: ChatTurn; state: Exchang
         transition={{ duration: 0.25, ease, delay: reduce ? 0 : 0.12 }}
         className="flex w-[94%] items-start gap-2 self-start rounded-2xl rounded-bl-md bg-slate-100 px-2.5 py-1.5 text-left dark:bg-slate-800"
       >
-        <span className="mt-px flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary text-white">
-          <Sparkles className="h-2.5 w-2.5" />
-        </span>
+        <AppIcon name="coreAi" size="inline" className={`mt-px ${ICON_COLOR.active}`} />
         <motion.div
           initial={false}
           animate={{ height: phase === 'thinking' ? 16 : 'auto' }}
@@ -186,7 +189,10 @@ function AskCoreAiCard({ turns, onStart }: { turns: ChatTurn[]; onStart: () => v
   return (
     <div ref={ref} {...hold} className="group relative flex h-full min-h-[380px] flex-col overflow-hidden rounded-[20px] bg-[linear-gradient(180deg,#EAF2FF_0%,#F6F9FF_100%)] p-5 xl:min-h-0 text-left ring-1 ring-blue-100 dark:bg-[linear-gradient(180deg,rgba(59,130,246,0.16)_0%,rgba(15,23,42,1)_100%)] dark:ring-blue-400/20">
       <div className="flex flex-col items-start">
-        <h3 className="text-[16px] font-bold text-text-primary">{t('core_ai.title')}</h3>
+        <h3 className="flex items-center gap-2 text-[16px] font-bold text-text-primary">
+          <AppIcon name="coreAi" className={ICON_COLOR.active} />
+          {t('core_ai.title')}
+        </h3>
         <p className="mt-1 text-[13px] leading-relaxed text-slate-600 dark:text-slate-300">{t('pre_dashboard.ask_note')}</p>
       </div>
 
@@ -217,7 +223,7 @@ function AskCoreAiCard({ turns, onStart }: { turns: ChatTurn[]; onStart: () => v
             <span className="min-w-0 flex-1 truncate text-slate-600 dark:text-slate-300">{t('core_ai.placeholder')}</span>
           )}
           <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white transition-colors duration-200 motion-reduce:transition-none ${typing ? 'bg-primary' : 'bg-slate-400 dark:bg-slate-600'}`}>
-            <ArrowUp className="h-4 w-4" />
+            <AppIcon icon={ArrowUp} size="inline" />
           </span>
         </div>
       </div>
@@ -228,7 +234,7 @@ function AskCoreAiCard({ turns, onStart }: { turns: ChatTurn[]; onStart: () => v
         className={`mt-4 inline-flex self-start h-10 items-center gap-1 rounded-full bg-primary px-4 text-sm font-semibold text-white shadow-[0_8px_20px_-10px_rgba(11,21,51,0.35)] dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)] ${stretchedAction}`}
       >
         {t('core_ai.start_chatting')}
-        <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+        <AppIcon icon={ChevronRight} className="transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" />
       </button>
     </div>
   )
@@ -247,28 +253,18 @@ function AdvisorCard({ cap, onBook }: { cap: number; onBook: () => void }) {
   return (
     <div ref={ref} {...hold} className="flex h-full flex-col">
       {/* Section title: says what the card is for before showing who */}
-      <div className="mb-4 flex items-center gap-2.5">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600 ring-1 ring-amber-100 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-400/20" aria-hidden>
-          <Headset className="h-4 w-4" />
-        </span>
+      {/* A plain section icon (no tile): tiles are kept for the icons that lead a card */}
+      <div className="mb-4 flex items-center gap-2">
+        <AppIcon icon={Headset} className={ICON_COLOR.active} />
         <h3 className="text-[15px] font-bold text-slate-900 dark:text-white">{t('pre_dashboard.advisor_heading')}</h3>
       </div>
     <div className="grid flex-1 gap-5 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:gap-0 md:divide-x md:divide-slate-200/80 md:dark:divide-white/10">
       {/* Left: the person, and the one action */}
       <div className="flex flex-col items-start md:pr-6">
-        <div className="flex items-center gap-3.5">
+        <div className="flex items-center gap-3">
           <span className="relative shrink-0">
-            <img
-              src={ADVISOR.photo}
-              onError={(e) => {
-                if (!e.currentTarget.src.endsWith(ADVISOR.fallbackPhoto)) e.currentTarget.src = ADVISOR.fallbackPhoto
-              }}
-              alt={ADVISOR.name}
-              width={56}
-              height={56}
-              className="h-14 w-14 rounded-full object-cover ring-2 ring-white shadow-[0_8px_20px_-10px_rgba(11,21,51,0.55)] dark:ring-slate-900"
-            />
-            <span className="absolute bottom-0.5 right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white dark:bg-slate-900" aria-hidden>
+            <AdvisorAvatar />
+            <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white dark:bg-slate-900" aria-hidden>
               {running && !reduce && <motion.span className="absolute h-3.5 w-3.5 rounded-full bg-emerald-400" animate={{ scale: [1, 1.8], opacity: [0.6, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: 'easeOut' }} />}
               <span className="relative h-2.5 w-2.5 rounded-full bg-emerald-500" />
             </span>
@@ -277,7 +273,7 @@ function AdvisorCard({ cap, onBook }: { cap: number; onBook: () => void }) {
             <p className="text-[15px] font-bold leading-tight text-slate-900 dark:text-white">{ADVISOR.name}</p>
             <p className="mt-0.5 text-[13px] text-slate-600 dark:text-slate-300">{t('postDashboard.advisor_title_role')}</p>
             <p className="mt-1 flex items-center gap-1 text-[12px] text-slate-500 dark:text-slate-400">
-              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden />
+              <AppIcon icon={Star} size="inline" className="text-amber-500 dark:text-amber-300" />
               {t('pre_dashboard.advisor_meta', { years: ADVISOR.years, rating: ADVISOR.rating })}
             </p>
           </div>
@@ -291,7 +287,7 @@ function AdvisorCard({ cap, onBook }: { cap: number; onBook: () => void }) {
             className={`inline-flex h-10 items-center gap-1 rounded-full bg-white px-4 text-sm font-semibold text-slate-900 shadow-[0_8px_20px_-10px_rgba(11,21,51,0.3)] ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-slate-900 dark:text-white dark:ring-white/15 dark:hover:bg-slate-800 ${stretchedAction}`}
           >
             {t('pre_dashboard.advisor_book')}
-            <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+            <AppIcon icon={ChevronRight} className="transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" />
           </button>
           <span className="text-[12px] text-slate-500 dark:text-slate-400">{t('pre_dashboard.plan_advisor_line')}</span>
         </div>
@@ -302,8 +298,8 @@ function AdvisorCard({ cap, onBook }: { cap: number; onBook: () => void }) {
         <p className="text-[13px] font-bold text-slate-900 dark:text-white">{t('pre_dashboard.advisor_tips_title', { name: firstName })}</p>
         <ul className="mt-3 space-y-2.5">
           {tips.map((tip) => (
-            <li key={tip} className="flex items-start gap-2.5 text-[13px] leading-snug text-slate-600 dark:text-slate-300">
-              <Lightbulb className="mt-px h-4 w-4 shrink-0 text-amber-500 dark:text-amber-300" aria-hidden />
+            <li key={tip} className="flex items-start gap-2 text-[13px] leading-snug text-slate-600 dark:text-slate-300">
+              <AppIcon icon={Lightbulb} size="inline" className="mt-px text-amber-500 dark:text-amber-300" />
               {tip}
             </li>
           ))}
@@ -316,7 +312,9 @@ function AdvisorCard({ cap, onBook }: { cap: number; onBook: () => void }) {
 
 // ────────────────────────────────────────────────────────────────────────────
 export function PreEnrollmentDashboard() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  /** Prototype demo: the participant picked, if any */
+  const persona = useDemoPersona()
   const navigate = useNavigate()
   const reduce = useReducedMotion()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -405,6 +403,8 @@ export function PreEnrollmentDashboard() {
                 {' '}
                 <span className="text-primary dark:text-blue-300">{t('pre_dashboard.title_accent')}</span>
               </h1>
+              {/* Demo participants who aren't eligible yet, or who opted out, see where they stand */}
+              <PersonaNotice persona={persona} className="mt-4 max-w-[560px]" />
               </div>
 
               <div className="mt-6 flex flex-col gap-3 max-sm:order-3 max-sm:mt-4 max-sm:px-5 max-sm:pb-5 sm:flex-row sm:items-center">
@@ -415,14 +415,18 @@ export function PreEnrollmentDashboard() {
                   className={`group inline-flex items-center justify-between gap-3 rounded-full bg-primary text-left text-white dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)] sm:gap-5 sm:whitespace-nowrap shadow-[0_6px_14px_-8px_rgba(37,99,235,0.5)] transition-transform hover:scale-[1.02] active:scale-[0.98] motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100 ${bannerFocus} min-h-14 py-2 pl-5 pr-2 sm:pl-6`}
                 >
                   <span className="inline-flex min-w-0 items-center gap-2.5">
-                    <Zap className="h-[18px] w-[18px] shrink-0" aria-hidden />
+                    <AppIcon icon={Zap} />
                     <span>
-                      <span className="block text-sm font-semibold leading-tight">{t('hero.one_click')}</span>
-                      <span className="mt-0.5 block text-[12px] font-normal leading-tight text-white/90">{t('hero.one_click_time')}</span>
+                      <span className="block text-sm font-semibold leading-tight">
+                        {persona?.status === 'not_eligible' ? t('demo.cta_advance') : persona?.status === 'opted_out' ? t('demo.cta_reenroll') : t('hero.one_click')}
+                      </span>
+                      <span className="mt-0.5 block text-[12px] font-normal leading-tight text-white/90">
+                        {persona?.status === 'not_eligible' ? t('demo.cta_advance_time', { date: personaDates(persona, i18n.language).eligible }) : t('hero.one_click_time')}
+                      </span>
                     </span>
                   </span>
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-primary transition-transform group-hover:translate-x-0.5" aria-hidden>
-                    <ChevronRight className="h-5 w-5" />
+                    <AppIcon icon={ChevronRight} />
                   </span>
                 </button>
                 {/* Secondary: guided enrollment */}
@@ -447,15 +451,14 @@ export function PreEnrollmentDashboard() {
             </div>
 
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)]">
-              {/* Enrich financial learning: the lead card, opens Enrich in a new tab.
-                  The page's blue card, with a chart illustration in the same blues */}
-              <Reveal className="group relative isolate flex min-h-[180px] overflow-clip rounded-[20px] bg-[radial-gradient(90%_130%_at_0%_0%,#CBE7FF_0%,rgba(203,231,255,0)_62%),linear-gradient(90deg,#EEF2FF_0%,#E4E9FF_100%)] p-6 text-left ring-1 ring-blue-100 xl:min-h-[164px] xl:py-5 md:col-span-2 xl:col-span-3 dark:bg-[radial-gradient(90%_130%_at_0%_0%,#173F7A_0%,rgba(23,63,122,0)_62%),linear-gradient(90deg,#0F1A48_0%,#26358F_100%)] dark:ring-blue-400/20">
+              {/* Enrich financial learning: the lead card, opens Enrich in a new tab */}
+              <Reveal className="group relative isolate flex min-h-[180px] overflow-hidden rounded-[20px] bg-[radial-gradient(90%_130%_at_0%_0%,#CBE7FF_0%,rgba(203,231,255,0)_62%),radial-gradient(70%_130%_at_100%_100%,#C9D0FF_0%,rgba(201,208,255,0)_68%),linear-gradient(#EEF2FF,#EEF2FF)] p-6 text-left shadow-[0_18px_40px_-28px_rgba(37,99,235,0.55)] ring-1 ring-blue-200/80 xl:min-h-[164px] xl:py-5 transition-shadow hover:shadow-[0_24px_48px_-26px_rgba(37,99,235,0.6)] md:col-span-2 xl:col-span-3 dark:bg-[radial-gradient(90%_130%_at_0%_0%,#173F7A_0%,rgba(23,63,122,0)_62%),radial-gradient(70%_130%_at_100%_100%,#3340B0_0%,rgba(51,64,176,0)_68%),linear-gradient(#0F1A48,#0F1A48)] dark:shadow-none dark:ring-blue-400/25">
+                {/* The coin art's periwinkle, glowing behind it so the image and card share one light */}
+                <span className="pointer-events-none absolute -right-10 top-1/2 -z-10 h-64 w-80 -translate-y-1/2 rounded-full bg-[#8C9BFF] opacity-35 blur-[70px] transition-opacity group-hover:opacity-50 dark:bg-[#5B6BFF] dark:opacity-45" aria-hidden />
                 {/* Left: what it is and the way in */}
-                <div className="relative z-10 flex flex-1 flex-col items-start justify-center sm:max-w-[60%]">
+                <div className="relative z-10 flex flex-1 flex-col items-start justify-center sm:max-w-[70%]">
                   <span className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_16px_-6px_rgba(37,99,235,0.6)]" aria-hidden>
-                      <GraduationCap className="h-5 w-5" />
-                    </span>
+                    <IconTile icon={GraduationCap} />
                     <h3 className="text-[20px] font-bold leading-tight text-[#0B1533] dark:text-white">
                       <a
                         href={ENRICH_URL}
@@ -469,18 +472,23 @@ export function PreEnrollmentDashboard() {
                     </h3>
                   </span>
                   {/* Lines up with the title, not the badge, so the text reads as one block */}
-                  <p className="mt-0.5 pl-[52px] text-[14px] leading-snug text-slate-700 dark:text-slate-200">{t('pre_dashboard.enrich_desc')}</p>
+                  <p className="mt-0.5 pl-[56px] text-[14px] leading-snug text-slate-700 dark:text-slate-200">{t('pre_dashboard.enrich_desc')}</p>
                   {/* Same button as Start chatting on the Ask Core AI card */}
-                  <span className="ml-[52px] mt-5 inline-flex h-10 items-center gap-1 rounded-full bg-primary px-4 text-sm font-semibold text-white shadow-[0_8px_20px_-10px_rgba(11,21,51,0.35)] dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)]" aria-hidden>
+                  <span className="ml-[56px] mt-5 inline-flex h-10 items-center gap-1 rounded-full bg-primary px-4 text-sm font-semibold text-white shadow-[0_8px_20px_-10px_rgba(11,21,51,0.35)] dark:[background-color:color-mix(in_srgb,var(--color-primary)_78%,black)]" aria-hidden>
                     {t('pre_dashboard.enrich_cta')}
-                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+                    <AppIcon icon={ChevronRight} className="transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" />
                   </span>
                 </div>
 
-                {/* The art's periwinkle, glowing behind it so the picture and the card share one light */}
-                <span className="pointer-events-none absolute -right-10 top-1/2 -z-10 h-64 w-80 -translate-y-1/2 rounded-full bg-[#8C9BFF] opacity-35 blur-[70px] transition-opacity group-hover:opacity-50 dark:bg-[#5B6BFF] dark:opacity-45" aria-hidden />
-                {/* Right: the bar, line and pie chart on its podium (a vector drawing with a clear background, so it sits straight on the card in both themes) */}
-                <img src="/media/enrich-chart.svg" alt="" width={400} height={320} className="pointer-events-none absolute right-4 top-1/2 hidden h-[96%] w-auto max-w-none -translate-y-1/2 transition-transform duration-700 group-hover:scale-[1.04] motion-reduce:transition-none sm:block" aria-hidden />
+                {/* Right: the coin on the steps, its backdrop removed so it sits straight on the card; the left and the bright top-right corner fade into the card */}
+                <img
+                  src="/media/enrich-coin-dollar.png"
+                  alt=""
+                  width={300}
+                  height={180}
+                  className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[300px] max-w-none object-cover object-[center_8%] transition-transform duration-700 [mask-composite:intersect] [mask-image:linear-gradient(to_right,transparent_0%,black_30%),radial-gradient(60%_55%_at_100%_0%,transparent_0%,transparent_30%,black_95%)] [-webkit-mask-composite:source-in] group-hover:scale-[1.05] motion-reduce:transition-none sm:block"
+                  aria-hidden
+                />
               </Reveal>
 
               {/* Ask Core AI: the second feature, a tall column so the chat is always in view */}

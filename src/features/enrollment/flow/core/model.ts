@@ -1,4 +1,4 @@
-import { PLAN_DEFAULT_ALLOCATION, type AutoIncrease, type InvestMode, type Unit } from '@/features/plan/electionsData'
+import { PLAN_DEFAULT_ALLOCATION, type AutoIncrease, type InvestMode, type RiskStyle, type Unit } from '@/features/plan/electionsData'
 import { fundCatalog, recommendedFunds, type RiskKey } from '../../investmentCatalog'
 
 /** The participant's elections as one object, so editors can work on a copy and apply it in one go. */
@@ -13,6 +13,8 @@ export interface Election {
   auto: AutoIncrease
   mode: InvestMode
   risk: RiskKey
+  /** The risk questionnaire's answer, once taken: the risk level can be changed only after it */
+  riskStyle?: RiskStyle
   ownRows: Row[]
   autoRebalance: boolean
   sdb: boolean

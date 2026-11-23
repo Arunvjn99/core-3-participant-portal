@@ -33,7 +33,6 @@ import {
   Calculator,
   Lightbulb,
 } from 'lucide-react'
-import { NotificationBanner } from '@/features/notifications/NotificationBanner'
 import { useContributionLimits } from '@/features/contributions/useContributionLimits'
 import { PremiumBalanceChart } from '@/features/dashboard/components/PremiumBalanceChart'
 import { useEnrollment } from '@/core/hooks/useEnrollment'
@@ -53,6 +52,12 @@ import { useRetirementGoal } from '@/features/retirement/retirementStore'
 import { ON_TRACK_MIN, READINESS_BANDS, readinessBandOf } from '@/features/retirement/readinessBands'
 import { goalExtras } from '@/features/retirement/readinessExtras'
 import { ReadinessRing, ReadinessStatus } from '@/features/retirement/ReadinessRing'
+import { AdvisorAvatar } from '@/features/advisors/AdvisorAvatar'
+import { AppIcon, IconTile } from '@/design-system/icons'
+import { useDemoPersona } from '@/features/demo/demoStore'
+import { PersonaNotice } from '@/features/demo/PersonaNotice'
+import { createPortal } from 'react-dom'
+import { useSecondPlan } from '@/features/plan/secondPlan'
 
 const ease = [0.22, 1, 0.36, 1] as const
 
@@ -120,7 +125,7 @@ function SpecCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.5, ease }}
-      className={`rounded-[20px] shadow-[0_12px_32px_-28px_rgba(11,21,51,0.45)] ${CARD_TONES[tone]} ${noPadding ? '' : 'p-5'} ${className}`}
+      className={`rounded-[20px] shadow-[0_12px_32px_-28px_rgba(11,21,51,0.45)] ${CARD_TONES[tone]} ${noPadding ? '' : 'px-5 py-4'} ${className}`}
     >
       {children}
     </motion.div>
@@ -189,11 +194,36 @@ function MatchGapTip({ label, from, to, youMore, employerMore, yearly }: { label
   const { t } = useTranslation()
   const [open, setOpen] = React.useState(false)
   const wrap = React.useRef<HTMLSpanElement>(null)
+  const panel = React.useRef<HTMLSpanElement>(null)
   const panelId = useId()
+  /** Where the tip sits on screen: drawn above the page so no card can cut it off, and kept inside the window */
+  const [pos, setPos] = React.useState<{ left: number; top: number } | null>(null)
+  React.useLayoutEffect(() => {
+    if (!open) return
+    const place = () => {
+      const btn = wrap.current?.getBoundingClientRect()
+      const box = panel.current?.getBoundingClientRect()
+      if (!btn || !box) return
+      const edge = 12
+      const left = Math.min(Math.max(edge, btn.left), window.innerWidth - box.width - edge)
+      const below = btn.bottom + 8
+      const top = below + box.height > window.innerHeight - edge ? Math.max(edge, btn.top - box.height - 8) : below
+      setPos({ left, top })
+    }
+    place()
+    const close = () => setOpen(false)
+    window.addEventListener('resize', close)
+    window.addEventListener('scroll', close, true)
+    return () => {
+      window.removeEventListener('resize', close)
+      window.removeEventListener('scroll', close, true)
+    }
+  }, [open])
   React.useEffect(() => {
     if (!open) return
     const onDown = (e: MouseEvent) => {
-      if (wrap.current && !wrap.current.contains(e.target as Node)) setOpen(false)
+      const target = e.target as Node
+      if (!wrap.current?.contains(target) && !panel.current?.contains(target)) setOpen(false)
     }
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
     document.addEventListener('mousedown', onDown)
@@ -207,7 +237,10 @@ function MatchGapTip({ label, from, to, youMore, employerMore, yearly }: { label
     <span ref={wrap} className="relative inline-flex">
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          setPos(null)
+          setOpen((o) => !o)
+        }}
         aria-expanded={open}
         aria-controls={panelId}
         className="inline-flex items-center gap-1 rounded text-status-warning underline decoration-dotted underline-offset-2 hover:decoration-solid focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -215,12 +248,14 @@ function MatchGapTip({ label, from, to, youMore, employerMore, yearly }: { label
         {label}
         <Lightbulb className="h-3.5 w-3.5" aria-hidden />
       </button>
-      {open && (
+      {open && createPortal(
         <span
+          ref={panel}
           id={panelId}
           role="dialog"
           aria-label={t('postDashboard.match_tip_title')}
-          className="absolute left-0 top-full z-30 mt-2 block w-[280px] rounded-xl bg-surface-card p-3.5 text-left shadow-[0_12px_32px_-12px_rgba(11,21,51,0.35)] ring-1 ring-slate-200 dark:ring-white/10"
+          style={{ left: pos?.left ?? 0, top: pos?.top ?? 0, visibility: pos ? 'visible' : 'hidden' }}
+          className="fixed z-[200] block w-[min(280px,calc(100vw-24px))] rounded-xl bg-surface-card p-3.5 text-left shadow-[0_12px_32px_-12px_rgba(11,21,51,0.35)] ring-1 ring-slate-200 dark:ring-white/10"
         >
           <span className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-amber-600 dark:text-amber-300">
             <Lightbulb className="h-3.5 w-3.5" aria-hidden />
@@ -246,7 +281,8 @@ function MatchGapTip({ label, from, to, youMore, employerMore, yearly }: { label
             {t('contributionLimits.change')}
             <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
           </Link>
-        </span>
+        </span>,
+        document.body,
       )}
     </span>
   )
@@ -290,7 +326,7 @@ function RolloverPrompt() {
   return (
     <section
       aria-labelledby="rollover-title"
-      className="mb-5 flex flex-col gap-4 rounded-[20px] bg-[linear-gradient(180deg,#EAF2FF_0%,#F6F9FF_100%)] p-5 ring-1 ring-blue-100 sm:flex-row sm:items-center dark:bg-[linear-gradient(180deg,rgba(59,130,246,0.16)_0%,rgba(15,23,42,1)_100%)] dark:ring-blue-400/20"
+      className="mb-3 flex flex-col gap-4 rounded-[20px] bg-[linear-gradient(180deg,#EAF2FF_0%,#F6F9FF_100%)] px-5 py-4 ring-1 ring-blue-100 sm:flex-row sm:items-center dark:bg-[linear-gradient(180deg,rgba(59,130,246,0.16)_0%,rgba(15,23,42,1)_100%)] dark:ring-blue-400/20"
     >
       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-primary shadow-[0_1px_2px_rgba(11,21,51,0.06)] ring-1 ring-blue-100 dark:bg-white/10 dark:text-blue-300 dark:ring-white/10" aria-hidden>
         <ArrowLeftRight className="h-5 w-5" />
@@ -338,7 +374,15 @@ export default function PostEnrollmentDashboard() {
 
   // ── Account: same balance, vested amount and holdings as Account Summary ──
   const election = useElectionsStore((s) => s.investment)
-  const account = PLANS[0]
+  // Prototype demo: a participant with their own balances uses those instead
+  const persona = useDemoPersona()
+  const planAccount = persona?.balance !== undefined ? { ...PLANS[0], balance: persona.balance, vested: persona.vested ?? persona.balance } : PLANS[0]
+  // A second plan (457(b)) they're enrolled in counts toward the total; it's their own money, so fully vested
+  const secondPlan = useSecondPlan()
+  const secondEnrolled = !!secondPlan?.enrolled
+  const secondBalance = secondEnrolled ? (secondPlan?.balance ?? 0) : 0
+  const account = secondEnrolled ? { ...planAccount, balance: planAccount.balance + secondBalance, vested: planAccount.vested + secondBalance } : planAccount
+  const dashEmployer = useProfileStore((s) => s.employment.employer)
   const holdings = useMemo(() => allHoldings(election), [election])
   const quarterReturn = Math.round(weightedReturn(holdings, '3M') * 10) / 10
   const vestedPct = Math.round((account.vested / account.balance) * 100)
@@ -394,8 +438,6 @@ export default function PostEnrollmentDashboard() {
   const replacePct = data.salary > 0 ? Math.round((income.total / data.salary) * 100) : 0
   // On track above 70 (green), needs attention 50 to 70 (amber), off track under 50 (red)
   const band = READINESS_BANDS[readinessBandOf(readinessShown)]
-  // Enrolled in one click and not yet asked about retirement goals: the score would be a guess, so the card asks instead
-  const contributionMonth = new Date().toLocaleDateString(locale, { month: 'long', year: 'numeric' })
   const limits = useContributionLimits()
   const monthlyGap = Math.round((fullMatch - annualMatch) / 12)
   // ── Readiness suggestion: the single change that would help most, from the participant's own numbers, in order:
@@ -501,66 +543,55 @@ export default function PostEnrollmentDashboard() {
     <AnimatedPage className="min-h-full">
       <div className="min-h-screen bg-surface-page font-sans text-text-primary">
         <div className="w-full pb-6 pt-2 lg:pb-7 lg:pt-3">
+          {/* Prototype demo: an auto-enrolled participant is told so first */}
+          <PersonaNotice persona={persona} className="mb-4" />
+
           {/* First thing on the page: an offer to bring money from an old plan or IRA into this one */}
           <RolloverPrompt />
 
-          <NotificationBanner />
 
-          {/* Overview and balance with this month's contributions, beside readiness; the two always the same height */}
-          {/* Balance and readiness share a row, so they are always the same height */}
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+          {/* Balance and readiness share a row, 65% and 35%, so they are always the same height */}
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,13fr)_minmax(0,7fr)]">
             {/* Card 1: Total balance */}
-            <SpecCard className="relative flex flex-col overflow-hidden lg:col-span-8">
-              {/* Overview heading and the balance on the left; this month's contributions in the top-right corner */}
-              <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0">
-                  <h1 className="text-[22px] font-bold leading-tight text-[#0B1533] dark:text-white">{t('dashboard.overview')}</h1>
-                  <p className="mt-0.5 text-[13px] leading-snug text-text-secondary">{t('dashboard.overview_sub')}</p>
-                  <p className="mt-4 text-[11px] font-semibold uppercase tracking-wide text-text-secondary">{t('dashboard.totalBalance')}</p>
-                  <p className="mt-1.5 text-[36px] font-bold leading-none tracking-tight tabular-nums text-text-primary">{money(Math.round(account.balance))}</p>
-                  <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
-                    <span className="inline-flex items-center gap-2 text-[13px] text-text-secondary">
-                      <span className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[12px] font-semibold tabular-nums ${quarterReturn >= 0 ? 'bg-status-success-bg text-status-success' : 'bg-status-danger-bg text-status-danger'}`}>
-                        <TrendingUp className={`h-3.5 w-3.5 shrink-0 ${quarterReturn < 0 ? 'rotate-180' : ''}`} aria-hidden />
-                        {`${quarterReturn >= 0 ? '+' : ''}${quarterReturn}%`}
+            <SpecCard className="relative flex flex-col overflow-hidden">
+              {/* Overview heading, then two sides in the same type: the balance on the left, this month's contributions on the right */}
+              <div className="mb-3">
+                <h1 className="text-[22px] font-bold leading-tight text-[#0B1533] dark:text-white">{t('dashboard.overview')}</h1>
+                <p className="mt-0.5 text-[13px] leading-snug text-text-secondary">{t('dashboard.overview_sub')}</p>
+                <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">{t('dashboard.totalBalance')}</p>
+                    <p className="mt-1.5 text-[36px] font-bold leading-none tracking-tight tabular-nums text-text-primary">{money(Math.round(account.balance))}</p>
+                    <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+                      <span className="inline-flex items-center gap-2 text-[13px] text-text-secondary">
+                        <span className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[12px] font-semibold tabular-nums ${quarterReturn >= 0 ? 'bg-status-success-bg text-status-success' : 'bg-status-danger-bg text-status-danger'}`}>
+                          <TrendingUp className={`h-3.5 w-3.5 shrink-0 ${quarterReturn < 0 ? 'rotate-180' : ''}`} aria-hidden />
+                          {`${quarterReturn >= 0 ? '+' : ''}${quarterReturn}%`}
+                        </span>
+                        {t('postDashboard.this_quarter')}
                       </span>
-                      {t('postDashboard.this_quarter')}
-                    </span>
-                    <span className="hidden h-4 w-px bg-slate-200 sm:block dark:bg-white/10" aria-hidden />
-                    <Link to="/account-summary" className={`group/summary text-[13px] ${TEXT_LINK}`}>
-                      {t('portfolio.view_summary')}
-                      <ChevronRight className="h-4 w-4 transition-transform group-hover/summary:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
-                    </Link>
+                      <span className="hidden h-4 w-px bg-slate-200 sm:block dark:bg-white/10" aria-hidden />
+                      <Link to="/account-summary" className={`group/summary text-[13px] ${TEXT_LINK}`}>
+                        {t('portfolio.view_summary')}
+                        <ChevronRight className="h-4 w-4 transition-transform group-hover/summary:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+                      </Link>
+                    </div>
                   </div>
-                </div>
-
-                {/* Your contributions this month: yours, your employer's and the total, set off by a thin rule (no panel in the card) */}
-                <div className="shrink-0 border-t border-slate-200/80 pt-3 sm:w-[248px] sm:border-l sm:border-t-0 sm:pl-5 sm:pt-0 dark:border-white/10">
-                  <p className="flex items-baseline justify-between gap-2 text-[12px] text-text-secondary">
-                    <span className="font-semibold text-text-primary">{t('postDashboard.contributions_title')}</span>
-                    <span>{contributionMonth}</span>
-                  </p>
-                  <dl className="mt-2 space-y-1.5 text-[13px]">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <dt className="flex items-center gap-1.5 text-text-secondary"><span className="h-2 w-2 rounded-full bg-primary" aria-hidden />{t('postDashboard.c_you')}</dt>
-                      <dd className="font-semibold tabular-nums text-text-primary">{money(monthlyYou)}<span className="font-normal text-text-secondary">{t('postDashboard.per_mo')}</span></dd>
-                    </div>
-                    <div className="flex items-baseline justify-between gap-3">
-                      <dt className="flex items-center gap-1.5 text-text-secondary"><span className="h-2 w-2 rounded-full bg-status-success" aria-hidden />{t('postDashboard.c_employer')}</dt>
-                      <dd className="font-semibold tabular-nums text-status-success">{`+${money(monthlyMatch)}`}<span className="font-normal text-text-secondary">{t('postDashboard.per_mo')}</span></dd>
-                    </div>
-                    <div className="flex items-baseline justify-between gap-3 border-t border-slate-200/80 pt-1.5 dark:border-white/10">
-                      <dt className="flex items-center gap-1.5 font-semibold text-text-primary"><span className="h-2 w-2" aria-hidden />{t('postDashboard.c_total')}</dt>
-                      <dd className="font-bold tabular-nums text-text-primary">{money(monthlyTotal)}<span className="font-normal text-text-secondary">{t('postDashboard.per_mo')}</span></dd>
-                    </div>
-                  </dl>
-                  {/* How the total splits, yours and your employer's */}
-                  <div className="mt-2.5 flex h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10" role="img" aria-label={`${t('postDashboard.c_you')} ${money(monthlyYou)}, ${t('postDashboard.c_employer')} ${money(monthlyMatch)}`}>
-                    <span className="h-full bg-primary" style={{ width: `${monthlyTotal > 0 ? (monthlyYou / monthlyTotal) * 100 : 0}%` }} />
-                    <span className="h-full bg-status-success" style={{ width: `${monthlyTotal > 0 ? (monthlyMatch / monthlyTotal) * 100 : 0}%` }} />
-                  </div>
-                  {monthlyGap > 0 && (
-                    <div className="mt-2 flex items-center gap-1 text-[12px] text-status-warning">
+                  <div className="min-w-0 sm:text-right">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">{t('postDashboard.contributions_title')}</p>
+                    <p className="mt-1.5 text-[28px] font-bold leading-none tracking-tight tabular-nums text-text-primary">
+                      {money(monthlyTotal)}
+                      <span className="text-[15px] font-medium tracking-normal text-text-secondary">{t('postDashboard.per_mo')}</span>
+                    </p>
+                    <p className="mt-3 flex min-h-[24px] flex-wrap items-center gap-x-1.5 text-[13px] text-text-secondary sm:justify-end">
+                      <span>{t('postDashboard.c_you')}</span>
+                      <span className="font-semibold tabular-nums text-text-primary">{money(monthlyYou)}</span>
+                      <span aria-hidden>·</span>
+                      <span>{t('postDashboard.c_employer')}</span>
+                      <span className="font-semibold tabular-nums text-status-success">{`+${money(monthlyMatch)}`}</span>
+                    </p>
+                    {monthlyGap > 0 && (
+                      <div className="mt-1.5 flex items-center gap-1 text-[12px] text-status-warning sm:justify-end">
                       <MatchGapTip
                         label={t('postDashboard.c_match_gap', { amount: money(monthlyGap) })}
                         from={data.contributionPercent}
@@ -570,16 +601,17 @@ export default function PostEnrollmentDashboard() {
                         yearly={money(Math.round(fullMatch - annualMatch))}
                       />
                     </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="mb-4 w-full">
+              <div className="mb-3 w-full">
                 <PremiumBalanceChart data={balanceChartData} isDark={isDark} axes={{ xLabels: balanceMonths, formatY: (v) => `$${Math.round(v / 1000)}K` }} />
               </div>
 
               {/* Three facts in a row under the chart, split by thin dividers: no panel inside the card */}
-              <div className="mt-auto grid grid-cols-1 divide-y divide-slate-200/80 border-t border-slate-200/80 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:pt-4 dark:divide-white/10 dark:border-white/10">
+              <div className="mt-auto grid grid-cols-1 divide-y divide-slate-200/80 border-t border-slate-200/80 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:pt-3 dark:divide-white/10 dark:border-white/10">
                 <div className="flex items-center gap-2.5 py-3 last:pb-0 sm:px-4 sm:py-0 sm:first:pl-0">
                   <IconChip Icon={Lock} tone="blue" small />
                   <p className="text-[12px] text-text-secondary">
@@ -605,7 +637,7 @@ export default function PostEnrollmentDashboard() {
             </SpecCard>
 
             {/* Readiness: a soft tile icon with a one-line explainer, a ring in soft shades of the score band's colour, with the score inside and the status under it, what the score means in a quiet panel, then the page's main button */}
-            <SpecCard className="relative isolate flex flex-col lg:col-span-4">
+            <SpecCard className="relative isolate flex flex-col">
               {/* Soft wash in the top-right corner, clipped to the card in its own layer so tooltips can still spill out */}
               <span className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[20px]" aria-hidden>
                 <span className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[radial-gradient(closest-side,rgba(52,211,153,0.16),rgba(52,211,153,0)_70%)] dark:bg-[radial-gradient(closest-side,rgba(52,211,153,0.12),rgba(52,211,153,0)_70%)]" />
@@ -646,7 +678,7 @@ export default function PostEnrollmentDashboard() {
                 </span>
               </Link>
 
-              <Link to="/retirement-goal" className={`group mt-4 h-10 w-full gap-2 text-[14px] ${PILL_PRIMARY}`}>
+              <Link to="/retirement-goal" className={`group mt-3 h-10 w-full gap-2 text-[14px] ${PILL_PRIMARY}`}>
                 <Calculator className="h-4 w-4" aria-hidden />
                 {t('dashboard.launchSimulator')}
                 <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
@@ -654,409 +686,418 @@ export default function PostEnrollmentDashboard() {
             </SpecCard>
           </div>
 
-          {/* Learning comes straight after the balance */}
-            <div className="mt-4 grid min-w-0">
-                {/* Financial wellness library: the Enrich card's look, coin art and all */}
-                  <SpecCard tone="blue" className="group relative isolate flex min-h-[188px] overflow-hidden transition-shadow hover:shadow-[0_24px_48px_-28px_rgba(37,99,235,0.45)]">
-                    {/* The coin art's periwinkle, glowing behind it so the image and card share one light */}
-                    <span className="pointer-events-none absolute -right-10 top-1/2 -z-10 h-64 w-80 -translate-y-1/2 rounded-full bg-[#8C9BFF] opacity-25 blur-[70px] transition-opacity group-hover:opacity-40 dark:bg-[#5B6BFF] dark:opacity-35" aria-hidden />
-                    <div className="relative z-10 flex flex-1 flex-col items-start sm:max-w-[56%]">
-                      <div className="flex items-center gap-2.5">
-                        <TitleBadge Icon={GraduationCap} color="bg-blue-600" />
-                        <h2 className="text-[16px] font-bold text-text-primary">{t('dashboard.learningHub')}</h2>
+          {/* Two plans: each one's balance and what goes into it, side by side under the overview */}
+          {secondEnrolled && secondPlan && (
+            <section aria-labelledby="your-plans" className="mt-3">
+              <h2 id="your-plans" className="sr-only">{t('plan2.dash_title')}</h2>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[
+                  { key: 'main', name: t('enrollment.rw.plan_name', { employer: dashEmployer }), type: t('plan2.main_type'), balance: planAccount.balance, rate: data.contributionPercent, note: t('plan2.dash_match', { cap: PLAN_CONFIG.match.capPercent }), tone: 'blue' as const },
+                  { key: 'second', name: t('plan2.name', { employer: dashEmployer }), type: t('plan2.type'), balance: secondBalance, rate: secondPlan.rate, note: t('plan2.dash_no_match'), tone: 'violet' as const },
+                ].map((p) => (
+                  <SpecCard key={p.key} className="flex items-start gap-3">
+                    <IconTile icon={Landmark} tone={p.tone} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h3 className="truncate text-[15px] font-bold text-text-primary">{p.name}</h3>
+                          <p className="text-[12px] text-text-secondary">{p.type}</p>
+                        </div>
+                        <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 ring-1 ring-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-400/20">{t('plan2.dash_participating')}</span>
                       </div>
-                      <h3 className="mt-4 text-[20px] font-bold leading-tight text-slate-900 dark:text-white">{t('enrich.subtitle')}</h3>
-                      <p className="mb-5 mt-2 max-w-[380px] text-[14px] leading-relaxed text-slate-600 dark:text-slate-300">
-                        {t('enrich.intro')}
+                      <p className="mt-2 text-[22px] font-bold leading-tight tabular-nums text-text-primary">{money(Math.round(p.balance))}</p>
+                      <p className="mt-0.5 text-[13px] text-text-secondary">
+                        {t('plan2.dash_saving', { rate: p.rate, amount: money(Math.round((data.salary * p.rate) / 100 / 12)) })} · {p.note}
                       </p>
-                      <Link to="/enrich" className={`group/cta mt-auto ${PILL_SECONDARY}`}>
-                        {t('postDashboard.library_cta')}
-                        <ChevronRight className="h-4 w-4 transition-transform group-hover/cta:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
-                      </Link>
                     </div>
-
-                    {/* The coin on the steps, faded into the card on its left and its bright top-right corner */}
-                    <img
-                      src="/media/enrich-coin.png"
-                      alt=""
-                      width={300}
-                      height={180}
-                      className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[320px] max-w-none object-cover object-[center_8%] transition-transform duration-700 [mask-composite:intersect] [mask-image:linear-gradient(to_right,transparent_0%,black_30%),radial-gradient(60%_55%_at_100%_0%,transparent_0%,transparent_30%,black_95%)] [-webkit-mask-composite:source-in] group-hover:scale-[1.05] motion-reduce:transition-none sm:block"
-                      aria-hidden
-                    />
                   </SpecCard>
-            </div>
+                ))}
+              </div>
+            </section>
+          )}
 
-          {/* Rows of cards that line up top and bottom: wide and narrow, two halves, then three across */}
-          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
-            <div className="grid min-w-0 lg:col-span-8">
-                {/* Quick Actions: one card, four tiles in a row split by thin rules */}
-                  <SpecCard noPadding className="flex flex-col overflow-hidden">
-                    <div className="flex items-center gap-2.5 px-5 pb-3.5 pt-5">
-                      <TitleBadge Icon={Zap} color="bg-blue-600" />
-                      <h2 className="text-[16px] font-bold text-text-primary">{t('dashboard.quickActions')}</h2>
-                    </div>
-                    <div className="grid flex-1 grid-cols-1 divide-y divide-slate-200/80 border-t border-slate-200/80 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4 dark:divide-white/10 dark:border-white/10">
-                      {quickActions.map((tile) => (
-                        <Link
-                          key={tile.title}
-                          to={tile.href}
-                          className="group flex flex-col justify-center px-5 py-4 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary dark:hover:bg-white/5"
-                        >
-                          <span className="flex items-center justify-between">
-                            <IconChip Icon={tile.Icon} tone={tile.tone} />
-                            <ChevronRight className="-mr-1 h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
-                          </span>
-                          <p className="mt-3 text-[14px] font-bold leading-tight text-text-primary">{tile.title}</p>
-                          <p className="mt-1 text-[13px] font-medium text-primary dark:text-blue-300">{tile.sub}</p>
-                          <p className="mt-0.5 text-[12px] text-text-secondary">{tile.hint}</p>
+          {/* Below the first row: a 65% column on the left and a 35% column on the right; the last card in each grows so
+              both columns end level. On small screens the two columns fold back into one list in reading order. */}
+          <div className="mt-3 flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(0,13fr)_minmax(0,7fr)]">
+            <div className="contents lg:flex lg:min-w-0 lg:flex-col lg:gap-3">
+              <div className="order-1 grid min-w-0 lg:order-none">
+                  {/* Financial wellness library: the Enrich card's look, coin art and all */}
+                    <SpecCard tone="blue" className="group relative isolate flex min-h-[168px] overflow-hidden transition-shadow hover:shadow-[0_24px_48px_-28px_rgba(37,99,235,0.45)]">
+                      {/* The coin art's periwinkle, glowing behind it so the image and card share one light */}
+                      <span className="pointer-events-none absolute -right-10 top-1/2 -z-10 h-64 w-80 -translate-y-1/2 rounded-full bg-[#8C9BFF] opacity-25 blur-[70px] transition-opacity group-hover:opacity-40 dark:bg-[#5B6BFF] dark:opacity-35" aria-hidden />
+                      <div className="relative z-10 flex flex-1 flex-col items-start sm:max-w-[56%]">
+                        <div className="flex items-center gap-2.5">
+                          <TitleBadge Icon={GraduationCap} color="bg-blue-600" />
+                          <h2 className="text-[16px] font-bold text-text-primary">{t('dashboard.learningHub')}</h2>
+                        </div>
+                        <h3 className="mt-3 text-[20px] font-bold leading-tight text-slate-900 dark:text-white">{t('enrich.subtitle')}</h3>
+                        <p className="mb-4 mt-1.5 max-w-[380px] text-[14px] leading-relaxed text-slate-600 dark:text-slate-300">
+                          {t('enrich.intro')}
+                        </p>
+                        <Link to="/enrich" className={`group/cta mt-auto ${PILL_SECONDARY}`}>
+                          {t('postDashboard.library_cta')}
+                          <ChevronRight className="h-4 w-4 transition-transform group-hover/cta:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
                         </Link>
+                      </div>
+
+                      {/* The coin on the steps, faded into the card on its left and its bright top-right corner */}
+                      <img
+                        src="/media/enrich-coin.png"
+                        alt=""
+                        width={300}
+                        height={180}
+                        className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[320px] max-w-none object-cover object-[center_8%] transition-transform duration-700 [mask-composite:intersect] [mask-image:linear-gradient(to_right,transparent_0%,black_30%),radial-gradient(60%_55%_at_100%_0%,transparent_0%,transparent_30%,black_95%)] [-webkit-mask-composite:source-in] group-hover:scale-[1.05] motion-reduce:transition-none sm:block"
+                        aria-hidden
+                      />
+                    </SpecCard>
+              </div>
+              <div className="order-3 grid min-w-0 lg:order-none">
+                  {/* Quick Actions: one card, four tiles in a row split by thin rules */}
+                    <SpecCard noPadding className="flex flex-col overflow-hidden">
+                      <div className="flex items-center gap-2.5 px-5 pb-3 pt-4">
+                        <TitleBadge Icon={Zap} color="bg-blue-600" />
+                        <h2 className="text-[16px] font-bold text-text-primary">{t('dashboard.quickActions')}</h2>
+                      </div>
+                      <div className="grid flex-1 grid-cols-1 divide-y divide-slate-200/80 border-t border-slate-200/80 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4 dark:divide-white/10 dark:border-white/10">
+                        {quickActions.map((tile) => (
+                          <Link
+                            key={tile.title}
+                            to={tile.href}
+                            className="group flex flex-col justify-center px-5 py-3 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary dark:hover:bg-white/5"
+                          >
+                            <span className="flex items-center justify-between">
+                              <IconChip Icon={tile.Icon} tone={tile.tone} />
+                              <ChevronRight className="-mr-1 h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+                            </span>
+                            <p className="mt-3 text-[14px] font-bold leading-tight text-text-primary">{tile.title}</p>
+                            <p className="mt-1 text-[13px] font-medium text-primary dark:text-blue-300">{tile.sub}</p>
+                            <p className="mt-0.5 text-[12px] text-text-secondary">{tile.hint}</p>
+                          </Link>
+                        ))}
+                      </div>
+                    </SpecCard>
+              </div>
+              <div className="order-5 grid min-w-0 lg:order-none">
+                  {/* Card 4: Portfolio Allocation — header, bar centred in the space, figures along the bottom */}
+                  <SpecCard className="flex flex-col">
+                    <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-2.5">
+                          <TitleBadge Icon={PieChart} color="bg-blue-600" />
+                          <span className="text-[16px] font-bold text-text-primary">{t('dashboard.portfolioAllocation')}</span>
+                        </div>
+                        <p className="mt-0.5 pl-[46px] text-[12px] text-text-secondary">{t('postDashboard.current_asset_mix')}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-text-secondary dark:bg-white/10">
+                        <span className={`h-2 w-2 rounded-full ${riskDot[data.riskLevel]}`} aria-hidden />
+                        {t(`enrollment.investment.risk_short_${data.riskLevel}`)}
+                      </div>
+                    </div>
+                    <div className="flex flex-1 flex-col justify-center py-2">
+                    {/* Scale labels sit exactly over their quarter marks */}
+                    <div className="relative mb-1.5 h-3 text-[11px] leading-none text-text-muted" aria-hidden>
+                      {[0, 25, 50, 75, 100].map((v) => (
+                        <span key={v} className="absolute top-0" style={{ left: `${v}%`, transform: `translateX(${v === 0 ? '0' : v === 100 ? '-100%' : '-50%'})` }}>
+                          {v}%
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex h-3 w-full gap-0.5 overflow-hidden rounded-full">
+                      {portfolioSegments.map((s) => (
+                        <div
+                          key={s.key}
+                          style={{ width: `${s.pct}%`, backgroundColor: s.color }}
+                          title={`${s.label} ${s.pct}%`}
+                        />
+                      ))}
+                    </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 border-t border-slate-200/80 pt-3 sm:grid-cols-4 dark:border-white/10">
+                      {portfolioSegments.map((s) => (
+                        <div key={s.key}>
+                          <div className="flex items-center gap-1.5">
+                            <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: s.color }} />
+                            <span className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary">
+                              {s.label}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-[16px] font-bold text-text-primary">{s.pct}%</p>
+                          <p className="text-[12px] text-text-secondary">{s.amount}</p>
+                        </div>
                       ))}
                     </div>
                   </SpecCard>
-            </div>
-
-            <div className="grid min-w-0 lg:col-span-4">
-                {/* Next Best Actions: the two most important, each a boxed card; a required one is tinted */}
-                <SpecCard className="flex flex-col">
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2.5">
-                      <TitleBadge Icon={CheckSquare} color="bg-emerald-600" />
-                      <h2 className="text-[16px] font-bold text-text-primary">{t('dashboard.nextBestActions')}</h2>
-                    </div>
-                    <span className="text-[12px] font-medium text-text-secondary">{t('postDashboard.actions_count', { count: Math.min(nextActions.length, 2) })}</span>
-                  </div>
-                  <ul className="flex flex-1 flex-col gap-3">
-                    {nextActions.slice(0, 2).map((action) => {
-                      const ActionIcon = NEXT_ACTION_ICONS[action.id]
-                      return (
-                        <li key={action.id} className="flex flex-1">
-                          <Link
-                            to={action.href}
-                            className={`group flex w-full items-center gap-3 rounded-2xl border p-4 transition-shadow hover:shadow-[0_6px_16px_-10px_rgba(11,21,51,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${action.required ? 'border-status-danger/20 bg-status-danger-bg' : 'border-border-default bg-surface-elevated'}`}
-                          >
-                            <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${action.required ? 'bg-status-danger/15 text-status-danger' : 'bg-surface-page text-text-secondary'}`} aria-hidden>
-                              <ActionIcon className="h-5 w-5" />
-                            </span>
-                            <span className="min-w-0 flex-1">
-                              <span className="flex flex-wrap items-center gap-2">
-                                <span className="text-[13px] font-bold text-text-primary">{t(`next_actions.${action.id}`, action.values)}</span>
-                                {action.required && (
-                                  <span className="rounded bg-status-danger/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-status-danger">{t('postDashboard.badge_required')}</span>
-                                )}
-                              </span>
-                              <span className="mt-1 block text-[12px] text-text-secondary">{t(`next_actions.${action.id}_sub`, action.values)}</span>
-                            </span>
-                            <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
-                          </Link>
-                        </li>
-                      )
-                    })}
-                    {/* With fewer than two to do, things already settled fill the space, marked done */}
-                    {doneActions.slice(0, Math.max(0, 2 - nextActions.length)).map((id: DoneActionId) => (
-                      <li key={id} className="flex flex-1 items-center gap-3 rounded-2xl border border-border-default bg-surface-elevated p-4">
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-status-success-bg text-status-success" aria-hidden>
-                          <Check className="h-5 w-5" />
-                        </span>
-                        <span className="min-w-0 flex-1 text-[13px] text-text-secondary">{t(`next_actions.done_${id}`)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </SpecCard>
-            </div>
-
-            <div className="grid min-w-0 lg:col-span-6">
-                {/* Card 4: Portfolio Allocation — header, bar centred in the space, figures along the bottom */}
-                <SpecCard className="flex flex-col">
-                  <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-                    <div>
+              </div>
+              <div className="order-7 grid min-w-0 lg:order-none lg:flex-1">
+                  {/* Recent Activity: the last card on the left, stretched so both columns end level */}
+                  <SpecCard className="flex h-full flex-col">
+                    <div className="mb-3 flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5">
-                        <TitleBadge Icon={PieChart} color="bg-blue-600" />
-                        <span className="text-[16px] font-bold text-text-primary">{t('dashboard.portfolioAllocation')}</span>
+                        <TitleBadge Icon={History} color="bg-blue-600" />
+                        <h3 className="text-[16px] font-bold text-text-primary">{t('dashboard.recentActivity')}</h3>
                       </div>
-                      <p className="mt-0.5 pl-[46px] text-[12px] text-text-secondary">{t('postDashboard.current_asset_mix')}</p>
+                      <Link to="/transactions" className={`group text-[13px] ${TEXT_LINK}`}>
+                        {t('dashboard.viewAll')}
+                        <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+                      </Link>
                     </div>
-                    <div className="flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-[12px] font-medium text-text-secondary dark:bg-white/10">
-                      <span className={`h-2 w-2 rounded-full ${riskDot[data.riskLevel]}`} aria-hidden />
-                      {t(`enrollment.investment.risk_short_${data.riskLevel}`)}
-                    </div>
-                  </div>
-                  <div className="flex flex-1 flex-col justify-center py-3">
-                  {/* Scale labels sit exactly over their quarter marks */}
-                  <div className="relative mb-1.5 h-3 text-[11px] leading-none text-text-muted" aria-hidden>
-                    {[0, 25, 50, 75, 100].map((v) => (
-                      <span key={v} className="absolute top-0" style={{ left: `${v}%`, transform: `translateX(${v === 0 ? '0' : v === 100 ? '-100%' : '-50%'})` }}>
-                        {v}%
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex h-3 w-full gap-0.5 overflow-hidden rounded-full">
-                    {portfolioSegments.map((s) => (
-                      <div
-                        key={s.key}
-                        style={{ width: `${s.pct}%`, backgroundColor: s.color }}
-                        title={`${s.label} ${s.pct}%`}
-                      />
-                    ))}
-                  </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 border-t border-slate-200/80 pt-4 sm:grid-cols-4 dark:border-white/10">
-                    {portfolioSegments.map((s) => (
-                      <div key={s.key}>
-                        <div className="flex items-center gap-1.5">
-                          <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: s.color }} />
-                          <span className="text-[10px] font-semibold uppercase tracking-wide text-text-secondary">
-                            {s.label}
-                          </span>
-                        </div>
-                        <p className="mt-1 text-[16px] font-bold text-text-primary">{s.pct}%</p>
-                        <p className="text-[12px] text-text-secondary">{s.amount}</p>
-                      </div>
-                    ))}
-                  </div>
-                </SpecCard>
-            </div>
-
-            <div className="grid min-w-0 lg:col-span-6">
-                {/* Recent Activity */}
-                <SpecCard>
-                  <div className="mb-4 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2.5">
-                      <TitleBadge Icon={History} color="bg-blue-600" />
-                      <h3 className="text-[16px] font-bold text-text-primary">{t('dashboard.recentActivity')}</h3>
-                    </div>
-                    <Link to="/transactions" className={`group text-[13px] ${TEXT_LINK}`}>
-                      {t('dashboard.viewAll')}
-                      <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
-                    </Link>
-                  </div>
-                  <ul className="divide-y divide-slate-200/80 dark:divide-white/10">
-                    <li className="flex items-center gap-3.5 py-3 first:pt-0">
-                      <IconChip Icon={ArrowDownLeft} tone="emerald" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_contribution')}</p>
-                        <p className="text-[12px] text-text-secondary">{t('postDashboard.activity_payroll')}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[14px] font-bold text-status-success">+{money(monthlyYou, true)}</p>
-                        <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct')}</p>
-                      </div>
-                    </li>
-                    <li className="flex items-center gap-3.5 py-3">
-                      <IconChip Icon={Building2} tone="blue" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_employer_match')}</p>
-                        <p className="text-[12px] text-text-secondary">{t('postDashboard.activity_safe_harbor')}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[14px] font-bold text-status-success">+{money(monthlyMatch, true)}</p>
-                        <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct')}</p>
-                      </div>
-                    </li>
-                    {loans.length > 0 && (
-                      <li className="flex items-center gap-3.5 py-3">
-                        <IconChip Icon={CreditCard} tone="amber" />
+                    <ul className="flex flex-1 flex-col justify-around divide-y divide-slate-200/80 dark:divide-white/10">
+                      <li className="flex items-center gap-3.5 py-2 first:pt-0">
+                        <IconChip Icon={ArrowDownLeft} tone="emerald" />
                         <div className="min-w-0 flex-1">
-                          <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_loan_repayment')}</p>
-                          <p className="text-[12px] text-text-secondary">{t(`postDashboard.loan_${loans[0].purpose}`)}</p>
+                          <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_contribution')}</p>
+                          <p className="text-[12px] text-text-secondary">{t('postDashboard.activity_payroll')}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-[14px] font-bold tabular-nums text-text-primary">{money(loans[0].payment, true)}</p>
+                          <p className="text-[14px] font-bold text-status-success">+{money(monthlyYou, true)}</p>
                           <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct')}</p>
                         </div>
                       </li>
-                    )}
-                    <li className="flex items-center gap-3.5 py-3 last:pb-0">
-                      <IconChip Icon={RefreshCcw} tone="slate" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_rebalance')}</p>
-                        <p className="text-[12px] text-text-secondary">{t('postDashboard.activity_auto_quarterly')}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[14px] font-medium text-text-secondary">{t('common.completed')}</p>
-                        <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct1')}</p>
-                      </div>
-                    </li>
-                  </ul>
-                </SpecCard>
-            </div>
-
-            <div className="grid min-w-0 lg:col-span-4">
-                {/* Active loans: one shows in full; two or more show as rows with the total underneath */}
-                <SpecCard className="flex flex-col">
-                  <div className="mb-3 flex items-start justify-between gap-2">
-                    <div className="flex min-w-0 items-center gap-2.5">
-                      <TitleBadge Icon={CreditCard} color="bg-blue-600" />
-                      <div className="min-w-0">
-                        <h2 className="text-[16px] font-bold leading-tight text-text-primary">{t(loans.length > 1 ? 'postDashboard.loans_title' : 'dashboard.activeLoan')}</h2>
-                        {loans[0] && <p className="mt-0.5 truncate text-[12px] text-text-secondary">{t('postDashboard.loans_from_plan', { plan: loans[0].planName })}</p>}
-                      </div>
-                    </div>
-                    {loans.length > 1 && (
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[12px] font-semibold tabular-nums text-text-secondary dark:bg-white/10">{loans.length}</span>
-                    )}
-                  </div>
-
-                  {loans.length === 1 ? (
-                    loans.map((loan) => (
-                      <div key={loan.ref}>
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <p className="text-[14px] font-semibold text-text-primary">{t(`postDashboard.loan_${loan.purpose}`)}</p>
-                            <p className="mt-0.5 text-[12px] text-text-secondary">
-                              {loan.ref} · {t('postDashboard.loan_since', { date: new Date(`${loan.originated}T00:00:00`).toLocaleDateString(locale, { month: 'short', year: 'numeric' }) })}
-                            </p>
-                          </div>
-                          <span className="shrink-0 rounded-full bg-status-success-bg px-2 py-0.5 text-[12px] font-semibold text-status-success">{t('common.active')}</span>
+                      <li className="flex items-center gap-3.5 py-2">
+                        <IconChip Icon={Building2} tone="blue" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_employer_match')}</p>
+                          <p className="text-[12px] text-text-secondary">{t('postDashboard.activity_safe_harbor')}</p>
                         </div>
-                        <div className="mt-4 grid grid-cols-2 gap-4 border-t border-slate-200/80 pt-4 dark:border-white/10">
-                          <div>
-                            <p className="text-[12px] text-text-secondary">{t('postDashboard.remaining')}</p>
-                            <p className="mt-0.5 text-[20px] font-semibold tabular-nums text-text-primary">{money(loan.balance)}</p>
+                        <div className="text-right">
+                          <p className="text-[14px] font-bold text-status-success">+{money(monthlyMatch, true)}</p>
+                          <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct')}</p>
+                        </div>
+                      </li>
+                      {loans.length > 0 && (
+                        <li className="flex items-center gap-3.5 py-2">
+                          <IconChip Icon={CreditCard} tone="amber" />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_loan_repayment')}</p>
+                            <p className="text-[12px] text-text-secondary">{t(`postDashboard.loan_${loans[0].purpose}`)}</p>
                           </div>
                           <div className="text-right">
-                            <p className="text-[12px] text-text-secondary">{t('postDashboard.next_payment')}</p>
-                            <p className="mt-0.5 text-[15px] font-semibold tabular-nums text-text-primary">{money(loan.payment)} · {nextLoanDue}</p>
+                            <p className="text-[14px] font-bold tabular-nums text-text-primary">{money(loans[0].payment, true)}</p>
+                            <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct')}</p>
                           </div>
+                        </li>
+                      )}
+                      <li className="flex items-center gap-3.5 py-2 last:pb-0">
+                        <IconChip Icon={RefreshCcw} tone="slate" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[14px] font-bold text-text-primary">{t('postDashboard.activity_rebalance')}</p>
+                          <p className="text-[12px] text-text-secondary">{t('postDashboard.activity_auto_quarterly')}</p>
                         </div>
-                        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
-                          <div className="h-full rounded-full bg-status-success" style={{ width: `${loan.paidPct}%` }} />
+                        <div className="text-right">
+                          <p className="text-[14px] font-medium text-text-secondary">{t('common.completed')}</p>
+                          <p className="text-[12px] text-text-secondary">{t('postDashboard.sample_date_oct1')}</p>
                         </div>
-                        <div className="mt-1.5 flex justify-between text-[12px] text-text-secondary">
-                          <span>{t('postDashboard.loan_paid', { pct: loan.paidPct })}</span>
-                          <span>{t('postDashboard.loan_left', { count: loan.paymentsLeft })}</span>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <>
-                      <ul className="flex flex-1 flex-col divide-y divide-slate-200/80 dark:divide-white/10">
-                        {loans.map((loan) => (
-                          <li key={loan.ref} className="flex flex-1 flex-col justify-center py-3 first:pt-0">
-                            <div className="flex items-baseline justify-between gap-2">
-                              <p className="min-w-0 truncate text-[14px] font-semibold text-text-primary">{t(`postDashboard.loan_${loan.purpose}`)}</p>
-                              <p className="shrink-0 text-[15px] font-semibold tabular-nums text-text-primary">{money(loan.balance)}</p>
-                            </div>
-                            <div className="mt-0.5 flex items-baseline justify-between gap-2 text-[12px] text-text-secondary">
-                              <span>{loan.ref}</span>
-                              <span>{t('postDashboard.loan_next_short', { amount: money(loan.payment), date: nextLoanDue })}</span>
-                            </div>
-                            <div className="mt-2 h-1 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={loan.paidPct} aria-label={t('postDashboard.loan_paid', { pct: loan.paidPct })}>
-                              <div className="h-full rounded-full bg-status-success" style={{ width: `${loan.paidPct}%` }} />
-                            </div>
-                            <div className="mt-1.5 flex justify-between text-[12px] text-text-secondary">
-                              <span>{t('postDashboard.loan_paid', { pct: loan.paidPct })}</span>
-                              <span>{t('postDashboard.loan_left', { count: loan.paymentsLeft })}</span>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                      <div className="flex items-baseline justify-between border-t border-slate-200/80 pt-3 dark:border-white/10">
-                        <span className="text-[12px] text-text-secondary">{t('postDashboard.loans_total')}</span>
-                        <span className="text-[16px] font-semibold tabular-nums text-text-primary">{money(loansTotal)}</span>
-                      </div>
-                    </>
-                  )}
-                </SpecCard>
+                      </li>
+                    </ul>
+                  </SpecCard>
+              </div>
             </div>
-
-            <div className="grid min-w-0 lg:col-span-4">
-                {/* All your accounts: this plan plus accounts linked from elsewhere */}
-                <SpecCard className="flex flex-col">
-                  <div className="mb-3 flex items-center gap-2.5">
-                    <TitleBadge Icon={Landmark} color="bg-blue-600" />
-                    <span className="text-[16px] font-bold text-text-primary">{t('outside_assets.card_title')}</span>
-                  </div>
-                  {outsideAccounts.length > 0 ? (
-                    <>
-                      <p className="text-[12px] text-text-secondary">{t('outside_assets.net_worth')}</p>
-                      <p className="mt-0.5 text-[24px] font-bold leading-tight tabular-nums text-text-primary">{formatMoney(allAccounts.netWorth, locale)}</p>
-                      <dl className="mt-3 space-y-1.5 border-t border-slate-200/80 pt-3 dark:border-white/10">
-                        {accountRows.map((row) => (
-                          <div key={row.id} className="flex items-center justify-between gap-3 text-[13px]">
-                            <dt className="flex min-w-0 items-center gap-2 text-text-secondary">
-                              <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: row.color }} aria-hidden />
-                              <span className="truncate">{row.label}</span>
-                            </dt>
-                            <dd className="shrink-0 font-semibold tabular-nums text-text-primary">{formatMoney(row.value, locale)}</dd>
-                          </div>
-                        ))}
-                      </dl>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-[13px] leading-relaxed text-slate-600 dark:text-slate-300">{t('outside_assets.card_invite')}</p>
-                      {/* What the total will be made of: this plan now, the rest once linked */}
-                      <dl className="mt-3 space-y-1.5 border-t border-slate-200/80 pt-3 dark:border-white/10">
-                        {ASSET_SLICES.map((id) => ({ id: id as string, label: t(`outside_assets.slice.${id}`), value: allAccounts.slices[id], color: ACCOUNT_SLICE_COLOR[id] })).map((row) => (
-                          <div key={row.id} className="flex items-center justify-between gap-3 text-[13px]">
-                            <dt className="flex min-w-0 items-center gap-2 text-text-secondary">
-                              <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: row.id === 'plan' ? row.color : undefined }} aria-hidden>
-                                {row.id !== 'plan' && <span className="block h-2 w-2 rounded-full border border-dashed border-slate-400 dark:border-slate-500" />}
+            <div className="contents lg:flex lg:min-w-0 lg:flex-col lg:gap-3">
+              <div className="order-2 grid min-w-0 lg:order-none">
+                  {/* Your Advisor: the plan widget's wash, a face, the numbers between two thin rules */}
+                  <SpecCard tone="warm">
+                    <div className="flex items-center gap-3">
+                      <AdvisorAvatar />
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-text-secondary">{t('dashboard.yourAdvisor')}</p>
+                        <h3 className="mt-0.5 text-[18px] font-bold leading-tight text-text-primary">Sarah Jenkins</h3>
+                        <p className="mt-0.5 text-[13px] text-slate-600 dark:text-slate-300">{t('postDashboard.advisor_title_role')}</p>
+                      </div>
+                    </div>
+                    {/* Stats sit straight on the card between two thin rules: no panel inside the card */}
+                    <div className="mt-3 grid grid-cols-3 divide-x divide-slate-200/80 border-y border-slate-200/80 py-2.5 text-center dark:divide-white/10 dark:border-white/10">
+                      <div className="px-2">
+                        <p className="text-[16px] font-bold text-text-primary">4.9</p>
+                        <p className="text-[11px] text-text-secondary">{t('postDashboard.advisor_rating')}</p>
+                      </div>
+                      <div className="px-2">
+                        <p className="text-[16px] font-bold text-text-primary">12yr</p>
+                        <p className="text-[11px] text-text-secondary">{t('postDashboard.advisor_experience')}</p>
+                      </div>
+                      <div className="px-2">
+                        <p className="text-[16px] font-bold text-text-primary">240+</p>
+                        <p className="text-[11px] text-text-secondary">{t('postDashboard.advisor_clients')}</p>
+                      </div>
+                    </div>
+                    <p className="mt-3 text-[13px] leading-relaxed text-slate-600 dark:text-slate-300">
+                      {t('postDashboard.advisor_bio')}
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2.5">
+                      <Link to="/advisor?tab=messages" className={`flex-auto whitespace-nowrap ${PILL_SECONDARY}`}>
+                        <AppIcon icon={Mail} />
+                        {t('dashboard.message')}
+                      </Link>
+                      <Link to="/advisor?tab=meetings" className={`flex-auto gap-1.5 whitespace-nowrap ${PILL_SECONDARY}`}>
+                        <AppIcon icon={CalendarDays} />
+                        {t('dashboard.scheduleCall')}
+                      </Link>
+                    </div>
+                  </SpecCard>
+              </div>
+              <div className="order-4 grid min-w-0 lg:order-none">
+                  {/* Next Best Actions: the two most important, each a boxed card; a required one is tinted */}
+                  <SpecCard className="flex flex-col">
+                    <div className="mb-3 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <TitleBadge Icon={CheckSquare} color="bg-emerald-600" />
+                        <h2 className="text-[16px] font-bold text-text-primary">{t('dashboard.nextBestActions')}</h2>
+                      </div>
+                      <span className="text-[12px] font-medium text-text-secondary">{t('postDashboard.actions_count', { count: Math.min(nextActions.length, 2) })}</span>
+                    </div>
+                    <ul className="flex flex-1 flex-col gap-3">
+                      {nextActions.slice(0, 2).map((action) => {
+                        const ActionIcon = NEXT_ACTION_ICONS[action.id]
+                        return (
+                          <li key={action.id} className="flex flex-1">
+                            <Link
+                              to={action.href}
+                              className={`group flex w-full items-center gap-3 rounded-2xl border p-4 transition-shadow hover:shadow-[0_6px_16px_-10px_rgba(11,21,51,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${action.required ? 'border-status-danger/20 bg-status-danger-bg' : 'border-border-default bg-surface-elevated'}`}
+                            >
+                              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${action.required ? 'bg-status-danger/15 text-status-danger' : 'bg-surface-page text-text-secondary'}`} aria-hidden>
+                                <ActionIcon className="h-5 w-5" />
                               </span>
-                              <span className="truncate">{row.label}</span>
-                            </dt>
-                            {row.id === 'plan' ? (
-                              <dd className="shrink-0 font-semibold tabular-nums text-text-primary">{formatMoney(row.value, locale)}</dd>
-                            ) : (
-                              <dd className="shrink-0 text-[12px] text-slate-600 dark:text-slate-300">{t('outside_assets.not_linked')}</dd>
-                            )}
-                          </div>
-                        ))}
-                      </dl>
-                    </>
-                  )}
-                  <Link to="/outside-assets" className={`group mt-auto self-start pt-3 text-[13px] ${TEXT_LINK}`}>
-                    {outsideAccounts.length > 0 ? t('outside_assets.card_link') : t('outside_assets.card_link_empty')}
-                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
-                  </Link>
-                </SpecCard>
-            </div>
+                              <span className="min-w-0 flex-1">
+                                <span className="flex flex-wrap items-center gap-2">
+                                  <span className="text-[13px] font-bold text-text-primary">{t(`next_actions.${action.id}`, action.values)}</span>
+                                  {action.required && (
+                                    <span className="rounded bg-status-danger/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-status-danger">{t('postDashboard.badge_required')}</span>
+                                  )}
+                                </span>
+                                <span className="mt-1 block text-[12px] text-text-secondary">{t(`next_actions.${action.id}_sub`, action.values)}</span>
+                              </span>
+                              <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+                            </Link>
+                          </li>
+                        )
+                      })}
+                      {/* With fewer than two to do, things already settled fill the space, marked done */}
+                      {doneActions.slice(0, Math.max(0, 2 - nextActions.length)).map((id: DoneActionId) => (
+                        <li key={id} className="flex flex-1 items-center gap-3 rounded-2xl border border-border-default bg-surface-elevated p-4">
+                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-status-success-bg text-status-success" aria-hidden>
+                            <Check className="h-5 w-5" />
+                          </span>
+                          <span className="min-w-0 flex-1 text-[13px] text-text-secondary">{t(`next_actions.done_${id}`)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </SpecCard>
+              </div>
+              <div className="order-6 grid min-w-0 lg:order-none">
+                  {/* Active loans: one shows in full; two or more show as rows with the total underneath */}
+                  <SpecCard className="flex flex-col">
+                    <div className="mb-3 flex items-start justify-between gap-2">
+                      <div className="flex min-w-0 items-center gap-2.5">
+                        <TitleBadge Icon={CreditCard} color="bg-blue-600" />
+                        <div className="min-w-0">
+                          <h2 className="text-[16px] font-bold leading-tight text-text-primary">{t(loans.length > 1 ? 'postDashboard.loans_title' : 'dashboard.activeLoan')}</h2>
+                          {loans[0] && <p className="mt-0.5 truncate text-[12px] text-text-secondary">{t('postDashboard.loans_from_plan', { plan: loans[0].planName })}</p>}
+                        </div>
+                      </div>
+                      {loans.length > 1 && (
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[12px] font-semibold tabular-nums text-text-secondary dark:bg-white/10">{loans.length}</span>
+                      )}
+                    </div>
 
-            <div className="grid min-w-0 lg:col-span-4">
-                {/* Your Advisor: the plan widget's wash, a face, the numbers between two thin rules */}
-                <SpecCard tone="warm">
-                  <div className="flex items-center gap-3.5">
-                    <img
-                      src="https://randomuser.me/api/portraits/women/44.jpg"
-                      alt="Sarah Jenkins"
-                      className="h-14 w-14 shrink-0 rounded-full object-cover shadow-[0_6px_16px_-8px_rgba(11,21,51,0.5)] ring-2 ring-white dark:ring-slate-900"
-                    />
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-semibold uppercase tracking-widest text-text-secondary">{t('dashboard.yourAdvisor')}</p>
-                      <h3 className="mt-0.5 text-[18px] font-bold leading-tight text-text-primary">Sarah Jenkins</h3>
-                      <p className="mt-0.5 text-[13px] text-slate-600 dark:text-slate-300">{t('postDashboard.advisor_title_role')}</p>
+                    {loans.length === 1 ? (
+                      loans.map((loan) => (
+                        <div key={loan.ref}>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <p className="text-[14px] font-semibold text-text-primary">{t(`postDashboard.loan_${loan.purpose}`)}</p>
+                              <p className="mt-0.5 text-[12px] text-text-secondary">
+                                {loan.ref} · {t('postDashboard.loan_since', { date: new Date(`${loan.originated}T00:00:00`).toLocaleDateString(locale, { month: 'short', year: 'numeric' }) })}
+                              </p>
+                            </div>
+                            <span className="shrink-0 rounded-full bg-status-success-bg px-2 py-0.5 text-[12px] font-semibold text-status-success">{t('common.active')}</span>
+                          </div>
+                          <div className="mt-3 grid grid-cols-2 gap-4 border-t border-slate-200/80 pt-3 dark:border-white/10">
+                            <div>
+                              <p className="text-[12px] text-text-secondary">{t('postDashboard.remaining')}</p>
+                              <p className="mt-0.5 text-[20px] font-semibold tabular-nums text-text-primary">{money(loan.balance)}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-[12px] text-text-secondary">{t('postDashboard.next_payment')}</p>
+                              <p className="mt-0.5 text-[15px] font-semibold tabular-nums text-text-primary">{money(loan.payment)} · {nextLoanDue}</p>
+                            </div>
+                          </div>
+                          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
+                            <div className="h-full rounded-full bg-status-success" style={{ width: `${loan.paidPct}%` }} />
+                          </div>
+                          <div className="mt-1.5 flex justify-between text-[12px] text-text-secondary">
+                            <span>{t('postDashboard.loan_paid', { pct: loan.paidPct })}</span>
+                            <span>{t('postDashboard.loan_left', { count: loan.paymentsLeft })}</span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        <ul className="flex flex-1 flex-col divide-y divide-slate-200/80 dark:divide-white/10">
+                          {loans.map((loan) => (
+                            <li key={loan.ref} className="flex flex-1 flex-col justify-center py-2.5 first:pt-0">
+                              <div className="flex items-baseline justify-between gap-2">
+                                <p className="min-w-0 truncate text-[14px] font-semibold text-text-primary">{t(`postDashboard.loan_${loan.purpose}`)}</p>
+                                <p className="shrink-0 text-[15px] font-semibold tabular-nums text-text-primary">{money(loan.balance)}</p>
+                              </div>
+                              <div className="mt-0.5 flex items-baseline justify-between gap-2 text-[12px] text-text-secondary">
+                                <span>{loan.ref}</span>
+                                <span>{t('postDashboard.loan_next_short', { amount: money(loan.payment), date: nextLoanDue })}</span>
+                              </div>
+                              <div className="mt-2 h-1 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={loan.paidPct} aria-label={t('postDashboard.loan_paid', { pct: loan.paidPct })}>
+                                <div className="h-full rounded-full bg-status-success" style={{ width: `${loan.paidPct}%` }} />
+                              </div>
+                              <div className="mt-1.5 flex justify-between text-[12px] text-text-secondary">
+                                <span>{t('postDashboard.loan_paid', { pct: loan.paidPct })}</span>
+                                <span>{t('postDashboard.loan_left', { count: loan.paymentsLeft })}</span>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                        <div className="flex items-baseline justify-between border-t border-slate-200/80 pt-3 dark:border-white/10">
+                          <span className="text-[12px] text-text-secondary">{t('postDashboard.loans_total')}</span>
+                          <span className="text-[16px] font-semibold tabular-nums text-text-primary">{money(loansTotal)}</span>
+                        </div>
+                      </>
+                    )}
+                  </SpecCard>
+              </div>
+              <div className="order-8 grid min-w-0 lg:order-none lg:flex-1">
+                  {/* All your accounts, kept short: the total (or this plan, before any are linked), up to three accounts, one link */}
+                  <SpecCard className="flex flex-col">
+                    <div className="mb-2 flex items-center justify-between gap-2">
+                      <div className="flex min-w-0 items-center gap-2.5">
+                        <TitleBadge Icon={Landmark} color="bg-blue-600" />
+                        <span className="truncate text-[16px] font-bold text-text-primary">{t('outside_assets.card_title')}</span>
+                      </div>
+                      <Link to="/outside-assets" className={`group shrink-0 text-[13px] ${TEXT_LINK}`}>
+                        {outsideAccounts.length > 0 ? t('outside_assets.card_link') : t('outside_assets.card_link_empty')}
+                        <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+                      </Link>
                     </div>
-                  </div>
-                  {/* Stats sit straight on the card between two thin rules: no panel inside the card */}
-                  <div className="mt-4 grid grid-cols-3 divide-x divide-slate-200/80 border-y border-slate-200/80 py-3 text-center dark:divide-white/10 dark:border-white/10">
-                    <div className="px-2">
-                      <p className="text-[16px] font-bold text-text-primary">4.9</p>
-                      <p className="text-[11px] text-text-secondary">{t('postDashboard.advisor_rating')}</p>
-                    </div>
-                    <div className="px-2">
-                      <p className="text-[16px] font-bold text-text-primary">12yr</p>
-                      <p className="text-[11px] text-text-secondary">{t('postDashboard.advisor_experience')}</p>
-                    </div>
-                    <div className="px-2">
-                      <p className="text-[16px] font-bold text-text-primary">240+</p>
-                      <p className="text-[11px] text-text-secondary">{t('postDashboard.advisor_clients')}</p>
-                    </div>
-                  </div>
-                  <p className="mt-4 text-[13px] leading-relaxed text-slate-600 dark:text-slate-300">
-                    {t('postDashboard.advisor_bio')}
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-2.5">
-                    <Link to="/advisor?tab=messages" className={`flex-auto whitespace-nowrap ${PILL_SECONDARY}`}>
-                      <Mail className="h-4 w-4" aria-hidden />
-                      {t('dashboard.message')}
-                    </Link>
-                    <Link to="/advisor?tab=meetings" className={`flex-auto gap-1.5 whitespace-nowrap ${PILL_SECONDARY}`}>
-                      <CalendarDays className="h-4 w-4" aria-hidden />
-                      {t('dashboard.scheduleCall')}
-                    </Link>
-                  </div>
-                </SpecCard>
+                    {outsideAccounts.length > 0 ? (
+                      <>
+                        <p className="text-[12px] text-text-secondary">{t('outside_assets.net_worth')}</p>
+                        <p className="mt-0.5 text-[22px] font-bold leading-tight tabular-nums text-text-primary">{formatMoney(allAccounts.netWorth, locale)}</p>
+                        <dl className="mt-2.5 space-y-1.5 border-t border-slate-200/80 pt-2.5 dark:border-white/10">
+                          {accountRows.slice(0, 3).map((row) => (
+                            <div key={row.id} className="flex items-center justify-between gap-3 text-[13px]">
+                              <dt className="flex min-w-0 items-center gap-2 text-text-secondary">
+                                <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: row.color }} aria-hidden />
+                                <span className="truncate">{row.label}</span>
+                              </dt>
+                              <dd className="shrink-0 font-semibold tabular-nums text-text-primary">{formatMoney(row.value, locale)}</dd>
+                            </div>
+                          ))}
+                        </dl>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-[12px] text-text-secondary">{t('outside_assets.slice.plan')}</p>
+                        <p className="mt-0.5 text-[22px] font-bold leading-tight tabular-nums text-text-primary">{formatMoney(allAccounts.slices.plan, locale)}</p>
+                        <p className="mt-1.5 text-[13px] leading-snug text-slate-600 dark:text-slate-300">{t('outside_assets.card_invite')}</p>
+                      </>
+                    )}
+                  </SpecCard>
+              </div>
             </div>
           </div>
         </div>
