@@ -72,13 +72,14 @@ export function WebSummary(p: WebSummaryProps) {
   const periodWord = t(`enrollment.core.web.per_${period}`)
   /** The same words inside a sentence, where they aren't a label */
   const periodInText = periodWord.toLocaleLowerCase()
+  /** Inside a title the period's leading "Per" is a minor word, so it drops to lower case ("You Get per Month") */
+  const periodInTitle = periodWord.replace(/^Per /, 'per ').replace(/^Por /, 'por ')
   const yearlyYou = (p.salary * p.total) / 100
   const yearlyIn = yearlyYou + p.match
 
-  // What goes into the account: each source of your own pay, then your employer's match, as on the printed summary
+  // What you save: each source of your own pay. The employer's match has its own card and KPI, so it isn't repeated here
   const flow = [
     ...p.sources.filter((src) => src.pct > 0).map((src) => ({ key: src.key, label: src.label, amount: (p.salary * src.pct) / 100, note: t('enrollment.core.web.pct_of_pay', { pct: src.pct }), bar: src.bar })),
-    ...(p.match > 0 ? [{ key: 'match', label: t('enrollment.core.web.employer'), amount: p.match, note: t('enrollment.core.web.free_money', { cap: p.cap }), bar: 'bg-emerald-500' }] : []),
   ]
   const flowTotal = flow.reduce((sum, row) => sum + row.amount, 0) || 1
   const [hoverClass, setHoverClass] = useState<string | null>(null)
@@ -113,11 +114,13 @@ export function WebSummary(p: WebSummaryProps) {
           { label: t('enrollment.core.web.kpi_total'), value: p.money(ofYear(yearlyIn)), sub: periodWord },
           { label: t('enrollment.core.m_proj', { age: p.retireAge }), value: p.compact(p.projected), sub: t('enrollment.core.not_guaranteed') },
         ].map((k, i) => (
-          <div key={k.label} className={cn(CARD, 'flex flex-col p-4 sm:p-4')}>
-            <dt className="text-[12px] font-medium text-text-secondary">{k.label}</dt>
-            <dd className={cn('mt-1 text-[22px] font-bold tabular-nums tracking-tight text-text-primary', k.tone)}>{k.value}</dd>
-            <dd className="text-[12px] text-text-secondary">{k.sub}</dd>
-            {/* The projection tile carries its own small growth line, from today to retirement */}
+          <div key={k.label} className={cn(CARD, 'flex items-end justify-between gap-3 p-4 sm:p-4')}>
+            <div className="min-w-0">
+              <dt className="text-[12px] font-medium text-text-secondary">{k.label}</dt>
+              <dd className={cn('mt-1 text-[22px] font-bold tabular-nums tracking-tight text-text-primary', k.tone)}>{k.value}</dd>
+              <dd className="text-[12px] text-text-secondary">{k.sub}</dd>
+            </div>
+            {/* The projection tile's growth line sits beside its figure, so every tile stays the same height */}
             {i === 3 && <Sparkline points={p.series} label={t('enrollment.core.chart_label')} from={t('enrollment.core.web.auto_today')} to={t('enrollment.core.web.age', { age: p.retireAge })} />}
           </div>
         ))}
@@ -129,7 +132,7 @@ export function WebSummary(p: WebSummaryProps) {
           <IconTile name="contributions" />
           <div>
             <h3 id="web-flow" className={CARD_TITLE}>{t('enrollment.core.web.flow_title')}</h3>
-            <p className="text-[13px] text-text-secondary">{t('enrollment.core.web.flow_sub', { you: p.money(ofYear(yearlyYou)), employer: p.money(ofYear(p.match)), period: periodInText })}</p>
+            <p className="text-[13px] text-text-secondary">{t('enrollment.core.web.flow_sub', { you: p.money(ofYear(yearlyYou)), period: periodInText })}</p>
           </div>
         </div>
         <div className="mt-4 flex h-4 w-full gap-[2px] overflow-hidden rounded-full" aria-hidden>
@@ -198,11 +201,11 @@ export function WebSummary(p: WebSummaryProps) {
             </div>
             <dl className="mt-4 grid grid-cols-2 gap-3 text-[13px]">
               <div>
-                <dt className="text-text-secondary">{t('enrollment.core.web.match_you_get', { period: periodWord })}</dt>
+                <dt className="text-text-secondary">{t('enrollment.core.web.match_you_get', { period: periodInTitle })}</dt>
                 <dd className="text-[18px] font-bold tabular-nums text-text-primary">{`+${p.money(ofYear(p.match))}`}</dd>
               </div>
               <div>
-                <dt className="text-text-secondary">{t('enrollment.core.web.match_max', { period: periodWord })}</dt>
+                <dt className="text-text-secondary">{t('enrollment.core.web.match_max', { period: periodInTitle })}</dt>
                 <dd className="text-[18px] font-bold tabular-nums text-text-primary">{`+${p.money(ofYear(p.fullMatch))}`}</dd>
               </div>
             </dl>
@@ -230,7 +233,7 @@ export function WebSummary(p: WebSummaryProps) {
                   <tr className="border-b border-slate-200 text-left text-[12px] text-text-secondary dark:border-white/10">
                     <th scope="col" className="py-1.5 pr-3 font-semibold">{t('enrollment.core.web.auto_when')}</th>
                     <th scope="col" className="py-1.5 pr-3 font-semibold">{t('enrollment.core.web.auto_rate')}</th>
-                    <th scope="col" className="py-1.5 text-right font-semibold">{t('enrollment.core.web.auto_amount', { period: periodWord })}</th>
+                    <th scope="col" className="py-1.5 text-right font-semibold">{t('enrollment.core.web.auto_amount', { period: periodInTitle })}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -278,7 +281,7 @@ export function WebSummary(p: WebSummaryProps) {
                 <th scope="col" className="py-2 pr-3 font-semibold">{t('enrollment.core.ed.funds')}</th>
                 <th scope="col" className="hidden py-2 pr-3 font-semibold sm:table-cell">{t('enrollment.core.web.fund_type')}</th>
                 <th scope="col" className="py-2 pr-3 text-right font-semibold">%</th>
-                <th scope="col" className="py-2 text-right font-semibold">{t('enrollment.core.web.fund_in', { period: periodWord })}</th>
+                <th scope="col" className="py-2 text-right font-semibold">{t('enrollment.core.web.fund_in', { period: periodInTitle })}</th>
               </tr>
             </thead>
             <tbody>
@@ -363,7 +366,7 @@ function Sparkline({ points, label, from, to }: { points: number[]; label: strin
   const xy = points.map((v, i) => [(i / (points.length - 1)) * W, H - 3 - (v / max) * (H - 8)] as const)
   const line = xy.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ')
   return (
-    <div className="mt-auto pt-2">
+    <div className="w-[45%] max-w-[120px] shrink-0">
       <svg viewBox={`0 0 ${W} ${H}`} className="block h-9 w-full" role="img" aria-label={label} preserveAspectRatio="none">
         <path d={`${line} L${W},${H} L0,${H} Z`} className="fill-blue-500/10 dark:fill-blue-400/15" />
         <path d={line} fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" className="stroke-blue-600 dark:stroke-blue-400" />

@@ -627,8 +627,8 @@ function InvestmentStrategy() {
         {/* Build Portfolio Modal */}
         {showBuildPortfolioModal && (
           <div className="fixed inset-0 z-[90] flex items-center justify-center bg-[#0B1533]/50 p-4 backdrop-blur-sm" role="dialog" aria-modal="true">
-            <div className="flex max-h-[90vh] w-full max-w-7xl flex-col overflow-hidden rounded-[24px] bg-white shadow-2xl ring-1 ring-slate-200/70 dark:bg-[#0B1436] dark:ring-white/10">
-              <div className="px-6 py-5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between">
+            <div className={cn('flex max-h-[min(88vh,820px)] w-full flex-col overflow-hidden rounded-[24px] bg-white shadow-2xl ring-1 ring-slate-200/70 transition-[max-width] duration-200 dark:bg-[#0B1436] dark:ring-white/10', editingSource ? 'max-w-5xl' : 'max-w-2xl')}>
+              <div className="flex shrink-0 items-start justify-between gap-4 border-b border-slate-200/80 px-6 py-4 dark:border-white/10">
                 <div>
                   <div className="mb-1.5 flex items-center gap-3">
                     <TitleBadge Icon={Sparkles} />
@@ -638,8 +638,8 @@ function InvestmentStrategy() {
                 </div>
                 <button type="button" onClick={() => { setShowBuildPortfolioModal(false); setEditingSource(null); setInlineAllocs(null) }} className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-[#0B1533] dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"><X className="h-5 w-5" /></button>
               </div>
-              <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
-                <div className={`${editingSource ? 'md:w-2/5' : 'w-full'} border-r border-slate-200/80 dark:border-white/10 overflow-y-auto px-6 py-5 transition-all`}>
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row">
+                <div className={cn('min-h-0 overflow-y-auto px-6 py-5', editingSource ? 'border-b border-slate-200/80 md:w-2/5 md:border-b-0 md:border-r dark:border-white/10' : 'w-full')}>
                   <p className="text-[#0B1533] dark:text-white mb-4" style={{ fontSize: '0.95rem', fontWeight: 600 }}>{t('enrollment.investment.sources_heading')}</p>
                   <div className="space-y-3">
                     {activeSources.map((src) => <SourceCard key={src} sourceKey={src} monthlyAmount={getMonthlyForSource(src)} funds={getFundsForSource()} isCustomized={isSourceCustomized()} onEditPortfolio={() => handleOpenCustomize(src)} />)}
@@ -647,7 +647,7 @@ function InvestmentStrategy() {
                   </div>
                 </div>
                 {editingSource && inlineAllocs && (
-                  <div className="flex flex-1 flex-col md:w-3/5">
+                  <div className="flex min-h-0 flex-1 flex-col md:w-3/5">
                     <div className={cn('border-b px-6 py-4', RULE)}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: sourceColors[editingSource] }} /><h3 className="text-[#0B1533] dark:text-white" style={{ fontSize: '1rem', fontWeight: 600 }}>{t('enrollment.investment.customize_source', { source: t(`enrollment.investment.${sourceTKey[editingSource]}`) })}</h3></div>
@@ -666,7 +666,7 @@ function InvestmentStrategy() {
                   </div>
                 )}
               </div>
-              <div className={cn('border-t px-6 py-4', RULE)}>
+              <div className={cn('shrink-0 border-t px-6 py-4', RULE)}>
                 <button type="button" onClick={handleDoneBuilding} className={cn(PILL_PRIMARY, 'w-full')}>{t('enrollment.investment.done')} <ChevronRight className="w-4 h-4" /></button>
               </div>
             </div>

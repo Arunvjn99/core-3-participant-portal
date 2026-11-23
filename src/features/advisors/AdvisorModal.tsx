@@ -147,7 +147,7 @@ function AdvisorList({ advisors, myPlans, onBook }: { advisors: DirectoryAdvisor
               {/* Another day or time, right here: pick a day, then a time, and it goes straight to confirm */}
               {openId === a.id && pickDay && (
                 <div id={`times-${a.id}`} className="mt-3 border-t border-slate-200/80 pt-3 dark:border-white/10">
-                  <div role="group" aria-label={t('advisor_modal.select_date')} className="flex gap-1.5 overflow-x-auto pb-1">
+                  <div role="group" aria-label={t('advisor_modal.select_date')} className="-mx-1 flex gap-1.5 overflow-x-auto px-1 py-1">
                     {days.map((d) => {
                       const free = SLOT_MINUTES.filter((m) => !isTaken(a.id, d, m)).length
                       const on = isoDate(d) === isoDate(pickDay)
@@ -158,7 +158,7 @@ function AdvisorList({ advisors, myPlans, onBook }: { advisors: DirectoryAdvisor
                           aria-pressed={on}
                           disabled={free === 0}
                           onClick={() => setPickDay(d)}
-                          className={cn(chip(on, free === 0), 'shrink-0 px-2.5 py-1.5 text-center leading-tight')}
+                          className={cn(chip(on, free === 0), 'min-w-[68px] shrink-0 px-2.5 py-1.5 text-center leading-tight focus-visible:ring-inset focus-visible:ring-offset-0', on && 'focus-visible:ring-white/70')}
                         >
                           <span className="block text-[12px]">{d.toLocaleDateString(locale, { weekday: 'short' })}</span>
                           <span className="block text-[11px] font-medium opacity-80">{d.toLocaleDateString(locale, { month: 'short', day: 'numeric' })}</span>
