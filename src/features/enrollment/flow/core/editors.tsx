@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, ChevronRight, Lightbulb, Minus, Plus, Search, Target, X } from 'lucide-react'
@@ -324,6 +324,11 @@ export function InvestmentsEditor({ value, onChange, ctx, onQuizChange }: { valu
   const isDark = useTheme().resolvedMode === 'dark'
   const [query, setQuery] = useState('')
   const [quiz, setQuiz] = useState(false)
+  /** The brokerage note appears under its switch: bring it fully into view so it never sits cut off at the panel's edge */
+  const sdbNote = useRef<HTMLParagraphElement>(null)
+  useEffect(() => {
+    if (value.sdb) sdbNote.current?.scrollIntoView({ block: 'nearest' })
+  }, [value.sdb])
   useEffect(() => {
     onQuizChange?.(quiz)
     return () => onQuizChange?.(false)
@@ -499,7 +504,7 @@ export function InvestmentsEditor({ value, onChange, ctx, onQuizChange }: { valu
         </div>
         <Switch checked={value.sdb} onChange={(v) => onChange({ ...value, sdb: v })} label={t('plan.inv.sdb')} />
       </div>
-      {value.sdb && <p className="rounded-lg bg-amber-50 px-3 py-2 text-[12px] leading-[1.5] text-amber-900 dark:bg-amber-950/30 dark:text-amber-200">{t('plan.sdb_funds.note')}</p>}
+      {value.sdb && <p ref={sdbNote} className="scroll-mb-4 rounded-lg bg-amber-50 px-3 py-2 text-[12px] leading-[1.5] text-amber-900 dark:bg-amber-950/30 dark:text-amber-200">{t('plan.sdb_funds.note')}</p>}
     </div>
   )
 

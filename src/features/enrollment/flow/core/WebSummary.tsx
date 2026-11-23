@@ -70,6 +70,8 @@ export function WebSummary(p: WebSummaryProps) {
   const per = period === 'paycheck' ? p.periods : period === 'month' ? 12 : 1
   const ofYear = (v: number) => v / per
   const periodWord = t(`enrollment.core.web.per_${period}`)
+  /** The same words inside a sentence, where they aren't a label */
+  const periodInText = periodWord.toLocaleLowerCase()
   const yearlyYou = (p.salary * p.total) / 100
   const yearlyIn = yearlyYou + p.match
 
@@ -127,7 +129,7 @@ export function WebSummary(p: WebSummaryProps) {
           <IconTile name="contributions" />
           <div>
             <h3 id="web-flow" className={CARD_TITLE}>{t('enrollment.core.web.flow_title')}</h3>
-            <p className="text-[13px] text-text-secondary">{t('enrollment.core.web.flow_sub', { you: p.money(ofYear(yearlyYou)), employer: p.money(ofYear(p.match)), period: periodWord })}</p>
+            <p className="text-[13px] text-text-secondary">{t('enrollment.core.web.flow_sub', { you: p.money(ofYear(yearlyYou)), employer: p.money(ofYear(p.match)), period: periodInText })}</p>
           </div>
         </div>
         <div className="mt-4 flex h-4 w-full gap-[2px] overflow-hidden rounded-full" aria-hidden>
@@ -252,7 +254,7 @@ export function WebSummary(p: WebSummaryProps) {
               </table>
               {/* How each amount is worked out */}
               <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2.5 text-[12px] text-text-secondary dark:bg-white/[0.05]">
-                {t('enrollment.core.web.auto_how', { pay: p.money(ofYear(p.salary)), period: periodWord, cap: p.auto.stopAt })}
+                {t('enrollment.core.web.auto_how', { pay: p.money(ofYear(p.salary)), period: periodInText, cap: p.auto.stopAt })}
               </p>
             </>
           ) : null}
