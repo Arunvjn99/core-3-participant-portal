@@ -134,25 +134,19 @@ function SpecCard({
 
 type IconType = React.ComponentType<{ className?: string }>
 
-/** Solid icon badge beside a card title, like the Enrich card's. */
-function TitleBadge({ Icon, color }: { Icon: IconType; color: string }) {
+/** Icon badge beside a card title: the icon system's subtle blue circle, the same on every card (`color` is kept for
+ *  older callers and no longer changes the colour). */
+function TitleBadge({ Icon }: { Icon: IconType; color: string }) {
   return (
-    <span
-      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_16px_-8px_rgba(11,21,51,0.45)] ${color}`}
-      aria-hidden
-    >
+    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/25 dark:text-blue-200" aria-hidden>
       <Icon className="h-[18px] w-[18px]" />
     </span>
   )
 }
 
-const CHIP_TONES = {
-  emerald: 'bg-emerald-50 text-emerald-600 ring-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/20',
-  blue: 'bg-blue-50 text-blue-600 ring-blue-100 dark:bg-blue-500/15 dark:text-blue-300 dark:ring-blue-400/20',
-  amber: 'bg-amber-50 text-amber-600 ring-amber-100 dark:bg-amber-500/15 dark:text-amber-300 dark:ring-amber-400/20',
-  rose: 'bg-rose-50 text-rose-600 ring-rose-100 dark:bg-rose-500/15 dark:text-rose-300 dark:ring-rose-400/20',
-  slate: 'bg-slate-100 text-slate-600 ring-slate-200 dark:bg-white/10 dark:text-slate-300 dark:ring-white/10',
-} as const
+const CHIP_TONE_BLUE = 'bg-blue-50 text-[#2563EB] ring-blue-100 dark:bg-blue-500/15 dark:text-blue-300 dark:ring-blue-400/20'
+/** Every round chip uses the icon system's subtle blue; the tone names stay so callers need no change */
+const CHIP_TONES = { emerald: CHIP_TONE_BLUE, blue: CHIP_TONE_BLUE, amber: CHIP_TONE_BLUE, rose: CHIP_TONE_BLUE, slate: CHIP_TONE_BLUE } as const
 
 /** Round tinted icon chip, like the ones in the plan widget. */
 function IconChip({ Icon, tone, small }: { Icon: IconType; tone: keyof typeof CHIP_TONES; small?: boolean }) {
@@ -721,9 +715,9 @@ export default function PostEnrollmentDashboard() {
           <div className="mt-3 flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(0,13fr)_minmax(0,7fr)]">
             <div className="contents lg:flex lg:min-w-0 lg:flex-col lg:gap-3">
               <div className="order-1 grid min-w-0 lg:order-none">
-                  {/* Financial wellness library: the Enrich card's look, coin art and all */}
+                  {/* Financial wellness library: the Enrich card's look and illustration, as on the pre-enrollment dashboard */}
                     <SpecCard tone="blue" className="group relative isolate flex min-h-[168px] overflow-hidden transition-shadow hover:shadow-[0_24px_48px_-28px_rgba(37,99,235,0.45)]">
-                      {/* The coin art's periwinkle, glowing behind it so the image and card share one light */}
+                      {/* A soft periwinkle glow behind the illustration so it sits in the card's own light */}
                       <span className="pointer-events-none absolute -right-10 top-1/2 -z-10 h-64 w-80 -translate-y-1/2 rounded-full bg-[#8C9BFF] opacity-25 blur-[70px] transition-opacity group-hover:opacity-40 dark:bg-[#5B6BFF] dark:opacity-35" aria-hidden />
                       <div className="relative z-10 flex flex-1 flex-col items-start sm:max-w-[56%]">
                         <div className="flex items-center gap-2.5">
@@ -740,13 +734,14 @@ export default function PostEnrollmentDashboard() {
                         </Link>
                       </div>
 
-                      {/* The coin on the steps, faded into the card on its left and its bright top-right corner */}
+                      {/* The saver on the safe, the same illustration as the pre-enrollment Enrich card: cut out of its
+                          backdrop and fitted whole, its cut edges sitting on the card's bottom and right edges */}
                       <img
-                        src="/media/enrich-coin.png"
+                        src="/media/enrich-big-goals.webp"
                         alt=""
-                        width={300}
-                        height={180}
-                        className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[320px] max-w-none object-cover object-[center_8%] transition-transform duration-700 [mask-composite:intersect] [mask-image:linear-gradient(to_right,transparent_0%,black_30%),radial-gradient(60%_55%_at_100%_0%,transparent_0%,transparent_30%,black_95%)] [-webkit-mask-composite:source-in] group-hover:scale-[1.05] motion-reduce:transition-none sm:block"
+                        width={960}
+                        height={658}
+                        className="pointer-events-none absolute bottom-0 right-0 hidden h-[calc(100%-12px)] w-auto max-w-[44%] origin-bottom-right object-contain object-right-bottom drop-shadow-[0_16px_24px_rgba(15,26,72,0.18)] transition-transform duration-700 group-hover:scale-[1.03] motion-reduce:transition-none sm:block"
                         aria-hidden
                       />
                     </SpecCard>

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, PiggyBank } from 'lucide-react'
+import { PiggyBank } from 'lucide-react'
 import { cn } from '@/lib/cn'
-import { AppIcon, ICON_COLOR, IconTile } from '@/design-system/icons'
+import { IconTile } from '@/design-system/icons'
 import { ProjectionChart } from './ui'
 
 /** How often the amounts are shown; every figure on the page follows this */
@@ -65,7 +65,6 @@ export function WebSummary(p: WebSummaryProps) {
   const [period, setPeriod] = useState<Period>('paycheck')
   const [activeFlow, setActiveFlow] = useState<string | null>(null)
   const [year, setYear] = useState(0)
-  const [openFund, setOpenFund] = useState<string | null>(null)
 
   const per = period === 'paycheck' ? p.periods : period === 'month' ? 12 : 1
   const ofYear = (v: number) => v / per
@@ -73,11 +72,13 @@ export function WebSummary(p: WebSummaryProps) {
   const yearlyYou = (p.salary * p.total) / 100
   const yearlyIn = yearlyYou + p.match
 
-  // Where the money comes from: each source, then the employer, in one bar
-  const flow = [
-    ...p.sources.filter((s) => s.pct > 0).map((s) => ({ key: s.key, label: s.label, amount: (p.salary * s.pct) / 100, note: t('enrollment.core.web.pct_of_pay', { pct: s.pct }), bar: s.bar })),
-    ...(p.match > 0 ? [{ key: 'match', label: t('enrollment.core.web.employer'), amount: p.match, note: t('enrollment.core.web.free_money'), bar: 'bg-emerald-500' }] : []),
-  ]
+  // Where your savings come from: each source of your own pay, in one bar. The employer's match is not your
+  // savings, so it stays in the Employer Match card and the totals above, not here.
+  const flow = p.sources
+    .filter((s) => s.pct > 0)
+    .map((s) => ({ key: s.key, label: s.label, amount: (p.salary * s.pct) / 100, note: t('enrollment.core.web.pct_of_pay', { pct: s.pct }), bar: s.bar }))
+  const flowTotal = flow.reduce((sum, s) => sum + s.amount, 0) || 1
+  const [hoverClass, setHoverClass] = useState<string | null>(null)
   const matchedRate = Math.min(p.deferral, p.cap)
   const schedule = p.auto.schedule
   const picked = schedule[Math.min(year, schedule.length - 1)]
@@ -109,11 +110,13 @@ export function WebSummary(p: WebSummaryProps) {
           { label: t('enrollment.core.web.kpi_employer'), value: `+${p.money(ofYear(p.match))}`, sub: periodWord, tone: 'text-emerald-600 dark:text-emerald-400' },
           { label: t('enrollment.core.web.kpi_total'), value: p.money(ofYear(yearlyIn)), sub: periodWord },
           { label: t('enrollment.core.m_proj', { age: p.retireAge }), value: p.compact(p.projected), sub: t('enrollment.core.not_guaranteed') },
-        ].map((k) => (
-          <div key={k.label} className={cn(CARD, 'p-4 sm:p-4')}>
+        ].map((k, i) => (
+          <div key={k.label} className={cn(CARD, 'relative overflow-hidden p-4 sm:p-4')}>
             <dt className="text-[12px] font-medium text-text-secondary">{k.label}</dt>
             <dd className={cn('mt-1 text-[22px] font-bold tabular-nums tracking-tight text-text-primary', k.tone)}>{k.value}</dd>
             <dd className="text-[12px] text-text-secondary">{k.sub}</dd>
+            {/* The projection tile carries its own small growth line */}
+            {i === 3 && <Sparkline points={p.series} label={t('enrollment.core.chart_label')} />}
           </div>
         ))}
       </dl>
@@ -124,7 +127,7 @@ export function WebSummary(p: WebSummaryProps) {
           <IconTile name="contributions" />
           <div>
             <h3 id="web-flow" className={CARD_TITLE}>{t('enrollment.core.web.flow_title')}</h3>
-            <p className="text-[13px] text-text-secondary">{t('enrollment.core.web.flow_sub', { amount: p.money(ofYear(yearlyIn)), period: periodWord })}</p>
+            <p className="text-[13px] text-text-secondary">{t('enrollment.core.web.flow_sub', { amount: p.money(ofYear(yearlyYou)), period: periodWord })}</p>
           </div>
         </div>
         <div className="mt-4 flex h-4 w-full gap-[2px] overflow-hidden rounded-full" aria-hidden>
@@ -134,7 +137,7 @@ export function WebSummary(p: WebSummaryProps) {
               onMouseEnter={() => setActiveFlow(s.key)}
               onMouseLeave={() => setActiveFlow(null)}
               className={cn('h-full transition-opacity first:rounded-l-full last:rounded-r-full', s.bar, activeFlow && activeFlow !== s.key && 'opacity-30')}
-              style={{ width: `${(s.amount / yearlyIn) * 100}%`, minWidth: 6 }}
+              style={{ width: `${(s.amount / flowTotal) * 100}%`, minWidth: 6 }}
             />
           ))}
         </div>
@@ -156,7 +159,7 @@ export function WebSummary(p: WebSummaryProps) {
                 </span>
                 <span className="text-right">
                   <span className="block text-[15px] font-bold tabular-nums text-text-primary">{p.money(ofYear(s.amount))}</span>
-                  <span className="block text-[12px] tabular-nums text-text-secondary">{t('enrollment.core.web.share', { pct: Math.round((s.amount / yearlyIn) * 100) })}</span>
+                  <span className="block text-[12px] tabular-nums text-text-secondary">{t('enrollment.core.web.share', { pct: Math.round((s.amount / flowTotal) * 100) })}</span>
                 </span>
               </button>
             </li>
@@ -263,53 +266,58 @@ export function WebSummary(p: WebSummaryProps) {
             <p className="text-[13px] text-text-secondary">{t('enrollment.core.web.funds_sub', { invest: p.investLabel, growth: p.growthPct })}</p>
           </div>
         </div>
-        <ul className="mt-4 space-y-1">
-          {p.funds.map((fund) => {
-            const open = openFund === fund.ticker
-            return (
-              <li key={fund.ticker}>
-                <button
-                  type="button"
-                  aria-expanded={open}
-                  onClick={() => setOpenFund(open ? null : fund.ticker)}
-                  className={cn('w-full rounded-xl px-2 py-2.5 text-left transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.05]', FOCUS)}
-                >
-                  <span className="flex items-center gap-3">
-                    <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: fund.color }} aria-hidden />
-                    <span className="min-w-0 flex-1 truncate text-[14px] font-semibold text-text-primary">{fund.name}</span>
-                    <span className="text-[14px] font-bold tabular-nums text-text-primary">{`${fund.pct}%`}</span>
-                    <AppIcon icon={ChevronDown} size="inline" className={cn(ICON_COLOR.muted, 'transition-transform', open && 'rotate-180')} />
-                  </span>
-                  <span className="mt-2 block h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-white/10" aria-hidden>
-                    <span className="block h-full rounded-full" style={{ width: `${fund.pct}%`, backgroundColor: fund.color }} />
-                  </span>
-                </button>
-                {open && (
-                  <dl className="mx-2 mb-2 grid grid-cols-2 gap-3 rounded-xl bg-slate-50 px-3 py-2.5 text-[13px] sm:grid-cols-3 dark:bg-white/[0.05]">
-                    <div>
-                      <dt className="text-text-secondary">{t('enrollment.core.web.fund_ticker')}</dt>
-                      <dd className="font-semibold text-text-primary">{fund.ticker}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-text-secondary">{t('enrollment.core.web.fund_type')}</dt>
-                      <dd className="font-semibold text-text-primary">{fund.assetClass}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-text-secondary">{t('enrollment.core.web.fund_in', { period: periodWord })}</dt>
-                      <dd className="font-semibold tabular-nums text-text-primary">{p.money(ofYear((yearlyIn * fund.pct) / 100))}</dd>
-                    </div>
-                  </dl>
-                )}
-              </li>
-            )
-          })}
-        </ul>
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full border-collapse text-[13px]">
+            <caption className="sr-only">{t('enrollment.core.ed.funds')}</caption>
+            <thead>
+              <tr className="border-b border-slate-200 text-left text-[12px] font-semibold text-text-secondary dark:border-white/10">
+                <th scope="col" className="py-2 pr-3 font-semibold">{t('enrollment.core.ed.funds')}</th>
+                <th scope="col" className="hidden py-2 pr-3 font-semibold sm:table-cell">{t('enrollment.core.web.fund_type')}</th>
+                <th scope="col" className="py-2 pr-3 text-right font-semibold">%</th>
+                <th scope="col" className="py-2 text-right font-semibold">{t('enrollment.core.web.fund_in', { period: periodWord })}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {p.funds.map((fund) => {
+                const lit = hoverClass === fund.assetClass
+                const dim = hoverClass !== null && !lit
+                return (
+                  <tr key={fund.ticker} className={cn('border-b border-slate-100 transition-colors last:border-0 hover:bg-slate-50 dark:border-white/[0.06] dark:hover:bg-white/[0.04]', lit && 'bg-blue-50/70 dark:bg-blue-500/10', dim && 'opacity-40')}>
+                    <th scope="row" className="py-2.5 pr-3 text-left font-normal">
+                      <span className="flex items-start gap-2.5">
+                        <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: fund.color }} aria-hidden />
+                        <span className="min-w-0">
+                          <span className="block font-semibold text-text-primary">{fund.name}</span>
+                          <span className="block text-[12px] text-text-secondary">{fund.ticker}<span className="sm:hidden">{` · ${fund.assetClass}`}</span></span>
+                        </span>
+                      </span>
+                    </th>
+                    <td className="hidden py-2.5 pr-3 align-top text-text-secondary sm:table-cell">{fund.assetClass}</td>
+                    <td className="py-2.5 pr-3 text-right align-top font-bold tabular-nums text-text-primary">{`${fund.pct}%`}</td>
+                    <td className="py-2.5 text-right align-top tabular-nums text-text-primary">{p.money(ofYear((yearlyIn * fund.pct) / 100))}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
         <div className="mt-4 border-t border-slate-200/80 pt-4 dark:border-white/10">
           <p className="text-[13px] font-semibold text-text-primary">{t('enrollment.core.sum_by_type')}</p>
+          {/* Hover or focus a type to pick out its funds above */}
           <ul className="mt-2 flex flex-wrap gap-2">
             {p.byAssetClass.map(([cls, pct]) => (
-              <li key={cls} className="rounded-full bg-slate-100 px-3 py-1 text-[12px] text-text-primary dark:bg-white/[0.08]">
-                <span className="font-semibold tabular-nums">{`${pct}%`}</span> {cls}
+              <li key={cls}>
+                <button
+                  type="button"
+                  aria-pressed={hoverClass === cls}
+                  onMouseEnter={() => setHoverClass(cls)}
+                  onMouseLeave={() => setHoverClass(null)}
+                  onFocus={() => setHoverClass(cls)}
+                  onBlur={() => setHoverClass(null)}
+                  className={cn('rounded-full px-3 py-1 text-[12px] text-text-primary transition-colors', FOCUS, hoverClass === cls ? 'bg-blue-100 dark:bg-blue-500/25' : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.14]')}
+                >
+                  <span className="font-semibold tabular-nums">{`${pct}%`}</span> {cls}
+                </button>
               </li>
             ))}
           </ul>
@@ -339,5 +347,23 @@ export function WebSummary(p: WebSummaryProps) {
         </div>
       </section>
     </div>
+  )
+}
+
+/** A small growth line for a tile: the balance from today to retirement, filled underneath */
+function Sparkline({ points, label }: { points: number[]; label: string }) {
+  if (points.length < 2) return null
+  const W = 120
+  const H = 40
+  const max = Math.max(...points) || 1
+  const xy = points.map((v, i) => [(i / (points.length - 1)) * W, H - 2 - (v / max) * (H - 6)] as const)
+  const line = xy.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ')
+  const [ex, ey] = xy[xy.length - 1]
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="pointer-events-none absolute bottom-3 right-3 h-10 w-[45%] max-w-[130px]" role="img" aria-label={label} preserveAspectRatio="none">
+      <path d={`${line} L${W},${H} L0,${H} Z`} className="fill-blue-500/10 dark:fill-blue-400/15" />
+      <path d={line} fill="none" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" className="stroke-blue-600 dark:stroke-blue-400" />
+      <circle cx={ex} cy={ey} r="2.5" className="fill-blue-600 dark:fill-blue-400" />
+    </svg>
   )
 }

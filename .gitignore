@@ -35,3 +35,6 @@ dist-ssr
 # Local agent skills (installed via npx skills)
 .agents/
 skills-lock.json
+
+# Local Netlify folder
+.netlify

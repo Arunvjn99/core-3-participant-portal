@@ -453,10 +453,10 @@ export function PreEnrollmentDashboard() {
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)]">
               {/* Enrich financial learning: the lead card, opens Enrich in a new tab */}
               <Reveal className="group relative isolate flex min-h-[180px] overflow-hidden rounded-[20px] bg-[radial-gradient(90%_130%_at_0%_0%,#CBE7FF_0%,rgba(203,231,255,0)_62%),radial-gradient(70%_130%_at_100%_100%,#C9D0FF_0%,rgba(201,208,255,0)_68%),linear-gradient(#EEF2FF,#EEF2FF)] p-6 text-left shadow-[0_18px_40px_-28px_rgba(37,99,235,0.55)] ring-1 ring-blue-200/80 xl:min-h-[164px] xl:py-5 transition-shadow hover:shadow-[0_24px_48px_-26px_rgba(37,99,235,0.6)] md:col-span-2 xl:col-span-3 dark:bg-[radial-gradient(90%_130%_at_0%_0%,#173F7A_0%,rgba(23,63,122,0)_62%),radial-gradient(70%_130%_at_100%_100%,#3340B0_0%,rgba(51,64,176,0)_68%),linear-gradient(#0F1A48,#0F1A48)] dark:shadow-none dark:ring-blue-400/25">
-                {/* The coin art's periwinkle, glowing behind it so the image and card share one light */}
+                {/* A soft periwinkle glow behind the illustration so it sits in the card's own light */}
                 <span className="pointer-events-none absolute -right-10 top-1/2 -z-10 h-64 w-80 -translate-y-1/2 rounded-full bg-[#8C9BFF] opacity-35 blur-[70px] transition-opacity group-hover:opacity-50 dark:bg-[#5B6BFF] dark:opacity-45" aria-hidden />
                 {/* Left: what it is and the way in */}
-                <div className="relative z-10 flex flex-1 flex-col items-start justify-center sm:max-w-[70%]">
+                <div className="relative z-10 flex flex-1 flex-col items-start justify-center sm:pr-[280px]">
                   <span className="flex items-center gap-3">
                     <IconTile icon={GraduationCap} />
                     <h3 className="text-[20px] font-bold leading-tight text-[#0B1533] dark:text-white">
@@ -480,13 +480,13 @@ export function PreEnrollmentDashboard() {
                   </span>
                 </div>
 
-                {/* Right: the coin on the steps, its backdrop removed so it sits straight on the card; the left and the bright top-right corner fade into the card */}
+                {/* Right: the saver on the safe, cut out of its backdrop and fitted whole inside the card; the image's cut edges sit on the card's bottom and right edges */}
                 <img
-                  src="/media/enrich-coin-dollar.png"
+                  src="/media/enrich-big-goals.webp"
                   alt=""
-                  width={300}
-                  height={180}
-                  className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-[300px] max-w-none object-cover object-[center_8%] transition-transform duration-700 [mask-composite:intersect] [mask-image:linear-gradient(to_right,transparent_0%,black_30%),radial-gradient(60%_55%_at_100%_0%,transparent_0%,transparent_30%,black_95%)] [-webkit-mask-composite:source-in] group-hover:scale-[1.05] motion-reduce:transition-none sm:block"
+                  width={960}
+                  height={658}
+                  className="pointer-events-none absolute bottom-0 right-0 hidden h-[calc(100%-12px)] w-auto max-w-[45%] object-contain object-right-bottom origin-bottom-right drop-shadow-[0_16px_24px_rgba(15,26,72,0.18)] transition-transform duration-700 group-hover:scale-[1.03] motion-reduce:transition-none sm:block"
                   aria-hidden
                 />
               </Reveal>

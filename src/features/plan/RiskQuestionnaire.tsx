@@ -20,8 +20,10 @@ const STYLE_TONE: Record<RiskStyle, { ring: string; text: string }> = {
 /**
  * Consent, then five statements one at a time on an agree/disagree scale, then the investment style with a score
  * out of 100. Nothing is saved until the participant chooses Use This Style.
+ * `inline` draws it straight into the surface that holds it (such as an edit panel) instead of a modal, so it never
+ * stacks a popup on top of another layer.
  */
-export function RiskQuestionnaire({ open, onClose, onComplete }: { open: boolean; onClose: () => void; onComplete: (style: RiskStyle) => void }) {
+export function RiskQuestionnaire({ open, onClose, onComplete, inline = false }: { open: boolean; onClose: () => void; onComplete: (style: RiskStyle) => void; inline?: boolean }) {
   const { t } = useTranslation()
   const [stage, setStage] = useState<'consent' | 'questions' | 'result'>('consent')
   const [step, setStep] = useState(0)
@@ -48,12 +50,12 @@ export function RiskQuestionnaire({ open, onClose, onComplete }: { open: boolean
   const R = 40
   const C = 2 * Math.PI * R
 
-  return (
-    <Modal open={open} onClose={close} size="lg" title={stage === 'consent' ? t('plan.risk.consent_title') : t('plan.risk.title')}>
+  const body = (
+    <>
       {stage === 'consent' && (
         <>
           <p className="text-[14px] leading-relaxed text-slate-600 dark:text-slate-300">{t('plan.risk.consent_body')}</p>
-          <div className="mt-6 flex justify-end gap-2">
+          <div className={cn('mt-6 flex gap-2', inline ? 'justify-start' : 'justify-end')}>
             <button type="button" onClick={close} className={SECONDARY}>{t('plan.risk.decline')}</button>
             <button type="button" onClick={() => setStage('questions')} className={PRIMARY}>{t('plan.risk.consent')}</button>
           </div>
@@ -139,6 +141,138 @@ export function RiskQuestionnaire({ open, onClose, onComplete }: { open: boolean
           </div>
         </div>
       )}
+    </>
+  )
+
+  if (inline) {
+    if (!open) return null
+    return <InlineQuestionnaire onClose={close} onComplete={(st) => { onComplete(st); reset() }} />
+  }
+
+  return (
+    <Modal open={open} onClose={close} size="lg" title={stage === 'consent' ? t('plan.risk.consent_title') : t('plan.risk.title')}>
+      {body}
     </Modal>
+  )
+}
+
+/**
+ * The questionnaire drawn inside an edit panel: one header (a single back arrow, the title, the step count and a
+ * stepped progress bar), compact answers that move on by themselves once picked, and a short result to apply.
+ */
+function InlineQuestionnaire({ onClose, onComplete }: { onClose: () => void; onComplete: (style: RiskStyle) => void }) {
+  const { t } = useTranslation()
+  const [stage, setStage] = useState<'consent' | 'questions' | 'result'>('consent')
+  const [step, setStep] = useState(0)
+  const [answers, setAnswers] = useState<Record<string, number>>({})
+  const q = QUESTIONS[step]
+  const score = riskScore(answers)
+  const style = styleFromScore(score)
+  const tone = STYLE_TONE[style]
+  const total = QUESTIONS.length
+
+  /** One back arrow for the whole flow: a question back, or out to the intro, or out of the questionnaire */
+  const back = () => {
+    if (stage === 'result') return setStage('questions')
+    if (stage === 'questions') return step > 0 ? setStep(step - 1) : setStage('consent')
+    onClose()
+  }
+  const pick = (value: number) => {
+    setAnswers((s) => ({ ...s, [q]: value }))
+    // A short beat so the choice is seen, then on to the next one
+    window.setTimeout(() => (step < total - 1 ? setStep(step + 1) : setStage('result')), 220)
+  }
+  const done = stage === 'result' ? total : stage === 'questions' ? step : 0
+
+  const R = 30
+  const C = 2 * Math.PI * R
+
+  return (
+    <section aria-labelledby="risk-inline-title" className="flex min-h-full flex-col">
+      {/* Header: back, title, count, and the steps as segments */}
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={back}
+          aria-label={stage === 'consent' ? t('plan.risk.back_to_investments') : t('plan.risk.back')}
+          className={cn('-ml-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white', FOCUS)}
+        >
+          <AppIcon icon={ChevronLeft} size="secondary" />
+        </button>
+        <h3 id="risk-inline-title" className="flex-1 text-[15px] font-semibold text-slate-900 dark:text-white">{t('plan.risk.inline_title')}</h3>
+        {stage === 'questions' && (
+          <span className="text-[12px] font-semibold tabular-nums text-slate-500 dark:text-slate-400">{t('plan.risk.progress', { n: step + 1, total })}</span>
+        )}
+      </div>
+      <div className="mt-3 grid gap-1" style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }} aria-hidden>
+        {QUESTIONS.map((key, i) => (
+          <span key={key} className={cn('h-1 rounded-full transition-colors', i < done || (stage === 'questions' && i === step) ? 'bg-blue-600 dark:bg-blue-400' : 'bg-slate-200 dark:bg-white/10')} />
+        ))}
+      </div>
+
+      {stage === 'consent' && (
+        <div className="mt-5">
+          <p className="text-[14px] leading-relaxed text-slate-600 dark:text-slate-300">{t('plan.risk.consent_body')}</p>
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            <button type="button" onClick={() => setStage('questions')} className={PRIMARY}>{t('plan.risk.consent')}</button>
+            <button type="button" onClick={onClose} className={cn('inline-flex h-10 items-center rounded-full px-4 text-[14px] font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/10', FOCUS)}>{t('plan.risk.decline')}</button>
+          </div>
+        </div>
+      )}
+
+      {stage === 'questions' && (
+        <fieldset key={q} className="mt-5">
+          <legend className="text-[16px] font-semibold leading-snug text-slate-900 dark:text-white">{t(`plan.risk.q_${q}`)}</legend>
+          <div className="mt-3 divide-y divide-slate-100 overflow-hidden rounded-xl ring-1 ring-slate-200 dark:divide-white/10 dark:ring-white/15" role="radiogroup" aria-label={t(`plan.risk.q_${q}`)}>
+            {LIKERT.map((value) => {
+              const on = answers[q] === value
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  role="radio"
+                  aria-checked={on}
+                  onClick={() => pick(value)}
+                  className={cn(
+                    'flex h-11 w-full items-center gap-3 px-3.5 text-left text-[14px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500',
+                    on ? 'bg-blue-50 font-semibold text-blue-900 dark:bg-blue-500/15 dark:text-blue-100' : 'font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-white/5',
+                  )}
+                >
+                  <span className={cn('flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full ring-1', on ? 'bg-blue-600 ring-blue-600' : 'ring-slate-300 dark:ring-slate-500')} aria-hidden>
+                    {on && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                  </span>
+                  {t(`plan.risk.likert_${value}`)}
+                </button>
+              )
+            })}
+          </div>
+          <p className="mt-2.5 text-[12px] text-slate-500 dark:text-slate-400">{t('plan.risk.tap_hint')}</p>
+        </fieldset>
+      )}
+
+      {stage === 'result' && (
+        <div className="mt-5">
+          <div className="flex items-center gap-4 rounded-2xl bg-slate-50 p-4 dark:bg-white/[0.05]">
+            <div className="relative h-16 w-16 shrink-0">
+              <svg viewBox="0 0 80 80" className="h-full w-full -rotate-90" aria-hidden>
+                <circle cx="40" cy="40" r={R} fill="none" strokeWidth="7" className="stroke-slate-200 dark:stroke-white/10" />
+                <circle cx="40" cy="40" r={R} fill="none" strokeWidth="7" strokeLinecap="round" stroke={tone.ring} strokeDasharray={C} strokeDashoffset={C * (1 - score / 100)} />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-[15px] font-bold tabular-nums text-slate-900 dark:text-white">{score}</span>
+            </div>
+            <div className="min-w-0">
+              <p className={cn('text-[11px] font-bold uppercase tracking-[0.08em]', tone.text)}>{t('plan.risk.your_style')}</p>
+              <p className="text-[18px] font-bold text-slate-900 dark:text-white">{t(`plan.risk.style_${style}`)}</p>
+            </div>
+          </div>
+          <p className="mt-3 text-[14px] leading-relaxed text-slate-600 dark:text-slate-300">{t(`plan.risk.style_${style}_desc`)}</p>
+          <p className="mt-2 text-[12px] text-slate-500 dark:text-slate-400">{t('plan.risk.disclaimer')}</p>
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            <button type="button" onClick={() => onComplete(style)} className={PRIMARY}>{t('plan.risk.use_style')}</button>
+            <button type="button" onClick={() => { setAnswers({}); setStep(0); setStage('questions') }} className={cn('inline-flex h-10 items-center rounded-full px-4 text-[14px] font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/10', FOCUS)}>{t('plan.risk.retake')}</button>
+          </div>
+        </div>
+      )}
+    </section>
   )
 }

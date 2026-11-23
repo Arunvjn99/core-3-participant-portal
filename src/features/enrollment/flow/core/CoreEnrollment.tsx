@@ -15,7 +15,7 @@ import { useEnrollmentSave } from '@/core/hooks/useEnrollmentSave'
 import { useTheme } from '@/core/hooks/useTheme'
 import { useElectionsStore } from '@/features/plan/electionsStore'
 import { nextIncreaseDate } from '@/features/plan/electionsData'
-import { recommendedFunds, type RiskKey } from '../../investmentCatalog'
+import { type RiskKey } from '../../investmentCatalog'
 import { GROWTH_RATES, buildQuickEnrollmentDefaults } from '../../quickEnrollmentDefaults'
 import { useParticipantBasics } from '../../useParticipantBasics'
 import { PLAN_CONFIG, PLAN_LIMITS, employerMatch } from '../../agent/planConfig'
@@ -27,6 +27,7 @@ import { WebSummary } from './WebSummary'
 import { AppIcon } from '@/design-system/icons'
 import { SecondPlanCard } from '@/features/plan/SecondPlanCard'
 import { useSecondPlan } from '@/features/plan/secondPlan'
+import { PlanSwitcher } from './PlanSwitcher'
 
 /**
  * One-click enrollment: Core AI builds a plan from the details already on file and opens straight on it. The participant
@@ -131,7 +132,8 @@ export default function CoreEnrollment() {
     roth: 2,
     afterTax: 1,
     auto: { enabled: true, cycle: 'plan_year', sourceWise: false, amount: { preTax: 1, roth: 1 }, cap: { preTax: 10, roth: 10 } },
-    mode: 'risk_style',
+    // The plan's own portfolio until the participant asks to match a risk level
+    mode: 'plan_selected',
     risk: 'balanced',
     ownRows: [],
     autoRebalance: false,
@@ -148,6 +150,8 @@ export default function CoreEnrollment() {
   /** Set just before leaving on purpose (to the step-by-step flow), so the discard prompt doesn't stop it */
   const leaving = useRef(false)
   const [showFunds, setShowFunds] = useState(false)
+  /** The risk questionnaire is running inside the investments panel: its Cancel and Done step aside */
+  const [investQuiz, setInvestQuiz] = useState(false)
   /** Warns before leaving the confirmation without naming a beneficiary */
   const [beneWarn, setBeneWarn] = useState(false)
   const beneRef = useDialogA11y<HTMLDivElement>(beneWarn, () => setBeneWarn(false))
@@ -359,14 +363,13 @@ export default function CoreEnrollment() {
     }
     markStep(1, 'done')
     const d = buildQuickEnrollmentDefaults(useEnrollmentDraftStore.getState().draftData)
-    const risk = d.riskLevel as RiskKey
     const proposed: Election = {
       ...initialElection(),
       // Split the rate across both sources: about two thirds pre-tax, one third Roth
       preTax: d.contributionPercent - Math.max(1, Math.round(d.contributionPercent / 3)),
       roth: Math.max(1, Math.round(d.contributionPercent / 3)),
-      risk,
-      ownRows: recommendedFunds(risk).map((x) => ({ ticker: x.ticker, pct: x.allocation })),
+      // Invested in the plan's selected portfolio: a risk style (Aggressive and the like) only comes in once the
+      // participant chooses Match My Risk Level
       auto: { enabled: d.autoIncrease.enabled, cycle: 'plan_year', sourceWise: false, amount: { preTax: d.autoIncrease.amount, roth: d.autoIncrease.amount }, cap: { preTax: d.autoIncrease.max, roth: d.autoIncrease.max } },
     }
     setElection(proposed)
@@ -778,7 +781,7 @@ export default function CoreEnrollment() {
   }
 
   /** Edit on a row: opens that part's panel */
-  const editButton = (kind: EditKind, what: string) =>
+  const editButton = (kind: EditKind, what: string, text = t('enrollment.core.edit')) =>
     canEdit ? (
       <button
         type="button"
@@ -787,7 +790,7 @@ export default function CoreEnrollment() {
         className="inline-flex h-7 shrink-0 items-center gap-1 rounded-full px-2.5 text-[13px] font-semibold text-blue-700 ring-1 ring-inset ring-blue-200 transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-blue-300 dark:ring-blue-400/30 dark:hover:bg-blue-500/10"
       >
         <Pencil className="h-3 w-3" aria-hidden />
-        {t('enrollment.core.edit')}
+        {text}
       </button>
     ) : null
   /** Marks a row that no longer matches the suggested plan */
@@ -871,44 +874,25 @@ export default function CoreEnrollment() {
 
                   {/* Which plan this is */}
                   <div className="flex flex-wrap items-center gap-x-2.5 gap-y-2 border-b border-slate-100 px-5 py-3.5 sm:px-6 dark:border-gray-800">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300" aria-hidden>
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/25 dark:text-blue-200" aria-hidden>
                       <Landmark className="h-[18px] w-[18px]" />
                     </span>
                     {secondPlan ? (
-                      /* Two plans: a tab for each, with whether it's included, so both are in view and one click switches the details */
-                      <div role="tablist" aria-label={t('plan2.tabs_label')} className="flex min-w-0 flex-1 basis-[320px] gap-1 rounded-xl bg-slate-100 p-1 dark:bg-white/[0.06]">
-                        {([
-                          { key: 'main', name: t('plan2.tab_main'), status: t('plan2.status_included'), on: true },
-                          { key: 'second', name: t('plan2.tab_second'), status: secondPlan.enrolled ? t('plan2.status_included') : t('plan2.status_not_included'), on: secondPlan.enrolled },
-                        ] as const).map((tab) => {
-                          const active = activePlan === tab.key
-                          return (
-                            <button
-                              key={tab.key}
-                              type="button"
-                              role="tab"
-                              aria-selected={active}
-                              aria-controls="plan-panel"
-                              onClick={() => setActivePlan(tab.key)}
-                              className={cn(
-                                'min-w-0 flex-1 rounded-lg px-3 py-1.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
-                                active ? 'bg-white shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-white/10' : 'hover:bg-white/60 dark:hover:bg-white/5',
-                              )}
-                            >
-                              <span className={cn('block truncate text-[14px] font-semibold', active ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-gray-300')}>{tab.name}</span>
-                              <span className={cn('flex items-center gap-1 text-[12px]', tab.on ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-gray-400')}>
-                                <span className={cn('h-1.5 w-1.5 rounded-full', tab.on ? 'bg-emerald-500' : 'bg-slate-400')} aria-hidden />
-                                {tab.status}
-                              </span>
-                            </button>
-                          )
-                        })}
-                      </div>
+                      /* Two plans: the current one by its full name, and a list to switch; long names never get squeezed */
+                      <PlanSwitcher
+                        active={activePlan}
+                        onChange={setActivePlan}
+                        plans={[
+                          { key: 'main', name: planName, status: t('plan2.status_included'), on: true, detail: `${f.total}% · ${t(PLAN_CONFIG.plan.nameKey)}` },
+                          { key: 'second', name: t('plan2.name', { employer }), status: secondPlan.enrolled ? t('plan2.status_included') : t('plan2.status_not_included'), on: secondPlan.enrolled, detail: secondPlan.enrolled ? `${secondPlan.rate}% · ${t('plan2.type')}` : t('plan2.type') },
+                        ]}
+                      />
                     ) : (
                       <p className="min-w-0 flex-1 basis-[180px] truncate text-[17px] font-semibold tracking-[-0.01em] text-slate-900 dark:text-white">{planName}</p>
                     )}
                     {/* Plan type: beside the name on wider screens, under it on narrow ones */}
-                    <span className="inline-flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-slate-600 dark:text-gray-300">
+                    {/* With two plans the switcher already names each plan's type, so this is left out to give the name room */}
+                    <span className={cn('shrink-0 items-center gap-1.5 text-[13px] font-medium text-slate-600 dark:text-gray-300', secondPlan ? 'hidden' : 'inline-flex')}>
                       <span className="text-slate-500 dark:text-gray-400">{t('enrollment.core.plan_type')}</span>
                       <span className="font-semibold text-slate-900 dark:text-white">{showSecond ? t('plan2.type') : t(PLAN_CONFIG.plan.nameKey)}</span>
                     </span>
@@ -1187,10 +1171,16 @@ export default function CoreEnrollment() {
                         <>
                           <p className="mt-1.5 truncate text-[22px] font-semibold tracking-[-0.02em] text-slate-900 dark:text-white">{f.invest}</p>
                           <p className="mt-1 text-[14px] text-slate-500 dark:text-gray-400">
-                            <button type="button" onClick={() => setShowFunds(true)} className="rounded-md font-semibold text-blue-700 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-blue-300">
-                              {t('enrollment.core.funds_n', { count: funds.length })}
-                            </button>
+                            {election.mode === 'plan_selected'
+                              ? t('enrollment.core.invest_desc_plan')
+                              : election.mode === 'own'
+                                ? t('enrollment.core.invest_desc_own')
+                                : t(`enrollment.core.invest_desc_${STYLE_FOR_RISK[election.risk]}`)}
                           </p>
+                          <button type="button" onClick={() => setShowFunds(true)} className="-ml-1 mt-2 inline-flex items-center gap-0.5 rounded-md px-1 py-0.5 text-[14px] font-semibold text-blue-700 transition-colors hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-blue-300 dark:hover:text-blue-200">
+                            {t('enrollment.core.funds_view', { count: funds.length })}
+                            <ChevronRight className="h-4 w-4" aria-hidden />
+                          </button>
                           {fundsError && <p role="alert" className="mt-1 text-[12px] font-medium text-red-600">{t('enrollment.feed.err_funds', { total: f.rowsTotal })}</p>}
                         </>
                       ) : (
@@ -1259,8 +1249,8 @@ export default function CoreEnrollment() {
                     {t('enrollment.core.cancel')}
                   </button>
                   {canEdit && changeCount > 0 && (
-                    <button type="button" onClick={resetToSuggested} className="inline-flex h-10 items-center gap-1.5 rounded-full px-3 text-[14px] font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white">
-                      <RotateCcw className="h-4 w-4" aria-hidden />
+                    <button type="button" onClick={resetToSuggested} className="inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[14px] font-semibold text-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.05)] ring-1 ring-slate-200/70 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:opacity-50 dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-800 dark:hover:bg-gray-800">
+                      <RotateCcw className="h-3.5 w-3.5 shrink-0" aria-hidden />
                       {t('enrollment.core.reset_suggested')}
                     </button>
                   )}
@@ -1480,8 +1470,8 @@ export default function CoreEnrollment() {
       <Sheet preview open={sheet === 'auto'} onClose={cancelEdit} title={t('enrollment.core.sheet_auto')} subtitle={t('enrollment.core.sheet_sub')} footer={editFooter('auto', false)}>
         <AutoIncreaseEditor value={election} onChange={setElection} ctx={editCtx} />
       </Sheet>
-      <Sheet preview open={sheet === 'invest'} onClose={cancelEdit} title={t('enrollment.core.sheet_invest')} subtitle={t('enrollment.core.sheet_sub')} footer={editFooter('invest', fundsError)}>
-        <InvestmentsEditor value={election} onChange={setElection} />
+      <Sheet preview wide={investQuiz ? false : 'md'} open={sheet === 'invest'} onClose={cancelEdit} title={t('enrollment.core.sheet_invest')} subtitle={t('enrollment.core.sheet_sub')} footer={investQuiz ? undefined : editFooter('invest', fundsError)}>
+        <InvestmentsEditor value={election} onChange={setElection} ctx={editCtx} onQuizChange={setInvestQuiz} />
       </Sheet>
 
       {/* Leaving with edits that aren't approved yet */}

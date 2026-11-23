@@ -38,34 +38,35 @@ export const ICON_SIZE = {
 } as const
 export type IconSize = keyof typeof ICON_SIZE
 
-/** Tile sizes: container px and corner radius. 44px is the smallest tile (and the minimum touch target);
- *  52px is for the one tile that leads a card, such as the advisor. */
+/** Tile sizes: a circle, container px and icon px. `sm` sits beside a card title; 44px is the smallest tile that is
+ *  also a touch target; 52px is for the one tile that leads a card, such as the advisor. */
 export const ICON_TILE = {
-  md: { box: 'h-11 w-11', radius: 'rounded-[12px]', icon: 20 },
-  lg: { box: 'h-[52px] w-[52px]', radius: 'rounded-[14px]', icon: 22 },
+  sm: { box: 'h-9 w-9', radius: 'rounded-full', icon: 18 },
+  md: { box: 'h-11 w-11', radius: 'rounded-full', icon: 20 },
+  lg: { box: 'h-[52px] w-[52px]', radius: 'rounded-full', icon: 22 },
 } as const
 export type IconTileSize = keyof typeof ICON_TILE
 
 /**
  * Colour tokens as Tailwind classes, each with its dark-mode pair.
- * - tile: soft neutral #F1F5F9 behind shortcut icons (a faint white wash in dark mode)
- * - active: brand blue #2563EB, for selected items and the icon inside a tile (4.7:1 on #F1F5F9)
+ * - tile: light brand blue (#DBEAFE) behind icons, so a title icon reads as a distinct chip; a blue wash in dark mode
+ * - active: brand blue #1D4ED8, for selected items and the icon inside a tile (5.6:1 on #DBEAFE)
  * - muted: slate for inactive and decorative icons (4.8:1 on white, so it clears the 3:1 non-text minimum)
  */
 export const ICON_COLOR = {
-  tile: 'bg-[#F1F5F9] dark:bg-white/[0.08]',
-  active: 'text-[#2563EB] dark:text-blue-300',
+  tile: 'bg-blue-100 dark:bg-blue-500/25',
+  active: 'text-blue-700 dark:text-blue-200',
   muted: 'text-slate-500 dark:text-slate-400',
 } as const
 
 /** Soft tinted tiles, for the rare place where icons must be told apart by colour (each still has a label).
- *  `neutral` is the default #F1F5F9 tile. */
+ *  `neutral` is the default subtle blue tile. */
 export const ICON_TILE_TONE = {
   neutral: `${ICON_COLOR.tile} ${ICON_COLOR.active}`,
-  blue: 'bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300',
-  violet: 'bg-violet-50 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300',
-  amber: 'bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300',
-  emerald: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300',
+  blue: 'bg-blue-100 text-blue-700 dark:bg-blue-500/25 dark:text-blue-200',
+  violet: 'bg-violet-100 text-violet-700 dark:bg-violet-500/25 dark:text-violet-200',
+  amber: 'bg-amber-100 text-amber-700 dark:bg-amber-500/25 dark:text-amber-200',
+  emerald: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/25 dark:text-emerald-200',
 } as const
 export type IconTileTone = keyof typeof ICON_TILE_TONE
 

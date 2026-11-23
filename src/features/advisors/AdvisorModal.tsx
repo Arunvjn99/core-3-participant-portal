@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
-import { ArrowLeft, Calendar, CheckCircle2, ChevronRight, Clock, Mail, Phone, Star, Video, X } from 'lucide-react'
+import { ArrowLeft, Calendar, CheckCircle2, ChevronDown, Clock, Mail, Phone, Star, Video, X } from 'lucide-react'
 import { supabase } from '@/core/supabase'
 import { useDialogA11y } from '@/lib/useDialogA11y'
 import { getAppDateLocale } from '@/lib/dateLocale'
@@ -52,80 +52,131 @@ function PlanTags({ plans }: { plans: AdvisorPlan[] }) {
   )
 }
 
-// ─── List: advisors for your plans, each with their next open times ─────────────
+// ─── List: advisors for your plans, each with their next free times ─────────────
 
 function AdvisorList({ advisors, myPlans, onBook }: { advisors: DirectoryAdvisor[]; myPlans: AdvisorPlan[]; onBook: (a: DirectoryAdvisor, slot?: Slot, plan?: AdvisorPlan) => void }) {
   const { t } = useTranslation()
   const locale = getAppDateLocale()
   const [filter, setFilter] = useState<AdvisorPlan | 'all'>('all')
+  /** The card whose day-and-time picker is open, and the day picked in it */
+  const [openId, setOpenId] = useState<string | null>(null)
+  const [pickDay, setPickDay] = useState<Date | null>(null)
+  const days = useMemo(() => nextWorkdays(5), [])
   const shown = advisors.filter((a) => (filter === 'all' ? a.plans.some((p) => myPlans.includes(p)) : a.plans.includes(filter)))
-  const dayLabel = (d: Date) => d.toLocaleDateString(locale, { weekday: 'short', month: 'short', day: 'numeric' })
+  const plan = filter === 'all' ? undefined : filter
+  const dayLabel = (d: Date) => d.toLocaleDateString(locale, { weekday: 'short' })
 
   return (
     <div>
-      <p className="text-[13px] text-text-secondary">
-        {t('advisor_modal.for_plans', { plans: myPlans.map((p) => t(`advisor_modal.plan_${p}`)).join(t('advisor_modal.and')) })}
-      </p>
-      {/* Two plans: narrow the list to one */}
-      {myPlans.length > 1 && (
-        <div role="group" aria-label={t('advisor_modal.filter_label')} className="mt-3 flex flex-wrap gap-2">
-          {(['all', ...myPlans] as const).map((f) => (
-            <button key={f} type="button" aria-pressed={filter === f} onClick={() => setFilter(f)} className={chip(filter === f)}>
-              {f === 'all' ? t('advisor_modal.filter_all') : t(`advisor_modal.plan_${f}`)}
-            </button>
-          ))}
-        </div>
-      )}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-[13px] text-text-secondary">
+          {myPlans.length > 1
+            ? t('advisor_modal.intro_two', { a: t('advisor_modal.plan_tag_401k'), b: t('advisor_modal.plan_tag_457b') })
+            : t('advisor_modal.intro_one', { plan: t(`advisor_modal.plan_tag_${myPlans[0]}`) })}
+        </p>
+        {/* Two plans: narrow the list to one, in a single short row */}
+        {myPlans.length > 1 && (
+          <div role="group" aria-label={t('advisor_modal.filter_label')} className="inline-flex rounded-full bg-slate-100 p-1 dark:bg-white/[0.06]">
+            {(['all', ...myPlans] as const).map((f) => (
+              <button
+                key={f}
+                type="button"
+                aria-pressed={filter === f}
+                onClick={() => setFilter(f)}
+                className={cn('h-8 rounded-full px-3 text-[12px] font-semibold transition-colors', FOCUS, filter === f ? 'bg-white text-blue-700 shadow-sm dark:bg-slate-900 dark:text-blue-300' : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white')}
+              >
+                {f === 'all' ? t('advisor_modal.filter_all') : t(`advisor_modal.plan_tag_${f}`)}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       {shown.length === 0 ? (
         <p className="py-10 text-center text-[14px] text-text-secondary">{t('advisor_modal.empty')}</p>
       ) : (
-        <ul className="mt-4 flex flex-col gap-3">
-          {shown.map((a) => {
-            const open = nextOpenSlots(a.id, 3)
-            return (
-              <li key={a.id} className="rounded-2xl p-4 ring-1 ring-slate-200/80 dark:ring-white/10">
-                <div className="flex items-start gap-3.5">
-                  <Avatar advisor={a} />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="truncate text-[16px] font-bold text-text-primary">{a.name}</p>
-                      <span className="flex shrink-0 items-center gap-1 text-[13px] font-semibold text-text-primary">
-                        <AppIcon icon={Star} size="inline" className="text-amber-500 dark:text-amber-300" />
-                        {a.rating}
-                      </span>
-                    </div>
-                    <p className="text-[13px] text-text-secondary">{t(`advisor_modal.dir.${a.id}.title`)}</p>
-                    <p className="mt-0.5 text-[12px] text-text-secondary">{t('advisor_modal.focus_line', { focus: t(`advisor_modal.dir.${a.id}.focus`), years: a.years })}</p>
-                    <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                      <span className="text-[12px] text-text-secondary">{t('advisor_modal.covers')}</span>
-                      <PlanTags plans={a.plans} />
-                    </div>
-                  </div>
-                </div>
-                <p className="mt-3 text-[13px] leading-snug text-slate-600 dark:text-slate-300">{t(`advisor_modal.dir.${a.id}.bio`)}</p>
-
-                {/* The next times this advisor is free: one tap books that time */}
-                <div className="mt-3 border-t border-slate-200/80 pt-3 dark:border-white/10">
-                  <p className="flex items-center gap-1.5 text-[12px] font-semibold text-text-secondary">
-                    <AppIcon icon={Clock} size="inline" />
-                    {t('advisor_modal.next_times')}
+        <ul className="mt-4 flex flex-col gap-2.5">
+          {shown.map((a) => (
+            <li key={a.id} className={cn('rounded-2xl bg-surface-card p-3.5 shadow-[0_6px_18px_-14px_rgba(11,21,51,0.45)] ring-1 transition-shadow hover:shadow-[0_10px_24px_-14px_rgba(11,21,51,0.5)]', openId === a.id ? 'ring-blue-300 dark:ring-blue-400/40' : 'ring-slate-200 dark:ring-white/10')}>
+              {/* Who: name and rating, role and years, the plans they cover */}
+              <div className="flex items-center gap-3">
+                <Avatar advisor={a} size="sm" />
+                <div className="min-w-0 flex-1">
+                  <p className="flex items-center gap-1.5 text-[15px] font-bold text-text-primary">
+                    <span className="truncate">{a.name}</span>
+                    <span className="inline-flex shrink-0 items-center gap-0.5 text-[12px] font-semibold text-text-secondary">
+                      <AppIcon icon={Star} size="inline" className="text-amber-500 dark:text-amber-300" />
+                      {a.rating}
+                    </span>
                   </p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {open.map((s) => (
-                      <button key={`${isoDate(s.day)}-${s.minutes}`} type="button" onClick={() => onBook(a, s, filter === 'all' ? undefined : filter)} className={chip(false)}>
-                        {t('advisor_modal.slot_short', { day: dayLabel(s.day), time: slotLabel(s.minutes, locale) })}
+                  <p className="truncate text-[12px] text-text-secondary">{t('advisor_modal.role_line', { title: t(`advisor_modal.dir.${a.id}.title`), years: a.years })}</p>
+                  {/* Phones: the tags go under the role, so the name keeps its room */}
+                  <span className="mt-1.5 flex sm:hidden"><PlanTags plans={a.plans} /></span>
+                </div>
+                <span className="hidden sm:flex"><PlanTags plans={a.plans} /></span>
+              </div>
+              {/* When: the next two free times, one tap books; or every time */}
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {nextOpenSlots(a.id, 2).map((sl) => (
+                  <button
+                    key={`${isoDate(sl.day)}-${sl.minutes}`}
+                    type="button"
+                    onClick={() => onBook(a, sl, plan)}
+                    className={cn('inline-flex h-8 items-center gap-1 rounded-full bg-white px-3 text-[12px] font-semibold text-slate-700 ring-1 ring-slate-200 transition-colors hover:text-blue-700 hover:ring-blue-400 dark:bg-white/5 dark:text-slate-200 dark:ring-white/15', FOCUS)}
+                  >
+                    <AppIcon icon={Clock} size="inline" className="text-text-secondary" />
+                    {t('advisor_modal.slot_short', { day: dayLabel(sl.day), time: slotLabel(sl.minutes, locale) })}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  aria-expanded={openId === a.id}
+                  aria-controls={`times-${a.id}`}
+                  onClick={() => {
+                    const opening = openId !== a.id
+                    setOpenId(opening ? a.id : null)
+                    setPickDay(opening ? (days.find((d) => SLOT_MINUTES.some((m) => !isTaken(a.id, d, m))) ?? days[0]) : null)
+                  }}
+                  className={cn('ml-auto inline-flex h-8 items-center gap-1 rounded-full px-2 text-[13px] font-semibold text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-500/10', FOCUS)}
+                >
+                  {openId === a.id ? t('advisor_modal.hide_times') : t('advisor_modal.other_time')}
+                  <AppIcon icon={ChevronDown} size="inline" className={cn('transition-transform motion-reduce:transition-none', openId === a.id && 'rotate-180')} />
+                </button>
+              </div>
+
+              {/* Another day or time, right here: pick a day, then a time, and it goes straight to confirm */}
+              {openId === a.id && pickDay && (
+                <div id={`times-${a.id}`} className="mt-3 border-t border-slate-200/80 pt-3 dark:border-white/10">
+                  <div role="group" aria-label={t('advisor_modal.select_date')} className="flex gap-1.5 overflow-x-auto pb-1">
+                    {days.map((d) => {
+                      const free = SLOT_MINUTES.filter((m) => !isTaken(a.id, d, m)).length
+                      const on = isoDate(d) === isoDate(pickDay)
+                      return (
+                        <button
+                          key={isoDate(d)}
+                          type="button"
+                          aria-pressed={on}
+                          disabled={free === 0}
+                          onClick={() => setPickDay(d)}
+                          className={cn(chip(on, free === 0), 'shrink-0 px-2.5 py-1.5 text-center leading-tight')}
+                        >
+                          <span className="block text-[12px]">{d.toLocaleDateString(locale, { weekday: 'short' })}</span>
+                          <span className="block text-[11px] font-medium opacity-80">{d.toLocaleDateString(locale, { month: 'short', day: 'numeric' })}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <div role="group" aria-label={t('advisor_modal.select_time')} className="mt-2.5 grid grid-cols-3 gap-1.5 sm:grid-cols-4">
+                    {SLOT_MINUTES.filter((m) => !isTaken(a.id, pickDay, m)).map((m) => (
+                      <button key={m} type="button" onClick={() => onBook(a, { day: pickDay, minutes: m }, plan)} className={cn(chip(false), 'px-2 py-1.5 text-[12px]')}>
+                        {slotLabel(m, locale)}
                       </button>
                     ))}
                   </div>
                 </div>
-                <button type="button" onClick={() => onBook(a, undefined, filter === 'all' ? undefined : filter)} className={cn(PRIMARY, 'mt-3 h-10')}>
-                  {t('advisor_modal.book')}
-                  <AppIcon icon={ChevronRight} size="inline" />
-                </button>
-              </li>
-            )
-          })}
+              )}
+            </li>
+          ))}
         </ul>
       )}
     </div>
@@ -343,7 +394,17 @@ export default function AdvisorModal({ onClose }: { onClose: () => void }) {
   const [planHint, setPlanHint] = useState<AdvisorPlan | undefined>()
   const [booked, setBooked] = useState<{ slot: Slot; type: MeetingType; plan: AdvisorPlan } | null>(null)
 
-  const title = view === 'list' ? t('advisor_modal.title_list') : view === 'book' ? t('advisor_modal.title_book') : t('advisor_modal.done_title')
+  // The confirmation names itself in the body, so the header keeps the step's name
+  // The page behind stays still while the window is open
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [])
+
+  const title = view === 'list' ? t('advisor_modal.title_list') : t('advisor_modal.title_book')
 
   return (
     <div
@@ -370,7 +431,7 @@ export default function AdvisorModal({ onClose }: { onClose: () => void }) {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 py-5">
+        <div className={cn('flex-1 overflow-y-auto px-6 py-5', view === 'list' && 'bg-slate-50 dark:bg-white/[0.02]')}>
           {view === 'list' && (
             <AdvisorList
               advisors={ADVISORS}

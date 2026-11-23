@@ -399,7 +399,7 @@ export function InfoTip({ label, text, side = 'top', wide = false, align = 'cent
 }
 
 /** A side panel on wide screens and a bottom sheet on phones, for focused edits. */
-export function Sheet({ open, onClose, title, subtitle, children, footer, wide = false, stacked = false, preview = false }: { open: boolean; onClose: () => void; title: string; subtitle?: string; children: React.ReactNode; footer?: React.ReactNode; wide?: boolean; stacked?: boolean; /** A light, unblurred backdrop, so the page behind stays readable while it updates live */ preview?: boolean }) {
+export function Sheet({ open, onClose, title, subtitle, children, footer, wide = false, stacked = false, preview = false }: { open: boolean; onClose: () => void; title: string; subtitle?: string; children: React.ReactNode; footer?: React.ReactNode; /** true: a wide document panel; 'md': room for two columns */ wide?: boolean | 'md'; stacked?: boolean; /** A light, unblurred backdrop, so the page behind stays readable while it updates live */ preview?: boolean }) {
   const { t } = useTranslation()
   const reduce = useReducedMotion()
   const panel = useRef<HTMLDivElement>(null)
@@ -455,7 +455,7 @@ export function Sheet({ open, onClose, title, subtitle, children, footer, wide =
             animate={{ x: 0, opacity: 1 }}
             exit={reduce ? { opacity: 0 } : { x: 32, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 420, damping: 40 }}
-            className={cn('relative flex w-full flex-col rounded-t-[20px] bg-white shadow-[0_24px_64px_rgba(15,23,42,0.18)] sm:m-3 sm:max-h-none sm:rounded-[20px] dark:bg-gray-900', wide ? 'max-h-[94vh] sm:w-[min(980px,calc(100vw-24px))]' : 'max-h-[88vh] sm:w-[440px]')}
+            className={cn('relative flex w-full flex-col rounded-t-[20px] bg-white shadow-[0_24px_64px_rgba(15,23,42,0.18)] sm:m-3 sm:max-h-none sm:rounded-[20px] dark:bg-gray-900', wide === 'md' ? 'max-h-[88vh] sm:w-[min(780px,calc(100vw-24px))]' : wide ? 'max-h-[94vh] sm:w-[min(980px,calc(100vw-24px))]' : 'max-h-[88vh] sm:w-[440px]')}
           >
             <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 pb-4 pt-5 dark:border-gray-800">
               <div className="min-w-0">

@@ -86,13 +86,11 @@ export const badge = (tone: BadgeTone = 'blue') =>
 
 type IconType = ComponentType<{ className?: string }>
 
-/** Solid icon badge beside a card title, like the dashboard cards. */
-export function TitleBadge({ Icon, color = 'bg-blue-600' }: { Icon: IconType; color?: string }) {
+/** Icon badge beside a card title: the icon system's subtle blue circle, the same on every card (`color` is kept for
+ *  older callers and no longer changes the colour). */
+export function TitleBadge({ Icon }: { Icon: IconType; color?: string }) {
   return (
-    <span
-      className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_16px_-8px_rgba(11,21,51,0.45)]', color)}
-      aria-hidden
-    >
+    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/25 dark:text-blue-200" aria-hidden>
       <Icon className="h-[18px] w-[18px]" />
     </span>
   )
