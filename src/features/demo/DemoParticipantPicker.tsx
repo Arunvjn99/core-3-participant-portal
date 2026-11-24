@@ -1,20 +1,27 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Check, FlaskConical, RotateCcw } from 'lucide-react'
+import { Check, FlaskConical, MessageSquarePlus, RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/cn'
-import { useFooterLift } from '@/lib/useFooterLift'
 import { ENV } from '@/lib/constants'
 import { useAuth } from '@/core/hooks/useAuth'
+import { useFeedbackUiStore } from '@/core/store/feedbackUiStore'
 import { AppIcon, ICON_TILE_TONE } from '@/design-system/icons'
 import { useDemoStore } from './demoStore'
 import { PERSONAS, initials, personaById } from './personas'
 
 const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900'
 
+// A tab docked to the right edge: shows its icon, slides its label out on hover or focus
+const TAB =
+  'group flex h-11 items-center gap-2 rounded-l-full bg-white pl-3.5 pr-3 text-[13px] font-semibold shadow-[0_8px_20px_-12px_rgba(11,21,51,0.45)] ring-1 transition-colors dark:bg-slate-900'
+const TAB_LABEL = 'max-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-all duration-200 group-hover:max-w-[220px] group-hover:opacity-100 group-focus-visible:max-w-[220px] group-focus-visible:opacity-100'
+
 /**
- * "Prototype demo": pick one of five participants to see the portal as they would. On the sign-in page it signs in
- * as them; inside the portal it switches who you are. Only in demo mode, where signing in needs no password.
+ * Prototype tools, docked mid-height on the right edge so they never cover a page's own buttons at the bottom:
+ * - Prototype Demo (demo mode only): pick one of five participants to see the portal as they would. On the sign-in
+ *   page it signs in as them; inside the portal it switches who you are.
+ * - Leave Feedback: opens the feedback form.
  */
 export function DemoParticipantPicker() {
   const { t } = useTranslation()
@@ -24,7 +31,8 @@ export function DemoParticipantPicker() {
   const switchTo = useDemoStore((s) => s.switchTo)
   const restoreOwn = useDemoStore((s) => s.restoreOwn)
   const [open, setOpen] = useState(false)
-  const footerLift = useFooterLift()
+  const openFeedback = useFeedbackUiStore((s) => s.setModalOpen)
+  const feedbackOpen = useFeedbackUiStore((s) => s.modalOpen)
   const box = useRef<HTMLDivElement>(null)
 
   // Closes on a click outside or Escape
@@ -40,7 +48,8 @@ export function DemoParticipantPicker() {
     }
   }, [open])
 
-  if (!ENV.LOCAL_DEMO_BYPASS) return null
+  const demo = ENV.LOCAL_DEMO_BYPASS
+  if (feedbackOpen) return null
 
   const pick = (id: string) => {
     switchTo(id)
@@ -50,14 +59,9 @@ export function DemoParticipantPicker() {
   }
 
   return (
-    <div
-      ref={box}
-      // Bottom-right, stacked just above Leave Feedback and rising with it (the same lift) when the footer comes into view
-      style={{ ['--footer-lift' as string]: `${footerLift}px` }}
-      className="fixed bottom-[max(9rem,calc(var(--footer-lift,0px)+8.25rem))] right-6 z-[60] flex flex-col items-end sm:bottom-[max(5rem,calc(var(--footer-lift,0px)+4.25rem))]"
-    >
-      {open && (
-        <div role="menu" aria-label={t('demo.list_label')} className="mb-2 w-[min(100vw-2.5rem,18.5rem)] overflow-hidden rounded-2xl bg-surface-card p-1.5 shadow-[0_24px_48px_-20px_rgba(11,21,51,0.45)] ring-1 ring-slate-200/80 dark:ring-white/10">
+    <div ref={box} className="fixed right-0 top-1/2 z-[60] flex -translate-y-1/2 flex-col items-end gap-2">
+      {demo && open && (
+        <div role="menu" aria-label={t('demo.list_label')} className="absolute right-[calc(100%+10px)] top-1/2 w-[min(100vw-4.5rem,18.5rem)] -translate-y-1/2 overflow-hidden rounded-2xl bg-surface-card p-1.5 shadow-[0_24px_48px_-20px_rgba(11,21,51,0.45)] ring-1 ring-slate-200/80 dark:ring-white/10">
           <p className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-secondary">{t('demo.list_label')}</p>
           {PERSONAS.map((p) => {
             const on = personaById(personaId)?.id === p.id
@@ -94,18 +98,32 @@ export function DemoParticipantPicker() {
           )}
         </div>
       )}
+      {demo && (
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-haspopup="menu"
+          aria-label={t('demo.button_short')}
+          title={t('demo.button_short')}
+          onClick={() => setOpen((v) => !v)}
+          className={cn(TAB, 'text-[#2563EB] ring-blue-200 hover:bg-blue-50 dark:text-blue-300 dark:ring-blue-400/30 dark:hover:bg-slate-800', open && 'bg-blue-50 dark:bg-slate-800', FOCUS)}
+        >
+          <AppIcon icon={FlaskConical} />
+          <span className={cn(TAB_LABEL, open && 'max-w-[220px] opacity-100')}>{user ? t('demo.button_short') : t('demo.button')}</span>
+        </button>
+      )}
       <button
         type="button"
-        aria-expanded={open}
-        aria-haspopup="menu"
-        onClick={() => setOpen((v) => !v)}
-        className={cn(
-          'inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-[13px] font-semibold text-[#2563EB] shadow-[0_8px_20px_-12px_rgba(11,21,51,0.35)] ring-1 ring-blue-200 transition-colors hover:bg-blue-50 dark:bg-slate-900 dark:text-blue-300 dark:ring-blue-400/30 dark:hover:bg-slate-800',
-          FOCUS,
-        )}
+        aria-label={t('feedback.leave_feedback')}
+        title={t('feedback.leave_feedback')}
+        onClick={() => {
+          setOpen(false)
+          openFeedback(true)
+        }}
+        className={cn(TAB, 'text-text-primary ring-slate-200 hover:bg-slate-50 dark:ring-white/15 dark:hover:bg-slate-800', FOCUS)}
       >
-        <AppIcon icon={FlaskConical} />
-        {user ? t('demo.button_short') : t('demo.button')}
+        <AppIcon icon={MessageSquarePlus} />
+        <span className={TAB_LABEL}>{t('feedback.leave_feedback')}</span>
       </button>
     </div>
   )

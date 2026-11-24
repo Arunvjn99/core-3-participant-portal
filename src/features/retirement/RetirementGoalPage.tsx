@@ -5,6 +5,7 @@ import { ArrowLeft, Check, Minus, Plus } from 'lucide-react'
 import { AnimatedPage } from '@/design-system/motion/AnimatedPage'
 import { Modal } from '@/design-system/components/Modal'
 import { RangeSlider } from '@/design-system/components/RangeSlider'
+import { Combobox } from '@/design-system/components/Combobox'
 import { cn } from '@/lib/cn'
 import { getAppDateLocale } from '@/lib/dateLocale'
 import { useEnrollmentDraftStore } from '@/core/store/enrollmentDraftStore'
@@ -151,6 +152,9 @@ export default function RetirementGoalPage() {
   }
 
   const taxRate = stateTaxRate(location)
+  // States with no tax on retirement withdrawals are tagged, since that is why someone would pick a place
+  const noTaxTag = t('retirement.no_tax_tag')
+  const stateOptions = useMemo(() => US_STATES.map((st) => ({ value: st, label: st, meta: stateTaxRate(st) === 0 ? noTaxTag : undefined })), [noTaxTag])
   const SLIDER_MAX = 30
   const slider = (value: number, set: (v: number) => void, label: string, hint: string, color: string) => (
     <div className="space-y-2">
@@ -254,22 +258,26 @@ export default function RetirementGoalPage() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <p className={LABEL} id="rg-age-label">{t('retirement.planned_age')}</p>
-                    <div className="flex items-center gap-3" role="group" aria-labelledby="rg-age-label">
-                      <button type="button" onClick={() => { setRetirementAge((a) => Math.max(minAge, a - 1)); setSaved(false) }} aria-label={t('enrollment.quick.decrease')} className={cn('flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-700 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-white/5 dark:text-white dark:ring-white/15 dark:hover:bg-white/10', FOCUS)}><Minus className="h-4 w-4" aria-hidden /></button>
-                      <span className="w-12 text-center text-[20px] font-bold tabular-nums text-text-primary" aria-live="polite">{retirementAge}</span>
-                      <button type="button" onClick={() => { setRetirementAge((a) => Math.min(maxAge, a + 1)); setSaved(false) }} aria-label={t('enrollment.quick.increase')} className={cn('flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-700 ring-1 ring-slate-200 transition-colors hover:bg-slate-50 dark:bg-white/5 dark:text-white dark:ring-white/15 dark:hover:bg-white/10', FOCUS)}><Plus className="h-4 w-4" aria-hidden /></button>
+                    {/* Same height and outline as the spending field beside it, so the two columns line up */}
+                    <div className="flex h-11 w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-1.5 dark:border-white/15 dark:bg-white/5" role="group" aria-labelledby="rg-age-label">
+                      <button type="button" onClick={() => { setRetirementAge((a) => Math.max(minAge, a - 1)); setSaved(false) }} aria-label={t('enrollment.quick.decrease')} className={cn('flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-700 transition-colors hover:bg-slate-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/20', FOCUS)}><Minus className="h-4 w-4" aria-hidden /></button>
+                      <span className="text-center text-[16px] font-semibold tabular-nums text-text-primary" aria-live="polite">{retirementAge}</span>
+                      <button type="button" onClick={() => { setRetirementAge((a) => Math.min(maxAge, a + 1)); setSaved(false) }} aria-label={t('enrollment.quick.increase')} className={cn('flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-700 transition-colors hover:bg-slate-200 dark:bg-white/10 dark:text-white dark:hover:bg-white/20', FOCUS)}><Plus className="h-4 w-4" aria-hidden /></button>
                     </div>
                     {errors.age ? <p role="alert" className={ERROR}>{errors.age}</p> : <p className={HINT}>{t('retirement.years_from_now', { years: result.yearsRemaining })}</p>}
                   </div>
                   {moneyField('rg-monthly', t('retirement.monthly_spending'), monthly, setMonthly, errors.monthly, t('retirement.spending_hint', { amount: money(parseMoney(monthly) * 12) }))}
                   <div className="sm:col-span-2">
                     <label htmlFor="rg-location" className={LABEL}>{t('retirement.location')}</label>
-                    <select id="rg-location" value={location} onChange={(e) => { setLocation(e.target.value); setSaved(false) }} className={field}>
-                      {US_STATES.map((st) => (
-                        <option key={st} value={st}>{st}</option>
-                      ))}
-                    </select>
-                    <p className={HINT}>{taxRate === 0 ? t('retirement.no_state_tax') : t('retirement.state_tax_est', { pct: Math.round(taxRate * 100) })}</p>
+                    <Combobox
+                      id="rg-location"
+                      value={location}
+                      options={stateOptions}
+                      onChange={(v) => { setLocation(v); setSaved(false) }}
+                      emptyText={t('retirement.no_state_match')}
+                      aria-describedby="rg-location-hint"
+                    />
+                    <p id="rg-location-hint" className={HINT}>{taxRate === 0 ? t('retirement.no_state_tax') : t('retirement.state_tax_est', { pct: Math.round(taxRate * 100) })}</p>
                   </div>
                 </div>
               </li>

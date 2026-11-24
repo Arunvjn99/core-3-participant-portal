@@ -1,14 +1,12 @@
-import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { MessageSquarePlus, Star, X } from 'lucide-react'
+import { Star, X } from 'lucide-react'
 import { useAuth } from '@/core/hooks/useAuth'
 import { useFeedbackUiStore } from '@/core/store/feedbackUiStore'
 import { submitFeedback } from '@/features/feedback/submitFeedback'
 import { Button } from '@/design-system/components/Button'
 import { cn } from '@/lib/cn'
-import { useFooterLift } from '@/lib/useFooterLift'
-import { router } from '@/router'
 
 const TOAST_MS = 4200
 
@@ -212,33 +210,9 @@ export function GlobalFeedback() {
       document.body
     )
 
-  // Rise above the footer when it scrolls into view, instead of sitting on it
-  const footerLift = useFooterLift()
-  const onQuickEnrol = useSyncExternalStore(router.subscribe, () => router.state.location.pathname === '/enrollment/quick')
-
+  // The Leave Feedback button lives in the right-edge tab rail (DemoParticipantPicker), which opens this form
   return (
     <>
-      <button
-        type="button"
-        onClick={() => {
-          resetForm()
-          setModalOpen(true)
-        }}
-        className={cn(
-          // Sits beside the Ask CORE AI pill on wider screens, above it on phones where they would collide
-          'fixed bottom-[max(5.5rem,calc(var(--footer-lift,0px)+4.75rem))] right-6 z-[60] flex h-12 items-center gap-2 rounded-full px-4 sm:bottom-[max(1.5rem,calc(var(--footer-lift,0px)+0.75rem))]',
-          // One-click enrolment has its own message bar and a summary panel that this would cover
-          onQuickEnrol && 'hidden',
-          'border border-[var(--border-default)] bg-[var(--surface-card)] text-[var(--text-primary)] shadow-[var(--shadow-card)]',
-          'transition-transform hover:scale-105 hover:shadow-[var(--shadow-dropdown)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)]',
-          'dark:border-[var(--border-strong)]'
-        )}
-        style={{ ['--footer-lift' as string]: `${footerLift}px` }}
-        aria-label={t('feedback.leave_feedback')}
-      >
-        <MessageSquarePlus className="h-5 w-5 shrink-0" aria-hidden />
-        <span className="whitespace-nowrap text-sm font-medium">{t('feedback.leave_feedback')}</span>
-      </button>
       {modal}
       {toast}
     </>
