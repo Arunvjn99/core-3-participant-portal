@@ -221,7 +221,7 @@ export function VerifyOTP() {
       </div>
 
       {/* ── Page footer — pinned to bottom ── */}
-      <div className="px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-800">
+      <div data-action-bar className="px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-800">
         <p className="text-xs text-gray-400 dark:text-gray-600">{t('auth.copyright', { year: new Date().getFullYear() })}</p>
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
           <LegalHrefLink href={LEGAL.privacyPolicyHref} className="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-600 dark:hover:text-gray-400">

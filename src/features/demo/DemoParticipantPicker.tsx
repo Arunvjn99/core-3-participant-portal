@@ -5,6 +5,7 @@ import { Check, FlaskConical, MessageSquarePlus, RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { ENV } from '@/lib/constants'
 import { useAuth } from '@/core/hooks/useAuth'
+import { useBottomClearance } from '@/lib/useBottomClearance'
 import { useFeedbackUiStore } from '@/core/store/feedbackUiStore'
 import { AppIcon, ICON_TILE_TONE } from '@/design-system/icons'
 import { useDemoStore } from './demoStore'
@@ -12,13 +13,14 @@ import { PERSONAS, initials, personaById } from './personas'
 
 const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900'
 
-// A tab docked to the right edge: shows its icon, slides its label out on hover or focus
+// Round icon buttons on phones, where labels would crowd Ask CORE AI and the page's own buttons; labelled pills from sm up
 const TAB =
-  'group flex h-11 items-center gap-2 rounded-l-full bg-white pl-3.5 pr-3 text-[13px] font-semibold shadow-[0_8px_20px_-12px_rgba(11,21,51,0.45)] ring-1 transition-colors dark:bg-slate-900'
-const TAB_LABEL = 'max-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-all duration-200 group-hover:max-w-[220px] group-hover:opacity-100 group-focus-visible:max-w-[220px] group-focus-visible:opacity-100'
+  'flex h-10 w-10 items-center justify-center gap-2 rounded-full bg-white text-[13px] font-semibold sm:w-auto sm:px-4 shadow-[0_8px_20px_-12px_rgba(11,21,51,0.45)] ring-1 transition-colors dark:bg-slate-900'
+const TAB_LABEL = 'hidden whitespace-nowrap sm:inline'
 
 /**
- * Prototype tools, docked mid-height on the right edge so they never cover a page's own buttons at the bottom:
+ * Prototype tools in the bottom-right corner, lifted to sit just above a page's Back / Next bar (or the footer)
+ * so they never cover its buttons:
  * - Prototype Demo (demo mode only): pick one of five participants to see the portal as they would. On the sign-in
  *   page it signs in as them; inside the portal it switches who you are.
  * - Leave Feedback: opens the feedback form.
@@ -31,6 +33,7 @@ export function DemoParticipantPicker() {
   const switchTo = useDemoStore((s) => s.switchTo)
   const restoreOwn = useDemoStore((s) => s.restoreOwn)
   const [open, setOpen] = useState(false)
+  const clearance = useBottomClearance()
   const openFeedback = useFeedbackUiStore((s) => s.setModalOpen)
   const feedbackOpen = useFeedbackUiStore((s) => s.modalOpen)
   const box = useRef<HTMLDivElement>(null)
@@ -59,9 +62,9 @@ export function DemoParticipantPicker() {
   }
 
   return (
-    <div ref={box} className="fixed right-0 top-1/2 z-[60] flex -translate-y-1/2 flex-col items-end gap-2">
+    <div ref={box} style={{ bottom: Math.max(24, clearance + 12) }} className="fixed right-6 z-[60] flex flex-col items-end gap-2">
       {demo && open && (
-        <div role="menu" aria-label={t('demo.list_label')} className="absolute right-[calc(100%+10px)] top-1/2 w-[min(100vw-4.5rem,18.5rem)] -translate-y-1/2 overflow-hidden rounded-2xl bg-surface-card p-1.5 shadow-[0_24px_48px_-20px_rgba(11,21,51,0.45)] ring-1 ring-slate-200/80 dark:ring-white/10">
+        <div role="menu" aria-label={t('demo.list_label')} className="absolute bottom-full right-0 mb-2 w-[min(100vw-3rem,18.5rem)] overflow-hidden rounded-2xl bg-surface-card p-1.5 shadow-[0_24px_48px_-20px_rgba(11,21,51,0.45)] ring-1 ring-slate-200/80 dark:ring-white/10">
           <p className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-secondary">{t('demo.list_label')}</p>
           {PERSONAS.map((p) => {
             const on = personaById(personaId)?.id === p.id
@@ -104,12 +107,12 @@ export function DemoParticipantPicker() {
           aria-expanded={open}
           aria-haspopup="menu"
           aria-label={t('demo.button_short')}
-          title={t('demo.button_short')}
+          title={user ? t('demo.button_short') : t('demo.button')}
           onClick={() => setOpen((v) => !v)}
           className={cn(TAB, 'text-[#2563EB] ring-blue-200 hover:bg-blue-50 dark:text-blue-300 dark:ring-blue-400/30 dark:hover:bg-slate-800', open && 'bg-blue-50 dark:bg-slate-800', FOCUS)}
         >
           <AppIcon icon={FlaskConical} />
-          <span className={cn(TAB_LABEL, open && 'max-w-[220px] opacity-100')}>{user ? t('demo.button_short') : t('demo.button')}</span>
+          <span className={TAB_LABEL}>{t('demo.button_short')}</span>
         </button>
       )}
       <button

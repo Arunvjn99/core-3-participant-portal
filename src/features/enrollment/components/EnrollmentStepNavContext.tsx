@@ -74,7 +74,7 @@ function EnrollmentStepFooterBar({ config }: { config: EnrollmentNavConfig | nul
   if (!showBack && !showNext) return null
 
   return (
-    <div className="sticky bottom-0 z-10 mt-8 w-full border-t border-slate-200/80 bg-[color:color-mix(in_srgb,var(--surface-page)_92%,transparent)] px-4 py-3 backdrop-blur-sm dark:border-white/10 sm:px-6">
+    <div data-action-bar className="sticky bottom-0 z-10 mt-8 w-full border-t border-slate-200/80 bg-[color:color-mix(in_srgb,var(--surface-page)_92%,transparent)] px-4 py-3 backdrop-blur-sm dark:border-white/10 sm:px-6">
       {/* Back on the left, the primary action flush right */}
       <div className="mx-auto flex w-full max-w-[1040px] items-center gap-3">
         {showBack && config.onBack && (

@@ -1262,7 +1262,7 @@ export default function QuickEnrollment() {
       </div>
 
       {planReady && (
-        <div className="sticky bottom-0 z-20 -mx-4 -mb-6 border-t border-slate-200/70 bg-[#f5f6f8]/90 px-4 pb-4 pt-3 backdrop-blur-md dark:border-gray-800 dark:bg-gray-950/90 sm:-mx-6 sm:px-6">
+        <div data-action-bar className="sticky bottom-0 z-20 -mx-4 -mb-6 border-t border-slate-200/70 bg-[#f5f6f8]/90 px-4 pb-4 pt-3 backdrop-blur-md dark:border-gray-800 dark:bg-gray-950/90 sm:-mx-6 sm:px-6">
           <div className="mx-auto max-w-3xl space-y-2.5">
             <QuickActions
               label={t('enrollment.agent.quick_actions')}

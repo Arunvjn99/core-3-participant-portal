@@ -14,9 +14,9 @@ export default function AppFooter() {
   return (
     <footer className="mt-auto border-t border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-          {/* CORE logo + copyright */}
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col items-center justify-between gap-3 md:flex-row md:gap-4">
+          {/* CORE logo + copyright: stacked and centred on phones, side by side from tablet up */}
+          <div className="flex flex-col items-center gap-2 text-center sm:flex-row sm:gap-3 sm:text-left">
             <CoreLogo className="h-6 w-auto object-contain opacity-70 transition-opacity hover:opacity-100" />
             <span className="text-xs text-gray-600 dark:text-gray-400">
               {t('footer.copyright', { year })}
